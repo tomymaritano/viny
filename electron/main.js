@@ -17,7 +17,7 @@ const createWindow = () => {
       backgroundThrottling: false,
     },
     titleBarStyle: 'default',
-    title: 'Nototo - Note Taking App',
+    title: 'Nototo v1.1.1 - Note Taking App',
     show: false,
     minWidth: 800,
     minHeight: 600,

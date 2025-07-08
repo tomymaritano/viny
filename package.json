@@ -1,6 +1,6 @@
 {
   "name": "nototo",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "main": "electron/main.js",
   "scripts": {
     "dev": "vite",
@@ -73,11 +73,10 @@
     },
     "files": [
       "dist/**/*",
-      "electron/**/*",
-      "!node_modules/**/{test,__tests__,tests,*.test.*,*.spec.*}",
-      "!node_modules/**/node_modules/**",
-      "!node_modules/**/*.md",
-      "!node_modules/**/*.map"
+      "electron/**/*"
+    ],
+    "asarUnpack": [
+      "node_modules/electron-updater/**/*"
     ],
     "extraMetadata": {
       "main": "electron/main.js"

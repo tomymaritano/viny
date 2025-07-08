@@ -143,7 +143,7 @@ const UpdateSettings = () => {
       <div className="pt-4 border-t border-solarized-base01">
         <div className="flex items-center justify-between text-sm">
           <span className="text-solarized-base1">Current Version</span>
-          <span className="text-solarized-base3 font-mono">v1.1.0</span>
+          <span className="text-solarized-base3 font-mono">v1.1.1</span>
         </div>
       </div>
     </div>
