@@ -86,8 +86,9 @@
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "public/icon-512.png",
-      "hardenedRuntime": true,
+      "hardenedRuntime": false,
       "gatekeeperAssess": false,
+      "identity": null,
       "extendInfo": {
         "NSRequiresAquaSystemAppearance": false
       },

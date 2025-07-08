@@ -24,7 +24,7 @@ const ResizableLayout = ({
     return saved ? parseInt(saved) : 350
   })
 
-  const sidebarWidth = 240 // Fixed
+  const sidebarWidth = 200 // Fixed
   const minNotesListWidth = 280
   const maxNotesListWidth = 500
   const minPreviewWidth = 280

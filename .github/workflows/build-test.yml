@@ -43,3 +43,5 @@ jobs:
         env:
           # Don't publish, just build
           SKIP_PUBLISH: true
+          # Disable code signing for test builds
+          CSC_IDENTITY_AUTO_DISCOVERY: false
