@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import PropTypes from 'prop-types'
 import Editor from '@monaco-editor/react'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
@@ -827,6 +828,38 @@ const MarkdownEditor = ({
       />
     </div>
   )
+}
+
+MarkdownEditor.propTypes = {
+  note: PropTypes.shape({
+    id: PropTypes.string,
+    title: PropTypes.string,
+    content: PropTypes.string,
+    notebook: PropTypes.string,
+    status: PropTypes.string,
+    tags: PropTypes.array,
+  }),
+  onSave: PropTypes.func,
+  onClose: PropTypes.func,
+  toast: PropTypes.shape({
+    success: PropTypes.func,
+    error: PropTypes.func,
+    warning: PropTypes.func,
+    info: PropTypes.func,
+  }),
+  layoutMode: PropTypes.oneOf(['normal', 'markdown', 'preview', 'focus']),
+  onCycleLayoutMode: PropTypes.func,
+  allTags: PropTypes.array,
+}
+
+MarkdownEditor.defaultProps = {
+  note: null,
+  onSave: null,
+  onClose: null,
+  toast: null,
+  layoutMode: 'normal',
+  onCycleLayoutMode: null,
+  allTags: [],
 }
 
 export default MarkdownEditor

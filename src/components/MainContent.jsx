@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import AllNotesSection from './sections/AllNotesSection'
 import PinnedNotesSection from './sections/PinnedNotesSection'
 import NotebookSection from './sections/NotebookSection'
@@ -47,6 +48,13 @@ const MainContent = ({ activeSection, notes, onOpenNote, onNewNote }) => {
       <div className="h-full overflow-y-auto">{renderSection()}</div>
     </div>
   )
+}
+
+MainContent.propTypes = {
+  activeSection: PropTypes.string.isRequired,
+  notes: PropTypes.array.isRequired,
+  onOpenNote: PropTypes.func.isRequired,
+  onNewNote: PropTypes.func.isRequired,
 }
 
 export default MainContent
