@@ -4,94 +4,8 @@ import { usePluginStore } from '../stores/pluginStore'
 // Plugin store with curated plugins
 const PLUGIN_STORE = {
   featured: [
-    {
-      id: 'test-install',
-      name: 'Test Install Plugin',
-      description: 'Simple test plugin to verify installation works',
-      author: 'Test',
-      version: '1.0.0',
-      category: 'Testing',
-      tags: ['test', 'debug'],
-      downloads: 1,
-      rating: 5.0,
-      icon: '🧪',
-      url: 'examples/test-install.js',
-      features: [
-        'Simple test plugin',
-        'Verifies installation process',
-        'Shows success toast',
-      ],
-    },
-    {
-      id: 'neovim-integrated',
-      name: 'Neovim Integrated',
-      description:
-        'Complete Neovim experience using built-in monaco-vim library',
-      author: 'Nototo Team',
-      version: '1.0.0',
-      category: 'Editor',
-      tags: ['vim', 'neovim', 'keyboard', 'productivity'],
-      downloads: 1250,
-      rating: 4.9,
-      icon: '⚡',
-      url: 'examples/neovim-integrated-plugin.js',
-      screenshots: ['/images/neovim-demo.gif'],
-      features: [
-        'All Vim modes (Normal, Insert, Visual, Command)',
-        'Standard vim keybindings (hjkl, dd, yy, p, etc.)',
-        'Advanced movements (w, b, gg, G, 0, $)',
-        'Search functionality (/, n, N)',
-        'Statusbar with mode and position',
-        'Built-in help system (F1)',
-        'Toggle with Ctrl+Alt+V',
-        'No external dependencies',
-      ],
-    },
-    {
-      id: 'emoji-picker',
-      name: 'Emoji Picker',
-      description:
-        'Add emojis to your notes with a convenient picker and search',
-      author: 'Nototo Team',
-      version: '1.0.0',
-      category: 'Productivity',
-      tags: ['emoji', 'picker', 'productivity', 'fun'],
-      downloads: 950,
-      rating: 4.8,
-      icon: '😀',
-      url: 'examples/emoji-picker-advanced.js',
-      features: [
-        'Beautiful emoji picker interface',
-        'Search emojis by category',
-        'Keyboard shortcut (Ctrl+E)',
-        'Categories: Smileys, Gestures, Objects, Nature, Symbols',
-        'Insert at cursor position',
-        'Hover effects and smooth animations',
-        'Click outside to close',
-        'Escape key support',
-      ],
-    },
-    {
-      id: 'git-integration',
-      name: 'Git Integration',
-      description:
-        'Git status, diff view, and commit management directly in notes',
-      author: 'DevTools',
-      version: '1.2.0',
-      category: 'Version Control',
-      tags: ['git', 'version-control', 'diff', 'commits'],
-      downloads: 420,
-      rating: 4.5,
-      icon: '🔄',
-      url: 'examples/git-integration.js',
-      features: [
-        'Git status in sidebar',
-        'Inline diff markers',
-        'Quick commit interface',
-        'Branch switching',
-        'File history view',
-      ],
-    },
+    // Plugin examples have been removed for cleanup
+    // Real plugins can be added here when available
   ],
   categories: [
     'All',
@@ -127,9 +41,7 @@ export default function PluginStore({ isVisible, onClose, onInstall }) {
 
   const handleInstallPlugin = async plugin => {
     try {
-      console.log('Installing plugin:', plugin.name, 'from URL:', plugin.url)
       await installPluginFromUrl(plugin.url)
-      console.log('Plugin installed successfully, calling onInstall callback')
       onInstall?.(plugin)
     } catch (error) {
       console.error('Failed to install plugin:', error)

@@ -8,6 +8,8 @@ const Sidebar = ({
   onNewNote,
   notes = [],
   onManageNotebooks,
+  storageMode = 'localStorage',
+  onToggleStorage,
 }) => {
   const { notebooks, getColorClass } = useNotebooks()
   // Dropdown states
@@ -492,7 +494,8 @@ const Sidebar = ({
       </div>
 
       {/* Footer */}
-      <div className="px-3 py-2 border-t border-solarized-base01">
+      <div className="px-3 py-2 border-t border-solarized-base01 space-y-2">
+        {/* User Info */}
         <div className="flex items-center space-x-2">
           <div className="w-6 h-6 bg-solarized-blue rounded-full flex items-center justify-center">
             <span className="text-solarized-base5 text-xs font-medium">U</span>
@@ -507,6 +510,41 @@ const Sidebar = ({
               })}
             </div>
           </div>
+        </div>
+
+        {/* Storage Mode - Subtle indicator */}
+        <div className="flex items-center justify-between text-xs mt-2 pt-2 border-t border-solarized-base01">
+          <div className="flex items-center space-x-2">
+            <div
+              className={`w-2 h-2 rounded-full ${
+                storageMode === 'localStorage' ? 'bg-blue-400' : 'bg-green-400'
+              }`}
+            />
+            <span className="text-solarized-base0">
+              {storageMode === 'localStorage' ? 'Local' : 'API'}
+            </span>
+          </div>
+          {onToggleStorage && (
+            <button
+              onClick={onToggleStorage}
+              className="text-solarized-base0 hover:text-solarized-base3 transition-colors p-1 rounded hover:bg-solarized-base01"
+              title="Toggle storage mode"
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                <path d="M21 3v5h-5" />
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                <path d="M3 21v-5h5" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
     </div>

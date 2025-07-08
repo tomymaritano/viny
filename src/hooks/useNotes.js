@@ -551,7 +551,6 @@ Imports notes from a JSON file.
 const handleImport = async (file) => {
   try {
     const result = await importNotes(file)
-    console.log(\`Imported \${result.imported} of \${result.total} notes\`)
   } catch (error) {
     console.error('Import failed:', error.message)
   }
@@ -1118,12 +1117,7 @@ export const useNotes = () => {
       setViewMode('edit')
       setIsEditorOpen(true)
 
-      // Debug logging
-      console.log('Opening note for edit:', {
-        noteId,
-        title: note.title,
-        currentNote: note,
-      })
+      // Debug logging removed
     } else {
       console.warn('Note not found:', noteId)
     }
@@ -1344,10 +1338,7 @@ export const useNotes = () => {
       const note = notes.find(n => n.id === selectedNoteId)
       if (note && (!currentNote || currentNote.id !== selectedNoteId)) {
         setCurrentNote(note)
-        console.log('Syncing currentNote with selectedNoteId:', {
-          selectedNoteId,
-          noteTitle: note.title,
-        })
+        // Sync logging removed
       }
     }
   }, [selectedNoteId, notes, viewMode, isEditorOpen, currentNote])

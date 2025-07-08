@@ -8,6 +8,7 @@ import TagManager from './TagManager'
 import Icons from './Icons'
 import ExportDialog from './ExportDialog'
 import { useSettings } from '../hooks/useSettings'
+import { monacoOptions, initializeMonaco } from '../config/monaco'
 
 const MarkdownEditor = ({
   note,
@@ -213,6 +214,9 @@ const MarkdownEditor = ({
 
   const handleEditorDidMount = (editor, monacoInstance) => {
     editorRef.current = editor
+
+    // Initialize Monaco optimizations
+    initializeMonaco()
 
     // Make editor available globally
     window.activeEditor = editor
@@ -505,52 +509,53 @@ const MarkdownEditor = ({
               onMount={handleEditorDidMount}
               theme="solarized-dark"
               options={{
-                fontSize: settings.fontSize,
-                fontFamily: `${settings.fontFamily}, JetBrains Mono, Monaco, Consolas, monospace`,
+                ...monacoOptions,
+                fontSize: settings.fontSize || 14,
+                fontFamily: `${settings.fontFamily || 'JetBrains Mono'}, Monaco, Consolas, monospace`,
                 lineNumbers: settings.lineNumbers ? 'on' : 'off',
-                minimap: { enabled: settings.minimap },
-                scrollBeyondLastLine: false,
+                minimap: { enabled: settings.minimap || false },
                 wordWrap: settings.wordWrap ? 'on' : 'off',
-                lineHeight: 1.7,
-                letterSpacing: 0.3,
-                cursorBlinking: 'smooth',
-                cursorSmoothCaretAnimation: 'on',
-                smoothScrolling: true,
-                padding: { top: 20, bottom: 20 },
-                renderLineHighlight: 'all',
-                selectionHighlight: true,
-                occurrencesHighlight: true,
-                rulers: [80, 100],
-                bracketPairColorization: { enabled: true },
+                // Performance optimized settings
+                lineHeight: 1.6,
+                letterSpacing: 0,
+                cursorBlinking: 'solid',
+                cursorSmoothCaretAnimation: 'off',
+                smoothScrolling: false,
+                padding: { top: 10, bottom: 10 },
+                renderLineHighlight: 'line',
+                selectionHighlight: false,
+                occurrencesHighlight: false,
+                rulers: [],
+                bracketPairColorization: { enabled: false },
                 guides: {
-                  bracketPairs: true,
-                  indentation: true,
-                  highlightActiveIndentation: true,
+                  bracketPairs: false,
+                  indentation: false,
+                  highlightActiveIndentation: false,
                 },
-                // IDE-like features
-                autoIndent: 'full',
-                formatOnPaste: true,
-                formatOnType: true,
-                suggestOnTriggerCharacters: true,
-                acceptSuggestionOnCommitCharacter: true,
-                acceptSuggestionOnEnter: 'on',
-                quickSuggestions: true,
+                // Disable heavy features for better performance
+                autoIndent: 'none',
+                formatOnPaste: false,
+                formatOnType: false,
+                suggestOnTriggerCharacters: false,
+                acceptSuggestionOnCommitCharacter: false,
+                acceptSuggestionOnEnter: 'off',
+                quickSuggestions: false,
                 suggest: {
-                  showWords: true,
-                  showSnippets: true,
+                  showWords: false,
+                  showSnippets: false,
                 },
-                // Markdown specific
-                wordBasedSuggestions: 'allDocuments',
-                links: true,
-                colorDecorators: true,
-                folding: true,
-                foldingStrategy: 'indentation',
-                showFoldingControls: 'always',
-                // Performance
-                renderWhitespace: 'boundary',
+                // Markdown specific - optimized
+                wordBasedSuggestions: 'off',
+                links: false,
+                colorDecorators: false,
+                folding: false,
+                foldingStrategy: 'auto',
+                showFoldingControls: 'never',
+                // Performance optimized
+                renderWhitespace: 'none',
                 renderControlCharacters: false,
-                renderIndentGuides: true,
-                highlightActiveIndentGuide: true,
+                renderIndentGuides: false,
+                highlightActiveIndentGuide: false,
               }}
             />
           </div>

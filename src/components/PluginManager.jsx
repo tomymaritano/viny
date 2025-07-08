@@ -26,8 +26,6 @@ export default function PluginManager({ isVisible, onClose }) {
 
   const handleFileUpload = async file => {
     try {
-      console.log('File selected:', file.name, 'Size:', file.size)
-
       if (!file.name.endsWith('.js')) {
         throw new Error('Please select a .js file')
       }
@@ -38,7 +36,6 @@ export default function PluginManager({ isVisible, onClose }) {
       }
 
       const text = await file.text()
-      console.log('File content loaded, length:', text.length)
 
       if (!text.trim()) {
         throw new Error('File is empty')

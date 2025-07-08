@@ -1,6 +1,6 @@
 {
   "name": "nototo",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "electron/main.js",
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,7 @@
     "electron-dev": "NODE_ENV=development electron .",
     "dev:electron": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && npm run electron-dev\"",
     "start": "node start-dev.js",
-    "build:electron": "npm run build && electron-builder",
+    "build:electron": "TARGET=electron npm run build && electron-builder",
     "test": "vitest",
     "test:run": "vitest run",
     "test:ui": "vitest --ui",
@@ -38,7 +38,10 @@
     "backend:local": "node scripts/start-local-backend.js",
     "dev:local-full": "concurrently \"npm run backend:local\" \"npm run dev\" --names \"BACKEND,FRONTEND\" --prefix-colors \"blue,green\"",
     "prepare": "husky",
-    "lint-staged": "lint-staged"
+    "lint-staged": "lint-staged",
+    "release": "npm version patch && git push origin --tags",
+    "release:minor": "npm version minor && git push origin --tags",
+    "release:major": "npm version major && git push origin --tags"
   },
   "lint-staged": {
     "*.{js,jsx}": [
@@ -63,13 +66,31 @@
     "directories": {
       "output": "dist-electron"
     },
+    "publish": {
+      "provider": "github",
+      "owner": "tomymaritano",
+      "repo": "markdown"
+    },
     "files": [
       "dist/**/*",
       "electron/**/*",
-      "node_modules/**/*"
+      "!node_modules/**/{test,__tests__,tests,*.test.*,*.spec.*}",
+      "!node_modules/**/node_modules/**",
+      "!node_modules/**/*.md",
+      "!node_modules/**/*.map"
     ],
+    "extraMetadata": {
+      "main": "electron/main.js"
+    },
+    "compression": "normal",
     "mac": {
       "category": "public.app-category.productivity",
+      "icon": "public/icon-512.png",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "extendInfo": {
+        "NSRequiresAquaSystemAppearance": false
+      },
       "target": [
         {
           "target": "dmg",
@@ -133,6 +154,7 @@
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
     "dompurify": "^3.2.6",
+    "electron-updater": "^6.3.9",
     "framer-motion": "^12.23.0",
     "fuse.js": "^7.1.0",
     "marked": "^15.0.12",

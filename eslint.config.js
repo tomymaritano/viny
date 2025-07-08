@@ -107,8 +107,6 @@ module.exports = [
       '*.config.js',
       '*.config.ts',
       'server/',
-      'examples/',
-      'public/examples/',
     ],
   },
 ]

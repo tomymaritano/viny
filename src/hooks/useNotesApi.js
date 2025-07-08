@@ -75,7 +75,6 @@ export const useNotesApi = () => {
         const isApiDisabled = import.meta.env.VITE_API_BASE_URL === 'disabled'
 
         if (isApiDisabled) {
-          console.log('API is disabled, using localStorage mode')
           setStorageMode('localStorage')
           const localNotes = storage.load()
           setNotes(localNotes || [])
@@ -91,17 +90,13 @@ export const useNotesApi = () => {
           // No notes in API, check if we have localStorage data to migrate
           const localNotes = storage.load()
           if (localNotes && localNotes.length > 0) {
-            console.log(
-              `Found ${localNotes.length} notes in localStorage, migrating to database...`
-            )
+            // Found localStorage notes, migrating to database
 
             try {
               await migrationApi.importFromLocalStorage(localNotes)
               const migratedNotes = await notesApi.getAll()
               setNotes(migratedNotes)
-              console.log(
-                `Successfully migrated ${migratedNotes.length} notes to database`
-              )
+              // Successfully migrated notes to database
 
               // Optionally clear localStorage after successful migration
               // storage.clear()
@@ -149,7 +144,6 @@ export const useNotesApi = () => {
       setError(error.message)
 
       if (fallbackFunction) {
-        console.log('Attempting fallback...')
         return fallbackFunction()
       }
 

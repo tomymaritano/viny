@@ -6,48 +6,68 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   plugins: [
     react(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'favicon.svg'],
-      manifest: {
-        name: 'Nototo - Markdown Editor',
-        short_name: 'Nototo',
-        description: 'Professional markdown editor with live preview, note organization, and export capabilities',
-        theme_color: '#002B36',
-        background_color: '#00141A',
-        display: 'standalone',
-        scope: '/',
-        start_url: '/',
-        icons: [
-          {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable'
-          }
-        ]
-      },
-      workbox: {
-        maximumFileSizeToCacheInBytes: 5000000 // 5MB
-      }
-    })
+    // Disable PWA for Electron builds to improve performance
+    ...(process.env.TARGET !== 'electron' ? [
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['favicon.png', 'apple-touch-icon.png', 'favicon.svg'],
+        manifest: {
+          name: 'Nototo - Markdown Editor',
+          short_name: 'Nototo',
+          description: 'Professional markdown editor with live preview, note organization, and export capabilities',
+          theme_color: '#002B36',
+          background_color: '#00141A',
+          display: 'standalone',
+          scope: '/',
+          start_url: '/',
+          icons: [
+            {
+              src: 'pwa-192x192.png',
+              sizes: '192x192',
+              type: 'image/png'
+            },
+            {
+              src: 'pwa-512x512.png',
+              sizes: '512x512',
+              type: 'image/png'
+            },
+            {
+              src: 'pwa-512x512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'any maskable'
+            }
+          ]
+        },
+        workbox: {
+          maximumFileSizeToCacheInBytes: 5000000 // 5MB
+        }
+      })
+    ] : [])
   ],
   base: './',
   build: {
     outDir: 'dist',
+    target: 'esnext',
+    minify: 'terser',
+    sourcemap: false,
     rollupOptions: {
-      external: ['electron']
-    }
+      external: ['electron'],
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          monaco: ['monaco-editor', '@monaco-editor/react'],
+          utils: ['marked', 'dompurify', 'fuse.js'],
+          motion: ['framer-motion'],
+        },
+      },
+    },
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
   },
   test: {
     environment: 'jsdom',
@@ -68,8 +88,6 @@ export default defineConfig({
         'dist-electron/',
         'electron/',
         'scripts/',
-        'examples/',
-        'public/examples/',
         'server/',
         'start-dev*.js'
       ],

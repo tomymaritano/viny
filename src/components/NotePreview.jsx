@@ -169,161 +169,161 @@ const NotePreview = ({
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
-            {/* Pin Button */}
-            {onTogglePin && !isTrashView && (
-              <button
-                onClick={() => onTogglePin(note)}
-                className={`p-1 rounded transition-colors ${
-                  note.isPinned
-                    ? 'text-solarized-yellow hover:text-solarized-orange'
-                    : 'text-solarized-base1 hover:text-solarized-yellow'
-                }`}
-                title={note.isPinned ? 'Unpin note' : 'Pin note'}
-              >
-                <Icons.Star size={16} />
-              </button>
-            )}
+          <div className="flex items-center space-x-1">
+            {/* Actions Bar */}
+            <div className="flex items-center bg-solarized-base01 rounded-md p-1 space-x-1">
+              {/* Pin Button */}
+              {onTogglePin && !isTrashView && (
+                <button
+                  onClick={() => onTogglePin(note)}
+                  className={`p-1.5 rounded transition-colors ${
+                    note.isPinned
+                      ? 'text-solarized-yellow hover:text-solarized-orange bg-solarized-base00'
+                      : 'text-solarized-base1 hover:text-solarized-yellow hover:bg-solarized-base00'
+                  }`}
+                  title={note.isPinned ? 'Unpin note' : 'Pin note'}
+                >
+                  <Icons.Star size={14} />
+                </button>
+              )}
 
-            <div className="relative" ref={menuRef}>
-              <button
-                onClick={() => setShowMenu(!showMenu)}
-                className="p-1 text-solarized-base1 hover:text-solarized-base3 hover:bg-solarized-base01 rounded transition-colors"
-                title="More options"
-              >
-                <Icons.MoreVertical size={16} />
-              </button>
-
-              {showMenu && (
-                <div className="absolute right-0 top-8 bg-solarized-base02 border border-solarized-base01 rounded shadow-lg py-1 w-48 z-10">
-                  {isTrashView ? (
-                    // Trash view actions
-                    <>
-                      <button
-                        onClick={() => {
-                          onRestoreNote?.(note)
-                          setShowMenu(false)
-                        }}
-                        className="w-full px-3 py-2 text-left text-sm text-solarized-green hover:bg-solarized-base01 transition-colors"
-                      >
-                        Restore Note
-                      </button>
-
-                      <div className="border-t border-solarized-base01 my-1"></div>
-
-                      <button
-                        onClick={() => {
-                          onPermanentDelete?.(note)
-                          setShowMenu(false)
-                        }}
-                        className="w-full px-3 py-2 text-left text-sm text-solarized-red hover:bg-solarized-base01 transition-colors"
-                      >
-                        Delete Permanently
-                      </button>
-                    </>
+              {/* View Mode Toggle */}
+              {onViewModeChange && !isTrashView && (
+                <button
+                  onClick={() =>
+                    onViewModeChange(
+                      viewMode === 'preview' ? 'edit' : 'preview'
+                    )
+                  }
+                  className={`p-1.5 rounded transition-colors ${
+                    viewMode === 'edit'
+                      ? 'text-solarized-cyan bg-solarized-base00'
+                      : 'text-solarized-base1 hover:text-solarized-cyan hover:bg-solarized-base00'
+                  }`}
+                  title={
+                    viewMode === 'edit' ? 'Switch to preview' : 'Switch to edit'
+                  }
+                >
+                  {viewMode === 'edit' ? (
+                    <Icons.EditActive size={14} />
                   ) : (
-                    // Normal view actions
-                    <>
-                      <button
-                        onClick={() => {
-                          onEdit(note)
-                          setShowMenu(false)
-                        }}
-                        className="w-full px-3 py-2 text-left text-sm text-solarized-base3 hover:bg-solarized-base01 transition-colors"
-                      >
-                        Edit Note
-                      </button>
+                    <Icons.Edit size={14} />
+                  )}
+                </button>
+              )}
 
-                      {onTogglePin && (
+              {/* More Menu */}
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="p-1.5 text-solarized-base1 hover:text-solarized-base3 hover:bg-solarized-base00 rounded transition-colors"
+                  title="More options"
+                >
+                  <Icons.MoreVertical size={14} />
+                </button>
+
+                {showMenu && (
+                  <div className="absolute right-0 top-8 bg-solarized-base02 border border-solarized-base01 rounded shadow-lg py-1 w-48 z-10">
+                    {isTrashView ? (
+                      // Trash view actions
+                      <>
                         <button
                           onClick={() => {
-                            onTogglePin(note)
+                            onRestoreNote?.(note)
                             setShowMenu(false)
                           }}
-                          className="w-full px-3 py-2 text-left text-sm text-solarized-base3 hover:bg-solarized-base01 transition-colors flex items-center space-x-2"
+                          className="w-full px-3 py-2 text-left text-sm text-solarized-green hover:bg-solarized-base01 transition-colors"
                         >
-                          <Icons.Star
-                            size={14}
-                            className={
-                              note.isPinned
-                                ? 'text-solarized-yellow'
-                                : 'text-solarized-base1'
-                            }
-                          />
-                          <span>
-                            {note.isPinned ? 'Unpin Note' : 'Pin Note'}
-                          </span>
+                          Restore Note
                         </button>
-                      )}
 
-                      {onDuplicate && (
+                        <div className="border-t border-solarized-base01 my-1"></div>
+
                         <button
                           onClick={() => {
-                            onDuplicate(note)
-                            setShowMenu(false)
-                          }}
-                          className="w-full px-3 py-2 text-left text-sm text-solarized-base3 hover:bg-solarized-base01 transition-colors"
-                        >
-                          Duplicate Note
-                        </button>
-                      )}
-
-                      <div className="border-t border-solarized-base01 my-1"></div>
-
-                      {onDelete && (
-                        <button
-                          onClick={() => {
-                            onDelete(note)
+                            onPermanentDelete?.(note)
                             setShowMenu(false)
                           }}
                           className="w-full px-3 py-2 text-left text-sm text-solarized-red hover:bg-solarized-base01 transition-colors"
                         >
-                          Delete Note
+                          Delete Permanently
                         </button>
-                      )}
+                      </>
+                    ) : (
+                      // Normal view actions
+                      <>
+                        {onDuplicate && (
+                          <button
+                            onClick={() => {
+                              onDuplicate(note)
+                              setShowMenu(false)
+                            }}
+                            className="w-full px-3 py-2 text-left text-sm text-solarized-base3 hover:bg-solarized-base01 transition-colors flex items-center space-x-2"
+                          >
+                            <Icons.Copy size={14} />
+                            <span>Duplicate Note</span>
+                          </button>
+                        )}
 
-                      <button
-                        onClick={() => {
-                          setShowExportDialog(true)
-                          setShowMenu(false)
-                        }}
-                        className="w-full px-3 py-2 text-left text-sm text-solarized-base3 hover:bg-solarized-base01 transition-colors"
-                      >
-                        Export Note
-                      </button>
-                    </>
-                  )}
+                        <button
+                          onClick={() => {
+                            setShowExportDialog(true)
+                            setShowMenu(false)
+                          }}
+                          className="w-full px-3 py-2 text-left text-sm text-solarized-base3 hover:bg-solarized-base01 transition-colors flex items-center space-x-2"
+                        >
+                          <Icons.Download size={14} />
+                          <span>Export Note</span>
+                        </button>
 
-                  <div className="border-t border-solarized-base01 my-1"></div>
+                        <div className="border-t border-solarized-base01 my-1"></div>
 
-                  <div className="px-3 py-1">
-                    <div className="text-xs text-solarized-base0 mb-1">
-                      Notebook
-                    </div>
-                    <div className="text-xs text-solarized-base2">
-                      {note.notebook}
-                    </div>
-                  </div>
-                  <div className="px-3 py-1">
-                    <div className="text-xs text-solarized-base0 mb-1">
-                      Created
-                    </div>
-                    <div className="text-xs text-solarized-base2">
-                      {note.date}
-                    </div>
-                  </div>
-                  {note.updatedAt && (
+                        {onDelete && (
+                          <button
+                            onClick={() => {
+                              onDelete(note)
+                              setShowMenu(false)
+                            }}
+                            className="w-full px-3 py-2 text-left text-sm text-solarized-red hover:bg-solarized-base01 transition-colors flex items-center space-x-2"
+                          >
+                            <Icons.Trash size={14} />
+                            <span>Delete Note</span>
+                          </button>
+                        )}
+                      </>
+                    )}
+
+                    <div className="border-t border-solarized-base01 my-1"></div>
+
                     <div className="px-3 py-1">
                       <div className="text-xs text-solarized-base0 mb-1">
-                        Modified
+                        Notebook
                       </div>
                       <div className="text-xs text-solarized-base2">
-                        {new Date(note.updatedAt).toLocaleDateString()}
+                        {note.notebook}
                       </div>
                     </div>
-                  )}
-                </div>
-              )}
+                    <div className="px-3 py-1">
+                      <div className="text-xs text-solarized-base0 mb-1">
+                        Created
+                      </div>
+                      <div className="text-xs text-solarized-base2">
+                        {note.date}
+                      </div>
+                    </div>
+                    {note.updatedAt && (
+                      <div className="px-3 py-1">
+                        <div className="text-xs text-solarized-base0 mb-1">
+                          Modified
+                        </div>
+                        <div className="text-xs text-solarized-base2">
+                          {new Date(note.updatedAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -353,40 +353,6 @@ const NotePreview = ({
           }}
           dangerouslySetInnerHTML={{ __html: getPreviewHtml() }}
         />
-
-        {/* View Mode Toggle */}
-        {onViewModeChange && !isTrashView && (
-          <div className="fixed bottom-6 right-4 backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-2xl p-2 flex flex-col space-y-2 z-20">
-            <button
-              onClick={() => onViewModeChange('preview')}
-              className={`p-2 transition-colors border-0 bg-transparent hover:bg-transparent ${
-                viewMode === 'preview' ? 'text-white' : 'text-white/70'
-              }`}
-              title={
-                viewMode === 'preview'
-                  ? 'Currently in Preview'
-                  : 'Switch to Preview'
-              }
-            >
-              <Icons.Eye size={16} />
-            </button>
-            <button
-              onClick={() => onViewModeChange('edit')}
-              className={`p-2 transition-colors border-0 bg-transparent hover:bg-transparent ${
-                viewMode === 'edit' ? 'text-white' : 'text-white/70'
-              }`}
-              title={
-                viewMode === 'edit' ? 'Currently Editing' : 'Switch to Edit'
-              }
-            >
-              {viewMode === 'edit' ? (
-                <Icons.EditActive size={16} />
-              ) : (
-                <Icons.Edit size={16} />
-              )}
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Footer Stats */}

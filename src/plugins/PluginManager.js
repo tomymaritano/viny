@@ -15,8 +15,6 @@ class PluginManager {
   // Registrar un plugin
   async registerPlugin(pluginData, code = null) {
     try {
-      console.log('Registering plugin:', pluginData)
-
       // Validar estructura del plugin
       if (!this.validatePlugin(pluginData)) {
         const missingFields = [
@@ -44,7 +42,6 @@ class PluginManager {
       // Guardar en localStorage
       this.savePluginsToStorage()
 
-      console.log('Plugin registered successfully:', plugin.name)
       return plugin
     } catch (error) {
       console.error('Failed to register plugin:', error)
@@ -76,8 +73,6 @@ class PluginManager {
       this.activePlugins.add(pluginId)
 
       this.savePluginsToStorage()
-
-      console.log(`Plugin ${pluginId} activated successfully`)
     } catch (error) {
       console.error(`Failed to activate plugin ${pluginId}:`, error)
       throw error
@@ -104,8 +99,6 @@ class PluginManager {
       this.activePlugins.delete(pluginId)
 
       this.savePluginsToStorage()
-
-      console.log(`Plugin ${pluginId} deactivated successfully`)
     } catch (error) {
       console.error(`Failed to deactivate plugin ${pluginId}:`, error)
       throw error
@@ -300,7 +293,6 @@ class PluginManager {
           localStorage.removeItem('nototo-plugins')
           return
         }
-        console.log('Loading stored plugins:', pluginsData)
 
         // Restaurar plugins desde el almacenamiento
         for (const pluginData of pluginsData) {
@@ -319,7 +311,6 @@ class PluginManager {
                   code: pluginData.code,
                   registeredAt: pluginData.registeredAt,
                 })
-                console.log('Restored plugin:', plugin.name)
               }
             } catch (error) {
               console.error('Failed to restore plugin:', pluginData.name, error)
@@ -333,7 +324,7 @@ class PluginManager {
   }
 
   // Recrear plugin desde código guardado
-  async recreatePluginFromCode(code, metadata) {
+  async recreatePluginFromCode(code, _metadata) {
     try {
       // Usar el mismo método que en usePlugins para evaluar el código
       let plugin
@@ -367,7 +358,6 @@ class PluginManager {
         }
       } catch (parseError) {
         console.error('Plugin parsing failed:', parseError)
-        console.log('Problematic plugin code:', code.substring(0, 200) + '...')
         throw new Error(`Invalid plugin format: ${parseError.message}`)
       }
 

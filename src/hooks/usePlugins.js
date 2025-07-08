@@ -13,14 +13,11 @@ export function usePlugins() {
 
   // Instalar plugin desde archivo
   const installPlugin = useCallback(
-    async (pluginCode, filename) => {
+    async (pluginCode, _filename) => {
       setLoading(true)
       setError(null)
 
       try {
-        console.log('Installing plugin from file:', filename)
-        console.log('Plugin code length:', pluginCode.length)
-
         // Método más seguro: evaluar el código en un contexto controlado
         let plugin
 
@@ -68,13 +65,10 @@ export function usePlugins() {
           )
         }
 
-        console.log('Plugin parsed successfully:', plugin.name)
-
         // Registrar el plugin con el código para persistencia
         await pluginManager.registerPlugin(plugin, pluginCode)
 
         refreshPlugins()
-        console.log('Plugin installed successfully:', plugin.name)
         return plugin
       } catch (err) {
         console.error('Plugin installation failed:', err)

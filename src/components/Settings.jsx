@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Icons from './Icons'
 import { useSettings } from '../hooks/useSettings'
 import { isFeatureEnabled } from '../config/features'
+import UpdateSettings from './UpdateSettings'
 
 const Settings = ({ isVisible, onClose }) => {
   const { settings, updateSetting, resetSettings } = useSettings()
@@ -24,6 +25,7 @@ const Settings = ({ isVisible, onClose }) => {
         ]
       : []),
     { id: 'export', label: 'Export', icon: <Icons.Download size={16} /> },
+    { id: 'updates', label: 'Updates', icon: <Icons.Download size={16} /> },
   ]
 
   const SettingItem = ({ label, children, description }) => (
@@ -321,6 +323,12 @@ const Settings = ({ isVisible, onClose }) => {
     </div>
   )
 
+  const renderUpdateSettings = () => (
+    <div className="space-y-6">
+      <UpdateSettings />
+    </div>
+  )
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'general':
@@ -333,6 +341,8 @@ const Settings = ({ isVisible, onClose }) => {
         return renderPluginSettings()
       case 'export':
         return renderExportSettings()
+      case 'updates':
+        return renderUpdateSettings()
       default:
         return renderGeneralSettings()
     }

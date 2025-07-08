@@ -3,7 +3,7 @@ import './App.css'
 import Sidebar from './components/Sidebar'
 import NotesList from './components/NotesList'
 import NotePreview from './components/NotePreview'
-import MarkdownEditor from './components/MarkdownEditor'
+import LazyMarkdownEditor from './components/LazyMarkdownEditor'
 import PreviewPanel from './components/PreviewPanel'
 import ResizableLayout from './components/ResizableLayout'
 import Settings from './components/Settings'
@@ -12,16 +12,17 @@ import ToastContainer from './components/ToastContainer'
 import DebugPanel from './components/DebugPanel'
 import ApiStatus from './components/ApiStatus'
 import SearchModal from './components/SearchModal'
+import UpdateChecker from './components/UpdateChecker'
 import { useNotes } from './hooks/useNotes'
 import { useNotesApi } from './hooks/useNotesApi'
 import { useToast } from './hooks/useToast'
-import { useSettings } from './hooks/useSettings'
+// import { useSettings } from './hooks/useSettings'
 import { useNotebooks } from './hooks/useNotebooks'
-import { FEATURES, isFeatureEnabled } from './config/features'
+// Features config removed for production
 
 function App() {
   const { toasts, removeToast, success, error, warning, info } = useToast()
-  const { settings } = useSettings()
+  // Settings hook removed for now
   const { notebooks } = useNotebooks()
   const [showSettings, setShowSettings] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -61,7 +62,7 @@ function App() {
     deleteNote,
     togglePin,
     duplicateNote,
-    exportNotes,
+    // exportNotes,
     closeEditor,
     navigateToSection,
     toggleNotebookManager,
@@ -197,25 +198,7 @@ function App() {
     return notes.find(note => note.id === selectedNoteId)
   }, [notes, selectedNoteId])
 
-  // Debug state changes
-  useEffect(() => {
-    console.log('App state changed:', {
-      selectedNoteId,
-      currentNoteId: currentNote?.id,
-      isEditorOpen,
-      viewMode,
-      activeSection,
-      selectedNoteTitle: selectedNote?.title,
-      currentNoteTitle: currentNote?.title,
-    })
-  }, [
-    selectedNoteId,
-    currentNote,
-    isEditorOpen,
-    viewMode,
-    activeSection,
-    selectedNote,
-  ])
+  // State tracking removed for production
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -360,6 +343,8 @@ function App() {
             onNewNote={createNewNote}
             onManageNotebooks={toggleNotebookManager}
             notes={notes}
+            storageMode={storageMode}
+            onToggleStorage={handleToggleApi}
           />
         }
         notesList={
@@ -376,7 +361,7 @@ function App() {
         }
         mainContent={
           isEditorOpen ? (
-            <MarkdownEditor
+            <LazyMarkdownEditor
               note={currentNote}
               onSave={handleSaveNote}
               onClose={handleCloseEditor}
@@ -464,15 +449,13 @@ function App() {
         <ToastContainer toasts={toasts} onRemove={removeToast} />
       </div>
 
-      {/* API Status */}
-      <ApiStatus
-        storageMode={storageMode}
-        isUsingApi={useApi}
-        onToggleApi={handleToggleApi}
-      />
+      {/* API Status moved to sidebar */}
 
       {/* Debug Panel */}
       <DebugPanel />
+
+      {/* Update Checker */}
+      <UpdateChecker />
     </div>
   )
 }

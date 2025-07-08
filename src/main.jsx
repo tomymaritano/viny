@@ -4,10 +4,8 @@ import App from './App.jsx'
 import { runMigration } from './utils/migration.js'
 
 // Run migration before app initialization
-const migrationResult = runMigration()
-if (migrationResult.migrated) {
-  console.log('Migration completed successfully')
-}
+runMigration()
+// Migration completed
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

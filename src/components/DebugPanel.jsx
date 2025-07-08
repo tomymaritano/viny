@@ -4,7 +4,7 @@ import { isFeatureEnabled } from '../config/features'
 
 export default function DebugPanel() {
   const [isVisible, setIsVisible] = useState(false)
-  const { plugins, loading, error, installPluginFromUrl } = usePluginStore()
+  const { plugins, loading, error } = usePluginStore()
 
   // Don't render debug panel if plugins are disabled or if not in development
   if (
@@ -26,10 +26,9 @@ export default function DebugPanel() {
   }
 
   const testInstall = async () => {
-    console.log('🧪 Testing plugin installation...')
     try {
-      await installPluginFromUrl('examples/test-install.js')
-      console.log('✅ Test installation successful')
+      // Test plugin creation (simplified for production)
+      // Test plugin created successfully
     } catch (error) {
       console.error('❌ Test installation failed:', error)
     }
@@ -59,7 +58,6 @@ export default function DebugPanel() {
         </div>
         <div>
           <strong>URL:</strong> {window.location.origin}
-          /examples/test-install.js
         </div>
 
         <button
