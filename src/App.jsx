@@ -419,7 +419,13 @@ function App() {
           <PreviewPanel
             note={isEditorOpen ? currentNote : selectedNote}
             isVisible={isEditorOpen ? showPreviewPanel : false}
-            onClose={closePreviewPanel}
+            onClose={() => {
+              // When closing preview panel, change layout mode to NORMAL
+              if (layoutMode === LAYOUT_MODES.PREVIEW) {
+                setLayoutMode(LAYOUT_MODES.NORMAL)
+              }
+              closePreviewPanel()
+            }}
           />
         }
         isPreviewVisible={isEditorOpen ? showPreviewPanel : false}
