@@ -1,0 +1,326 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue',
+    Arial, sans-serif;
+  background: #00141a;
+  color: #839496;
+  overflow: hidden;
+}
+
+.app {
+  @apply h-screen flex bg-solarized-base03;
+}
+
+/* Prevent text selection in UI elements but allow in editor */
+.sidebar,
+.notes-list,
+.toolbar,
+button,
+.menu {
+  user-select: none;
+}
+
+/* Allow text selection in content areas */
+.monaco-editor,
+.prose,
+textarea,
+input {
+  user-select: text;
+}
+
+/* Prose styles for markdown preview */
+.prose h1 {
+  color: #49aef5;
+  font-size: 2.2em;
+  font-weight: 600;
+  margin: 1.2em 0 0.8em 0;
+  line-height: 1.2;
+  border-bottom: 1px solid #268bd2;
+  padding-bottom: 0.3em;
+}
+.prose h2 {
+  color: #29eedf;
+  font-size: 1.8em;
+  font-weight: 600;
+  margin: 1em 0 0.6em 0;
+  line-height: 1.3;
+  border-bottom: 1px solid #2aa198;
+  padding-bottom: 0.2em;
+}
+.prose h3 {
+  color: #9ca0ed;
+  font-size: 1.4em;
+  font-weight: 600;
+  margin: 0.9em 0 0.5em 0;
+  line-height: 1.4;
+}
+.prose h4 {
+  color: #aadcff;
+  font-size: 1.2em;
+  font-weight: 600;
+  margin: 0.8em 0 0.4em 0;
+  line-height: 1.4;
+}
+.prose h5 {
+  color: #ffe999;
+  font-size: 1.1em;
+  font-weight: 600;
+  margin: 0.7em 0 0.3em 0;
+  line-height: 1.5;
+}
+.prose h6 {
+  color: #adb8b8;
+  font-size: 1em;
+  font-weight: 600;
+  margin: 0.6em 0 0.2em 0;
+  line-height: 1.5;
+}
+
+.prose p {
+  margin: 1.2em 0;
+  line-height: 1.8;
+  font-size: 1.05em;
+  color: #adb8b8;
+}
+.prose a {
+  color: #268bd2;
+  text-decoration: underline;
+  text-decoration-color: #268bd2;
+  text-underline-offset: 3px;
+}
+.prose a:hover {
+  color: #2aa198;
+  text-decoration-color: #2aa198;
+}
+
+.prose ul,
+.prose ol {
+  margin: 1.5em 0;
+  padding-left: 2em;
+}
+.prose li {
+  margin: 0.8em 0;
+  line-height: 1.7;
+}
+
+.prose blockquote {
+  border-left: 3px solid #6c71c4;
+  margin: 1.5em 0;
+  padding: 1em 1.5em;
+  color: #93a1a1;
+  font-style: italic;
+  background: rgba(2, 43, 54, 0.3);
+  border-radius: 0 4px 4px 0;
+}
+
+.prose code {
+  background: #002b36;
+  color: #2aa198;
+  padding: 0.3em 0.5em;
+  border-radius: 4px;
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
+  font-size: 0.9em;
+  border: 1px solid #073642;
+}
+
+.prose pre {
+  background: #002b36;
+  color: #839496;
+  padding: 1.5em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1.5em 0;
+  border: 1px solid #073642;
+  line-height: 1.6;
+}
+
+.prose pre code {
+  background: none;
+  padding: 0;
+  border: none;
+  font-size: 0.95em;
+}
+
+.prose table {
+  border-collapse: collapse;
+  margin: 2em 0;
+  width: 100%;
+  border: 1px solid #073642;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.prose th,
+.prose td {
+  border: 1px solid #073642;
+  padding: 0.8em 1em;
+  text-align: left;
+}
+.prose th {
+  background: #073642;
+  color: #eee8d5;
+  font-weight: 600;
+}
+.prose td {
+  background: rgba(2, 43, 54, 0.2);
+}
+
+.prose hr {
+  border: none;
+  border-top: 2px solid #073642;
+  margin: 3em 0;
+  border-radius: 1px;
+}
+
+.prose strong {
+  color: #cb4b16;
+  font-weight: 700;
+}
+.prose em {
+  color: #6c71c4;
+  font-style: italic;
+}
+
+/* Task lists */
+.prose input[type='checkbox'] {
+  margin-right: 0.8em;
+  accent-color: #268bd2;
+  transform: scale(1.1);
+}
+
+/* Task list items */
+.prose ul.contains-task-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.prose .task-list-item {
+  display: flex;
+  align-items: flex-start;
+  margin: 0.5em 0;
+}
+
+.prose .task-list-item input[type='checkbox'] {
+  margin-top: 0.3em;
+  flex-shrink: 0;
+}
+
+/* Line clamp utilities */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #073642;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #103b3d;
+}
+
+/* Button styles */
+button {
+  background: transparent;
+  color: #839496;
+  border: 1px solid #073642;
+  padding: 6px 12px;
+  border-radius: 2px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-weight: 400;
+  font-family: inherit;
+}
+
+button:hover {
+  background: #002b36;
+  border-color: #103b3d;
+  color: #93a1a1;
+}
+
+button:active {
+  background: #073642;
+}
+
+button.primary {
+  background: #002b36;
+  border-color: #268bd2;
+  color: white;
+}
+
+button.primary:hover {
+  background: #2c3300;
+  border-color: #2c3300;
+}
+
+/* Card styles */
+.card {
+  background: #002b36;
+  border: 1px solid #073642;
+  border-radius: 2px;
+  padding: 1rem;
+  transition: all 0.15s ease;
+}
+
+.card:hover {
+  background: #073642;
+  border-color: #103b3d;
+}
+
+/* Text styles */
+h1 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #fdf6e3;
+}
+
+h2 {
+  font-size: 1.4rem;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+  color: #eee8d5;
+}
+
+h3 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #93a1a1;
+}
+
+p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #657b83;
+  margin-bottom: 0.75rem;
+}

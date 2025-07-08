@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # Backend service
+  backend:
+    build:
+      context: ./server
+      target: production
+    container_name: nototo-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      # Persistent database and uploads
+      - nototo_data:/app/data
+      - nototo_db:/app/prisma
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=file:./nototo.db
+    networks:
+      - nototo-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Frontend service
+  frontend:
+    build:
+      context: .
+      target: production
+    container_name: nototo-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    networks:
+      - nototo-network
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional: Reverse proxy for HTTPS (uncomment for production)
+  # reverse-proxy:
+  #   image: traefik:v2.10
+  #   container_name: nototo-proxy
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #     - "8080:8080"  # Traefik dashboard
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - ./traefik:/etc/traefik:ro
+  #     - nototo_ssl:/etc/ssl/traefik
+  #   networks:
+  #     - nototo-network
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.api.rule=Host(`traefik.localhost`)"
+  #     - "traefik.http.routers.api.service=api@internal"
+
+volumes:
+  # Persistent data storage
+  nototo_data:
+    driver: local
+  nototo_db:
+    driver: local
+  # nototo_ssl:
+  #   driver: local
+
+networks:
+  nototo-network:
+    driver: bridge

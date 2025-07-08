@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nototo Plugin Debug</title>
+    <style>
+        body { font-family: monospace; background: #002b36; color: #839496; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { background: #073642; padding: 20px; margin: 20px 0; border-radius: 8px; border: 1px solid #586e75; }
+        .success { color: #2aa198; }
+        .error { color: #dc322f; }
+        .warning { color: #b58900; }
+        .info { color: #268bd2; }
+        button { background: #268bd2; color: #fdf6e3; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #2aa198; }
+        textarea { width: 100%; height: 200px; background: #073642; color: #839496; border: 1px solid #586e75; padding: 10px; border-radius: 4px; }
+        .log { background: #002b36; padding: 10px; border-left: 4px solid #586e75; margin: 10px 0; font-size: 12px; }
+        input[type="file"] { background: #073642; color: #839496; border: 1px solid #586e75; padding: 8px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧩 Nototo Plugin Debug Tool</h1>
+        
+        <div class="section">
+            <h2>📋 System Status</h2>
+            <div id="system-status"></div>
+            <button onclick="checkSystem()">Check System</button>
+        </div>
+
+        <div class="section">
+            <h2>📁 File Plugin Tester</h2>
+            <input type="file" id="plugin-file" accept=".js" />
+            <button onclick="testPluginFile()">Test Plugin File</button>
+            <div id="file-result"></div>
+        </div>
+
+        <div class="section">
+            <h2>📝 Plugin Code Tester</h2>
+            <textarea id="plugin-code" placeholder="Paste plugin code here...">
+export default {
+  name: 'test-plugin',
+  version: '1.0.0',
+  description: 'Test plugin',
+  author: 'Test',
+  
+  activate(api) {
+    console.log('Test plugin activated!');
+    api.ui.showToast('Test plugin works!', 'success');
+  },
+  
+  deactivate() {
+    console.log('Test plugin deactivated');
+  }
+}
+            </textarea>
+            <button onclick="testPluginCode()">Test Plugin Code</button>
+            <div id="code-result"></div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Quick Plugin Examples</h2>
+            <button onclick="loadExamplePlugin('simple')">Load Simple Plugin</button>
+            <button onclick="loadExamplePlugin('emoji')">Load Emoji Plugin</button>
+            <button onclick="loadExamplePlugin('vim')">Load Vim Plugin</button>
+        </div>
+
+        <div class="section">
+            <h2>📜 Debug Log</h2>
+            <div id="debug-log"></div>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+    </div>
+
+    <script>
+        // Mock Plugin Manager para testing
+        class DebugPluginManager {
+            constructor() {
+                this.plugins = new Map();
+                this.log('Debug Plugin Manager initialized');
+            }
+
+            log(message, type = 'info') {
+                const logDiv = document.getElementById('debug-log');
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = document.createElement('div');
+                logEntry.className = `log ${type}`;
+                logEntry.innerHTML = `<strong>${timestamp}</strong> - ${message}`;
+                logDiv.appendChild(logEntry);
+                logDiv.scrollTop = logDiv.scrollHeight;
+                console.log(`[${type.toUpperCase()}]`, message);
+            }
+
+            async registerPlugin(pluginData) {
+                try {
+                    this.log(`Registering plugin: ${pluginData.name}`, 'info');
+                    
+                    // Validate plugin
+                    const required = ['name', 'version', 'description', 'activate'];
+                    const missing = required.filter(field => !pluginData[field]);
+                    
+                    if (missing.length > 0) {
+                        throw new Error(`Missing required fields: ${missing.join(', ')}`);
+                    }
+
+                    const plugin = {
+                        ...pluginData,
+                        id: pluginData.name,
+                        isActive: false,
+                        registeredAt: new Date().toISOString()
+                    };
+
+                    this.plugins.set(plugin.id, plugin);
+                    this.log(`Plugin "${plugin.name}" registered successfully`, 'success');
+                    return plugin;
+                } catch (error) {
+                    this.log(`Failed to register plugin: ${error.message}`, 'error');
+                    throw error;
+                }
+            }
+
+            async activatePlugin(pluginId) {
+                try {
+                    const plugin = this.plugins.get(pluginId);
+                    if (!plugin) {
+                        throw new Error(`Plugin ${pluginId} not found`);
+                    }
+
+                    this.log(`Activating plugin: ${plugin.name}`, 'info');
+                    
+                    // Mock API
+                    const mockAPI = this.createMockAPI();
+                    
+                    if (typeof plugin.activate === 'function') {
+                        await plugin.activate(mockAPI);
+                        plugin.isActive = true;
+                        this.log(`Plugin "${plugin.name}" activated successfully`, 'success');
+                    } else {
+                        throw new Error('Plugin activate function not found');
+                    }
+                } catch (error) {
+                    this.log(`Failed to activate plugin: ${error.message}`, 'error');
+                    throw error;
+                }
+            }
+
+            createMockAPI() {
+                return {
+                    notes: {
+                        getAll: () => { this.log('API: notes.getAll() called'); return []; },
+                        getById: (id) => { this.log(`API: notes.getById(${id}) called`); return null; },
+                        create: (data) => { this.log(`API: notes.create() called with: ${JSON.stringify(data)}`); },
+                        update: (id, data) => { this.log(`API: notes.update(${id}) called`); },
+                        delete: (id) => { this.log(`API: notes.delete(${id}) called`); },
+                        search: (query) => { this.log(`API: notes.search("${query}") called`); return []; }
+                    },
+                    ui: {
+                        showToast: (message, type) => {
+                            this.log(`Toast [${type}]: ${message}`, type);
+                            this.showToast(message, type);
+                        },
+                        addSidebarSection: (config) => { this.log(`API: addSidebarSection(${config.id}) called`); },
+                        addToolbarButton: (config) => { this.log(`API: addToolbarButton(${config.id}) called`); },
+                        addContextMenuItem: (config) => { this.log(`API: addContextMenuItem(${config.id}) called`); }
+                    },
+                    editor: {
+                        addCommand: (config) => { this.log(`API: addCommand(${config.id}) called`); },
+                        addKeyBinding: (config) => { this.log(`API: addKeyBinding(${config.key}) called`); },
+                        insertText: (text) => { this.log(`API: insertText("${text}") called`); }
+                    },
+                    utils: {
+                        storage: {
+                            get: (key) => { this.log(`API: storage.get("${key}") called`); return null; },
+                            set: (key, value) => { this.log(`API: storage.set("${key}") called`); },
+                            remove: (key) => { this.log(`API: storage.remove("${key}") called`); }
+                        }
+                    }
+                };
+            }
+
+            showToast(message, type) {
+                const toast = document.createElement('div');
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: ${type === 'success' ? '#2aa198' : type === 'error' ? '#dc322f' : '#268bd2'};
+                    color: white;
+                    padding: 12px 16px;
+                    border-radius: 4px;
+                    z-index: 10000;
+                    font-family: monospace;
+                `;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+
+            getPlugins() {
+                return Array.from(this.plugins.values());
+            }
+        }
+
+        // Initialize debug manager
+        const debugManager = new DebugPluginManager();
+        window.debugManager = debugManager;
+
+        function checkSystem() {
+            const statusDiv = document.getElementById('system-status');
+            let status = '<h3>System Check Results:</h3>';
+            
+            // Check if we're in Nototo
+            const isNototo = window.location.href.includes('nototo') || window.location.href.includes('localhost');
+            status += `<div class="${isNototo ? 'success' : 'warning'}">Environment: ${isNototo ? 'Nototo Application' : 'Debug Environment'}</div>`;
+            
+            // Check for required APIs
+            const hasReact = typeof window.React !== 'undefined';
+            status += `<div class="${hasReact ? 'success' : 'warning'}">React: ${hasReact ? 'Available' : 'Not Found'}</div>`;
+            
+            const hasMonaco = typeof window.monaco !== 'undefined';
+            status += `<div class="${hasMonaco ? 'success' : 'warning'}">Monaco Editor: ${hasMonaco ? 'Available' : 'Not Found'}</div>`;
+            
+            // Check localStorage
+            const hasStorage = typeof localStorage !== 'undefined';
+            status += `<div class="${hasStorage ? 'success' : 'error'}">LocalStorage: ${hasStorage ? 'Available' : 'Not Available'}</div>`;
+            
+            // Check console
+            status += `<div class="info">Console: Open Developer Tools to see detailed logs</div>`;
+            
+            statusDiv.innerHTML = status;
+            debugManager.log('System check completed');
+        }
+
+        async function testPluginFile() {
+            const fileInput = document.getElementById('plugin-file');
+            const resultDiv = document.getElementById('file-result');
+            
+            if (!fileInput.files[0]) {
+                resultDiv.innerHTML = '<div class="error">Please select a file</div>';
+                return;
+            }
+
+            const file = fileInput.files[0];
+            
+            try {
+                debugManager.log(`Testing file: ${file.name} (${file.size} bytes)`);
+                
+                if (!file.name.endsWith('.js')) {
+                    throw new Error('File must have .js extension');
+                }
+
+                const content = await file.text();
+                debugManager.log(`File content loaded: ${content.length} characters`);
+                
+                await testPlugin(content);
+                resultDiv.innerHTML = '<div class="success">✅ Plugin file loaded and tested successfully!</div>';
+                
+            } catch (error) {
+                debugManager.log(`File test failed: ${error.message}`, 'error');
+                resultDiv.innerHTML = `<div class="error">❌ ${error.message}</div>`;
+            }
+        }
+
+        async function testPluginCode() {
+            const code = document.getElementById('plugin-code').value;
+            const resultDiv = document.getElementById('code-result');
+            
+            if (!code.trim()) {
+                resultDiv.innerHTML = '<div class="error">Please enter plugin code</div>';
+                return;
+            }
+
+            try {
+                await testPlugin(code);
+                resultDiv.innerHTML = '<div class="success">✅ Plugin code tested successfully!</div>';
+            } catch (error) {
+                debugManager.log(`Code test failed: ${error.message}`, 'error');
+                resultDiv.innerHTML = `<div class="error">❌ ${error.message}</div>`;
+            }
+        }
+
+        async function testPlugin(pluginCode) {
+            debugManager.log('Starting plugin test...');
+            
+            // Parse plugin
+            let plugin;
+            try {
+                // Remove export statement for eval
+                const cleanCode = pluginCode
+                    .replace(/export\s+default\s+/, '')
+                    .replace(/export\s*\{\s*\w+\s+as\s+default\s*\}/, '');
+                
+                // Evaluate plugin
+                const func = new Function('return ' + cleanCode);
+                plugin = func();
+                
+                debugManager.log('Plugin parsed successfully');
+            } catch (parseError) {
+                throw new Error(`Parse error: ${parseError.message}`);
+            }
+
+            // Register plugin
+            await debugManager.registerPlugin(plugin);
+            
+            // Activate plugin
+            await debugManager.activatePlugin(plugin.name);
+            
+            debugManager.log('Plugin test completed successfully', 'success');
+        }
+
+        function loadExamplePlugin(type) {
+            const codeTextarea = document.getElementById('plugin-code');
+            
+            const examples = {
+                simple: `export default {
+  name: 'simple-test',
+  version: '1.0.0',
+  description: 'Simple test plugin',
+  author: 'Test',
+  
+  activate(api) {
+    api.ui.showToast('Simple plugin activated! 🎉', 'success');
+    console.log('Simple plugin is working!');
+  },
+  
+  deactivate() {
+    console.log('Simple plugin deactivated');
+  }
+}`,
+                emoji: `export default {
+  name: 'quick-emoji',
+  version: '1.0.0',
+  description: 'Quick emoji insertion',
+  author: 'Test',
+  
+  activate(api) {
+    api.ui.showToast('Emoji plugin activated! 😊', 'success');
+    
+    api.ui.addToolbarButton({
+      id: 'quick-emoji',
+      title: 'Insert Random Emoji',
+      icon: '😊',
+      onClick: () => {
+        const emojis = ['😊', '🚀', '🎉', '💡', '✨'];
+        const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+        api.editor.insertText(emoji);
+        api.ui.showToast(\`Inserted \${emoji}\`, 'success');
+      }
+    });
+  },
+  
+  deactivate() {
+    console.log('Emoji plugin deactivated');
+  }
+}`,
+                vim: `export default {
+  name: 'mini-vim',
+  version: '1.0.0',
+  description: 'Mini Vim mode demo',
+  author: 'Test',
+  
+  activate(api) {
+    api.ui.showToast('Mini Vim mode activated! ⌨️', 'success');
+    
+    api.editor.addCommand({
+      id: 'vim.save',
+      name: 'Vim: Save',
+      keybinding: 'Ctrl+Shift+W',
+      callback: () => {
+        api.ui.showToast('Vim save command! :w', 'info');
+      }
+    });
+    
+    api.editor.addKeyBinding({
+      key: 'Escape',
+      command: () => {
+        api.ui.showToast('Vim: Normal mode', 'info');
+      }
+    });
+  },
+  
+  deactivate() {
+    console.log('Mini Vim deactivated');
+  }
+}`
+            };
+            
+            codeTextarea.value = examples[type];
+            debugManager.log(`Loaded ${type} example plugin`);
+        }
+
+        function clearLog() {
+            document.getElementById('debug-log').innerHTML = '';
+            console.clear();
+        }
+
+        // Auto-check system on load
+        window.addEventListener('load', () => {
+            setTimeout(checkSystem, 100);
+            debugManager.log('Debug tool initialized');
+        });
+    </script>
+</body>
+</html>

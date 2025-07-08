@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./nototo.db"
+}
+
+model Note {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  preview   String?
+  notebook  String   @default("Personal")
+  status    String   @default("draft")
+  isPinned  Boolean  @default(false) @map("is_pinned")
+  isTrashed Boolean  @default(false) @map("is_trashed")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  trashedAt DateTime? @map("trashed_at")
+
+  // Relations
+  tags NoteTags[]
+
+  @@map("notes")
+}
+
+model Tag {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  color String @default("#268bd2")
+
+  // Relations
+  notes NoteTags[]
+
+  @@map("tags")
+}
+
+model NoteTags {
+  noteId Int @map("note_id")
+  tagId  Int @map("tag_id")
+
+  // Relations
+  note Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([noteId, tagId])
+  @@map("note_tags")
+}
+
+model Notebook {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  color     String   @default("#268bd2")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("notebooks")
+}

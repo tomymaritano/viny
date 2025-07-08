@@ -1,0 +1,32 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="80" fill="#002B36"/>
+  
+  <!-- Main Icon Shape - Stylized "N" for Nototo -->
+  <!-- Left vertical stroke -->
+  <rect x="140" y="120" width="40" height="272" rx="20" fill="#268BD2"/>
+  
+  <!-- Right vertical stroke -->
+  <rect x="332" y="120" width="40" height="272" rx="20" fill="#268BD2"/>
+  
+  <!-- Diagonal connecting stroke -->
+  <rect x="170" y="180" width="192" height="35" rx="17" fill="#268BD2" transform="rotate(35 266 197)"/>
+  
+  <!-- Accent dots representing notes/content -->
+  <circle cx="200" cy="160" r="8" fill="#2AA198"/>
+  <circle cx="220" cy="180" r="6" fill="#859900"/>
+  <circle cx="240" cy="200" r="4" fill="#B58900"/>
+  
+  <circle cx="300" cy="280" r="8" fill="#CB4B16"/>
+  <circle cx="320" cy="300" r="6" fill="#DC322F"/>
+  <circle cx="340" cy="320" r="4" fill="#D33682"/>
+  
+  <!-- Subtle gradient overlay for depth -->
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#073642;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#00141A;stop-opacity:0.1"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="80" fill="url(#grad)"/>
+</svg>

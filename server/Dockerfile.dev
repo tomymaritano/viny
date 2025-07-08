@@ -1,0 +1,29 @@
+# Development Dockerfile - Optimized for faster builds and development
+FROM node:18-alpine AS base
+WORKDIR /app
+
+# Install dependencies for development
+RUN apk add --no-cache \
+    libc6-compat \
+    curl \
+    && npm install -g tsx
+
+# Install dependencies first (better caching)
+COPY package.json package-lock.json* ./
+RUN npm ci && npm cache clean --force
+
+# Copy source code
+COPY . .
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Expose port
+EXPOSE 3001
+
+# Health check with faster interval for development
+HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=2 \
+  CMD curl -f http://localhost:3001/health || exit 1
+
+# Use tsx for development with hot reload
+CMD ["npm", "run", "dev"]

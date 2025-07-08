@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Backend service only - Frontend runs locally with npm
+  backend:
+    build: 
+      context: ./server
+      target: base
+    container_name: nototo-backend-hybrid
+    ports:
+      - "3001:3001"
+    volumes:
+      # Mount source code for hot reload
+      - ./server/src:/app/src:ro
+      - ./server/prisma:/app/prisma:ro
+      - ./server/package.json:/app/package.json:ro
+      - ./server/tsconfig.json:/app/tsconfig.json:ro
+      # Mount node_modules as volume for performance
+      - backend_node_modules:/app/node_modules
+      # Persistent database
+      - nototo_db:/app/prisma
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - DATABASE_URL=file:./nototo.db
+      # Allow CORS from local frontend
+      - CORS_ORIGIN=http://localhost:5173
+    command: npm run dev
+    networks:
+      - nototo-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  # Persistent database storage
+  nototo_db:
+    driver: local
+  # Node modules volume for better performance
+  backend_node_modules:
+    driver: local
+
+networks:
+  nototo-network:
+    driver: bridge
