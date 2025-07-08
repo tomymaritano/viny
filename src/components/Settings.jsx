@@ -5,6 +5,7 @@ import { useSettings } from '../hooks/useSettings'
 import { isFeatureEnabled } from '../config/features'
 import UpdateSettings from './UpdateSettings'
 import CustomSwitch from './ui/CustomSwitch'
+import packageInfo from '../../package.json'
 
 const Settings = ({ isVisible, onClose }) => {
   const { settings, updateSetting, resetSettings } = useSettings()
@@ -416,12 +417,21 @@ const Settings = ({ isVisible, onClose }) => {
 
             {/* Footer */}
             <div className="flex items-center justify-between p-6 border-t border-solarized-base01">
-              <button
-                onClick={resetSettings}
-                className="px-4 py-2 text-sm text-solarized-orange border border-solarized-orange rounded hover:bg-solarized-orange hover:text-solarized-base5 transition-colors"
-              >
-                Reset to Defaults
-              </button>
+              <div className="flex items-center space-x-6">
+                <button
+                  onClick={resetSettings}
+                  className="px-4 py-2 text-sm text-solarized-orange border border-solarized-orange rounded hover:bg-solarized-orange hover:text-solarized-base5 transition-colors"
+                >
+                  Reset to Defaults
+                </button>
+
+                {/* Version Info */}
+                <div className="flex items-center space-x-2 text-sm text-solarized-base1">
+                  <Icons.Info size={14} />
+                  <span>Nototo v{packageInfo.version}</span>
+                </div>
+              </div>
+
               <button
                 onClick={onClose}
                 className="px-4 py-2 text-sm bg-solarized-blue text-solarized-base5 rounded hover:bg-solarized-blue-hover transition-colors"

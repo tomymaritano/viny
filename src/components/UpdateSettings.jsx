@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Icons from './Icons'
 import CustomSwitch from './ui/CustomSwitch'
+import packageInfo from '../../package.json'
 
 const UpdateSettings = () => {
   const [autoUpdateEnabled, setAutoUpdateEnabled] = useState(true)
@@ -65,7 +66,23 @@ const UpdateSettings = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {/* Current Version */}
+      <div className="bg-solarized-base01 rounded-lg p-4 border border-solarized-base00">
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 bg-solarized-blue/20 rounded-full flex items-center justify-center">
+            <Icons.Info size={16} className="text-solarized-blue" />
+          </div>
+          <div>
+            <h4 className="font-semibold text-solarized-base3">
+              Current Version
+            </h4>
+            <p className="text-lg font-mono text-solarized-base5">
+              v{packageInfo.version}
+            </p>
+          </div>
+        </div>
+      </div>
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium text-solarized-base5">
           Auto-Updates
