@@ -13,9 +13,8 @@ const ApiStatus = ({ storageMode, isUsingApi, onToggleApi }) => {
       const health = await healthApi.check()
       setApiStatus(health.status === 'OK' ? 'online' : 'error')
       setLastCheck(new Date())
-    } catch (error) {
-      // API health check failed
-      console.warn('API health check failed:', error)
+    } catch {
+      // API health check failed - handled silently
       setApiStatus('offline')
       setLastCheck(new Date())
     }

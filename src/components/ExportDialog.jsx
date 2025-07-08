@@ -78,7 +78,7 @@ const ExportDialog = ({
 
       onClose()
     } catch (error) {
-      console.error('Export failed:', error)
+      // Export failed - show user-friendly error
       alert(`Export failed: ${error.message}`)
     } finally {
       setIsExporting(false)

@@ -1,5 +1,7 @@
+/* eslint-disable react/prop-types */
 // Unified icon library for Inkrun
 // All icons use consistent stroke width and style
+// PropTypes disabled for this file as all icons have the same structure: { size, className }
 
 const Icons = {
   // View and editing icons

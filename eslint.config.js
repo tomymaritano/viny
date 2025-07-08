@@ -33,6 +33,8 @@ module.exports = [
         Blob: 'readonly',
         FileReader: 'readonly',
         FormData: 'readonly',
+        CustomEvent: 'readonly',
+        navigator: 'readonly',
         alert: 'readonly',
         confirm: 'readonly',
         prompt: 'readonly',
