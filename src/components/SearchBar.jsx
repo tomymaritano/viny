@@ -23,6 +23,7 @@ const SearchBar = ({
     search,
     setQuery,
     clearSearch,
+    addToHistory,
   } = useSearch(notes)
   const [isOpen, setIsOpen] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)

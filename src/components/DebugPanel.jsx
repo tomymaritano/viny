@@ -29,8 +29,8 @@ export default function DebugPanel() {
     try {
       // Test plugin creation (simplified for production)
       // Test plugin created successfully
-    } catch (error) {
-      console.error('❌ Test installation failed:', error)
+    } catch {
+      // Test installation failed - handled silently
     }
   }
 

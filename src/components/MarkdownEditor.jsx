@@ -443,14 +443,21 @@ const MarkdownEditor = ({
                 <button
                   onClick={() => {
                     // Copy markdown to clipboard
-                    navigator.clipboard
-                      .writeText(content)
-                      .then(() => {
-                        toast?.success('Markdown copied to clipboard')
-                      })
-                      .catch(() => {
-                        toast?.error('Failed to copy to clipboard')
-                      })
+                    if (
+                      typeof navigator !== 'undefined' &&
+                      navigator.clipboard
+                    ) {
+                      navigator.clipboard
+                        .writeText(content)
+                        .then(() => {
+                          toast?.success('Markdown copied to clipboard')
+                        })
+                        .catch(() => {
+                          toast?.error('Failed to copy to clipboard')
+                        })
+                    } else {
+                      toast?.error('Clipboard API not available')
+                    }
                     setShowEditorMenu(false)
                   }}
                   className="w-full px-3 py-2 text-left text-sm text-solarized-base3 hover:bg-solarized-base01 transition-colors"

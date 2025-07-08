@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import PropTypes from 'prop-types'
 import Icons from './Icons'
 import { useExport } from '../hooks/useExport'
 import { useSettings } from '../hooks/useSettings'
@@ -301,6 +302,20 @@ const ExportDialog = ({
       </motion.div>
     </AnimatePresence>
   )
+}
+
+ExportDialog.propTypes = {
+  isVisible: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  notes: PropTypes.array,
+  selectedNotes: PropTypes.array,
+  type: PropTypes.oneOf(['single', 'multiple']),
+}
+
+ExportDialog.defaultProps = {
+  notes: [],
+  selectedNotes: [],
+  type: 'single',
 }
 
 export default ExportDialog

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import PropTypes from 'prop-types'
 import { healthApi } from '../services/api'
 import Icons from './Icons'
 
@@ -12,8 +13,9 @@ const ApiStatus = ({ storageMode, isUsingApi, onToggleApi }) => {
       const health = await healthApi.check()
       setApiStatus(health.status === 'OK' ? 'online' : 'error')
       setLastCheck(new Date())
-    } catch (_error) {
+    } catch (error) {
       // API health check failed
+      console.warn('API health check failed:', error)
       setApiStatus('offline')
       setLastCheck(new Date())
     }
@@ -170,6 +172,12 @@ const ApiStatus = ({ storageMode, isUsingApi, onToggleApi }) => {
       )}
     </div>
   )
+}
+
+ApiStatus.propTypes = {
+  storageMode: PropTypes.oneOf(['localStorage', 'api']).isRequired,
+  isUsingApi: PropTypes.bool.isRequired,
+  onToggleApi: PropTypes.func.isRequired,
 }
 
 export default ApiStatus

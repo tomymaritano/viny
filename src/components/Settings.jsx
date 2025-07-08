@@ -288,8 +288,10 @@ const Settings = ({ isVisible, onClose }) => {
             onClose()
             // Trigger plugin manager opening
             setTimeout(() => {
-              const event = new CustomEvent('openPluginManager')
-              window.dispatchEvent(event)
+              if (typeof window !== 'undefined' && window.CustomEvent) {
+                const event = new CustomEvent('openPluginManager')
+                window.dispatchEvent(event)
+              }
             }, 100)
           }}
           className="bg-solarized-blue text-solarized-base03 px-4 py-2 rounded font-medium hover:bg-solarized-blue/80 transition-colors"

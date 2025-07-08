@@ -42,6 +42,39 @@ global.ResizeObserver = vi.fn().mockImplementation(() => ({
 global.URL.createObjectURL = vi.fn(() => 'mocked-url')
 global.URL.revokeObjectURL = vi.fn()
 
+// Mock CustomEvent for browser environment
+global.CustomEvent = vi.fn().mockImplementation((type, options) => ({
+  type,
+  detail: options?.detail,
+  bubbles: options?.bubbles || false,
+  cancelable: options?.cancelable || false,
+}))
+
+// Mock navigator for clipboard and other APIs
+global.navigator = {
+  clipboard: {
+    writeText: vi.fn().mockResolvedValue(),
+    readText: vi.fn().mockResolvedValue(''),
+  },
+  userAgent: 'test-user-agent',
+  language: 'en-US',
+  languages: ['en-US', 'en'],
+  onLine: true,
+}
+
+// Ensure window is available (jsdom should provide this)
+if (typeof window !== 'undefined') {
+  // Add CustomEvent to window if not already present
+  if (!window.CustomEvent) {
+    window.CustomEvent = global.CustomEvent
+  }
+
+  // Add navigator to window if not already present
+  if (!window.navigator) {
+    window.navigator = global.navigator
+  }
+}
+
 // Console suppression for cleaner test output
 const originalError = console.error
 console.error = (...args) => {
