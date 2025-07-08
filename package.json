@@ -70,7 +70,7 @@
     "publish": {
       "provider": "github",
       "owner": "tomymaritano",
-      "repo": "markdown"
+      "repo": "nototo"
     },
     "files": [
       "dist/**/*",
