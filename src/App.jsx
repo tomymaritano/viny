@@ -28,6 +28,16 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showSearch, setShowSearch] = useState(false)
 
+  // Layout modes enum
+  const LAYOUT_MODES = {
+    NORMAL: 'normal', // Sidebar + Lista + Editor
+    MARKDOWN: 'markdown', // Sidebar + Editor (sin lista)
+    PREVIEW: 'preview', // Sidebar + Lista + Editor + Preview lateral
+    FOCUS: 'focus', // Solo Editor (sin sidebar ni lista)
+  }
+
+  const [layoutMode, setLayoutMode] = useState(LAYOUT_MODES.NORMAL)
+
   // API/localStorage toggle state
   const [useApi, setUseApi] = useState(() => {
     const stored = localStorage.getItem('nototo_use_api')
@@ -83,6 +93,26 @@ function App() {
       warning('Switched to localStorage')
     }
   }
+
+  const handleCycleLayoutMode = () => {
+    const modes = Object.values(LAYOUT_MODES)
+    const currentIndex = modes.indexOf(layoutMode)
+    const nextIndex = (currentIndex + 1) % modes.length
+    setLayoutMode(modes[nextIndex])
+  }
+
+  // Derived states from layoutMode
+  const isSidebarVisible = layoutMode !== LAYOUT_MODES.FOCUS
+  const isNotesListVisible =
+    layoutMode !== LAYOUT_MODES.MARKDOWN && layoutMode !== LAYOUT_MODES.FOCUS
+
+  // Sync preview panel with layout mode
+  useEffect(() => {
+    const shouldShowPreview = layoutMode === LAYOUT_MODES.PREVIEW
+    if (shouldShowPreview !== showPreviewPanel) {
+      togglePreviewPanel()
+    }
+  }, [layoutMode, showPreviewPanel, togglePreviewPanel, LAYOUT_MODES.PREVIEW])
 
   // Show error notifications for API issues
   useEffect(() => {
@@ -366,9 +396,8 @@ function App() {
               onSave={handleSaveNote}
               onClose={handleCloseEditor}
               toast={{ success, error, warning, info }}
-              showPreviewToggle={true}
-              onTogglePreview={togglePreviewPanel}
-              isPreviewVisible={showPreviewPanel}
+              layoutMode={layoutMode}
+              onCycleLayoutMode={handleCycleLayoutMode}
               allTags={getAllTags()}
             />
           ) : (
@@ -394,6 +423,8 @@ function App() {
           />
         }
         isPreviewVisible={isEditorOpen ? showPreviewPanel : false}
+        isSidebarVisible={isSidebarVisible}
+        isNotesListVisible={isNotesListVisible}
       />
 
       {/* Settings Modal */}

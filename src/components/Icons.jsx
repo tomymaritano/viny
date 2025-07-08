@@ -596,6 +596,41 @@ const Icons = {
       <circle cx="11" cy="11" r="2" />
     </svg>
   ),
+
+  Sidebar: ({ size = 16, className = '' }) => (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+      <line x1="9" y1="3" x2="9" y2="21" />
+    </svg>
+  ),
+
+  Markdown: ({ size = 16, className = '' }) => (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <rect x="3" y="5" width="18" height="14" rx="2" ry="2" />
+      <path d="M7 15l2-2 2 2" />
+      <path d="M17 9l-2 2-2-2" />
+    </svg>
+  ),
 }
 
 export default Icons

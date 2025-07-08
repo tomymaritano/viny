@@ -7,6 +7,8 @@ const ResizableLayout = ({
   mainContent,
   previewPanel,
   isPreviewVisible = false,
+  isSidebarVisible = true,
+  isNotesListVisible = true,
 }) => {
   const containerRef = useRef(null)
   const [containerWidth, setContainerWidth] = useState(0)
@@ -52,7 +54,9 @@ const ResizableLayout = ({
 
   // Calculate available space and constraints
   const getConstraints = useCallback(() => {
-    const usedWidth = sidebarWidth + (isPreviewVisible ? previewWidth : 0)
+    const usedWidth =
+      (isSidebarVisible ? sidebarWidth : 0) +
+      (isPreviewVisible ? previewWidth : 0)
     const availableForNotesAndMain = containerWidth - usedWidth
     const maxNotesListWidthConstrained = Math.min(
       maxNotesListWidth,
@@ -67,9 +71,18 @@ const ResizableLayout = ({
       ),
       minPreviewWidth,
       maxPreviewWidth:
-        containerWidth - sidebarWidth - minNotesListWidth - minMainContentWidth,
+        containerWidth -
+        (isSidebarVisible ? sidebarWidth : 0) -
+        (isNotesListVisible ? minNotesListWidth : 0) -
+        minMainContentWidth,
     }
-  }, [containerWidth, isPreviewVisible, previewWidth])
+  }, [
+    containerWidth,
+    isPreviewVisible,
+    previewWidth,
+    isSidebarVisible,
+    isNotesListVisible,
+  ])
 
   // Handle NotesList resize
   const handleNotesListResize = useCallback(
@@ -102,43 +115,50 @@ const ResizableLayout = ({
   // Calculate main content width
   const mainContentWidth =
     containerWidth -
-    sidebarWidth -
-    notesListWidth -
+    (isSidebarVisible ? sidebarWidth : 0) -
+    (isNotesListVisible ? notesListWidth : 0) -
     (isPreviewVisible ? previewWidth : 0)
 
   return (
     <div ref={containerRef} className="flex h-full w-full flex-1">
       {/* Sidebar - Fixed */}
-      <div className="flex-shrink-0" style={{ width: sidebarWidth }}>
-        {sidebar}
-      </div>
+      {isSidebarVisible && (
+        <div className="flex-shrink-0" style={{ width: sidebarWidth }}>
+          {sidebar}
+        </div>
+      )}
 
       {/* NotesList - Resizable */}
-      <div className="relative flex-shrink-0" style={{ width: notesListWidth }}>
-        {notesList}
-        <ResizeHandle
-          onMouseDown={startX => {
-            const startWidth = notesListWidth
+      {isNotesListVisible && (
+        <div
+          className="relative flex-shrink-0"
+          style={{ width: notesListWidth }}
+        >
+          {notesList}
+          <ResizeHandle
+            onMouseDown={startX => {
+              const startWidth = notesListWidth
 
-            const handleMouseMove = e => {
-              handleNotesListResize(e.clientX, startX, startWidth)
-            }
+              const handleMouseMove = e => {
+                handleNotesListResize(e.clientX, startX, startWidth)
+              }
 
-            const handleMouseUp = () => {
-              document.removeEventListener('mousemove', handleMouseMove)
-              document.removeEventListener('mouseup', handleMouseUp)
-              document.body.style.cursor = ''
-              document.body.style.userSelect = ''
-            }
+              const handleMouseUp = () => {
+                document.removeEventListener('mousemove', handleMouseMove)
+                document.removeEventListener('mouseup', handleMouseUp)
+                document.body.style.cursor = ''
+                document.body.style.userSelect = ''
+              }
 
-            document.addEventListener('mousemove', handleMouseMove)
-            document.addEventListener('mouseup', handleMouseUp)
-            document.body.style.cursor = 'col-resize'
-            document.body.style.userSelect = 'none'
-          }}
-          position="right"
-        />
-      </div>
+              document.addEventListener('mousemove', handleMouseMove)
+              document.addEventListener('mouseup', handleMouseUp)
+              document.body.style.cursor = 'col-resize'
+              document.body.style.userSelect = 'none'
+            }}
+            position="right"
+          />
+        </div>
+      )}
 
       {/* Main Content - Flexible */}
       <div className="flex-1" style={{ minWidth: minMainContentWidth }}>

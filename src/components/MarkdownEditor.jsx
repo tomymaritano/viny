@@ -15,14 +15,52 @@ const MarkdownEditor = ({
   onSave,
   onClose,
   toast,
-  showPreviewToggle = false,
-  onTogglePreview,
-  isPreviewVisible = false,
+  layoutMode = 'normal',
+  onCycleLayoutMode,
   allTags = [],
 }) => {
   const { settings } = useSettings()
   const [content, setContent] = useState(note?.content || '')
   const [title, setTitle] = useState(note?.title || 'Untitled Note')
+
+  // Layout modes
+  const LAYOUT_MODES = {
+    NORMAL: 'normal',
+    MARKDOWN: 'markdown',
+    PREVIEW: 'preview',
+    FOCUS: 'focus',
+  }
+
+  // Get layout mode info
+  const getLayoutModeInfo = () => {
+    const modes = {
+      [LAYOUT_MODES.NORMAL]: {
+        icon: <Icons.FileText size={12} />,
+        label: 'Normal',
+        title: 'Switch to Markdown Mode',
+        description: 'Sidebar + Notes + Editor',
+      },
+      [LAYOUT_MODES.MARKDOWN]: {
+        icon: <Icons.Markdown size={12} />,
+        label: 'Markdown',
+        title: 'Switch to Preview Mode',
+        description: 'Sidebar + Editor (no notes list)',
+      },
+      [LAYOUT_MODES.PREVIEW]: {
+        icon: <Icons.PanelRight size={12} />,
+        label: 'Preview',
+        title: 'Switch to Focus Mode',
+        description: 'Sidebar + Notes + Editor + Preview Panel',
+      },
+      [LAYOUT_MODES.FOCUS]: {
+        icon: <Icons.Maximize size={12} />,
+        label: 'Focus',
+        title: 'Switch to Normal Mode',
+        description: 'Editor only (fullscreen)',
+      },
+    }
+    return modes[layoutMode] || modes[LAYOUT_MODES.NORMAL]
+  }
 
   // Update content and title when note changes
   useEffect(() => {
@@ -441,56 +479,90 @@ const MarkdownEditor = ({
 
       {/* Formatting Toolbar */}
       <div className="px-4 py-2 bg-solarized-base02 border-b border-solarized-base01">
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={formatBold}
-            className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors"
-            title="Bold (Ctrl+B)"
-          >
-            B
-          </button>
-          <button
-            onClick={formatItalic}
-            className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors italic"
-            title="Italic (Ctrl+I)"
-          >
-            I
-          </button>
-          <button
-            onClick={formatCode}
-            className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors font-mono"
-            title="Code"
-          >
-            Code
-          </button>
-          <button
-            onClick={formatLink}
-            className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors"
-            title="Link"
-          >
-            Link
-          </button>
-          <button
-            onClick={formatList}
-            className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors"
-            title="List"
-          >
-            List
-          </button>
-          <button
-            onClick={formatQuote}
-            className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors"
-            title="Quote"
-          >
-            Quote
-          </button>
-          <button
-            onClick={formatHeading}
-            className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors"
-            title="Heading"
-          >
-            H
-          </button>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={formatBold}
+              className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors"
+              title="Bold (Ctrl+B)"
+            >
+              B
+            </button>
+            <button
+              onClick={formatItalic}
+              className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors italic"
+              title="Italic (Ctrl+I)"
+            >
+              I
+            </button>
+            <button
+              onClick={formatCode}
+              className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors font-mono"
+              title="Code"
+            >
+              Code
+            </button>
+            <button
+              onClick={formatLink}
+              className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors"
+              title="Link"
+            >
+              Link
+            </button>
+            <button
+              onClick={formatList}
+              className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors"
+              title="List"
+            >
+              List
+            </button>
+            <button
+              onClick={formatQuote}
+              className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors"
+              title="Quote"
+            >
+              Quote
+            </button>
+            <button
+              onClick={formatHeading}
+              className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors"
+              title="Heading"
+            >
+              H
+            </button>
+          </div>
+
+          {/* View Controls */}
+          <div className="flex items-center space-x-2">
+            {/* Split Preview Toggle */}
+            <button
+              onClick={togglePreview}
+              className={`px-2 py-1 text-xs border border-solarized-base01 rounded transition-colors flex items-center space-x-1 ${
+                showPreview
+                  ? 'bg-solarized-blue text-solarized-base03'
+                  : 'text-solarized-base1 hover:bg-solarized-base01'
+              }`}
+              title={showPreview ? 'Hide Split Preview' : 'Show Split Preview'}
+            >
+              <span>Split</span>
+            </button>
+
+            {/* Layout Mode Cycler */}
+            {onCycleLayoutMode &&
+              (() => {
+                const modeInfo = getLayoutModeInfo()
+                return (
+                  <button
+                    onClick={onCycleLayoutMode}
+                    className="px-2 py-1 text-xs border border-solarized-blue rounded transition-colors flex items-center space-x-1 bg-solarized-blue text-solarized-base03 hover:bg-solarized-blue/80"
+                    title={modeInfo.title}
+                  >
+                    {modeInfo.icon}
+                    <span>{modeInfo.label}</span>
+                  </button>
+                )
+              })()}
+          </div>
         </div>
       </div>
 
@@ -575,46 +647,7 @@ const MarkdownEditor = ({
           </div>
         )}
 
-        {/* View Mode Toggle */}
-        <div className="fixed bottom-6 right-4 backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-2xl p-2 flex flex-col space-y-2 z-20">
-          <button
-            onClick={togglePreview}
-            className={`p-2 transition-colors border-0 bg-transparent hover:bg-transparent ${
-              showPreview ? 'text-white' : 'text-white/70'
-            }`}
-            title={showPreview ? 'Hide Inline Preview' : 'Show Inline Preview'}
-          >
-            {showPreview ? <Icons.EyeOff size={16} /> : <Icons.Eye size={16} />}
-          </button>
-
-          {showPreviewToggle && onTogglePreview && (
-            <button
-              onClick={onTogglePreview}
-              className={`p-2 transition-colors border-0 bg-transparent hover:bg-transparent ${
-                isPreviewVisible ? 'text-white' : 'text-white/70'
-              }`}
-              title={
-                isPreviewVisible ? 'Hide Preview Panel' : 'Show Preview Panel'
-              }
-            >
-              <Icons.PanelRight size={16} />
-            </button>
-          )}
-
-          <button
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            className={`p-2 transition-colors border-0 bg-transparent hover:bg-transparent ${
-              isFullscreen ? 'text-white' : 'text-white/70'
-            }`}
-            title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-          >
-            {isFullscreen ? (
-              <Icons.Minimize size={16} />
-            ) : (
-              <Icons.Maximize size={16} />
-            )}
-          </button>
-        </div>
+        {/* Removed floating View Mode Toggle - now integrated in toolbar */}
       </div>
 
       {/* Status Bar */}

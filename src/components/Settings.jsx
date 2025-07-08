@@ -4,6 +4,7 @@ import Icons from './Icons'
 import { useSettings } from '../hooks/useSettings'
 import { isFeatureEnabled } from '../config/features'
 import UpdateSettings from './UpdateSettings'
+import CustomSwitch from './ui/CustomSwitch'
 
 const Settings = ({ isVisible, onClose }) => {
   const { settings, updateSetting, resetSettings } = useSettings()
@@ -60,20 +61,7 @@ const Settings = ({ isVisible, onClose }) => {
     </select>
   )
 
-  const Toggle = ({ checked, onChange }) => (
-    <button
-      onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-        checked ? 'bg-solarized-blue' : 'bg-solarized-base01'
-      }`}
-    >
-      <span
-        className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-          checked ? 'translate-x-5' : 'translate-x-1'
-        }`}
-      />
-    </button>
-  )
+  // Using CustomSwitch directly - removed wrapper to avoid confusion
 
   const NumberInput = ({ value, onChange, min, max, step = 1 }) => (
     <input
@@ -108,9 +96,10 @@ const Settings = ({ isVisible, onClose }) => {
         label="Auto Save"
         description="Automatically save changes while typing"
       >
-        <Toggle
+        <CustomSwitch
           checked={settings.autoSave}
           onChange={value => updateSetting('autoSave', value)}
+          size="md"
         />
       </SettingItem>
 
@@ -184,9 +173,10 @@ const Settings = ({ isVisible, onClose }) => {
         label="Word Wrap"
         description="Wrap long lines in the editor"
       >
-        <Toggle
+        <CustomSwitch
           checked={settings.wordWrap}
           onChange={value => updateSetting('wordWrap', value)}
+          size="md"
         />
       </SettingItem>
 
@@ -194,16 +184,18 @@ const Settings = ({ isVisible, onClose }) => {
         label="Line Numbers"
         description="Show line numbers in editor"
       >
-        <Toggle
+        <CustomSwitch
           checked={settings.lineNumbers}
           onChange={value => updateSetting('lineNumbers', value)}
+          size="md"
         />
       </SettingItem>
 
       <SettingItem label="Minimap" description="Show code minimap overview">
-        <Toggle
+        <CustomSwitch
           checked={settings.minimap}
           onChange={value => updateSetting('minimap', value)}
+          size="md"
         />
       </SettingItem>
     </div>
@@ -271,9 +263,10 @@ const Settings = ({ isVisible, onClose }) => {
         label="Include Metadata"
         description="Include note metadata in exports"
       >
-        <Toggle
+        <CustomSwitch
           checked={settings.includeMetadata}
           onChange={value => updateSetting('includeMetadata', value)}
+          size="md"
         />
       </SettingItem>
     </div>

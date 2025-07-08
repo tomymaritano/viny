@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import Icons from './Icons'
+import CustomSwitch from './ui/CustomSwitch'
 
 const UpdateSettings = () => {
   const [autoUpdateEnabled, setAutoUpdateEnabled] = useState(true)
@@ -28,8 +29,7 @@ const UpdateSettings = () => {
     localStorage.setItem('nototo_update_settings', JSON.stringify(settings))
   }
 
-  const handleAutoUpdateToggle = () => {
-    const newValue = !autoUpdateEnabled
+  const handleAutoUpdateToggle = newValue => {
     setAutoUpdateEnabled(newValue)
     saveSettings({ autoUpdateEnabled: newValue })
   }
@@ -74,18 +74,11 @@ const UpdateSettings = () => {
           <span className="text-sm text-solarized-base1">
             {autoUpdateEnabled ? 'Enabled' : 'Disabled'}
           </span>
-          <button
-            onClick={handleAutoUpdateToggle}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              autoUpdateEnabled ? 'bg-solarized-green' : 'bg-solarized-base01'
-            }`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                autoUpdateEnabled ? 'translate-x-6' : 'translate-x-1'
-              }`}
-            />
-          </button>
+          <CustomSwitch
+            checked={autoUpdateEnabled}
+            onChange={handleAutoUpdateToggle}
+            size="md"
+          />
         </div>
       </div>
 
