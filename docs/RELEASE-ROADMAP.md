@@ -54,6 +54,12 @@
   - [ ] Add loading states for heavy operations
   - [ ] Optimize Monaco Editor theme loading
 
+- [ ] **Auto-Update System Enhancements**
+  - [ ] Add download progress indicators and user feedback
+  - [ ] Implement changelog preview in update notifications
+  - [ ] Add "Install on close" option for non-disruptive updates
+  - [ ] Improve error handling with retry mechanisms
+
 **Tag:** `v1.2.1`
 
 ---
@@ -91,6 +97,12 @@
   - [ ] Recent searches dropdown
   - [ ] Bookmark frequent searches
 
+- [ ] **Auto-Update Settings & Controls**
+  - [ ] Add comprehensive auto-update settings panel
+  - [ ] Implement update frequency preferences (daily, weekly, monthly)
+  - [ ] Add network usage controls (WiFi only, metered connections)
+  - [ ] Create update channel selection (stable, beta, alpha)
+
 **Tag:** `v1.3.0`
 
 ---
@@ -125,6 +137,18 @@
   - [ ] Search performance optimization
   - [ ] Memory usage monitoring
   - [ ] Crash reporting system
+
+- [ ] **Auto-Update Analytics & Monitoring**
+  - [ ] Track update success/failure rates and performance metrics
+  - [ ] Monitor user engagement with update notifications
+  - [ ] Analyze update channel preferences and behavior
+  - [ ] Implement real-time update system health checks
+
+- [ ] **Auto-Update Security & Validation**
+  - [ ] Implement code signing verification for all updates
+  - [ ] Add digital signature validation before installation
+  - [ ] Secure update channel communication (TLS 1.3)
+  - [ ] Create comprehensive update audit trail logging
 
 **Tag:** `v1.4.0`
 
