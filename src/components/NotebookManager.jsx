@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import PropTypes from 'prop-types'
 import { motion, AnimatePresence } from 'framer-motion'
 import Icons from './Icons'
 import { useNotebooks } from '../hooks/useNotebooks'
@@ -274,6 +275,16 @@ const NotebookManager = ({ isVisible, onClose, onNotebookChange }) => {
       )}
     </AnimatePresence>
   )
+}
+
+NotebookManager.propTypes = {
+  isVisible: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onNotebookChange: PropTypes.func,
+}
+
+NotebookManager.defaultProps = {
+  onNotebookChange: null,
 }
 
 export default NotebookManager

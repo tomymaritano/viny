@@ -71,7 +71,7 @@ const MarkdownEditor = ({
     }
   }, [note?.id, note?.content, note?.title])
   const [showPreview, setShowPreview] = useState(false)
-  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isFullscreen] = useState(false)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [showEditorMenu, setShowEditorMenu] = useState(false)
   const [showTagManager, setShowTagManager] = useState(false)

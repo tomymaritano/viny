@@ -16,7 +16,7 @@ const NotePreview = ({
   isTrashView = false,
   onRestoreNote,
   onPermanentDelete,
-  onExport,
+  onExport: _onExport,
 }) => {
   const [showMenu, setShowMenu] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)
@@ -391,6 +391,7 @@ NotePreview.propTypes = {
     id: PropTypes.string,
     title: PropTypes.string,
     content: PropTypes.string,
+    notebook: PropTypes.string,
     tags: PropTypes.array,
     isPinned: PropTypes.bool,
     date: PropTypes.string,
