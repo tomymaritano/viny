@@ -117,14 +117,14 @@ const Sidebar = ({
   ]
 
   return (
-    <div className="w-60 bg-solarized-base02 border-r border-solarized-base01 flex flex-col h-full font-sans">
+    <div className="w-full bg-solarized-base02 border-r border-solarized-base01 flex flex-col h-full font-sans">
       {/* Header */}
-      <div className="px-2 py-3 border-b border-solarized-base01">
+      <div className="px-3 py-3 border-b border-solarized-base01">
         <h1 className="text-base font-semibold text-solarized-base5">Nototo</h1>
       </div>
 
       {/* Quick Access */}
-      <div className="px-2 py-2">
+      <div className="px-3 py-2">
         <div className="space-y-1">
           {quickSections.map(section => (
             <motion.button
@@ -176,7 +176,7 @@ const Sidebar = ({
       </div>
 
       {/* Notebooks */}
-      <div className="flex-1 px-2">
+      <div className="flex-1 px-3">
         <button
           onClick={() => toggleSection('notebooks')}
           className="w-full flex items-center justify-between px-2 py-1.5 text-xs uppercase tracking-wider text-solarized-base0 font-medium hover:text-solarized-base1 transition-colors"
