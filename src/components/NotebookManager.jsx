@@ -72,6 +72,7 @@ const NotebookManager = ({ isVisible, onClose, onNotebookChange }) => {
     setFormData({ name: '', description: '', color: 'blue' })
   }
 
+  // eslint-disable-next-line react/prop-types
   const NotebookForm = ({ isEdit = false }) => (
     <motion.div
       className="bg-solarized-base01 border border-solarized-base00 rounded-lg p-4 mb-4"
@@ -152,6 +153,7 @@ const NotebookManager = ({ isVisible, onClose, onNotebookChange }) => {
     </motion.div>
   )
 
+  // eslint-disable-next-line react/prop-types
   const NotebookItem = ({ notebook }) => (
     <motion.div
       key={notebook.id}

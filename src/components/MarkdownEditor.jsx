@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import Editor from '@monaco-editor/react'
 import { marked } from 'marked'
@@ -69,7 +69,7 @@ const MarkdownEditor = ({
       setContent(note.content || '')
       setTitle(note.title || 'Untitled Note')
     }
-  }, [note?.id, note?.content, note?.title])
+  }, [note])
   const [showPreview, setShowPreview] = useState(false)
   const [isFullscreen] = useState(false)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
@@ -166,7 +166,26 @@ const MarkdownEditor = ({
   useEffect(() => {
     // Define theme when Monaco is available
     monaco.editor.defineTheme('solarized-dark', solarizedTheme)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const handleSave = useCallback(
+    (isAutoSave = false) => {
+      const noteData = {
+        ...note,
+        title: title,
+        content: content,
+        notebook: selectedNotebook,
+        updatedAt: new Date().toISOString(),
+      }
+      onSave?.(noteData)
+
+      if (!isAutoSave) {
+        setHasUnsavedChanges(false)
+      }
+    },
+    [note, title, content, selectedNotebook, onSave]
+  )
 
   // Auto-save functionality
   useEffect(() => {
@@ -194,6 +213,7 @@ const MarkdownEditor = ({
     title,
     settings.autoSave,
     settings.autoSaveInterval,
+    handleSave,
   ])
 
   // Track content changes
@@ -300,21 +320,6 @@ const MarkdownEditor = ({
 
     // Focus editor
     editor.focus()
-  }
-
-  const handleSave = (isAutoSave = false) => {
-    const noteData = {
-      ...note,
-      title: title,
-      content: content,
-      notebook: selectedNotebook,
-      updatedAt: new Date().toISOString(),
-    }
-    onSave?.(noteData)
-
-    if (!isAutoSave) {
-      setHasUnsavedChanges(false)
-    }
   }
 
   const handleNotebookChange = notebook => {
