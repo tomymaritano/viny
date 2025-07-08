@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import PropTypes from 'prop-types'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import Icons from './Icons'
@@ -6,7 +7,7 @@ import ExportDialog from './ExportDialog'
 
 const NotePreview = ({
   note,
-  onEdit,
+  onEdit: _onEdit,
   onTogglePin,
   onDuplicate,
   onDelete,
@@ -383,6 +384,41 @@ const NotePreview = ({
       />
     </div>
   )
+}
+
+NotePreview.propTypes = {
+  note: PropTypes.shape({
+    id: PropTypes.string,
+    title: PropTypes.string,
+    content: PropTypes.string,
+    tags: PropTypes.array,
+    isPinned: PropTypes.bool,
+    date: PropTypes.string,
+    updatedAt: PropTypes.string,
+  }).isRequired,
+  onEdit: PropTypes.func,
+  onTogglePin: PropTypes.func,
+  onDuplicate: PropTypes.func,
+  onDelete: PropTypes.func,
+  viewMode: PropTypes.oneOf(['preview', 'edit']),
+  onViewModeChange: PropTypes.func,
+  isTrashView: PropTypes.bool,
+  onRestoreNote: PropTypes.func,
+  onPermanentDelete: PropTypes.func,
+  onExport: PropTypes.func,
+}
+
+NotePreview.defaultProps = {
+  onEdit: null,
+  onTogglePin: null,
+  onDuplicate: null,
+  onDelete: null,
+  viewMode: 'preview',
+  onViewModeChange: null,
+  isTrashView: false,
+  onRestoreNote: null,
+  onPermanentDelete: null,
+  onExport: null,
 }
 
 export default NotePreview

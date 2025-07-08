@@ -353,10 +353,6 @@ const MarkdownEditor = ({
     setShowPreview(!showPreview)
   }
 
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen)
-  }
-
   return (
     <div
       className={`${isFullscreen ? 'fixed inset-0 z-50' : 'w-full h-full'} bg-solarized-base03 flex flex-col font-mono`}

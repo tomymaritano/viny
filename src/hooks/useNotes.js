@@ -1241,6 +1241,7 @@ export const useNotes = () => {
       setNotes(prevNotes => [...prevNotes, duplicatedNote])
       return duplicatedNote
     }
+    return null // If note not found
   }
 
   const exportNotes = () => {

@@ -251,6 +251,7 @@ export const useNotesApi = () => {
       return newNote
     } catch (error) {
       console.error('Failed to create note:', error)
+      return null
     }
   }
 
@@ -386,6 +387,7 @@ export const useNotesApi = () => {
       }
     } catch (error) {
       console.error('Failed to toggle pin:', error)
+      return null
     }
   }
 
@@ -429,8 +431,10 @@ export const useNotesApi = () => {
         return duplicatedNote
       } catch (error) {
         console.error('Failed to duplicate note:', error)
+        return null
       }
     }
+    return null // If note not found
   }
 
   const exportNotes = async () => {
