@@ -590,6 +590,9 @@ export const useNotesApi = () => {
     togglePreviewPanel,
     closePreviewPanel,
 
+    // Note editing
+    setCurrentNote,
+
     // Utilities
     storage,
 

@@ -1,31 +1,50 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import './App.css'
 import Sidebar from './components/Sidebar'
 import NotesList from './components/NotesList'
 import NotePreview from './components/NotePreview'
-import LazyMarkdownEditor from './components/LazyMarkdownEditor'
+import MarkdownItEditor from './components/MarkdownItEditor'
 import PreviewPanel from './components/PreviewPanel'
 import ResizableLayout from './components/ResizableLayout'
 import Settings from './components/Settings'
+import SettingsPage from './components/SettingsPage'
 import NotebookManager from './components/NotebookManager'
 import ToastContainer from './components/ToastContainer'
 import DebugPanel from './components/DebugPanel'
 import SearchModal from './components/SearchModal'
 import UpdateChecker from './components/UpdateChecker'
+import ExportDialog from './components/ExportDialog'
 import { useNotes } from './hooks/useNotes'
 import { useNotesApi } from './hooks/useNotesApi'
 import { useToast } from './hooks/useToast'
-// import { useSettings } from './hooks/useSettings'
+import { useSettings } from './hooks/useSettings'
 import { useNotebooks } from './hooks/useNotebooks'
 // Features config removed for production
 
 function App() {
   const { toasts, removeToast, success, error, warning, info } = useToast()
-  // Settings hook removed for now
+  const { settings } = useSettings()
   const { notebooks } = useNotebooks()
+
+  // Apply theme to document
+  useEffect(() => {
+    const theme = settings?.theme || 'dark'
+
+    const finalTheme =
+      theme === 'system'
+        ? window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light'
+        : theme
+
+    document.documentElement.setAttribute('data-theme', finalTheme)
+  }, [settings])
   const [showSettings, setShowSettings] = useState(false)
+  const [currentView, setCurrentView] = useState('notes') // 'notes' | 'settings'
   const [searchQuery, setSearchQuery] = useState('')
   const [showSearch, setShowSearch] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [isPreviewVisible, setIsPreviewVisible] = useState(false)
 
   // Layout modes enum
   const LAYOUT_MODES = {
@@ -77,6 +96,7 @@ function App() {
     toggleNotebookManager,
     togglePreviewPanel,
     closePreviewPanel,
+    setCurrentNote,
   } = notesHook
 
   // Toggle between API and localStorage
@@ -127,7 +147,7 @@ function App() {
 
   const handleSidebarNavigation = section => {
     if (section === 'settings') {
-      setShowSettings(true)
+      setCurrentView('settings')
       return
     }
     navigateToSection(section)
@@ -259,7 +279,7 @@ function App() {
             break
           case ',':
             e.preventDefault()
-            setShowSettings(true)
+            setCurrentView('settings')
             break
           case 'f':
           case 'k':
@@ -300,6 +320,26 @@ function App() {
         break
       case 'trash':
         filteredNotes = notes.filter(note => note.isTrashed)
+        break
+      case 'status-active':
+        filteredNotes = notes.filter(
+          note => (note.status === 'active' || !note.status) && !note.isTrashed
+        )
+        break
+      case 'status-on-hold':
+        filteredNotes = notes.filter(
+          note => note.status === 'on-hold' && !note.isTrashed
+        )
+        break
+      case 'status-completed':
+        filteredNotes = notes.filter(
+          note => note.status === 'completed' && !note.isTrashed
+        )
+        break
+      case 'status-dropped':
+        filteredNotes = notes.filter(
+          note => note.status === 'dropped' && !note.isTrashed
+        )
         break
       case 'personal':
       case 'work':
@@ -347,12 +387,12 @@ function App() {
   if (isLoading) {
     return (
       <div className="app">
-        <div className="flex-1 bg-solarized-base03 flex items-center justify-center">
+        <div className="flex-1 bg-theme-bg-primary flex items-center justify-center">
           <div className="text-center">
-            <div className="text-solarized-base1 text-lg mb-2">
+            <div className="text-theme-text-tertiary text-lg mb-2">
               Loading Nototo...
             </div>
-            <div className="text-solarized-base0 text-sm">
+            <div className="text-theme-text-muted text-sm">
               Initializing your notes
             </div>
           </div>
@@ -361,9 +401,19 @@ function App() {
     )
   }
 
+  // Render settings page if currentView is 'settings'
+  if (currentView === 'settings') {
+    return (
+      <div className="app">
+        <SettingsPage onClose={() => setCurrentView('notes')} />
+      </div>
+    )
+  }
+
   return (
     <div className="app">
       <ResizableLayout
+        settings={settings}
         sidebar={
           <Sidebar
             key={`sidebar-${notebooks.map(n => `${n.id}-${n.color}`).join('-')}`}
@@ -386,18 +436,29 @@ function App() {
             onRestoreNote={handleRestoreNote}
             onPermanentDelete={handlePermanentDelete}
             onDeleteNote={handleDeleteNote}
+            activeSection={activeSection}
           />
         }
         mainContent={
           isEditorOpen ? (
-            <LazyMarkdownEditor
-              note={currentNote}
+            <MarkdownItEditor
+              value={currentNote?.content || ''}
+              onChange={newContent => {
+                // Update the current note content in real-time
+                setCurrentNote({ ...currentNote, content: newContent })
+              }}
               onSave={handleSaveNote}
-              onClose={handleCloseEditor}
-              toast={{ success, error, warning, info }}
-              layoutMode={layoutMode}
-              onCycleLayoutMode={handleCycleLayoutMode}
-              allTags={getAllTags()}
+              selectedNote={currentNote}
+              onNotebookChange={notebook => {
+                // Update the current note notebook and save
+                const updatedNote = { ...currentNote, notebook }
+                setCurrentNote(updatedNote)
+                saveNote(updatedNote)
+              }}
+              onExport={() => setShowExportDialog(true)}
+              onTogglePreview={() => setIsPreviewVisible(!isPreviewVisible)}
+              isPreviewVisible={isPreviewVisible}
+              notebooks={notebooks}
             />
           ) : (
             <NotePreview
@@ -432,11 +493,7 @@ function App() {
         isNotesListVisible={isNotesListVisible}
       />
 
-      {/* Settings Modal */}
-      <Settings
-        isVisible={showSettings}
-        onClose={() => setShowSettings(false)}
-      />
+      {/* Settings Modal - Removed, using SettingsPage instead */}
 
       {/* Notebook Manager Modal */}
       <NotebookManager
@@ -492,6 +549,20 @@ function App() {
 
       {/* Update Checker */}
       <UpdateChecker />
+
+      {/* Export Dialog */}
+      {showExportDialog && currentNote && (
+        <ExportDialog
+          isOpen={showExportDialog}
+          onClose={() => setShowExportDialog(false)}
+          note={currentNote}
+          onExport={format => {
+            console.log('Exporting as:', format)
+            // Handle export logic here
+            setShowExportDialog(false)
+          }}
+        />
+      )}
     </div>
   )
 }

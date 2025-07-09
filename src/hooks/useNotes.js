@@ -1381,6 +1381,9 @@ export const useNotes = () => {
     togglePreviewPanel,
     closePreviewPanel,
 
+    // Note editing
+    setCurrentNote,
+
     // Utilities
     storage,
   }
