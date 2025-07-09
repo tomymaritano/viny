@@ -37,5 +37,14 @@ jobs:
         env:
           # GitHub token for releases
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Disable code signing for now
+          # Disable ALL code signing
           CSC_IDENTITY_AUTO_DISCOVERY: false
+          CSC_LINK: ""
+          CSC_KEY_PASSWORD: ""
+          APPLE_ID: ""
+          APPLE_ID_PASSWORD: ""
+          APPLE_TEAM_ID: ""
+          # Skip notarization
+          NOTARIZE: false
+          # Force unsigned build
+          MAC_BUILD_TARGET: "dmg zip"

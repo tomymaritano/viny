@@ -1,6 +1,6 @@
 {
   "name": "nototo",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "main": "electron/main.js",
   "scripts": {
     "dev": "vite",
@@ -89,18 +89,28 @@
       "hardenedRuntime": false,
       "gatekeeperAssess": false,
       "identity": null,
-      "type": "distribution",
+      "signIgnore": [
+        ".*"
+      ],
       "extendInfo": {
         "NSRequiresAquaSystemAppearance": false,
         "LSApplicationCategoryType": "public.app-category.productivity",
         "CFBundleDisplayName": "Nototo",
         "CFBundleName": "Nototo",
-        "CFBundleShortVersionString": "1.2.3",
-        "CFBundleVersion": "1.2.3"
+        "CFBundleShortVersionString": "1.2.4",
+        "CFBundleVersion": "1.2.4",
+        "LSMinimumSystemVersion": "10.12.0"
       },
       "target": [
         {
           "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
           "arch": [
             "x64",
             "arm64"
@@ -120,15 +130,13 @@
           "y": 220,
           "type": "link",
           "path": "/Applications"
-        },
-        {
-          "x": 270,
-          "y": 350,
-          "type": "file",
-          "path": "scripts/install-macos.sh",
-          "name": "Install Script"
         }
-      ]
+      ],
+      "backgroundColor": "#002b36",
+      "window": {
+        "width": 540,
+        "height": 400
+      }
     },
     "linux": {
       "target": "AppImage"

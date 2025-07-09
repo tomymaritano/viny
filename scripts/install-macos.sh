@@ -76,14 +76,23 @@ else
     exit 1
 fi
 
-# Remove quarantine attribute
-echo "🔓 Removing quarantine attributes..."
-if xattr -cr "/Applications/Nototo.app" 2>/dev/null; then
-    echo -e "${GREEN}✅ Quarantine attributes removed${NC}"
-else
-    echo -e "${YELLOW}⚠️  Could not remove all attributes, trying with sudo...${NC}"
-    sudo xattr -cr "/Applications/Nototo.app"
-fi
+# Remove quarantine attribute and fix the app
+echo "🔓 Removing quarantine attributes and fixing app..."
+
+# Try multiple methods to ensure the app works
+echo "   → Removing extended attributes..."
+xattr -cr "/Applications/Nototo.app" 2>/dev/null || sudo xattr -cr "/Applications/Nototo.app"
+
+echo "   → Removing quarantine flag..."
+xattr -d com.apple.quarantine "/Applications/Nototo.app" 2>/dev/null || true
+
+echo "   → Clearing code signature..."
+codesign --remove-signature "/Applications/Nototo.app" 2>/dev/null || true
+
+echo "   → Adding to Gatekeeper exceptions..."
+sudo spctl --add "/Applications/Nototo.app" 2>/dev/null || true
+
+echo -e "${GREEN}✅ App fixed and ready to use${NC}"
 
 # Set proper permissions
 echo "🔐 Setting permissions..."
