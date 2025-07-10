@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { useSettings } from '../../../hooks/useSettings'
 import { useAutoSave } from '../../../hooks/useAutoSave'
 import { calculateStats } from '../utils/markdownFormatter'
+import { useSimpleStore } from '../../../stores/simpleStore'
 
 export const useMarkdownEditor = ({
   value = '',
@@ -11,6 +12,7 @@ export const useMarkdownEditor = ({
   onNotebookChange,
 }) => {
   const { settings } = useSettings()
+  const { addToast } = useSimpleStore()
 
   // UI state
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -52,14 +54,23 @@ export const useMarkdownEditor = ({
 
         await onSave(updatedNote)
         setLastSaved(new Date().toISOString())
+        setSaveError(null)
       } catch (error) {
-        setSaveError(error.message || 'Failed to save')
+        const errorMessage = error.message || 'Failed to save note'
+        setSaveError(errorMessage)
         console.error('Auto-save failed:', error)
+
+        // Show toast notification for save errors
+        addToast({
+          type: 'error',
+          message: `Save failed: ${errorMessage}`,
+          duration: 5000,
+        })
       } finally {
         setIsSaving(false)
       }
     },
-    [selectedNote, onSave]
+    [selectedNote, onSave, addToast]
   )
 
   // Auto-save hook

@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import Icons from '../../Icons'
+import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 
 const EditorToolbar = ({
   onBold,
@@ -17,6 +18,9 @@ const EditorToolbar = ({
   onTable,
   onHorizontalRule,
   onTags,
+  isSaving,
+  lastSaved,
+  saveError,
 }) => {
   const toolbarSections = [
     // Text formatting
@@ -153,6 +157,42 @@ const EditorToolbar = ({
     },
   ]
 
+  const getSaveIndicator = () => {
+    if (isSaving) {
+      return (
+        <div className="flex items-center text-theme-text-tertiary text-xs">
+          <Loader2 size={14} className="animate-spin mr-1" />
+          <span>Saving...</span>
+        </div>
+      )
+    }
+
+    if (saveError) {
+      return (
+        <div className="flex items-center text-theme-accent-red text-xs">
+          <AlertCircle size={14} className="mr-1" />
+          <span>Error saving</span>
+        </div>
+      )
+    }
+
+    if (lastSaved) {
+      const timeSinceLastSave = Date.now() - new Date(lastSaved).getTime()
+      const seconds = Math.floor(timeSinceLastSave / 1000)
+
+      if (seconds < 5) {
+        return (
+          <div className="flex items-center text-theme-accent-green text-xs">
+            <CheckCircle size={14} className="mr-1" />
+            <span>Saved</span>
+          </div>
+        )
+      }
+    }
+
+    return null
+  }
+
   return (
     <div
       className="flex items-center justify-between px-4 py-2 border-b border-theme-border-primary"
@@ -181,6 +221,9 @@ const EditorToolbar = ({
           </div>
         ))}
       </div>
+
+      {/* Save indicator */}
+      <div className="flex items-center">{getSaveIndicator()}</div>
     </div>
   )
 }
@@ -201,6 +244,9 @@ EditorToolbar.propTypes = {
   onTable: PropTypes.func.isRequired,
   onHorizontalRule: PropTypes.func.isRequired,
   onTags: PropTypes.func.isRequired,
+  isSaving: PropTypes.bool,
+  lastSaved: PropTypes.string,
+  saveError: PropTypes.string,
 }
 
 export default EditorToolbar
