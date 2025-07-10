@@ -74,10 +74,14 @@ export const useMarkdownEditor = ({
   )
 
   // Auto-save hook
-  useAutoSave(value, autoSaveFunction, {
-    enabled: settings.autoSave,
-    delay: (settings.autoSaveInterval || 30) * 1000,
-  })
+  useAutoSave(
+    autoSaveFunction,
+    value,
+    (settings.autoSaveInterval || 30) * 1000,
+    {
+      enabled: settings.autoSave,
+    }
+  )
 
   // Debounce timer for title changes
   const titleDebounceTimer = useRef(null)
@@ -85,20 +89,19 @@ export const useMarkdownEditor = ({
   // Note metadata handlers
   const handleTitleChange = useCallback(
     e => {
+      if (!selectedNote || !onSave) return
+
       const newTitle = e.target.value
 
-      // Clear existing timer
-      if (titleDebounceTimer.current) {
-        clearTimeout(titleDebounceTimer.current)
+      // Create updated note
+      const updatedNote = {
+        ...selectedNote,
+        title: newTitle,
+        updatedAt: new Date().toISOString(),
       }
 
-      // Set new timer to save after 500ms of no typing
-      titleDebounceTimer.current = setTimeout(() => {
-        if (selectedNote && onSave) {
-          const updatedNote = { ...selectedNote, title: newTitle }
-          onSave(updatedNote)
-        }
-      }, 500)
+      // Save immediately
+      onSave(updatedNote)
     },
     [selectedNote, onSave]
   )
