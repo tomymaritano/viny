@@ -1,9 +1,10 @@
 // Simplified NotesList component
-import React, { memo } from 'react'
+import React, { memo, useState, useRef, useEffect } from 'react'
 import { ArrowDownAZ, ArrowUpAZ, NotebookPen } from 'lucide-react'
 import { Note } from '../../types'
 import { useNotesListLogic } from '../../hooks/useNotesListLogic'
 import TaskProgress from '../ui/TaskProgress'
+import { useSimpleStore } from '../../stores/simpleStore'
 
 interface NotesListSimpleProps {
   notes: Note[]
@@ -27,6 +28,37 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
   onSortNotes
 }) => {
   const { isEmpty, notesCount, formatDate, getPreviewText } = useNotesListLogic(notes)
+  const { sortBy, sortDirection, setSortBy, setSortDirection, sortNotes } = useSimpleStore()
+  const [showSortMenu, setShowSortMenu] = useState(false)
+  const sortMenuRef = useRef<HTMLDivElement>(null)
+
+  // Handle click outside sort menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortMenuRef.current && !sortMenuRef.current.contains(event.target as Node)) {
+        setShowSortMenu(false)
+      }
+    }
+
+    if (showSortMenu) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showSortMenu])
+
+  const handleSort = (field: 'title' | 'date' | 'updated' | 'notebook') => {
+    if (sortBy === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(field)
+      setSortDirection('desc')
+    }
+    sortNotes()
+    setShowSortMenu(false)
+  }
 
   const getDynamicTitle = () => {
     if (currentSection === 'all-notes') return 'All Notes'
@@ -72,14 +104,56 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
     <div className="flex-1 flex flex-col" style={{ backgroundColor: '#1D1C1D' }}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-theme-border-primary">
-        {/* Sort button */}
-        <button
-          onClick={onSortNotes}
-          className="p-2 rounded hover:bg-theme-bg-tertiary transition-colors text-theme-text-secondary hover:text-theme-text-primary"
-          title="Sort alphabetically"
-        >
-          <ArrowDownAZ size={16} />
-        </button>
+        {/* Sort dropdown */}
+        <div className="relative" ref={sortMenuRef}>
+          <button
+            onClick={() => setShowSortMenu(!showSortMenu)}
+            className="p-2 rounded hover:bg-theme-bg-tertiary transition-colors text-theme-text-secondary hover:text-theme-text-primary"
+            title="Sort notes"
+          >
+            {sortDirection === 'asc' ? <ArrowUpAZ size={16} /> : <ArrowDownAZ size={16} />}
+          </button>
+          
+          {/* Sort dropdown menu */}
+          {showSortMenu && (
+            <div className="absolute left-0 mt-1 w-48 rounded-md shadow-lg bg-theme-bg-secondary border border-theme-border-primary z-10">
+              <div className="py-1">
+                <button
+                  onClick={() => handleSort('title')}
+                  className={`w-full px-4 py-2 text-sm text-left hover:bg-theme-bg-tertiary ${
+                    sortBy === 'title' ? 'text-theme-accent-primary' : 'text-theme-text-secondary'
+                  }`}
+                >
+                  Title {sortBy === 'title' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </button>
+                <button
+                  onClick={() => handleSort('updated')}
+                  className={`w-full px-4 py-2 text-sm text-left hover:bg-theme-bg-tertiary ${
+                    sortBy === 'updated' ? 'text-theme-accent-primary' : 'text-theme-text-secondary'
+                  }`}
+                >
+                  Last Updated {sortBy === 'updated' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </button>
+                <button
+                  onClick={() => handleSort('date')}
+                  className={`w-full px-4 py-2 text-sm text-left hover:bg-theme-bg-tertiary ${
+                    sortBy === 'date' ? 'text-theme-accent-primary' : 'text-theme-text-secondary'
+                  }`}
+                >
+                  Date Created {sortBy === 'date' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </button>
+                <button
+                  onClick={() => handleSort('notebook')}
+                  className={`w-full px-4 py-2 text-sm text-left hover:bg-theme-bg-tertiary ${
+                    sortBy === 'notebook' ? 'text-theme-accent-primary' : 'text-theme-text-secondary'
+                  }`}
+                >
+                  Notebook {sortBy === 'notebook' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Centered title */}
         <div className="flex-1 text-center">
