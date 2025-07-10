@@ -127,7 +127,7 @@ const SidebarSimple: React.FC = memo(() => {
                 </button>
               ))
             ) : (
-              <div className="px-7 py-2 text-xs text-theme-text-muted italic">
+              <div className="px-7 py-4 text-xs text-theme-text-muted italic text-center">
                 No notebooks yet
               </div>
             )}
@@ -181,7 +181,7 @@ const SidebarSimple: React.FC = memo(() => {
                 </button>
               ))
             ) : (
-              <div className="px-7 py-2 text-xs text-theme-text-muted italic">
+              <div className="px-7 py-4 text-xs text-theme-text-muted italic text-center">
                 No tags yet
               </div>
             )}
