@@ -204,7 +204,7 @@ const AppSimple: React.FC = () => {
           <SearchModal
             isOpen={modals.search}
             onClose={() => setModal('search', false)}
-            onSelectNote={handleOpenNote}
+            onSelectNote={(note) => handleOpenNote(note.id)}
             notes={filteredNotes}
             onPinNote={handleTogglePin}
             onDeleteNote={handleDeleteNote}
