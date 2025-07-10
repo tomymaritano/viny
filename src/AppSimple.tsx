@@ -12,16 +12,11 @@ import ResizableLayout from './components/ResizableLayout'
 import SidebarSimple from './components/features/SidebarSimple'
 import NotesListSimple from './components/features/NotesListSimple'
 import NotePreview from './components/NotePreview'
-import PreviewPanel from './components/PreviewPanel'
 import ToastContainer from './components/ToastContainer'
 
 // Lazy components
 import {
-  MarkdownEditor,
-  SettingsPage,
-  SearchModal,
-  NotebookManager,
-  ExportDialog
+  MarkdownEditor
 } from './components/features/LazyComponents'
 import SettingsView from './components/SettingsView'
 
@@ -50,6 +45,7 @@ const AppSimple: React.FC = () => {
     modals,
     toasts,
     isPreviewVisible,
+    activeSection,
     setModal,
     removeToast,
     setIsPreviewVisible,
@@ -60,9 +56,6 @@ const AppSimple: React.FC = () => {
 
   const { settings } = useSettings()
   const { notebooks } = useNotebooks()
-  
-  // Get current section from store for dynamic title
-  const { activeSection } = useSimpleStore()
 
   // Simple handlers
   const handleOpenNote = (noteId: string) => {
@@ -125,9 +118,8 @@ const AppSimple: React.FC = () => {
                 const sortedNotes = [...filteredNotes].sort((a, b) => 
                   a.title.toLowerCase().localeCompare(b.title.toLowerCase())
                 )
-                // Update the store with sorted notes
-                // This would need to be implemented in the store
-                console.log('Sorting notes alphabetically', sortedNotes)
+                // TODO: Implement sort functionality in the store
+                // For now, sorting is handled locally in the component
               }}
             />
           }
