@@ -113,15 +113,15 @@ export default function PluginManager({ isVisible, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-solarized-base02 border border-solarized-base01 rounded-lg shadow-xl w-full max-w-4xl max-h-[80vh] overflow-hidden">
+      <div className="theme-bg-secondary border border-theme-border-primary rounded-lg shadow-xl w-full max-w-4xl max-h-[80vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-solarized-base01">
-          <h2 className="text-xl font-bold text-solarized-base3">
+        <div className="flex items-center justify-between p-6 border-b border-theme-border-primary">
+          <h2 className="text-xl font-bold text-theme-text-secondary">
             Plugin Manager
           </h2>
           <button
             onClick={onClose}
-            className="text-solarized-base1 hover:text-solarized-base3 transition-colors"
+            className="text-theme-text-tertiary hover:text-theme-text-secondary transition-colors"
           >
             <svg
               width="24"
@@ -138,13 +138,13 @@ export default function PluginManager({ isVisible, onClose }) {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-solarized-base01">
+        <div className="flex border-b border-theme-border-primary">
           <button
             onClick={() => setActiveTab('store')}
             className={`px-6 py-3 font-medium transition-colors ${
               activeTab === 'store'
-                ? 'text-solarized-blue border-b-2 border-solarized-blue bg-solarized-base01'
-                : 'text-solarized-base1 hover:text-solarized-base3'
+                ? 'text-theme-accent-primary border-b-2 border-theme-accent-primary theme-bg-tertiary'
+                : 'text-theme-text-tertiary hover:text-theme-text-secondary'
             }`}
           >
             🏪 Plugin Store
@@ -153,8 +153,8 @@ export default function PluginManager({ isVisible, onClose }) {
             onClick={() => setActiveTab('installed')}
             className={`px-6 py-3 font-medium transition-colors ${
               activeTab === 'installed'
-                ? 'text-solarized-blue border-b-2 border-solarized-blue bg-solarized-base01'
-                : 'text-solarized-base1 hover:text-solarized-base3'
+                ? 'text-theme-accent-primary border-b-2 border-theme-accent-primary theme-bg-tertiary'
+                : 'text-theme-text-tertiary hover:text-theme-text-secondary'
             }`}
           >
             Installed Plugins ({plugins.length})
@@ -163,8 +163,8 @@ export default function PluginManager({ isVisible, onClose }) {
             onClick={() => setActiveTab('install')}
             className={`px-6 py-3 font-medium transition-colors ${
               activeTab === 'install'
-                ? 'text-solarized-blue border-b-2 border-solarized-blue bg-solarized-base01'
-                : 'text-solarized-base1 hover:text-solarized-base3'
+                ? 'text-theme-accent-primary border-b-2 border-theme-accent-primary theme-bg-tertiary'
+                : 'text-theme-text-tertiary hover:text-theme-text-secondary'
             }`}
           >
             Manual Install
@@ -174,17 +174,19 @@ export default function PluginManager({ isVisible, onClose }) {
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[60vh]">
           {error && (
-            <div className="bg-solarized-red/10 border border-solarized-red/20 rounded-lg p-4 mb-6">
+            <div className="bg-theme-accent-red/10 border border-theme-accent-red/20 rounded-lg p-4 mb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-solarized-red font-medium">
+                  <p className="text-theme-accent-red font-medium">
                     Plugin Installation Error
                   </p>
-                  <p className="text-solarized-red/80 text-sm mt-1">{error}</p>
+                  <p className="text-theme-accent-red/80 text-sm mt-1">
+                    {error}
+                  </p>
                 </div>
                 <button
                   onClick={clearError}
-                  className="text-solarized-red hover:text-solarized-red/80"
+                  className="text-theme-accent-red hover:text-theme-accent-red/80"
                 >
                   <svg
                     width="16"
@@ -203,10 +205,12 @@ export default function PluginManager({ isVisible, onClose }) {
           )}
 
           {loading && (
-            <div className="bg-solarized-blue/10 border border-solarized-blue/20 rounded-lg p-4 mb-6">
+            <div className="bg-theme-accent-primary/10 border border-theme-accent-primary/20 rounded-lg p-4 mb-6">
               <div className="flex items-center space-x-3">
-                <div className="animate-spin w-5 h-5 border-2 border-solarized-blue border-t-transparent rounded-full"></div>
-                <p className="text-solarized-blue">Installing plugin...</p>
+                <div className="animate-spin w-5 h-5 border-2 border-theme-accent-primary border-t-transparent rounded-full"></div>
+                <p className="text-theme-accent-primary">
+                  Installing plugin...
+                </p>
               </div>
             </div>
           )}
@@ -214,15 +218,15 @@ export default function PluginManager({ isVisible, onClose }) {
           {activeTab === 'store' && (
             <div className="text-center py-12">
               <div className="text-4xl mb-4">🏪</div>
-              <h3 className="text-lg font-semibold mb-4 text-solarized-base3">
+              <h3 className="text-lg font-semibold mb-4 text-theme-text-secondary">
                 Plugin Store
               </h3>
-              <p className="text-solarized-base1 mb-6">
+              <p className="text-theme-text-tertiary mb-6">
                 Discover and install curated plugins with one click
               </p>
               <button
                 onClick={openPluginStore}
-                className="bg-solarized-blue text-solarized-base03 px-6 py-3 rounded font-medium hover:bg-solarized-blue/80 transition-colors"
+                className="bg-theme-accent-primary text-theme-text-muted3 px-6 py-3 rounded font-medium hover:bg-theme-accent-primary/80 transition-colors"
               >
                 Open Plugin Store
               </button>
@@ -232,7 +236,7 @@ export default function PluginManager({ isVisible, onClose }) {
           {activeTab === 'installed' && (
             <div className="space-y-4">
               {plugins.length === 0 ? (
-                <div className="text-center py-12 text-solarized-base1">
+                <div className="text-center py-12 text-theme-text-tertiary">
                   <div className="text-4xl mb-4">🧩</div>
                   <h3 className="text-lg font-semibold mb-2">
                     No plugins installed
@@ -245,28 +249,28 @@ export default function PluginManager({ isVisible, onClose }) {
                 plugins.map(plugin => (
                   <div
                     key={plugin.id}
-                    className="bg-solarized-base01 rounded-lg p-4 border border-solarized-base00"
+                    className="theme-bg-tertiary rounded-lg p-4 border border-theme-border-secondary"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
-                          <h3 className="font-semibold text-solarized-base3">
+                          <h3 className="font-semibold text-theme-text-secondary">
                             {plugin.name}
                           </h3>
-                          <span className="text-xs bg-solarized-base00 text-solarized-base1 px-2 py-1 rounded">
+                          <span className="text-xs theme-bg-quaternary text-theme-text-tertiary px-2 py-1 rounded">
                             v{plugin.version}
                           </span>
                           {plugin.isActive && (
-                            <span className="text-xs bg-solarized-green text-solarized-base03 px-2 py-1 rounded font-medium">
+                            <span className="text-xs bg-theme-accent-green text-theme-text-muted3 px-2 py-1 rounded font-medium">
                               Active
                             </span>
                           )}
                         </div>
-                        <p className="text-solarized-base1 text-sm mb-2">
+                        <p className="text-theme-text-tertiary text-sm mb-2">
                           {plugin.description}
                         </p>
                         {plugin.author && (
-                          <p className="text-solarized-base0 text-xs">
+                          <p className="text-theme-text-muted text-xs">
                             by {plugin.author}
                           </p>
                         )}
@@ -277,8 +281,8 @@ export default function PluginManager({ isVisible, onClose }) {
                           disabled={loading}
                           className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
                             plugin.isActive
-                              ? 'bg-solarized-orange text-solarized-base03 hover:bg-solarized-orange/80'
-                              : 'bg-solarized-green text-solarized-base03 hover:bg-solarized-green/80'
+                              ? 'bg-theme-accent-orange text-theme-text-muted3 hover:bg-theme-accent-orange/80'
+                              : 'bg-theme-accent-green text-theme-text-muted3 hover:bg-theme-accent-green/80'
                           } disabled:opacity-50`}
                         >
                           {plugin.isActive ? 'Deactivate' : 'Activate'}
@@ -286,7 +290,7 @@ export default function PluginManager({ isVisible, onClose }) {
                         <button
                           onClick={() => handleUninstall(plugin)}
                           disabled={loading}
-                          className="px-3 py-1 rounded text-sm font-medium bg-solarized-red text-solarized-base03 hover:bg-solarized-red/80 transition-colors disabled:opacity-50"
+                          className="px-3 py-1 rounded text-sm font-medium bg-theme-accent-red text-theme-text-muted3 hover:bg-theme-accent-red/80 transition-colors disabled:opacity-50"
                         >
                           Uninstall
                         </button>
@@ -302,7 +306,7 @@ export default function PluginManager({ isVisible, onClose }) {
             <div className="space-y-6">
               {/* Install from file */}
               <div>
-                <h3 className="text-lg font-semibold text-solarized-base3 mb-3">
+                <h3 className="text-lg font-semibold text-theme-text-secondary mb-3">
                   Install from File
                 </h3>
                 <div
@@ -311,15 +315,15 @@ export default function PluginManager({ isVisible, onClose }) {
                   onDragLeave={handleDragLeave}
                   className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                     dragOver
-                      ? 'border-solarized-blue bg-solarized-blue/5'
-                      : 'border-solarized-base01 hover:border-solarized-base0'
+                      ? 'border-theme-accent-primary bg-theme-accent-primary/5'
+                      : 'border-theme-border-primary hover:border-solarized-base0'
                   }`}
                 >
                   <div className="text-4xl mb-4">📁</div>
-                  <p className="text-solarized-base1 mb-2">
+                  <p className="text-theme-text-tertiary mb-2">
                     Drag and drop a .js plugin file here, or
                   </p>
-                  <label className="inline-block bg-solarized-blue text-solarized-base03 px-4 py-2 rounded font-medium cursor-pointer hover:bg-solarized-blue/80 transition-colors">
+                  <label className="inline-block bg-theme-accent-primary text-theme-text-muted3 px-4 py-2 rounded font-medium cursor-pointer hover:bg-theme-accent-primary/80 transition-colors">
                     Choose File
                     <input
                       type="file"
@@ -336,7 +340,7 @@ export default function PluginManager({ isVisible, onClose }) {
 
               {/* Install from URL */}
               <div>
-                <h3 className="text-lg font-semibold text-solarized-base3 mb-3">
+                <h3 className="text-lg font-semibold text-theme-text-secondary mb-3">
                   Install from URL
                 </h3>
                 <div className="flex space-x-3">
@@ -345,12 +349,12 @@ export default function PluginManager({ isVisible, onClose }) {
                     placeholder="https://example.com/plugin.js"
                     value={installUrl}
                     onChange={e => setInstallUrl(e.target.value)}
-                    className="flex-1 bg-solarized-base01 border border-solarized-base00 rounded px-3 py-2 text-solarized-base3 placeholder-solarized-base0 focus:border-solarized-blue focus:outline-none"
+                    className="flex-1 theme-bg-tertiary border border-theme-border-secondary rounded px-3 py-2 text-theme-text-secondary placeholder-solarized-base0 focus:border-theme-accent-primary focus:outline-none"
                   />
                   <button
                     onClick={handleInstallFromUrl}
                     disabled={loading || !installUrl.trim()}
-                    className="bg-solarized-blue text-solarized-base03 px-4 py-2 rounded font-medium hover:bg-solarized-blue/80 transition-colors disabled:opacity-50"
+                    className="bg-theme-accent-primary text-theme-text-muted3 px-4 py-2 rounded font-medium hover:bg-theme-accent-primary/80 transition-colors disabled:opacity-50"
                   >
                     Install
                   </button>
@@ -358,16 +362,16 @@ export default function PluginManager({ isVisible, onClose }) {
               </div>
 
               {/* Plugin development info */}
-              <div className="bg-solarized-base01 rounded-lg p-4 border border-solarized-base00">
-                <h4 className="font-semibold text-solarized-base3 mb-2">
+              <div className="theme-bg-tertiary rounded-lg p-4 border border-theme-border-secondary">
+                <h4 className="font-semibold text-theme-text-secondary mb-2">
                   Developing Plugins
                 </h4>
-                <p className="text-solarized-base1 text-sm mb-3">
+                <p className="text-theme-text-tertiary text-sm mb-3">
                   Plugins are JavaScript modules that extend Nototo's
                   functionality. Check the documentation for the Plugin API
                   reference.
                 </p>
-                <button className="text-solarized-blue hover:text-solarized-blue/80 text-sm font-medium">
+                <button className="text-theme-accent-primary hover:text-theme-accent-primary/80 text-sm font-medium">
                   View Documentation →
                 </button>
               </div>
@@ -377,10 +381,10 @@ export default function PluginManager({ isVisible, onClose }) {
 
         {loading && (
           <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-            <div className="bg-solarized-base02 border border-solarized-base01 rounded-lg p-4">
+            <div className="theme-bg-secondary border border-theme-border-primary rounded-lg p-4">
               <div className="flex items-center space-x-3">
-                <div className="animate-spin w-5 h-5 border-2 border-solarized-blue border-t-transparent rounded-full"></div>
-                <span className="text-solarized-base3">Processing...</span>
+                <div className="animate-spin w-5 h-5 border-2 border-theme-accent-primary border-t-transparent rounded-full"></div>
+                <span className="text-theme-text-secondary">Processing...</span>
               </div>
             </div>
           </div>

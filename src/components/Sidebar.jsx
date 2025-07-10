@@ -1,554 +1,474 @@
-import { useState } from 'react'
+import { useState, memo, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNotebooks } from '../hooks/useNotebooks'
+import Icons from './Icons'
 
-const Sidebar = ({
-  activeSection,
-  setActiveSection,
-  onNewNote,
-  notes = [],
-  onManageNotebooks,
-  storageMode = 'localStorage',
-  onToggleStorage,
-}) => {
-  const { notebooks, getColorClass } = useNotebooks()
-  // Dropdown states
-  const [expandedSections, setExpandedSections] = useState({
-    notebooks: true,
-    tags: false,
-    recent: false,
-  })
+const Sidebar = memo(
+  ({
+    activeSection,
+    setActiveSection,
+    onNewNote,
+    notes = [],
+    onManageNotebooks,
+    storageMode = 'localStorage',
+    onToggleStorage,
+  }) => {
+    const { notebooks, getColorClass } = useNotebooks()
 
-  // Calculate real counts from notes
-  const totalNotes = notes.filter(note => !note.isTrashed).length
-  const pinnedNotes = notes.filter(
-    note => note.isPinned && !note.isTrashed
-  ).length
-  const trashedNotes = notes.filter(note => note.isTrashed).length || 0
+    // Dropdown states
+    const [expandedSections, setExpandedSections] = useState({
+      notebooks: true,
+      status: false,
+      tags: false,
+    })
 
-  // Get notebook counts from notes
-  const notebookCounts = notes.reduce((acc, note) => {
-    if (!note.isTrashed) {
-      const notebook = note.notebook
-      acc[notebook] = (acc[notebook] || 0) + 1
-    }
-    return acc
-  }, {})
+    // Memoize expensive calculations - OPTIMIZED
+    const {
+      totalNotes,
+      pinnedNotes,
+      trashedNotes,
+      notebooksWithCounts,
+      tagsWithCounts,
+    } = useMemo(() => {
+      // Calculate real counts from notes
+      const totalNotes = notes.filter(note => !note.isTrashed).length
+      const pinnedNotes = notes.filter(
+        note => note.isPinned && !note.isTrashed
+      ).length
+      const trashedNotes = notes.filter(note => note.isTrashed).length || 0
 
-  // Combine with notebook definitions
-  const notebooksWithCounts = notebooks
-    .map(notebook => ({
-      ...notebook,
-      count: notebookCounts[notebook.name] || 0,
-    }))
-    .sort((a, b) => b.count - a.count)
+      // Get notebook counts from notes
+      const notebookCounts = notes.reduce((acc, note) => {
+        if (!note.isTrashed) {
+          const notebook = note.notebook
+          acc[notebook] = (acc[notebook] || 0) + 1
+        }
+        return acc
+      }, {})
 
-  // Get all tags with counts
-  const tagCounts = notes.reduce((acc, note) => {
-    if (!note.isTrashed) {
-      note.tags?.forEach(tag => {
-        acc[tag] = (acc[tag] || 0) + 1
-      })
-    }
-    return acc
-  }, {})
-  const sortedTags = Object.entries(tagCounts).sort(([, a], [, b]) => b - a)
+      // Combine with notebook definitions
+      const notebooksWithCounts = notebooks
+        .map(notebook => ({
+          ...notebook,
+          count: notebookCounts[notebook.name] || 0,
+        }))
+        .sort((a, b) => b.count - a.sort)
 
-  // Get recent notes (last 5 modified)
-  const recentNotes = [...notes]
-    .filter(note => !note.isTrashed)
-    .sort(
-      (a, b) =>
-        new Date(b.updatedAt || b.date) - new Date(a.updatedAt || a.date)
+      // Get all tags with counts
+      const tagCounts = notes.reduce((acc, note) => {
+        if (!note.isTrashed) {
+          if (note.tags && Array.isArray(note.tags)) {
+            note.tags.forEach(tag => {
+              acc[tag] = (acc[tag] || 0) + 1
+            })
+          }
+        }
+        return acc
+      }, {})
+
+      const tagsWithCounts = Object.entries(tagCounts)
+        .map(([tag, count]) => ({ tag, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10) // Show only top 10 tags
+
+      return {
+        totalNotes,
+        pinnedNotes,
+        trashedNotes,
+        notebooksWithCounts,
+        tagsWithCounts,
+      }
+    }, [notes, notebooks])
+
+    // Use memoized tags directly - STABLE reference
+    const sortedTags = useMemo(
+      () => tagsWithCounts.map(({ tag, count }) => [tag, count]),
+      [tagsWithCounts]
     )
-    .slice(0, 5)
 
-  const toggleSection = section => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section],
-    }))
-  }
+    // Memoize callbacks to prevent re-renders
+    const toggleSection = useCallback(section => {
+      setExpandedSections(prev => ({
+        ...prev,
+        [section]: !prev[section],
+      }))
+    }, [])
 
-  const quickSections = [
-    {
-      id: 'all-notes',
-      label: 'All Notes',
-      count: totalNotes,
-      icon: (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1zm1 2v8h8V4H4z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'pinned',
-      label: 'Pinned Notes',
-      count: pinnedNotes,
-      icon: (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M8 2l1.5 3h3l-2.5 2 1 3-3-2-3 2 1-3-2.5-2h3L8 2z" />
-        </svg>
-      ),
-    },
-  ]
+    const handleSectionClick = useCallback(
+      sectionId => {
+        setActiveSection(sectionId)
+      },
+      [setActiveSection]
+    )
 
-  const systemSections = [
-    {
-      id: 'trash',
-      label: 'Trash',
-      count: trashedNotes,
-      icon: (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M6 2V1h4v1h3v1H3V2h3zm1 2v8h2V4H7zm-3 0v8h1V4H4zm6 0v8h1V4h-1z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'settings',
-      label: 'Settings',
-      icon: (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M8 4.754a3.246 3.246 0 100 6.492 3.246 3.246 0 000-6.492zM5.754 8a2.246 2.246 0 114.492 0 2.246 2.246 0 01-4.492 0z" />
-          <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 01-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 01-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 01.52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 011.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 011.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 01.52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 01-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 01-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 002.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 00-1.115 2.692l.319.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 00-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 00-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.318a1.873 1.873 0 00-2.692-1.116l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 002.025 8.91l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 003.141 4.35l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 002.692-1.115l.094-.32z" />
-        </svg>
-      ),
-    },
-  ]
+    const handleNewNote = useCallback(() => {
+      onNewNote()
+    }, [onNewNote])
 
-  return (
-    <div className="w-full bg-solarized-base02 border-r border-solarized-base01 flex flex-col h-full font-sans">
-      {/* Header */}
-      <div className="px-3 py-3 border-b border-solarized-base01">
-        <h1 className="text-base font-semibold text-solarized-base5">Nototo</h1>
-      </div>
+    const handleManageNotebooks = useCallback(() => {
+      onManageNotebooks()
+    }, [onManageNotebooks])
 
-      {/* Quick Access */}
-      <div className="px-3 py-2">
-        <div className="space-y-1">
-          {quickSections.map(section => (
-            <motion.button
+    // Memoize status counts - STABLE reference
+    const statusCounts = useMemo(() => {
+      return notes.reduce((acc, note) => {
+        if (!note.isTrashed) {
+          const status = note.status || 'active'
+          acc[status] = (acc[status] || 0) + 1
+        }
+        return acc
+      }, {})
+    }, [notes])
+
+    // Memoize status sections to prevent recreation
+    const statusSections = useMemo(
+      () => [
+        {
+          id: 'status-active',
+          label: 'Active',
+          count: statusCounts.active || 0,
+          icon: <Icons.Circle size={16} />,
+          color: 'text-theme-accent-green',
+        },
+        {
+          id: 'status-on-hold',
+          label: 'On Hold',
+          count: statusCounts['on-hold'] || 0,
+          icon: <Icons.Clock size={16} />,
+          color: 'text-theme-accent-yellow',
+        },
+        {
+          id: 'status-completed',
+          label: 'Completed',
+          count: statusCounts.completed || 0,
+          icon: <Icons.CheckCircle size={16} />,
+          color: 'text-theme-accent-green',
+        },
+        {
+          id: 'status-dropped',
+          label: 'Dropped',
+          count: statusCounts.dropped || 0,
+          icon: <Icons.XCircle size={16} />,
+          color: 'text-theme-accent-red',
+        },
+      ],
+      [statusCounts]
+    )
+
+    // Memoize main sections to prevent recreation
+    const mainSections = useMemo(
+      () => [
+        {
+          id: 'all-notes',
+          label: 'All Notes',
+          count: totalNotes,
+          icon: <Icons.FileText size={16} />,
+        },
+        {
+          id: 'pinned',
+          label: 'Pinned',
+          count: pinnedNotes,
+          icon: <Icons.Star size={16} />,
+        },
+      ],
+      [totalNotes, pinnedNotes]
+    )
+
+    // Memoize system sections
+    const systemSections = useMemo(
+      () => [
+        {
+          id: 'trash',
+          label: 'Trash',
+          count: trashedNotes,
+          icon: <Icons.Trash size={16} />,
+        },
+        {
+          id: 'settings',
+          label: 'Settings',
+          icon: <Icons.Settings size={16} />,
+        },
+      ],
+      [trashedNotes]
+    )
+
+    // Memoize SidebarButton to prevent re-renders
+    const SidebarButton = memo(({ section, isActive, onClick, children }) => (
+      <button
+        className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left transition-all duration-200 ${
+          isActive
+            ? 'text-theme-text-primary'
+            : 'text-theme-text-tertiary hover:text-theme-text-secondary'
+        }`}
+        style={{
+          backgroundColor: isActive ? 'var(--color-active-bg)' : 'transparent',
+          color: isActive ? 'var(--color-active-text)' : undefined,
+          borderRight: isActive
+            ? '2px solid var(--color-active-border)'
+            : '2px solid transparent',
+        }}
+        onMouseEnter={e => {
+          if (!isActive) {
+            e.target.style.backgroundColor = 'var(--color-hover-bg)'
+          }
+        }}
+        onMouseLeave={e => {
+          if (!isActive) {
+            e.target.style.backgroundColor = 'transparent'
+          }
+        }}
+        onClick={onClick}
+      >
+        {children}
+      </button>
+    ))
+
+    // Memoize CollapsibleSection
+    const CollapsibleSection = memo(
+      ({ title, icon, isExpanded, onToggle, children }) => (
+        <div>
+          <button
+            onClick={onToggle}
+            className="w-full flex items-center justify-between px-3 py-2 text-xs uppercase tracking-wider text-theme-text-muted font-medium hover:text-theme-text-tertiary transition-colors"
+          >
+            <div className="flex items-center space-x-2">
+              {icon}
+              <span>{title}</span>
+            </div>
+            <Icons.ChevronRight
+              size={12}
+              className={`transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}
+            />
+          </button>
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2, ease: 'easeInOut' }}
+                className="overflow-hidden"
+              >
+                <div className="space-y-0 mt-1">{children}</div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )
+    )
+
+    return (
+      <div className="w-full sidebar-modern flex flex-col h-full ui-font">
+        {/* Main Sections */}
+        <div className="space-y-0">
+          {mainSections.map(section => (
+            <SidebarButton
               key={section.id}
-              className={`w-full flex items-center justify-between px-2 py-1.5 text-sm rounded text-left relative overflow-hidden ${
-                activeSection === section.id
-                  ? 'bg-solarized-blue text-solarized-base5'
-                  : 'text-solarized-base1 hover:text-solarized-base3'
-              }`}
-              onClick={() => setActiveSection(section.id)}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              section={section}
+              isActive={activeSection === section.id}
+              onClick={() => handleSectionClick(section.id)}
             >
-              {/* Active indicator */}
-              {activeSection === section.id && (
-                <motion.div
-                  className="absolute left-0 top-0 bottom-0 w-1 bg-solarized-cyan"
-                  layoutId="activeIndicator"
-                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                />
-              )}
-
-              {/* Hover background */}
-              {activeSection !== section.id && (
-                <motion.div
-                  className="absolute inset-0 bg-solarized-base01 opacity-0"
-                  whileHover={{ opacity: 1 }}
-                  transition={{ duration: 0.2 }}
-                />
-              )}
-
-              <div className="flex items-center space-x-2 relative z-10">
-                <motion.span
-                  className="opacity-75"
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ type: 'spring', stiffness: 500 }}
-                >
-                  {section.icon}
-                </motion.span>
+              <div className="flex items-center space-x-2">
+                <span className="opacity-75">{section.icon}</span>
                 <span>{section.label}</span>
               </div>
-              <span className="text-xs opacity-75 relative z-10">
-                {section.count}
-              </span>
-            </motion.button>
+              <span className="text-xs opacity-75">{section.count}</span>
+            </SidebarButton>
           ))}
         </div>
-      </div>
 
-      {/* Notebooks */}
-      <div className="flex-1 px-3">
-        <button
-          onClick={() => toggleSection('notebooks')}
-          className="w-full flex items-center justify-between px-2 py-1.5 text-xs uppercase tracking-wider text-solarized-base0 font-medium hover:text-solarized-base1 transition-colors"
-        >
-          <div className="flex items-center space-x-2">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M2 3h12a1 1 0 011 1v8a1 1 0 01-1 1H2a1 1 0 01-1-1V4a1 1 0 011-1zm1 2v6h10V5H3z" />
-            </svg>
-            <span>Notebooks</span>
-          </div>
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            fill="currentColor"
-            className={`transition-transform ${expandedSections.notebooks ? 'rotate-90' : ''}`}
+        {/* Notebooks Section */}
+        <div>
+          <CollapsibleSection
+            title="Notebooks"
+            icon={<Icons.Book size={14} />}
+            isExpanded={expandedSections.notebooks}
+            onToggle={useCallback(
+              () => toggleSection('notebooks'),
+              [toggleSection]
+            )}
           >
-            <path
-              d="M4.5 2L8.5 6L4.5 10"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              fill="none"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
-
-        <AnimatePresence>
-          {expandedSections.notebooks && (
-            <motion.div
-              className="space-y-0.5 mt-1"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-            >
-              {notebooksWithCounts.length > 0 ? (
-                notebooksWithCounts.map((notebook, index) => (
-                  <motion.button
-                    key={notebook.id}
-                    className={`w-full flex items-center justify-between px-2 py-1.5 text-sm rounded text-left group relative overflow-hidden ${
+            {notebooksWithCounts.length > 0 ? (
+              notebooksWithCounts.map(notebook => (
+                <div key={notebook.id} className="relative group">
+                  <SidebarButton
+                    section={notebook}
+                    isActive={
                       activeSection ===
                       `notebook-${notebook.name.toLowerCase()}`
-                        ? 'bg-solarized-blue text-solarized-base5'
-                        : 'text-solarized-base1 hover:text-solarized-base3'
-                    }`}
+                    }
                     onClick={() =>
-                      setActiveSection(
+                      handleSectionClick(
                         `notebook-${notebook.name.toLowerCase()}`
                       )
                     }
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05, duration: 0.2 }}
-                    whileHover={{ scale: 1.02, x: 4 }}
-                    whileTap={{ scale: 0.98 }}
                   >
-                    {/* Active indicator */}
-                    {activeSection ===
-                      `notebook-${notebook.name.toLowerCase()}` && (
-                      <motion.div
-                        className="absolute left-0 top-0 bottom-0 w-1 bg-solarized-cyan"
-                        layoutId="notebookActiveIndicator"
-                        transition={{
-                          type: 'spring',
-                          stiffness: 500,
-                          damping: 30,
-                        }}
-                      />
-                    )}
-
-                    {/* Hover background */}
-                    {activeSection !==
-                      `notebook-${notebook.name.toLowerCase()}` && (
-                      <motion.div
-                        className="absolute inset-0 bg-solarized-base01 opacity-0"
-                        whileHover={{ opacity: 1 }}
-                        transition={{ duration: 0.2 }}
-                      />
-                    )}
-
-                    <div className="flex items-center space-x-2 relative z-10">
-                      <motion.div
+                    <div className="flex items-center space-x-2 ml-4">
+                      <div
                         className={`w-1.5 h-1.5 rounded-full ${getColorClass(notebook.color).replace('text-', 'bg-')}`}
-                        whileHover={{ scale: 1.3 }}
-                        transition={{ type: 'spring', stiffness: 500 }}
                       />
-                      <span>{notebook.name}</span>
+                      <span className="text-xs">{notebook.name}</span>
                     </div>
-                    <span className="text-xs opacity-75 relative z-10">
-                      {notebook.count}
-                    </span>
-                  </motion.button>
-                ))
-              ) : (
-                <motion.div
-                  className="px-2 py-1.5 text-xs text-solarized-base0 italic"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.1 }}
-                >
-                  No notebooks yet
-                </motion.div>
-              )}
-
-              <motion.button
-                onClick={onNewNote}
-                className="w-full px-2 py-1.5 text-sm text-solarized-blue hover:text-solarized-base3 text-left mt-1 transition-colors"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: notebooksWithCounts.length * 0.05 + 0.1 }}
-                whileHover={{ scale: 1.05, x: 4 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                + New Note
-              </motion.button>
-
-              <motion.button
-                onClick={onManageNotebooks}
-                className="w-full px-2 py-1.5 text-sm text-solarized-base1 hover:text-solarized-base3 text-left transition-colors"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: notebooksWithCounts.length * 0.05 + 0.15 }}
-                whileHover={{ scale: 1.05, x: 4 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Manage Notebooks
-              </motion.button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Tags */}
-      <div className="px-3 mb-3">
-        <button
-          onClick={() => toggleSection('tags')}
-          className="w-full flex items-center justify-between px-2 py-1.5 text-xs uppercase tracking-wider text-solarized-base0 font-medium hover:text-solarized-base1 transition-colors"
-        >
-          <div className="flex items-center space-x-2">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M8.5 1l6 6-6 6L2 7.5 8.5 1zm0 2L4 8.5l4.5 4.5L13 8.5 8.5 3z" />
-            </svg>
-            <span>Tags</span>
-          </div>
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            fill="currentColor"
-            className={`transition-transform ${expandedSections.tags ? 'rotate-90' : ''}`}
-          >
-            <path
-              d="M4.5 2L8.5 6L4.5 10"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              fill="none"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
-
-        {expandedSections.tags && (
-          <div className="space-y-0.5 mt-1 max-h-28 overflow-y-auto">
-            {sortedTags.length > 0 ? (
-              sortedTags.map(([tag, count]) => (
-                <button
-                  key={tag}
-                  className={`w-full flex items-center justify-between px-2 py-1 text-sm rounded transition-colors text-left ${
-                    activeSection === `tag-${tag}`
-                      ? 'bg-solarized-blue text-solarized-base5'
-                      : 'text-solarized-base1 hover:bg-solarized-base01 hover:text-solarized-base3'
-                  }`}
-                  onClick={() => setActiveSection(`tag-${tag}`)}
-                >
-                  <div className="flex items-center space-x-2">
-                    <span className="text-solarized-base0 text-xs">#</span>
-                    <span>{tag}</span>
-                  </div>
-                  <span className="text-xs opacity-75">{count}</span>
-                </button>
+                    <span className="text-xs opacity-75">{notebook.count}</span>
+                  </SidebarButton>
+                  <button
+                    onClick={e => {
+                      e.stopPropagation()
+                      onManageNotebooks()
+                    }}
+                    className="absolute right-12 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity px-2 py-1 text-xs border border-theme-text-muted text-theme-text-muted hover:text-theme-text-secondary hover:border-theme-text-secondary rounded"
+                    title="Edit notebook"
+                  >
+                    Edit
+                  </button>
+                </div>
               ))
             ) : (
-              <div className="px-2 py-1.5 text-xs text-solarized-base0 italic">
-                No tags yet
+              <div className="px-7 py-2 text-xs text-theme-text-muted italic">
+                No notebooks yet
               </div>
             )}
-          </div>
-        )}
-      </div>
 
-      {/* Recent Notes */}
-      <div className="px-3 mb-3">
-        <button
-          onClick={() => toggleSection('recent')}
-          className="w-full flex items-center justify-between px-2 py-1.5 text-xs uppercase tracking-wider text-solarized-base0 font-medium hover:text-solarized-base1 transition-colors"
-        >
-          <div className="flex items-center space-x-2">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2a5 5 0 110 10A5 5 0 018 3zm0 1v4l3 2-.5 1L7 9V4h1z" />
-            </svg>
-            <span>Recent</span>
-          </div>
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            fill="currentColor"
-            className={`transition-transform ${expandedSections.recent ? 'rotate-90' : ''}`}
-          >
-            <path
-              d="M4.5 2L8.5 6L4.5 10"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              fill="none"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
-
-        {expandedSections.recent && (
-          <div className="space-y-0.5 mt-1">
-            {recentNotes.length > 0 ? (
-              <>
-                {recentNotes.map(note => (
-                  <button
-                    key={note.id}
-                    className="w-full px-2 py-1.5 text-left rounded transition-colors hover:bg-solarized-base01 group"
-                    onClick={() => {
-                      setActiveSection('all-notes')
-                      // Could add onSelectNote callback here if needed
-                    }}
-                    title={note.title}
-                  >
-                    <div className="text-sm text-solarized-base3 line-clamp-1">
-                      {note.title}
-                    </div>
-                    <div className="text-xs text-solarized-base0 mt-0.5">
-                      {note.updatedAt
-                        ? new Date(note.updatedAt).toLocaleDateString()
-                        : note.date}
-                    </div>
-                  </button>
-                ))}
-                <motion.button
-                  onClick={() => setActiveSection('recent')}
-                  className="w-full px-2 py-1.5 text-sm text-solarized-blue hover:text-solarized-base3 text-left mt-1 transition-colors"
-                  whileHover={{ scale: 1.05, x: 4 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  View All Recent (⌘+R)
-                </motion.button>
-              </>
-            ) : (
-              <div className="px-2 py-1.5 text-xs text-solarized-base0 italic">
-                No recent notes
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* System */}
-      <div className="px-3 py-2 border-t border-solarized-base01 space-y-0.5">
-        {systemSections.map((section, index) => (
-          <motion.button
-            key={section.id}
-            className={`w-full flex items-center justify-between px-2 py-1.5 text-sm rounded text-left relative overflow-hidden ${
-              activeSection === section.id
-                ? 'bg-solarized-blue text-solarized-base5'
-                : 'text-solarized-base1 hover:text-solarized-base3'
-            }`}
-            onClick={() => setActiveSection(section.id)}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          >
-            {/* Active indicator */}
-            {activeSection === section.id && (
-              <motion.div
-                className="absolute left-0 top-0 bottom-0 w-1 bg-solarized-cyan"
-                layoutId="systemActiveIndicator"
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-              />
-            )}
-
-            {/* Hover background */}
-            {activeSection !== section.id && (
-              <motion.div
-                className="absolute inset-0 bg-solarized-base01 opacity-0"
-                whileHover={{ opacity: 1 }}
-                transition={{ duration: 0.2 }}
-              />
-            )}
-
-            <div className="flex items-center space-x-2 relative z-10">
-              <motion.span
-                className="opacity-75"
-                whileHover={{ scale: 1.1 }}
-                transition={{ type: 'spring', stiffness: 500 }}
-              >
-                {section.icon}
-              </motion.span>
-              <span>{section.label}</span>
-            </div>
-            {section.count !== undefined && (
-              <span className="text-xs opacity-75 relative z-10">
-                {section.count === 0 && section.id === 'trash'
-                  ? 'Empty'
-                  : section.count}
-              </span>
-            )}
-          </motion.button>
-        ))}
-      </div>
-
-      {/* Footer */}
-      <div className="px-3 py-2 border-t border-solarized-base01 space-y-2">
-        {/* User Info */}
-        <div className="flex items-center space-x-2">
-          <div className="w-6 h-6 bg-solarized-blue rounded-full flex items-center justify-center">
-            <span className="text-solarized-base5 text-xs font-medium">U</span>
-          </div>
-          <div className="flex-1">
-            <div className="text-sm text-solarized-base3 font-medium">User</div>
-            <div className="text-xs text-solarized-base0">
-              Started{' '}
-              {new Date().toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Storage Mode - Subtle indicator */}
-        <div className="flex items-center justify-between text-xs mt-2 pt-2 border-t border-solarized-base01">
-          <div className="flex items-center space-x-2">
-            <div
-              className={`w-2 h-2 rounded-full ${
-                storageMode === 'localStorage' ? 'bg-blue-400' : 'bg-green-400'
-              }`}
-            />
-            <span className="text-solarized-base0">
-              {storageMode === 'localStorage' ? 'Local' : 'API'}
-            </span>
-          </div>
-          {onToggleStorage && (
             <button
-              onClick={onToggleStorage}
-              className="text-solarized-base0 hover:text-solarized-base3 transition-colors p-1 rounded hover:bg-solarized-base01"
-              title="Toggle storage mode"
+              onClick={handleNewNote}
+              className="w-full px-7 py-2 text-xs text-theme-accent-primary hover:text-theme-accent-primary/80 text-left transition-colors"
+              onMouseEnter={e => {
+                e.target.style.backgroundColor = 'var(--color-hover-bg)'
+              }}
+              onMouseLeave={e => {
+                e.target.style.backgroundColor = 'transparent'
+              }}
             >
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-                <path d="M21 3v5h-5" />
-                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-                <path d="M3 21v-5h5" />
-              </svg>
+              + New Note
             </button>
-          )}
+
+            <button
+              onClick={handleManageNotebooks}
+              className="w-full px-7 py-2 text-xs text-theme-text-tertiary hover:text-theme-text-secondary text-left transition-colors"
+              onMouseEnter={e => {
+                e.target.style.backgroundColor = 'var(--color-hover-bg)'
+              }}
+              onMouseLeave={e => {
+                e.target.style.backgroundColor = 'transparent'
+              }}
+            >
+              Manage Notebooks
+            </button>
+          </CollapsibleSection>
+        </div>
+
+        {/* System Sections */}
+        <div className="space-y-0">
+          {systemSections.map(section => (
+            <SidebarButton
+              key={section.id}
+              section={section}
+              isActive={activeSection === section.id}
+              onClick={() => handleSectionClick(section.id)}
+            >
+              <div className="flex items-center space-x-2">
+                <span className="opacity-75">{section.icon}</span>
+                <span>{section.label}</span>
+              </div>
+              {section.count !== undefined && (
+                <span className="text-xs opacity-75">
+                  {section.count === 0 && section.id === 'trash'
+                    ? 'Empty'
+                    : section.count}
+                </span>
+              )}
+            </SidebarButton>
+          ))}
+        </div>
+
+        {/* Status Section */}
+        <div>
+          <CollapsibleSection
+            title="Status"
+            icon={<Icons.Circle size={14} />}
+            isExpanded={expandedSections.status}
+            onToggle={useCallback(
+              () => toggleSection('status'),
+              [toggleSection]
+            )}
+          >
+            {statusSections.map(status => (
+              <SidebarButton
+                key={status.id}
+                section={status}
+                isActive={activeSection === status.id}
+                onClick={() => handleSectionClick(status.id)}
+              >
+                <div className="flex items-center space-x-2 ml-4">
+                  <span className={`opacity-75 ${status.color}`}>
+                    {status.icon}
+                  </span>
+                  <span className="text-xs">{status.label}</span>
+                </div>
+                <span className="text-xs opacity-75">{status.count}</span>
+              </SidebarButton>
+            ))}
+          </CollapsibleSection>
+        </div>
+
+        {/* Tags Section */}
+        <div>
+          <CollapsibleSection
+            title="Tags"
+            icon={<Icons.Tag size={14} />}
+            isExpanded={expandedSections.tags}
+            onToggle={useCallback(() => toggleSection('tags'), [toggleSection])}
+          >
+            <div className="max-h-32 overflow-y-auto">
+              {sortedTags.length > 0 ? (
+                sortedTags.map(([tag, count]) => (
+                  <SidebarButton
+                    key={tag}
+                    section={{ id: `tag-${tag}` }}
+                    isActive={activeSection === `tag-${tag}`}
+                    onClick={() => handleSectionClick(`tag-${tag}`)}
+                  >
+                    <div className="flex items-center space-x-2 ml-4">
+                      <span className="text-theme-text-muted text-xs">#</span>
+                      <span className="text-xs">{tag}</span>
+                    </div>
+                    <span className="text-xs opacity-75">{count}</span>
+                  </SidebarButton>
+                ))
+              ) : (
+                <div className="px-7 py-2 text-xs text-theme-text-muted italic">
+                  No tags yet
+                </div>
+              )}
+            </div>
+          </CollapsibleSection>
+        </div>
+
+        {/* User Info */}
+        <div className="mt-auto px-3 pb-3 pt-2">
+          <div className="flex items-center space-x-2">
+            <div className="w-6 h-6 bg-theme-accent-primary rounded-full flex items-center justify-center">
+              <span className="text-theme-text-primary text-xs font-medium">
+                U
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm text-theme-text-secondary font-medium truncate">
+                User
+              </div>
+              <div className="text-xs text-theme-text-muted">
+                Started{' '}
+                {new Date().toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  )
-}
+    )
+  }
+)
 
 export default Sidebar

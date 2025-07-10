@@ -1,8 +1,8 @@
 const NotebookSection = ({ notebookId }) => {
   const notebooks = {
-    personal: { name: 'Personal', color: 'text-solarized-blue' },
-    work: { name: 'Work', color: 'text-solarized-green' },
-    projects: { name: 'Projects', color: 'text-solarized-orange' },
+    personal: { name: 'Personal', color: 'text-theme-accent-primary' },
+    work: { name: 'Work', color: 'text-theme-accent-green' },
+    projects: { name: 'Projects', color: 'text-theme-accent-orange' },
   }
 
   const notebookNotes = {
@@ -53,7 +53,7 @@ const NotebookSection = ({ notebookId }) => {
         <h1 className={`text-2xl font-semibold mb-2 ${notebook.color}`}>
           {notebook.name}
         </h1>
-        <p className="text-sm text-solarized-base1">
+        <p className="text-sm text-theme-text-tertiary">
           {notes.length} notes in this notebook
         </p>
       </div>
@@ -62,13 +62,15 @@ const NotebookSection = ({ notebookId }) => {
         {notes.map(note => (
           <div
             key={note.id}
-            className="bg-solarized-base02 border border-solarized-base01 rounded p-4 hover:bg-solarized-base01 transition-colors cursor-pointer"
+            className="theme-bg-secondary border border-theme-border-primary rounded p-4 hover:theme-bg-tertiary transition-colors cursor-pointer"
           >
             <div className="flex items-start justify-between mb-2">
-              <h3 className="font-medium text-solarized-base4">{note.title}</h3>
-              <span className="text-xs text-solarized-base0">{note.date}</span>
+              <h3 className="font-medium text-theme-text-secondary">
+                {note.title}
+              </h3>
+              <span className="text-xs text-theme-text-muted">{note.date}</span>
             </div>
-            <p className="text-sm text-solarized-base1">{note.preview}</p>
+            <p className="text-sm text-theme-text-tertiary">{note.preview}</p>
           </div>
         ))}
       </div>

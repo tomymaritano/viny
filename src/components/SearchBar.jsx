@@ -243,7 +243,7 @@ const SearchBar = ({
       regex.test(part) ? (
         <mark
           key={index}
-          className="bg-solarized-yellow text-solarized-base03 px-0.5 rounded"
+          className="bg-theme-accent-yellow text-theme-bg-primary px-0.5 rounded"
         >
           {part}
         </mark>
@@ -380,7 +380,7 @@ const SearchBar = ({
       {/* Search Input */}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Icons.Search size={16} className="text-solarized-base1" />
+          <Icons.Search size={16} className="text-theme-text-tertiary" />
         </div>
 
         <input
@@ -392,7 +392,7 @@ const SearchBar = ({
           onBlur={handleInputBlur}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full pl-10 pr-10 py-2 bg-solarized-base02 border border-solarized-base01 rounded-lg text-solarized-base3 placeholder-solarized-base0 focus:outline-none focus:ring-2 focus:ring-solarized-blue focus:border-transparent transition-colors"
+          className="w-full pl-10 pr-10 py-2 theme-bg-secondary border border-theme-border-primary rounded-lg text-theme-text-secondary placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent-primary focus:border-transparent transition-colors"
           autoComplete="off"
           spellCheck="false"
         />
@@ -401,12 +401,12 @@ const SearchBar = ({
         <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
           {isSearching ? (
             <div className="animate-spin">
-              <Icons.Loader size={16} className="text-solarized-base1" />
+              <Icons.Loader size={16} className="text-theme-text-tertiary" />
             </div>
           ) : query ? (
             <button
               onClick={handleClearClick}
-              className="text-solarized-base1 hover:text-solarized-base3 transition-colors"
+              className="text-theme-text-tertiary hover:text-theme-text-secondary transition-colors"
               type="button"
             >
               <Icons.X size={16} />
@@ -419,19 +419,19 @@ const SearchBar = ({
       {showDropdown && (
         <div
           ref={resultsRef}
-          className="absolute top-full left-0 right-0 mt-1 bg-solarized-base02 border border-solarized-base01 rounded-lg shadow-xl max-h-[28rem] overflow-y-auto z-50"
+          className="absolute top-full left-0 right-0 mt-1 theme-bg-secondary border border-theme-border-primary rounded-lg shadow-xl max-h-[28rem] overflow-y-auto z-50"
         >
           {/* Search Results */}
           {results.length > 0 && (
             <div>
-              <div className="px-3 py-2 text-xs font-medium text-solarized-base1 bg-solarized-base01 border-b border-solarized-base01">
+              <div className="px-3 py-2 text-xs font-medium text-theme-text-tertiary theme-bg-tertiary border-b border-theme-border-primary">
                 <div className="flex items-center justify-between">
                   <span>
                     {results.length} result{results.length !== 1 ? 's' : ''}
                     {query.trim() && ` for "${query.trim()}"`}
                   </span>
                   {results.length > 0 && (
-                    <span className="text-solarized-base0">
+                    <span className="text-theme-text-muted">
                       {results.filter(r => r.isPinned).length > 0 &&
                         `${results.filter(r => r.isPinned).length} pinned`}
                     </span>
@@ -448,35 +448,35 @@ const SearchBar = ({
                     key={result.id}
                     data-result-index={globalIndex}
                     onClick={() => handleResultClick(result)}
-                    className={`group px-3 py-3 cursor-pointer border-b border-solarized-base01 last:border-b-0 transition-all duration-150 ${
+                    className={`group px-3 py-3 cursor-pointer border-b border-theme-border-primary last:border-b-0 transition-all duration-150 ${
                       isSelected
-                        ? 'bg-solarized-blue/10 border-l-2 border-l-solarized-blue'
-                        : 'hover:bg-solarized-base01'
+                        ? 'bg-theme-accent-primary/10 border-l-2 border-l-theme-accent-primary'
+                        : 'hover:theme-bg-tertiary'
                     }`}
                   >
                     <div className="flex items-start space-x-3">
                       <div className="flex-shrink-0 mt-1">
                         <Icons.FileText
                           size={14}
-                          className="text-solarized-base1"
+                          className="text-theme-text-tertiary"
                         />
                       </div>
 
                       <div className="flex-1 min-w-0">
                         {/* Title with match highlighting */}
                         <div className="flex items-center justify-between">
-                          <div className="text-sm font-medium text-solarized-base3 truncate flex-1">
+                          <div className="text-sm font-medium text-theme-text-secondary truncate flex-1">
                             {highlightText(result.title, query)}
                           </div>
                           <div className="flex items-center space-x-1 ml-2 flex-shrink-0">
                             {result.isPinned && (
                               <Icons.Star
                                 size={12}
-                                className="text-solarized-yellow"
+                                className="text-theme-accent-yellow"
                               />
                             )}
                             {getContentStats(result) && (
-                              <span className="text-xs text-solarized-base1 bg-solarized-base01 px-1.5 py-0.5 rounded">
+                              <span className="text-xs text-theme-text-tertiary theme-bg-tertiary px-1.5 py-0.5 rounded">
                                 {getContentStats(result).words}w
                               </span>
                             )}
@@ -484,13 +484,13 @@ const SearchBar = ({
                         </div>
 
                         {/* Enhanced preview with better context */}
-                        <div className="text-xs text-solarized-base0 mt-1.5 leading-relaxed">
+                        <div className="text-xs text-theme-text-muted mt-1.5 leading-relaxed">
                           {highlightText(getPreviewText(result, query), query)}
                         </div>
 
                         {/* Expanded metadata section */}
                         <div className="flex items-center justify-between mt-2.5">
-                          <div className="flex items-center space-x-3 text-xs text-solarized-base1">
+                          <div className="flex items-center space-x-3 text-xs text-theme-text-tertiary">
                             {/* Notebook */}
                             <div className="flex items-center space-x-1">
                               <Icons.Folder size={10} />
@@ -505,7 +505,7 @@ const SearchBar = ({
                                   {result.tags.slice(0, 2).join(', ')}
                                 </span>
                                 {result.tags.length > 2 && (
-                                  <span className="text-solarized-base0">
+                                  <span className="text-theme-text-muted">
                                     +{result.tags.length - 2}
                                   </span>
                                 )}
@@ -527,7 +527,7 @@ const SearchBar = ({
 
                           {/* Reading time estimate */}
                           {getReadingTime(result.content) && (
-                            <div className="text-xs text-solarized-base1 bg-solarized-base01 px-1.5 py-0.5 rounded">
+                            <div className="text-xs text-theme-text-tertiary theme-bg-tertiary px-1.5 py-0.5 rounded">
                               {getReadingTime(result.content)}
                             </div>
                           )}
@@ -540,10 +540,10 @@ const SearchBar = ({
                             {onPinNote && (
                               <button
                                 onClick={e => handlePinAction(e, result)}
-                                className={`p-1 rounded hover:bg-solarized-base01 transition-colors ${
+                                className={`p-1 rounded hover:theme-bg-tertiary transition-colors ${
                                   result.isPinned
-                                    ? 'text-solarized-yellow'
-                                    : 'text-solarized-base1 hover:text-solarized-base3'
+                                    ? 'text-theme-accent-yellow'
+                                    : 'text-theme-text-tertiary hover:text-theme-text-secondary'
                                 }`}
                                 title={
                                   result.isPinned ? 'Unpin note' : 'Pin note'
@@ -557,7 +557,7 @@ const SearchBar = ({
                             {onMoveNote && (
                               <button
                                 onClick={e => handleMoveAction(e, result)}
-                                className="p-1 rounded text-solarized-base1 hover:text-solarized-base3 hover:bg-solarized-base01 transition-colors"
+                                className="p-1 rounded text-theme-text-tertiary hover:text-theme-text-secondary hover:theme-bg-tertiary transition-colors"
                                 title="Move note"
                               >
                                 <Icons.Move size={12} />
@@ -568,7 +568,7 @@ const SearchBar = ({
                             {onDeleteNote && (
                               <button
                                 onClick={e => handleDeleteAction(e, result)}
-                                className="p-1 rounded text-solarized-base1 hover:text-solarized-red hover:bg-solarized-base01 transition-colors"
+                                className="p-1 rounded text-theme-text-tertiary hover:text-theme-accent-red hover:theme-bg-tertiary transition-colors"
                                 title="Delete note"
                               >
                                 <Icons.Trash size={12} />
@@ -590,7 +590,7 @@ const SearchBar = ({
             showHistory &&
             searchHistory.length > 0 && (
               <div>
-                <div className="px-3 py-2 text-xs font-medium text-solarized-base1 bg-solarized-base01 border-b border-solarized-base01">
+                <div className="px-3 py-2 text-xs font-medium text-theme-text-tertiary theme-bg-tertiary border-b border-theme-border-primary">
                   Recent searches
                 </div>
 
@@ -603,18 +603,18 @@ const SearchBar = ({
                       key={index}
                       data-result-index={globalIndex}
                       onClick={() => handleHistoryClick(historyItem)}
-                      className={`px-3 py-2 cursor-pointer border-b border-solarized-base01 last:border-b-0 transition-all duration-150 ${
+                      className={`px-3 py-2 cursor-pointer border-b border-theme-border-primary last:border-b-0 transition-all duration-150 ${
                         isSelected
-                          ? 'bg-solarized-green/10 border-l-2 border-l-solarized-green'
-                          : 'hover:bg-solarized-base01'
+                          ? 'bg-theme-accent-green/10 border-l-2 border-l-theme-accent-green'
+                          : 'hover:theme-bg-tertiary'
                       }`}
                     >
                       <div className="flex items-center space-x-3">
                         <Icons.Clock
                           size={14}
-                          className="text-solarized-base1"
+                          className="text-theme-text-tertiary"
                         />
-                        <span className="text-sm text-solarized-base3">
+                        <span className="text-sm text-theme-text-secondary">
                           {historyItem}
                         </span>
                       </div>
@@ -626,7 +626,7 @@ const SearchBar = ({
 
           {/* No Results */}
           {results.length === 0 && query.trim() && !isSearching && (
-            <div className="px-3 py-4 text-center text-sm text-solarized-base1">
+            <div className="px-3 py-4 text-center text-sm text-theme-text-tertiary">
               No notes found for "{query}"
             </div>
           )}

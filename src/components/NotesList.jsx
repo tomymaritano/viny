@@ -1,5 +1,8 @@
 import { useState, useMemo } from 'react'
+import PropTypes from 'prop-types'
 import Icons from './Icons'
+import ContextMenu from './ContextMenu'
+import { useContextMenu } from '../hooks/useContextMenu'
 
 const NotesList = ({
   notes = [],
@@ -10,8 +13,40 @@ const NotesList = ({
   onRestoreNote,
   onPermanentDelete,
   onDeleteNote,
+  activeSection = 'all-notes',
 }) => {
   const [searchTerm, setSearchTerm] = useState('')
+  const { contextMenu, showContextMenu, hideContextMenu } = useContextMenu()
+
+  // Get section title based on activeSection
+  const getSectionTitle = () => {
+    if (isTrashView) return 'Trash'
+
+    switch (activeSection) {
+      case 'all-notes':
+        return 'All Notes'
+      case 'pinned':
+        return 'Pinned Notes'
+      case 'recent':
+        return 'Recent Notes'
+      case 'status-active':
+        return 'Active Notes'
+      case 'status-on-hold':
+        return 'On Hold Notes'
+      case 'status-completed':
+        return 'Completed Notes'
+      case 'status-dropped':
+        return 'Dropped Notes'
+      default:
+        if (activeSection.startsWith('notebook-')) {
+          return activeSection.replace('notebook-', '').replace('-', ' ')
+        }
+        if (activeSection.startsWith('tag-')) {
+          return `#${activeSection.replace('tag-', '')}`
+        }
+        return 'All Notes'
+    }
+  }
 
   // Filter and search notes
   const filteredNotes = useMemo(() => {
@@ -41,39 +76,17 @@ const NotesList = ({
   }
 
   return (
-    <div className="w-full bg-solarized-base02 border-r border-solarized-base01 flex flex-col h-full font-sans">
+    <div className="w-full theme-bg-secondary border-r border-theme-border-primary flex flex-col h-full ui-font">
       {/* Header */}
-      <div className="p-4 border-b border-solarized-base01">
+      <div className="p-4 border-b border-theme-border-primary">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-solarized-base5">
-            {isTrashView ? 'Trash' : 'All Notes'}
+          <h2 className="text-lg font-semibold text-theme-text-primary">
+            {getSectionTitle()}
           </h2>
-        </div>
-
-        {/* Search */}
-        <div className="flex items-center space-x-2">
-          <div className="relative flex-1">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              placeholder="Search notes..."
-              className="w-full px-3 py-2 pr-8 bg-solarized-base01 border border-solarized-base00 rounded text-sm text-solarized-base2 placeholder-solarized-base0 focus:outline-none focus:border-solarized-blue focus:bg-solarized-base02"
-            />
-            {searchTerm && (
-              <button
-                onClick={clearSearch}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-solarized-base0 hover:text-solarized-base3 transition-colors border-0 bg-transparent hover:bg-transparent p-1"
-                title="Clear search"
-              >
-                <Icons.X size={14} />
-              </button>
-            )}
-          </div>
           {!isTrashView && (
             <button
               onClick={onNewNote}
-              className="p-2 bg-solarized-blue text-solarized-base5 rounded hover:bg-solarized-green-hover transition-colors"
+              className="w-8 h-8 bg-theme-accent-primary text-theme-text-primary rounded-full flex items-center justify-center hover:bg-theme-accent-green transition-colors"
               title="New Note"
             >
               <Icons.Plus size={16} />
@@ -81,12 +94,40 @@ const NotesList = ({
           )}
         </div>
 
+        {/* Search */}
+        <div className="flex items-center space-x-2">
+          <div className="relative flex-1">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-theme-text-muted">
+              <Icons.Search size={14} />
+            </div>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              placeholder="Search notes..."
+              className="w-full pl-9 pr-8 py-1.5 theme-bg-tertiary border border-theme-border-secondary rounded text-sm text-theme-text-secondary placeholder-theme-text-muted focus:outline-none focus:border-theme-accent-primary focus:theme-bg-secondary"
+            />
+            {searchTerm && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-theme-text-muted hover:text-theme-text-secondary transition-colors border-0 bg-transparent hover:bg-transparent p-1"
+                title="Clear search"
+              >
+                <Icons.X size={14} />
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Search Results Info */}
         {searchTerm && (
-          <div className="mt-2 text-xs text-solarized-base0">
+          <div className="mt-2 text-xs text-theme-text-muted">
             {filteredNotes.length} of {notes.length} notes
             {filteredNotes.length === 0 && searchTerm && (
-              <span className="text-solarized-orange"> - No matches found</span>
+              <span className="text-theme-accent-orange">
+                {' '}
+                - No matches found
+              </span>
             )}
           </div>
         )}
@@ -99,25 +140,109 @@ const NotesList = ({
             <div
               key={note.id}
               onClick={isTrashView ? undefined : () => onOpenNote(note.id)}
+              onContextMenu={e => {
+                const items = isTrashView
+                  ? [
+                      {
+                        type: 'item',
+                        label: 'Restore Note',
+                        icon: <Icons.RefreshCw size={14} />,
+                        onClick: () => onRestoreNote(note),
+                      },
+                      {
+                        type: 'separator',
+                      },
+                      {
+                        type: 'item',
+                        label: 'Delete Permanently',
+                        icon: <Icons.Trash size={14} />,
+                        onClick: () => onPermanentDelete(note.id),
+                      },
+                    ]
+                  : [
+                      {
+                        type: 'item',
+                        label: 'Open Note',
+                        icon: <Icons.FileEdit size={14} />,
+                        onClick: () => onOpenNote(note.id),
+                        shortcut: 'Enter',
+                      },
+                      {
+                        type: 'separator',
+                      },
+                      {
+                        type: 'item',
+                        label: note.isPinned ? 'Unpin Note' : 'Pin Note',
+                        icon: <Icons.Star size={14} />,
+                        onClick: () => {
+                          // Handle pin/unpin logic here
+                          console.log('Pin/unpin note:', note.id)
+                        },
+                        shortcut: 'Ctrl+P',
+                      },
+                      {
+                        type: 'item',
+                        label: 'Duplicate Note',
+                        icon: <Icons.Copy size={14} />,
+                        onClick: () => {
+                          // Handle duplicate logic here
+                          console.log('Duplicate note:', note.id)
+                        },
+                        shortcut: 'Ctrl+D',
+                      },
+                      {
+                        type: 'separator',
+                      },
+                      {
+                        type: 'item',
+                        label: 'Move to Trash',
+                        icon: <Icons.Trash size={14} />,
+                        onClick: () => onDeleteNote(note),
+                        shortcut: 'Delete',
+                      },
+                    ]
+                showContextMenu(e, items)
+              }}
               className={`p-3 rounded transition-colors group ${
                 isTrashView ? 'cursor-default' : 'cursor-pointer'
               } ${
                 selectedNoteId === note.id
-                  ? 'bg-solarized-blue text-solarized-base5'
-                  : 'hover:bg-solarized-base01'
+                  ? 'bg-theme-accent-primary text-theme-text-primary'
+                  : 'hover:theme-bg-tertiary'
               }`}
+              style={{
+                backgroundColor:
+                  selectedNoteId === note.id
+                    ? 'var(--color-active-bg)'
+                    : undefined,
+                borderLeft:
+                  selectedNoteId === note.id
+                    ? '2px solid var(--color-active-border)'
+                    : '2px solid transparent',
+              }}
+              onMouseEnter={e => {
+                if (selectedNoteId !== note.id) {
+                  e.currentTarget.style.backgroundColor =
+                    'var(--color-hover-bg)'
+                }
+              }}
+              onMouseLeave={e => {
+                if (selectedNoteId !== note.id) {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                }
+              }}
             >
               {/* Note Header */}
               <div className="flex items-start justify-between mb-1">
                 <h3
                   className={`font-medium text-sm line-clamp-1 ${
                     selectedNoteId === note.id
-                      ? 'text-solarized-base5'
-                      : 'text-solarized-base4'
+                      ? 'text-theme-text-primary'
+                      : 'text-theme-text-primary'
                   }`}
                 >
                   {note.isPinned && (
-                    <span className="text-solarized-yellow mr-1">*</span>
+                    <span className="text-theme-accent-yellow mr-1">*</span>
                   )}
                   {note.title}
                 </h3>
@@ -125,8 +250,8 @@ const NotesList = ({
                   <span
                     className={`text-xs ${
                       selectedNoteId === note.id
-                        ? 'text-solarized-base5'
-                        : 'text-solarized-base0'
+                        ? 'text-theme-text-primary'
+                        : 'text-theme-text-muted'
                     }`}
                   >
                     {note.date}
@@ -140,7 +265,7 @@ const NotesList = ({
                           e.stopPropagation()
                           onDeleteNote(note)
                         }}
-                        className="p-1 text-solarized-base1 hover:text-solarized-red hover:bg-solarized-base01 rounded transition-colors"
+                        className="p-1 text-theme-text-tertiary hover:text-theme-accent-red hover:theme-bg-tertiary rounded transition-colors"
                         title="Delete note"
                       >
                         <Icons.Trash size={12} />
@@ -154,8 +279,8 @@ const NotesList = ({
               <p
                 className={`text-xs line-clamp-2 mb-2 ${
                   selectedNoteId === note.id
-                    ? 'text-solarized-base5'
-                    : 'text-solarized-base1'
+                    ? 'text-theme-text-primary'
+                    : 'text-theme-text-tertiary'
                 }`}
               >
                 {note.preview}
@@ -167,8 +292,8 @@ const NotesList = ({
                   <span
                     className={`text-xs px-2 py-1 rounded ${
                       selectedNoteId === note.id
-                        ? 'bg-solarized-base5 text-solarized-blue'
-                        : 'bg-solarized-base01 text-solarized-base1'
+                        ? 'bg-theme-text-primary text-theme-accent-primary'
+                        : 'theme-bg-tertiary text-theme-text-tertiary'
                     }`}
                   >
                     {note.notebook}
@@ -192,8 +317,8 @@ const NotesList = ({
                       <span
                         className={`text-xs capitalize ${
                           selectedNoteId === note.id
-                            ? 'text-solarized-base5'
-                            : 'text-solarized-base1'
+                            ? 'text-theme-text-primary'
+                            : 'text-theme-text-tertiary'
                         }`}
                       >
                         {note.status.replace('-', ' ')}
@@ -209,8 +334,8 @@ const NotesList = ({
                         key={tag}
                         className={`text-xs px-1 py-0.5 rounded ${
                           selectedNoteId === note.id
-                            ? 'text-solarized-base5'
-                            : 'text-solarized-blue'
+                            ? 'text-theme-text-primary'
+                            : 'text-theme-accent-primary'
                         }`}
                       >
                         #{tag}
@@ -220,8 +345,8 @@ const NotesList = ({
                       <span
                         className={`text-xs ${
                           selectedNoteId === note.id
-                            ? 'text-solarized-base5'
-                            : 'text-solarized-base0'
+                            ? 'text-theme-text-primary'
+                            : 'text-theme-text-muted'
                         }`}
                       >
                         +{note.tags.length - 2}
@@ -231,7 +356,7 @@ const NotesList = ({
                 )}
 
                 {isTrashView && (
-                  <div className="text-xs text-solarized-base0">
+                  <div className="text-xs text-theme-text-muted">
                     Trashed: {new Date(note.trashedAt).toLocaleDateString()}
                   </div>
                 )}
@@ -239,13 +364,13 @@ const NotesList = ({
 
               {/* Trash Actions */}
               {isTrashView && (
-                <div className="flex items-center justify-end space-x-2 mt-3 pt-2 border-t border-solarized-base01">
+                <div className="flex items-center justify-end space-x-2 mt-3 pt-2 border-t border-theme-border-primary">
                   <button
                     onClick={e => {
                       e.stopPropagation()
                       onRestoreNote?.(note)
                     }}
-                    className="px-2 py-1 text-xs bg-solarized-green text-solarized-base5 rounded hover:bg-solarized-cyan transition-colors border-0"
+                    className="px-2 py-1 text-xs bg-theme-accent-green text-theme-text-primary rounded hover:bg-theme-accent-cyan transition-colors border-0"
                     title="Restore note"
                   >
                     Restore
@@ -255,7 +380,7 @@ const NotesList = ({
                       e.stopPropagation()
                       onPermanentDelete?.(note)
                     }}
-                    className="px-2 py-1 text-xs bg-solarized-red text-solarized-base5 rounded hover:bg-red-600 transition-colors border-0"
+                    className="px-2 py-1 text-xs bg-theme-accent-red text-theme-text-primary rounded hover:bg-red-600 transition-colors border-0"
                     title="Delete permanently"
                   >
                     Delete
@@ -268,14 +393,46 @@ const NotesList = ({
       </div>
 
       {/* Footer */}
-      <div className="p-3 border-t border-solarized-base01 text-xs text-solarized-base0">
+      <div className="p-3 border-t border-theme-border-primary text-xs text-theme-text-muted">
         {searchTerm
           ? `${filteredNotes.length} of ${notes.length}`
           : `${notes.length}`}{' '}
         notes
       </div>
+
+      {/* Context Menu */}
+      <ContextMenu
+        isVisible={contextMenu.isVisible}
+        position={contextMenu.position}
+        items={contextMenu.items}
+        onClose={hideContextMenu}
+      />
     </div>
   )
+}
+
+NotesList.propTypes = {
+  notes: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      title: PropTypes.string,
+      content: PropTypes.string,
+      preview: PropTypes.string,
+      notebook: PropTypes.string,
+      date: PropTypes.string,
+      tags: PropTypes.arrayOf(PropTypes.string),
+      isPinned: PropTypes.bool,
+      status: PropTypes.string,
+      trashedAt: PropTypes.string,
+    })
+  ),
+  onOpenNote: PropTypes.func,
+  onNewNote: PropTypes.func,
+  selectedNoteId: PropTypes.string,
+  isTrashView: PropTypes.bool,
+  onRestoreNote: PropTypes.func,
+  onPermanentDelete: PropTypes.func,
+  onDeleteNote: PropTypes.func,
 }
 
 export default NotesList

@@ -1,6 +1,8 @@
 # Multi-stage build for production optimization
 FROM node:18-alpine AS base
 WORKDIR /app
+# Install curl for healthcheck in development
+RUN apk add --no-cache curl
 
 # Install dependencies only when needed
 FROM base AS deps

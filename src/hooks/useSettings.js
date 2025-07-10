@@ -8,12 +8,30 @@ const defaultSettings = {
   autoSaveInterval: 30, // seconds
 
   // Editor
-  fontSize: 14,
-  fontFamily: 'Fira Code',
+  fontSize: 15,
+  fontFamily: 'SF Mono',
   tabSize: 2,
   wordWrap: true,
   lineNumbers: true,
   minimap: false,
+
+  // Typography
+  uiFontFamily: 'system-ui',
+  uiFontSize: 14,
+  markdownFontFamily: 'system-ui',
+  markdownFontSize: 16,
+  lineHeight: 1.6,
+
+  // Additional typography settings
+  compactMode: false,
+  showSidebar: true,
+  animationSpeed: 'normal',
+  confirmDeletes: true,
+  pluginsEnabled: false,
+  autoUpdatePlugins: false,
+  defaultExportFormat: 'markdown',
+  exportPath: '~/Downloads',
+  vimMode: false,
 
   // Interface
   sidebarWidth: 240,
@@ -25,44 +43,133 @@ const defaultSettings = {
   includeMetadata: true,
 }
 
-export const useSettings = () => {
-  const [settings, setSettings] = useState(() => {
-    try {
-      const saved = localStorage.getItem('nototo-settings')
-      return saved
-        ? { ...defaultSettings, ...JSON.parse(saved) }
-        : defaultSettings
-    } catch (error) {
-      console.warn('Failed to load settings:', error)
-      return defaultSettings
-    }
-  })
+// Global settings store
+let globalSettings = null
+const subscribers = new Set()
 
-  // Save settings to localStorage whenever they change
-  useEffect(() => {
-    try {
-      localStorage.setItem('nototo-settings', JSON.stringify(settings))
-    } catch (error) {
-      console.warn('Failed to save settings:', error)
+const loadSettings = () => {
+  if (globalSettings) return globalSettings
+
+  try {
+    const saved = localStorage.getItem('nototo-settings')
+    globalSettings = saved
+      ? { ...defaultSettings, ...JSON.parse(saved) }
+      : defaultSettings
+  } catch (error) {
+    console.warn('Failed to load settings:', error)
+    globalSettings = defaultSettings
+  }
+
+  // Initialize CSS variables
+  const root = document.documentElement
+  root.style.setProperty(
+    '--font-family-editor',
+    globalSettings.fontFamily || defaultSettings.fontFamily
+  )
+  root.style.setProperty(
+    '--font-size-editor',
+    `${globalSettings.fontSize || defaultSettings.fontSize}px`
+  )
+  root.style.setProperty(
+    '--font-family-ui',
+    globalSettings.uiFontFamily || defaultSettings.uiFontFamily
+  )
+  root.style.setProperty(
+    '--font-size-ui',
+    `${globalSettings.uiFontSize || defaultSettings.uiFontSize}px`
+  )
+  root.style.setProperty(
+    '--font-family-markdown',
+    globalSettings.markdownFontFamily || defaultSettings.markdownFontFamily
+  )
+  root.style.setProperty(
+    '--font-size-markdown',
+    `${globalSettings.markdownFontSize || defaultSettings.markdownFontSize}px`
+  )
+  root.style.setProperty(
+    '--line-height',
+    globalSettings.lineHeight || defaultSettings.lineHeight
+  )
+
+  return globalSettings
+}
+
+const saveSettings = newSettings => {
+  try {
+    localStorage.setItem('nototo-settings', JSON.stringify(newSettings))
+    globalSettings = newSettings
+
+    // Update CSS variables for typography
+    const root = document.documentElement
+    if (newSettings.fontFamily) {
+      root.style.setProperty('--font-family-editor', newSettings.fontFamily)
     }
-  }, [settings])
+    if (newSettings.fontSize) {
+      root.style.setProperty('--font-size-editor', `${newSettings.fontSize}px`)
+    }
+    if (newSettings.uiFontFamily) {
+      root.style.setProperty('--font-family-ui', newSettings.uiFontFamily)
+    }
+    if (newSettings.uiFontSize) {
+      root.style.setProperty('--font-size-ui', `${newSettings.uiFontSize}px`)
+    }
+    if (newSettings.markdownFontFamily) {
+      root.style.setProperty(
+        '--font-family-markdown',
+        newSettings.markdownFontFamily
+      )
+    }
+    if (newSettings.markdownFontSize) {
+      root.style.setProperty(
+        '--font-size-markdown',
+        `${newSettings.markdownFontSize}px`
+      )
+    }
+    if (newSettings.lineHeight) {
+      root.style.setProperty('--line-height', newSettings.lineHeight)
+    }
+
+    // Notify all subscribers
+    subscribers.forEach(callback => callback(newSettings))
+  } catch (error) {
+    console.warn('Failed to save settings:', error)
+  }
+}
+
+export const useSettings = () => {
+  const [settings, setSettings] = useState(() => loadSettings())
+
+  // Subscribe to global settings changes
+  useEffect(() => {
+    const callback = newSettings => {
+      setSettings(newSettings)
+    }
+
+    subscribers.add(callback)
+
+    return () => {
+      subscribers.delete(callback)
+    }
+  }, [])
 
   const updateSetting = (key, value) => {
-    setSettings(prev => ({
-      ...prev,
+    const newSettings = {
+      ...globalSettings,
       [key]: value,
-    }))
+    }
+    saveSettings(newSettings)
   }
 
   const updateSettings = newSettings => {
-    setSettings(prev => ({
-      ...prev,
+    const mergedSettings = {
+      ...globalSettings,
       ...newSettings,
-    }))
+    }
+    saveSettings(mergedSettings)
   }
 
   const resetSettings = () => {
-    setSettings(defaultSettings)
+    saveSettings(defaultSettings)
   }
 
   const getSetting = key => {

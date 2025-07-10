@@ -86,88 +86,171 @@ const MarkdownEditor = ({
   const autoSaveTimeoutRef = useRef(null)
   const editorMenuRef = useRef(null)
 
-  // Solarized Dark theme for Monaco with enhanced markdown support
-  const solarizedTheme = {
+  // Get CSS color values dynamically
+  const getCSSColor = variable => {
+    if (typeof window === 'undefined') return '#839496' // fallback for SSR
+    const value = getComputedStyle(document.documentElement)
+      .getPropertyValue(variable)
+      .trim()
+    return value || '#839496'
+  }
+
+  // Dynamic theme for Monaco with enhanced markdown support
+  const getDynamicTheme = () => ({
     base: 'vs-dark',
     inherit: true,
     rules: [
       // Markdown specific tokens
-      { token: 'heading', foreground: 'fdf6e3', fontStyle: 'bold' },
-      { token: 'heading.1', foreground: 'fdf6e3', fontStyle: 'bold' },
-      { token: 'heading.2', foreground: 'eee8d5', fontStyle: 'bold' },
-      { token: 'heading.3', foreground: '93a1a1', fontStyle: 'bold' },
-      { token: 'heading.4', foreground: '839496', fontStyle: 'bold' },
-      { token: 'heading.5', foreground: '657b83', fontStyle: 'bold' },
-      { token: 'heading.6', foreground: '586e75', fontStyle: 'bold' },
+      {
+        token: 'heading',
+        foreground: getCSSColor('--color-base5'),
+        fontStyle: 'bold',
+      },
+      {
+        token: 'heading.1',
+        foreground: getCSSColor('--color-base5'),
+        fontStyle: 'bold',
+      },
+      {
+        token: 'heading.2',
+        foreground: getCSSColor('--color-base4'),
+        fontStyle: 'bold',
+      },
+      {
+        token: 'heading.3',
+        foreground: getCSSColor('--color-base1'),
+        fontStyle: 'bold',
+      },
+      {
+        token: 'heading.4',
+        foreground: getCSSColor('--color-base0'),
+        fontStyle: 'bold',
+      },
+      {
+        token: 'heading.5',
+        foreground: getCSSColor('--color-base0'),
+        fontStyle: 'bold',
+      },
+      {
+        token: 'heading.6',
+        foreground: getCSSColor('--color-base0'),
+        fontStyle: 'bold',
+      },
 
       // Markdown formatting
-      { token: 'emphasis', foreground: '93a1a1', fontStyle: 'italic' },
-      { token: 'strong', foreground: 'eee8d5', fontStyle: 'bold' },
-      { token: 'markup.bold', foreground: 'eee8d5', fontStyle: 'bold' },
-      { token: 'markup.italic', foreground: '93a1a1', fontStyle: 'italic' },
+      {
+        token: 'emphasis',
+        foreground: getCSSColor('--color-base1'),
+        fontStyle: 'italic',
+      },
+      {
+        token: 'strong',
+        foreground: getCSSColor('--color-base4'),
+        fontStyle: 'bold',
+      },
+      {
+        token: 'markup.bold',
+        foreground: getCSSColor('--color-base4'),
+        fontStyle: 'bold',
+      },
+      {
+        token: 'markup.italic',
+        foreground: getCSSColor('--color-base1'),
+        fontStyle: 'italic',
+      },
       {
         token: 'markup.strikethrough',
-        foreground: '586e75',
+        foreground: getCSSColor('--color-base0'),
         fontStyle: 'strikethrough',
       },
 
       // Code and quotes
       {
         token: 'markup.inline.raw',
-        foreground: '2aa198',
+        foreground: getCSSColor('--color-cyan'),
         background: '002B36',
       },
       {
         token: 'markup.fenced_code',
-        foreground: '2aa198',
+        foreground: getCSSColor('--color-cyan'),
         background: '002B36',
       },
-      { token: 'markup.quote', foreground: '93a1a1', fontStyle: 'italic' },
+      {
+        token: 'markup.quote',
+        foreground: getCSSColor('--color-base1'),
+        fontStyle: 'italic',
+      },
 
       // Links
-      { token: 'markup.underline.link', foreground: '268bd2' },
-      { token: 'markup.link', foreground: '268bd2' },
-      { token: 'meta.link', foreground: '657b83' },
+      {
+        token: 'markup.underline.link',
+        foreground: getCSSColor('--color-blue'),
+      },
+      { token: 'markup.link', foreground: getCSSColor('--color-blue') },
+      { token: 'meta.link', foreground: getCSSColor('--color-base0') },
 
       // Lists
-      { token: 'markup.list', foreground: 'eee8d5' },
-      { token: 'markup.list.numbered', foreground: 'eee8d5' },
-      { token: 'markup.list.unnumbered', foreground: 'eee8d5' },
+      { token: 'markup.list', foreground: getCSSColor('--color-base4') },
+      {
+        token: 'markup.list.numbered',
+        foreground: getCSSColor('--color-base4'),
+      },
+      {
+        token: 'markup.list.unnumbered',
+        foreground: getCSSColor('--color-base4'),
+      },
 
       // General tokens
-      { token: 'comment', foreground: '586e75', fontStyle: 'italic' },
-      { token: 'string', foreground: '2aa198' },
-      { token: 'number', foreground: 'd33682' },
-      { token: 'keyword', foreground: '859900' },
-      { token: 'delimiter', foreground: '93a1a1' },
-      { token: 'punctuation', foreground: '93a1a1' },
+      {
+        token: 'comment',
+        foreground: getCSSColor('--color-base0'),
+        fontStyle: 'italic',
+      },
+      { token: 'string', foreground: getCSSColor('--color-cyan') },
+      { token: 'number', foreground: getCSSColor('--color-red') },
+      { token: 'keyword', foreground: getCSSColor('--color-green') },
+      { token: 'delimiter', foreground: getCSSColor('--color-base1') },
+      { token: 'punctuation', foreground: getCSSColor('--color-base1') },
     ],
     colors: {
-      'editor.background': '#00141A',
-      'editor.foreground': '#839496',
-      'editor.lineHighlightBackground': '#002B36',
-      'editor.selectionBackground': '#073642',
-      'editor.inactiveSelectionBackground': '#002B36',
-      'editorCursor.foreground': '#93a1a1',
-      'editorLineNumber.foreground': '#586e75',
-      'editorLineNumber.activeForeground': '#93a1a1',
-      'editor.selectionHighlightBackground': '#073642',
-      'editor.wordHighlightBackground': '#073642',
-      'editor.findMatchBackground': '#268bd2',
-      'editor.findMatchHighlightBackground': '#2aa198',
-      'editorBracketMatch.background': '#073642',
-      'editorBracketMatch.border': '#268bd2',
-      'editorIndentGuide.background': '#073642',
-      'editorIndentGuide.activeBackground': '#268bd2',
-      'editorRuler.foreground': '#073642',
+      'editor.background': getCSSColor('--color-base03'),
+      'editor.foreground': getCSSColor('--color-base0'),
+      'editor.lineHighlightBackground': getCSSColor('--color-base02'),
+      'editor.selectionBackground': getCSSColor('--color-base01'),
+      'editor.inactiveSelectionBackground': getCSSColor('--color-base02'),
+      'editorCursor.foreground': getCSSColor('--color-base1'),
+      'editorLineNumber.foreground': getCSSColor('--color-base0'),
+      'editorLineNumber.activeForeground': getCSSColor('--color-base1'),
+      'editor.selectionHighlightBackground': getCSSColor('--color-base01'),
+      'editor.wordHighlightBackground': getCSSColor('--color-base01'),
+      'editor.findMatchBackground': getCSSColor('--color-blue'),
+      'editor.findMatchHighlightBackground': getCSSColor('--color-cyan'),
+      'editorBracketMatch.background': getCSSColor('--color-base01'),
+      'editorBracketMatch.border': getCSSColor('--color-blue'),
+      'editorIndentGuide.background': getCSSColor('--color-base01'),
+      'editorIndentGuide.activeBackground': getCSSColor('--color-blue'),
+      'editorRuler.foreground': getCSSColor('--color-base01'),
     },
-  }
+  })
 
   useEffect(() => {
     // Define theme when Monaco is available
-    monaco.editor.defineTheme('solarized-dark', solarizedTheme)
+    const dynamicTheme = getDynamicTheme()
+    monaco.editor.defineTheme('dynamic-theme', dynamicTheme)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [settings.theme])
+
+  // Update theme when settings change
+  useEffect(() => {
+    if (editorRef.current) {
+      // Small delay to ensure CSS variables are updated
+      setTimeout(() => {
+        const dynamicTheme = getDynamicTheme()
+        monaco.editor.defineTheme('dynamic-theme', dynamicTheme)
+        monaco.editor.setTheme('dynamic-theme')
+      }, 100)
+    }
+  }, [settings.theme])
 
   const handleSave = useCallback(
     (isAutoSave = false) => {
@@ -283,8 +366,9 @@ const MarkdownEditor = ({
     window.initVimMode = initVimMode
 
     // Define theme using monaco instance
-    monacoInstance.editor.defineTheme('solarized-dark', solarizedTheme)
-    monacoInstance.editor.setTheme('solarized-dark')
+    const dynamicTheme = getDynamicTheme()
+    monacoInstance.editor.defineTheme('dynamic-theme', dynamicTheme)
+    monacoInstance.editor.setTheme('dynamic-theme')
 
     // Keyboard shortcuts
     editor.addCommand(
@@ -342,7 +426,7 @@ const MarkdownEditor = ({
 
   const getPreviewHtml = () => {
     if (!content)
-      return '<p class="text-solarized-base1">Start writing in markdown...</p>'
+      return '<p class="text-theme-text-tertiary">Start writing in markdown...</p>'
 
     const html = marked(content, {
       breaks: true,
@@ -360,16 +444,16 @@ const MarkdownEditor = ({
 
   return (
     <div
-      className={`${isFullscreen ? 'fixed inset-0 z-50' : 'w-full h-full'} bg-solarized-base03 flex flex-col font-mono`}
+      className={`${isFullscreen ? 'fixed inset-0 z-50' : 'w-full h-full'} theme-bg-primary flex flex-col editor-font`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-solarized-base01 bg-solarized-base02">
+      <div className="flex items-center justify-between p-4 border-b border-theme-border-primary theme-bg-secondary">
         <div className="flex items-center space-x-4 flex-1">
           <input
             type="text"
             value={title}
             onChange={e => setTitle(e.target.value)}
-            className="text-lg font-medium bg-transparent text-solarized-base5 border-none outline-none flex-1"
+            className="text-lg font-medium bg-transparent text-theme-text-primary border-none outline-none flex-1"
             placeholder="Note title..."
           />
         </div>
@@ -378,14 +462,14 @@ const MarkdownEditor = ({
           <div className="relative" ref={editorMenuRef}>
             <button
               onClick={() => setShowEditorMenu(!showEditorMenu)}
-              className="p-2 text-solarized-base1 hover:text-solarized-base3 hover:bg-solarized-base01 rounded transition-colors"
+              className="p-2 text-theme-text-tertiary hover:text-theme-text-secondary hover:theme-bg-tertiary rounded transition-colors"
               title="More options"
             >
               <Icons.MoreVertical size={16} />
             </button>
 
             {showEditorMenu && (
-              <div className="absolute right-0 top-10 bg-solarized-base02 border border-solarized-base01 rounded shadow-lg py-1 w-48 z-10">
+              <div className="absolute right-0 top-10 theme-bg-secondary border border-theme-border-primary rounded shadow-lg py-1 w-48 z-10">
                 <button
                   onClick={() => {
                     handleSave(false)
@@ -393,8 +477,8 @@ const MarkdownEditor = ({
                   }}
                   className={`w-full px-3 py-2 text-left text-sm transition-colors ${
                     hasUnsavedChanges
-                      ? 'text-solarized-orange hover:bg-solarized-base01'
-                      : 'text-solarized-base3 hover:bg-solarized-base01'
+                      ? 'text-theme-accent-orange hover:theme-bg-tertiary'
+                      : 'text-theme-text-secondary hover:theme-bg-tertiary'
                   }`}
                 >
                   {hasUnsavedChanges ? 'Save Changes' : 'Saved'}
@@ -405,7 +489,7 @@ const MarkdownEditor = ({
                     setShowTagManager(true)
                     setShowEditorMenu(false)
                   }}
-                  className="w-full px-3 py-2 text-left text-sm text-solarized-base3 hover:bg-solarized-base01 transition-colors"
+                  className="w-full px-3 py-2 text-left text-sm text-theme-text-secondary hover:theme-bg-tertiary transition-colors"
                 >
                   Manage Tags
                 </button>
@@ -415,7 +499,7 @@ const MarkdownEditor = ({
                     setShowNotebookSelector(true)
                     setShowEditorMenu(false)
                   }}
-                  className="w-full px-3 py-2 text-left text-sm text-solarized-base3 hover:bg-solarized-base01 transition-colors"
+                  className="w-full px-3 py-2 text-left text-sm text-theme-text-secondary hover:theme-bg-tertiary transition-colors"
                 >
                   Change Notebook
                 </button>
@@ -425,19 +509,19 @@ const MarkdownEditor = ({
                     setShowStatusSelector(true)
                     setShowEditorMenu(false)
                   }}
-                  className="w-full px-3 py-2 text-left text-sm text-solarized-base3 hover:bg-solarized-base01 transition-colors"
+                  className="w-full px-3 py-2 text-left text-sm text-theme-text-secondary hover:theme-bg-tertiary transition-colors"
                 >
                   Change Status
                 </button>
 
-                <div className="border-t border-solarized-base01 my-1"></div>
+                <div className="border-t border-theme-border-primary my-1"></div>
 
                 <button
                   onClick={() => {
                     setShowExportDialog(true)
                     setShowEditorMenu(false)
                   }}
-                  className="w-full px-3 py-2 text-left text-sm text-solarized-base3 hover:bg-solarized-base01 transition-colors"
+                  className="w-full px-3 py-2 text-left text-sm text-theme-text-secondary hover:theme-bg-tertiary transition-colors"
                 >
                   Export Note
                 </button>
@@ -462,12 +546,12 @@ const MarkdownEditor = ({
                     }
                     setShowEditorMenu(false)
                   }}
-                  className="w-full px-3 py-2 text-left text-sm text-solarized-base3 hover:bg-solarized-base01 transition-colors"
+                  className="w-full px-3 py-2 text-left text-sm text-theme-text-secondary hover:theme-bg-tertiary transition-colors"
                 >
                   Copy Markdown
                 </button>
 
-                <div className="border-t border-solarized-base01 my-1"></div>
+                <div className="border-t border-theme-border-primary my-1"></div>
 
                 {onClose && (
                   <button
@@ -475,7 +559,7 @@ const MarkdownEditor = ({
                       onClose()
                       setShowEditorMenu(false)
                     }}
-                    className="w-full px-3 py-2 text-left text-sm text-solarized-base3 hover:bg-solarized-base01 transition-colors"
+                    className="w-full px-3 py-2 text-left text-sm text-theme-text-secondary hover:theme-bg-tertiary transition-colors"
                   >
                     Close Editor
                   </button>
@@ -487,54 +571,54 @@ const MarkdownEditor = ({
       </div>
 
       {/* Formatting Toolbar */}
-      <div className="px-4 py-2 bg-solarized-base02 border-b border-solarized-base01">
+      <div className="px-4 py-2 theme-bg-secondary border-b border-theme-border-primary">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <button
               onClick={formatBold}
-              className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors"
+              className="px-2 py-1 text-xs border border-theme-border-primary text-theme-text-tertiary hover:theme-bg-tertiary rounded transition-colors"
               title="Bold (Ctrl+B)"
             >
               B
             </button>
             <button
               onClick={formatItalic}
-              className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors italic"
+              className="px-2 py-1 text-xs border border-theme-border-primary text-theme-text-tertiary hover:theme-bg-tertiary rounded transition-colors italic"
               title="Italic (Ctrl+I)"
             >
               I
             </button>
             <button
               onClick={formatCode}
-              className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors font-mono"
+              className="px-2 py-1 text-xs border border-theme-border-primary text-theme-text-tertiary hover:theme-bg-tertiary rounded transition-colors editor-font"
               title="Code"
             >
               Code
             </button>
             <button
               onClick={formatLink}
-              className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors"
+              className="px-2 py-1 text-xs border border-theme-border-primary text-theme-text-tertiary hover:theme-bg-tertiary rounded transition-colors"
               title="Link"
             >
               Link
             </button>
             <button
               onClick={formatList}
-              className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors"
+              className="px-2 py-1 text-xs border border-theme-border-primary text-theme-text-tertiary hover:theme-bg-tertiary rounded transition-colors"
               title="List"
             >
               List
             </button>
             <button
               onClick={formatQuote}
-              className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors"
+              className="px-2 py-1 text-xs border border-theme-border-primary text-theme-text-tertiary hover:theme-bg-tertiary rounded transition-colors"
               title="Quote"
             >
               Quote
             </button>
             <button
               onClick={formatHeading}
-              className="px-2 py-1 text-xs border border-solarized-base01 text-solarized-base1 hover:bg-solarized-base01 rounded transition-colors"
+              className="px-2 py-1 text-xs border border-theme-border-primary text-theme-text-tertiary hover:theme-bg-tertiary rounded transition-colors"
               title="Heading"
             >
               H
@@ -546,10 +630,10 @@ const MarkdownEditor = ({
             {/* Split Preview Toggle */}
             <button
               onClick={togglePreview}
-              className={`px-2 py-1 text-xs border border-solarized-base01 rounded transition-colors flex items-center space-x-1 ${
+              className={`px-2 py-1 text-xs border border-theme-border-primary rounded transition-colors flex items-center space-x-1 ${
                 showPreview
-                  ? 'bg-solarized-blue text-solarized-base03'
-                  : 'text-solarized-base1 hover:bg-solarized-base01'
+                  ? 'bg-theme-accent-primary text-theme-bg-primary'
+                  : 'text-theme-text-tertiary hover:theme-bg-tertiary'
               }`}
               title={showPreview ? 'Hide Split Preview' : 'Show Split Preview'}
             >
@@ -563,7 +647,7 @@ const MarkdownEditor = ({
                 return (
                   <button
                     onClick={onCycleLayoutMode}
-                    className="px-2 py-1 text-xs border border-solarized-blue rounded transition-colors flex items-center space-x-1 bg-solarized-blue text-solarized-base03 hover:bg-solarized-blue/80"
+                    className="px-2 py-1 text-xs border border-theme-accent-primary rounded transition-colors flex items-center space-x-1 bg-theme-accent-primary text-theme-bg-primary hover:bg-theme-accent-primary/80"
                     title={modeInfo.title}
                   >
                     {modeInfo.icon}
@@ -579,7 +663,7 @@ const MarkdownEditor = ({
       <div className="flex-1 flex overflow-hidden relative min-h-0">
         {/* Editor */}
         <div
-          className={`${showPreview ? 'w-1/2 border-r border-solarized-base01' : 'w-full'} flex flex-col`}
+          className={`${showPreview ? 'w-1/2 border-r border-theme-border-primary' : 'w-full'} flex flex-col`}
         >
           <div className="flex-1" style={{ minHeight: '400px' }}>
             <Editor
@@ -588,11 +672,11 @@ const MarkdownEditor = ({
               value={content}
               onChange={value => setContent(value || '')}
               onMount={handleEditorDidMount}
-              theme="solarized-dark"
+              theme="dynamic-theme"
               options={{
                 ...monacoOptions,
                 fontSize: settings.fontSize || 14,
-                fontFamily: `${settings.fontFamily || 'JetBrains Mono'}, Monaco, Consolas, monospace`,
+                fontFamily: `${settings.fontFamily || 'SF Mono'}, Monaco, Cascadia Code, Roboto Mono, Consolas, Courier New, monospace`,
                 lineNumbers: settings.lineNumbers ? 'on' : 'off',
                 minimap: { enabled: settings.minimap || false },
                 wordWrap: settings.wordWrap ? 'on' : 'off',
@@ -644,11 +728,12 @@ const MarkdownEditor = ({
 
         {/* Preview */}
         {showPreview && (
-          <div className="w-1/2 overflow-y-auto bg-solarized-base03">
+          <div className="w-1/2 overflow-y-auto theme-bg-primary">
             <div
-              className="p-6 prose prose-invert max-w-none"
+              key={settings.theme}
+              className="p-6 prose max-w-none"
               style={{
-                color: '#839496',
+                color: 'var(--color-base0)',
                 lineHeight: '1.7',
               }}
               dangerouslySetInnerHTML={{ __html: getPreviewHtml() }}
@@ -660,7 +745,7 @@ const MarkdownEditor = ({
       </div>
 
       {/* Status Bar */}
-      <div className="px-4 py-2 bg-solarized-base02 border-t border-solarized-base01 text-xs text-solarized-base0 flex items-center justify-between flex-shrink-0">
+      <div className="px-4 py-2 theme-bg-secondary border-t border-theme-border-primary text-xs text-theme-text-muted flex items-center justify-between flex-shrink-0">
         <div className="flex items-center space-x-4">
           <span>Lines: {content.split('\n').length}</span>
           <span>
@@ -674,8 +759,8 @@ const MarkdownEditor = ({
           <span
             className={
               hasUnsavedChanges
-                ? 'text-solarized-orange'
-                : 'text-solarized-green'
+                ? 'text-theme-accent-orange'
+                : 'text-theme-accent-green'
             }
           >
             {hasUnsavedChanges ? 'Unsaved' : 'Saved'}
@@ -696,14 +781,14 @@ const MarkdownEditor = ({
       {/* Notebook Selector Modal */}
       {showNotebookSelector && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-solarized-base02 border border-solarized-base01 rounded-lg shadow-xl p-6 w-80">
+          <div className="theme-bg-secondary border border-theme-border-primary rounded-lg shadow-xl p-6 w-80">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-solarized-base5">
+              <h2 className="text-lg font-semibold text-theme-text-primary">
                 Change Notebook
               </h2>
               <button
                 onClick={() => setShowNotebookSelector(false)}
-                className="text-solarized-base1 hover:text-solarized-base3 transition-colors border-0 bg-transparent hover:bg-transparent p-1"
+                className="text-theme-text-tertiary hover:text-theme-text-secondary transition-colors border-0 bg-transparent hover:bg-transparent p-1"
               >
                 <Icons.X size={16} />
               </button>
@@ -716,8 +801,8 @@ const MarkdownEditor = ({
                   onClick={() => handleNotebookChange(notebook)}
                   className={`w-full px-3 py-2 text-left rounded transition-colors ${
                     selectedNotebook === notebook
-                      ? 'bg-solarized-blue text-solarized-base5'
-                      : 'text-solarized-base3 hover:bg-solarized-base01'
+                      ? 'bg-theme-accent-primary text-theme-text-primary'
+                      : 'text-theme-text-secondary hover:theme-bg-tertiary'
                   }`}
                 >
                   <div className="flex items-center space-x-2">
@@ -731,10 +816,10 @@ const MarkdownEditor = ({
               ))}
             </div>
 
-            <div className="mt-4 pt-4 border-t border-solarized-base01">
+            <div className="mt-4 pt-4 border-t border-theme-border-primary">
               <button
                 onClick={() => setShowNotebookSelector(false)}
-                className="w-full px-4 py-2 bg-solarized-base01 text-solarized-base3 rounded hover:bg-solarized-base00 transition-colors text-sm border-0"
+                className="w-full px-4 py-2 theme-bg-tertiary text-theme-text-secondary rounded hover:theme-bg-quaternary transition-colors text-sm border-0"
               >
                 Cancel
               </button>
@@ -746,14 +831,14 @@ const MarkdownEditor = ({
       {/* Status Selector Modal */}
       {showStatusSelector && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-solarized-base02 border border-solarized-base01 rounded-lg shadow-xl w-80 p-6">
+          <div className="theme-bg-secondary border border-theme-border-primary rounded-lg shadow-xl w-80 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-solarized-base5">
+              <h3 className="text-lg font-medium text-theme-text-primary">
                 Change Status
               </h3>
               <button
                 onClick={() => setShowStatusSelector(false)}
-                className="text-solarized-base1 hover:text-solarized-base3 border-0 bg-transparent hover:bg-transparent p-1"
+                className="text-theme-text-tertiary hover:text-theme-text-secondary border-0 bg-transparent hover:bg-transparent p-1"
               >
                 <Icons.X size={18} />
               </button>
@@ -778,8 +863,8 @@ const MarkdownEditor = ({
                     }}
                     className={`w-full px-3 py-2 text-left rounded transition-colors ${
                       selectedStatus === status
-                        ? 'bg-solarized-blue text-solarized-base5'
-                        : 'text-solarized-base3 hover:bg-solarized-base01'
+                        ? 'bg-theme-accent-primary text-theme-text-primary'
+                        : 'text-theme-text-secondary hover:theme-bg-tertiary'
                     }`}
                   >
                     <div className="flex items-center space-x-2">
@@ -808,10 +893,10 @@ const MarkdownEditor = ({
               )}
             </div>
 
-            <div className="mt-4 pt-4 border-t border-solarized-base01">
+            <div className="mt-4 pt-4 border-t border-theme-border-primary">
               <button
                 onClick={() => setShowStatusSelector(false)}
-                className="w-full px-4 py-2 bg-solarized-base01 text-solarized-base3 rounded hover:bg-solarized-base00 transition-colors text-sm border-0"
+                className="w-full px-4 py-2 theme-bg-tertiary text-theme-text-secondary rounded hover:theme-bg-quaternary transition-colors text-sm border-0"
               >
                 Cancel
               </button>

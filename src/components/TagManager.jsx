@@ -85,14 +85,14 @@ const TagManager = ({ note, onSave, onClose, allTags = [] }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-solarized-base02 border border-solarized-base01 rounded-lg shadow-xl p-6 w-96 max-h-[80vh] overflow-y-auto">
+      <div className="theme-bg-secondary border border-theme-border-primary rounded-lg shadow-xl p-6 w-96 max-h-[80vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-solarized-base5">
+          <h2 className="text-lg font-semibold text-theme-text-primary">
             Manage Tags
           </h2>
           <button
             onClick={onClose}
-            className="text-solarized-base1 hover:text-solarized-base3 transition-colors border-0 bg-transparent hover:bg-transparent p-1"
+            className="text-theme-text-tertiary hover:text-theme-text-secondary transition-colors border-0 bg-transparent hover:bg-transparent p-1"
           >
             <Icons.X size={16} />
           </button>
@@ -100,7 +100,7 @@ const TagManager = ({ note, onSave, onClose, allTags = [] }) => {
 
         {/* Current Tags */}
         <div className="mb-4">
-          <h3 className="text-sm font-medium text-solarized-base3 mb-2">
+          <h3 className="text-sm font-medium text-theme-text-secondary mb-2">
             Current Tags
           </h3>
           {tags.length > 0 ? (
@@ -121,14 +121,14 @@ const TagManager = ({ note, onSave, onClose, allTags = [] }) => {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-solarized-base0">No tags added yet</p>
+            <p className="text-sm text-theme-text-muted">No tags added yet</p>
           )}
         </div>
 
         {/* Available Tags */}
         {availableTags.length > 0 && (
           <div className="mb-4">
-            <h3 className="text-sm font-medium text-solarized-base3 mb-2">
+            <h3 className="text-sm font-medium text-theme-text-secondary mb-2">
               Available Tags
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -147,7 +147,7 @@ const TagManager = ({ note, onSave, onClose, allTags = [] }) => {
 
         {/* Add New Tag */}
         <div className="mb-4">
-          <h3 className="text-sm font-medium text-solarized-base3 mb-2">
+          <h3 className="text-sm font-medium text-theme-text-secondary mb-2">
             Add New Tag
           </h3>
           <div className="space-y-3">
@@ -157,12 +157,12 @@ const TagManager = ({ note, onSave, onClose, allTags = [] }) => {
               onChange={e => setNewTag(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Enter tag name..."
-              className="w-full px-3 py-2 bg-solarized-base01 border border-solarized-base00 rounded text-sm text-solarized-base2 placeholder-solarized-base0 focus:outline-none focus:border-solarized-blue focus:bg-solarized-base02"
+              className="w-full px-3 py-2 theme-bg-tertiary border border-theme-border-secondary rounded text-sm text-theme-text-secondary placeholder-solarized-base0 focus:outline-none focus:border-theme-accent-primary focus:theme-bg-secondary"
             />
 
             {/* Color Selection */}
             <div>
-              <label className="text-xs text-solarized-base1 mb-1 block">
+              <label className="text-xs text-theme-text-tertiary mb-1 block">
                 Tag Color
               </label>
               <div className="grid grid-cols-6 gap-1">
@@ -172,7 +172,7 @@ const TagManager = ({ note, onSave, onClose, allTags = [] }) => {
                     onClick={() => setSelectedColor(colorKey)}
                     className={`w-6 h-6 rounded border-2 transition-all border-0 bg-transparent hover:bg-transparent p-0 ${
                       selectedColor === colorKey
-                        ? 'ring-2 ring-solarized-blue ring-offset-1 ring-offset-solarized-base02'
+                        ? 'ring-2 ring-theme-accent-primary ring-offset-1 ring-offset-solarized-base02'
                         : ''
                     }`}
                     title={colorKey}
@@ -188,7 +188,7 @@ const TagManager = ({ note, onSave, onClose, allTags = [] }) => {
             <button
               onClick={addTag}
               disabled={!newTag.trim()}
-              className="w-full px-3 py-2 bg-solarized-blue text-solarized-base5 rounded hover:bg-solarized-cyan transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm border-0"
+              className="w-full px-3 py-2 bg-theme-accent-primary text-theme-text-primary rounded hover:bg-theme-accent-cyan transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm border-0"
             >
               Add Tag
             </button>
@@ -196,16 +196,16 @@ const TagManager = ({ note, onSave, onClose, allTags = [] }) => {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end space-x-2 pt-4 border-t border-solarized-base01">
+        <div className="flex items-center justify-end space-x-2 pt-4 border-t border-theme-border-primary">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-solarized-base1 hover:text-solarized-base3 transition-colors text-sm border-0 bg-transparent hover:bg-transparent"
+            className="px-4 py-2 text-theme-text-tertiary hover:text-theme-text-secondary transition-colors text-sm border-0 bg-transparent hover:bg-transparent"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 bg-solarized-green text-solarized-base5 rounded hover:bg-solarized-cyan transition-colors text-sm border-0"
+            className="px-4 py-2 bg-theme-accent-green text-theme-text-primary rounded hover:bg-theme-accent-cyan transition-colors text-sm border-0"
           >
             Save Changes
           </button>

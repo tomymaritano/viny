@@ -28,8 +28,8 @@ const ResizeHandle = ({ onMouseDown, position = 'right' }) => {
       className={`
         absolute ${position === 'right' ? 'right-0' : 'left-0'} top-0 h-full w-4
         cursor-col-resize z-40 group pointer-events-auto
-        ${isHovering || isDragging ? 'bg-solarized-blue/30' : 'bg-transparent'}
-        hover:bg-solarized-blue/30 transition-colors duration-150
+        ${isHovering || isDragging ? 'bg-theme-accent-primary/30' : 'bg-transparent'}
+        hover:bg-theme-accent-primary/30 transition-colors duration-150
       `}
       onMouseDown={handleMouseDown}
       onMouseEnter={() => setIsHovering(true)}
@@ -49,7 +49,7 @@ const ResizeHandle = ({ onMouseDown, position = 'right' }) => {
       <div
         className={`
           absolute ${position === 'right' ? 'right-0' : 'left-0'} top-0 h-full w-0.5
-          ${isHovering || isDragging ? 'bg-solarized-blue' : 'bg-transparent'}
+          ${isHovering || isDragging ? 'bg-theme-accent-primary' : 'bg-transparent'}
           transition-all duration-150
         `}
       />
@@ -60,9 +60,9 @@ const ResizeHandle = ({ onMouseDown, position = 'right' }) => {
           absolute top-1/2 transform -translate-y-1/2 
           ${position === 'right' ? 'right-0.5' : 'left-0.5'}
           w-3 h-12 rounded-sm flex items-center justify-center
-          ${isHovering || isDragging ? 'bg-solarized-blue' : 'bg-solarized-base01'}
+          ${isHovering || isDragging ? 'bg-theme-accent-primary' : 'theme-bg-tertiary'}
           transition-all duration-150 opacity-60 group-hover:opacity-100
-          border border-solarized-base01
+          border border-theme-border-primary
         `}
       >
         {/* Grip dots */}

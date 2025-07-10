@@ -6,8 +6,10 @@ import markdownItTaskLists from 'markdown-it-task-lists'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/atom-one-dark.css'
 import Icons from './Icons'
-import CodeMirrorEditor from './CodeMirrorEditor'
+import InkdropEditor from './InkdropEditor'
+import LoadingSpinner from './LoadingSpinner'
 import { useSettings } from '../hooks/useSettings'
+import { useAutoSave } from '../hooks/useAutoSave'
 
 // Configure markdown-it
 const md = new MarkdownIt({
@@ -39,51 +41,99 @@ const MarkdownItEditor = ({
   notebooks = [],
 }) => {
   const { settings } = useSettings()
-  const previewRef = useRef(null)
+  // previewRef removed - preview now handled externally
   const [showNotebookSelector, setShowNotebookSelector] = useState(false)
   const [wordCount, setWordCount] = useState(0)
   const [charCount, setCharCount] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [renderedHtml, setRenderedHtml] = useState('')
+  // renderedHtml removed - preview now handled externally
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
+  const [lastSaved, setLastSaved] = useState(null)
 
-  // Calculate stats and render preview
-  useEffect(() => {
-    const words = value
-      .trim()
-      .split(/\s+/)
-      .filter(word => word.length > 0).length
-    const chars = value.length
-    setWordCount(words)
-    setCharCount(chars)
+  // Memoize all callbacks to prevent re-renders
+  const handleTitleChange = useCallback(
+    e => {
+      if (selectedNote && onSave) {
+        const updatedNote = { ...selectedNote, title: e.target.value }
+        onSave(updatedNote)
+      }
+    },
+    [selectedNote, onSave]
+  )
 
-    // Render preview with debounce
-    const timer = setTimeout(() => {
-      if (!value) {
-        setRenderedHtml(
-          '<div class="empty-state">Start typing to see your markdown rendered here...</div>'
-        )
-      } else {
+  const handleNotebookChange = useCallback(
+    e => {
+      if (onNotebookChange) {
+        onNotebookChange(e.target.value)
+      }
+    },
+    [onNotebookChange]
+  )
+
+  const handleStatusChange = useCallback(
+    e => {
+      if (selectedNote && onSave) {
+        const updatedNote = { ...selectedNote, status: e.target.value }
+        onSave(updatedNote)
+      }
+    },
+    [selectedNote, onSave]
+  )
+
+  const handleTagsChange = useCallback(
+    e => {
+      if (selectedNote && onSave) {
+        const tags = e.target.value
+          .split(',')
+          .map(tag => tag.trim())
+          .filter(tag => tag)
+        const updatedNote = { ...selectedNote, tags }
+        onSave(updatedNote)
+      }
+    },
+    [selectedNote, onSave]
+  )
+
+  // Auto-save implementation with debounce
+  const autoSaveFunction = useCallback(
+    async content => {
+      if (selectedNote && onSave && content !== undefined) {
         try {
-          const rendered = md.render(value)
-          setRenderedHtml(rendered)
+          const updatedNote = { ...selectedNote, content }
+          await onSave(updatedNote)
+          setLastSaved(new Date())
+          setSaveError(null)
         } catch (error) {
-          console.error('Markdown render error:', error)
-          setRenderedHtml(
-            '<div class="empty-state" style="color: var(--color-red);">Error rendering markdown</div>'
-          )
+          setSaveError(error.message || 'Failed to save')
+          throw error
         }
       }
-    }, 300) // 300ms debounce
+    },
+    [selectedNote, onSave]
+  )
 
-    return () => clearTimeout(timer)
-  }, [value])
+  // Use auto-save hook
+  const { saveNow, hasUnsavedChanges } = useAutoSave(
+    autoSaveFunction,
+    value,
+    2000, // 2 second debounce
+    {
+      enabled: !!selectedNote,
+      onSaveStart: () => setIsSaving(true),
+      onSaveComplete: () => setIsSaving(false),
+      onSaveError: error => {
+        setIsSaving(false)
+        setSaveError(error.message || 'Auto-save failed')
+      },
+    }
+  )
 
-  // Handle keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = e => {
+  const handleKeyDown = useCallback(
+    e => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault()
-        onSave?.()
+        saveNow() // Use the auto-save function for manual save
       }
       if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
         e.preventDefault()
@@ -97,11 +147,28 @@ const MarkdownItEditor = ({
         e.preventDefault()
         setIsFullscreen(!isFullscreen)
       }
-    }
+    },
+    [selectedNote, saveNow, onTogglePreview, onExport, isFullscreen]
+  )
 
+  // Calculate stats and render preview
+  useEffect(() => {
+    const words = value
+      .trim()
+      .split(/\s+/)
+      .filter(word => word.length > 0).length
+    const chars = value.length
+    setWordCount(words)
+    setCharCount(chars)
+
+    // Preview rendering now handled by external PreviewPanel
+  }, [value])
+
+  // Handle keyboard shortcuts
+  useEffect(() => {
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [onSave, onTogglePreview, onExport, isFullscreen])
+  }, [handleKeyDown])
 
   // Insert text at cursor - simplified for CodeMirror
   const insertText = useCallback(
@@ -114,57 +181,108 @@ const MarkdownItEditor = ({
   )
 
   // Toolbar actions
-  const toggleBold = () => {
+  const toggleBold = useCallback(() => {
     insertText('**bold text**')
-  }
+  }, [insertText])
 
-  const toggleItalic = () => {
+  const toggleItalic = useCallback(() => {
     insertText('*italic text*')
-  }
+  }, [insertText])
 
-  const insertHeading = level => {
-    const prefix = '#'.repeat(level) + ' '
-    insertText('\n' + prefix + 'Heading\n')
-  }
+  const insertHeading = useCallback(
+    level => {
+      const prefix = '#'.repeat(level) + ' '
+      insertText('\n' + prefix + 'Heading\n')
+    },
+    [insertText]
+  )
 
-  const insertLink = () => {
+  const insertLink = useCallback(() => {
     insertText('[link text](https://example.com)')
-  }
+  }, [insertText])
 
-  const insertImage = () => {
+  const insertImage = useCallback(() => {
     insertText('![alt text](image-url.jpg)')
-  }
+  }, [insertText])
 
-  const insertList = () => {
+  const insertList = useCallback(() => {
     insertText('\n- Item 1\n- Item 2\n- Item 3\n')
-  }
+  }, [insertText])
 
-  const insertOrderedList = () => {
+  const insertOrderedList = useCallback(() => {
     insertText('\n1. Item 1\n2. Item 2\n3. Item 3\n')
-  }
+  }, [insertText])
 
-  const insertCheckbox = () => {
+  const insertCheckbox = useCallback(() => {
     insertText('\n- [ ] Task 1\n- [ ] Task 2\n- [ ] Task 3\n')
-  }
+  }, [insertText])
 
-  const insertCode = () => {
+  const insertCode = useCallback(() => {
     insertText('\n```javascript\n// code here\n```\n')
-  }
+  }, [insertText])
 
-  const insertQuote = () => {
+  const insertQuote = useCallback(() => {
     insertText('\n> Quote text\n')
-  }
+  }, [insertText])
 
-  const insertTable = () => {
+  const insertTable = useCallback(() => {
     insertText(
       '\n| Column 1 | Column 2 |\n|----------|----------|\n| Cell 1   | Cell 2   |\n'
     )
-  }
+  }, [insertText])
 
   return (
     <div
       className={`flex flex-col h-full theme-bg-primary ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}
     >
+      {/* Note Header */}
+      {selectedNote && (
+        <div className="px-4 py-3 border-b border-theme-border-primary theme-bg-secondary">
+          <div className="flex items-center justify-between mb-2">
+            <input
+              type="text"
+              value={selectedNote.title || ''}
+              onChange={handleTitleChange}
+              className="text-lg font-semibold bg-transparent border-none outline-none text-theme-text-primary flex-1 mr-4"
+              placeholder="Note title..."
+            />
+            <div className="flex items-center space-x-2 text-sm text-theme-text-muted">
+              <select
+                value={selectedNote.notebook || ''}
+                onChange={handleNotebookChange}
+                className="bg-transparent border border-theme-border-primary rounded px-2 py-1 text-theme-text-secondary"
+              >
+                <option value="">No notebook</option>
+                {notebooks.map(notebook => (
+                  <option key={notebook.id} value={notebook.name}>
+                    {notebook.name}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={selectedNote.status || 'active'}
+                onChange={handleStatusChange}
+                className="bg-transparent border border-theme-border-primary rounded px-2 py-1 text-theme-text-secondary"
+              >
+                <option value="active">Active</option>
+                <option value="on-hold">On Hold</option>
+                <option value="completed">Completed</option>
+                <option value="dropped">Dropped</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              value={(selectedNote.tags || []).join(', ')}
+              onChange={handleTagsChange}
+              className="bg-transparent border border-theme-border-primary rounded px-2 py-1 text-sm text-theme-text-secondary flex-1"
+              placeholder="Tags (comma separated)..."
+            />
+          </div>
+        </div>
+      )}
+
       {/* Toolbar */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-theme-border-primary theme-bg-secondary">
         <div className="flex items-center space-x-1">
@@ -313,41 +431,17 @@ const MarkdownItEditor = ({
       {/* Editor and Preview */}
       <div className="flex-1 flex overflow-hidden">
         {/* Editor */}
-        <div
-          className={`flex-1 flex flex-col ${isPreviewVisible ? 'w-1/2' : 'w-full'}`}
-        >
+        <div className="flex-1 flex flex-col w-full">
           <div className="markdown-editor">
-            <textarea
+            <InkdropEditor
               value={value}
-              onChange={e => onChange(e.target.value)}
-              className="enhanced-markdown-textarea"
-              style={{
-                fontFamily: settings?.fontFamily || 'var(--font-family-editor)',
-                fontSize: settings?.fontSize || 'var(--font-size-editor)',
-                lineHeight: settings?.lineHeight || 'var(--line-height)',
-              }}
+              onChange={onChange}
               placeholder="Start writing your markdown here..."
-              spellCheck={settings?.spellCheck !== false}
             />
           </div>
         </div>
 
-        {/* Preview */}
-        {isPreviewVisible && (
-          <div className="w-1/2 flex flex-col border-l border-theme-border-primary">
-            <div
-              className="flex-1 overflow-y-auto p-4 prose prose-theme markdown-font"
-              ref={previewRef}
-              dangerouslySetInnerHTML={{ __html: renderedHtml }}
-              style={{
-                fontFamily:
-                  settings?.markdownFontFamily || 'var(--font-family-markdown)',
-                fontSize:
-                  settings?.markdownFontSize || 'var(--font-size-markdown)',
-              }}
-            />
-          </div>
-        )}
+        {/* Preview removed - now handled by external PreviewPanel */}
       </div>
 
       {/* Status Bar */}
@@ -355,6 +449,27 @@ const MarkdownItEditor = ({
         <div className="flex items-center space-x-4">
           <span>{wordCount} words</span>
           <span>{charCount} characters</span>
+
+          {/* Save status */}
+          {isSaving && (
+            <div className="flex items-center space-x-1">
+              <LoadingSpinner size="small" color="secondary" />
+              <span>Saving...</span>
+            </div>
+          )}
+
+          {saveError && <span className="text-red-500">⚠ {saveError}</span>}
+
+          {lastSaved && !isSaving && !saveError && (
+            <span className="text-green-500">
+              ✓ Saved {lastSaved.toLocaleTimeString()}
+            </span>
+          )}
+
+          {hasUnsavedChanges && !isSaving && (
+            <span className="text-yellow-500">• Unsaved changes</span>
+          )}
+
           {selectedNote && (
             <>
               <span>•</span>

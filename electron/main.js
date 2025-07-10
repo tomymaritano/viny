@@ -16,7 +16,7 @@ const createWindow = () => {
       v8CacheOptions: 'code',
       backgroundThrottling: false,
     },
-    titleBarStyle: 'default',
+    titleBarStyle: 'hidden',
     title: 'Nototo v1.1.1 - Note Taking App',
     show: false,
     minWidth: 800,

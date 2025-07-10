@@ -72,17 +72,16 @@ const NotebookManager = ({ isVisible, onClose, onNotebookChange }) => {
     setFormData({ name: '', description: '', color: 'blue' })
   }
 
-  // eslint-disable-next-line react/prop-types
   const NotebookForm = ({ isEdit = false }) => (
     <motion.div
-      className="bg-solarized-base01 border border-solarized-base00 rounded-lg p-4 mb-4"
+      className="theme-bg-tertiary border border-theme-border-secondary rounded-lg p-4 mb-4"
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: 'auto' }}
       exit={{ opacity: 0, height: 0 }}
     >
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-solarized-base3 mb-2">
+          <label className="block text-sm font-medium text-theme-text-secondary mb-2">
             Notebook Name
           </label>
           <input
@@ -92,13 +91,13 @@ const NotebookManager = ({ isVisible, onClose, onNotebookChange }) => {
               setFormData(prev => ({ ...prev, name: e.target.value }))
             }
             placeholder="Enter notebook name..."
-            className="w-full px-3 py-2 bg-solarized-base02 border border-solarized-base01 rounded text-solarized-base3 focus:border-solarized-blue focus:outline-none"
+            className="w-full px-3 py-2 theme-bg-secondary border border-theme-border-primary rounded text-theme-text-secondary focus:border-theme-accent-primary focus:outline-none"
             autoFocus
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-solarized-base3 mb-2">
+          <label className="block text-sm font-medium text-theme-text-secondary mb-2">
             Description (Optional)
           </label>
           <textarea
@@ -108,12 +107,12 @@ const NotebookManager = ({ isVisible, onClose, onNotebookChange }) => {
             }
             placeholder="Brief description of this notebook..."
             rows={2}
-            className="w-full px-3 py-2 bg-solarized-base02 border border-solarized-base01 rounded text-solarized-base3 focus:border-solarized-blue focus:outline-none resize-none"
+            className="w-full px-3 py-2 theme-bg-secondary border border-theme-border-primary rounded text-theme-text-secondary focus:border-theme-accent-primary focus:outline-none resize-none"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-solarized-base3 mb-2">
+          <label className="block text-sm font-medium text-theme-text-secondary mb-2">
             Color
           </label>
           <div className="flex flex-wrap gap-2">
@@ -125,8 +124,8 @@ const NotebookManager = ({ isVisible, onClose, onNotebookChange }) => {
                 }
                 className={`w-8 h-8 rounded-full border-2 transition-colors ${
                   formData.color === color.value
-                    ? 'border-solarized-base5'
-                    : 'border-solarized-base01 hover:border-solarized-base1'
+                    ? 'border-theme-text-primary'
+                    : 'border-theme-border-primary hover:border-theme-text-tertiary'
                 } ${color.class.replace('text-', 'bg-')}`}
                 title={color.label}
               />
@@ -138,13 +137,33 @@ const NotebookManager = ({ isVisible, onClose, onNotebookChange }) => {
           <button
             onClick={isEdit ? handleUpdateNotebook : handleCreateNotebook}
             disabled={!formData.name.trim()}
-            className="px-4 py-2 bg-solarized-blue text-solarized-base5 rounded hover:bg-solarized-blue-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+            className="px-4 py-2 text-theme-text-primary rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+            style={{
+              backgroundColor: 'var(--color-active-bg)',
+              color: 'var(--color-active-text)',
+            }}
+            onMouseEnter={e => {
+              if (!formData.name.trim()) return
+              e.target.style.backgroundColor = 'var(--color-active-bg)'
+              e.target.style.opacity = '0.9'
+            }}
+            onMouseLeave={e => {
+              if (!formData.name.trim()) return
+              e.target.style.backgroundColor = 'var(--color-active-bg)'
+              e.target.style.opacity = '1'
+            }}
           >
             {isEdit ? 'Update Notebook' : 'Create Notebook'}
           </button>
           <button
             onClick={cancelEdit}
-            className="px-4 py-2 text-solarized-base1 border border-solarized-base01 rounded hover:bg-solarized-base01 transition-colors text-sm"
+            className="px-4 py-2 text-theme-text-tertiary border border-theme-border-primary rounded transition-colors text-sm"
+            onMouseEnter={e => {
+              e.target.style.backgroundColor = 'var(--color-hover-bg)'
+            }}
+            onMouseLeave={e => {
+              e.target.style.backgroundColor = 'transparent'
+            }}
           >
             Cancel
           </button>
@@ -153,11 +172,16 @@ const NotebookManager = ({ isVisible, onClose, onNotebookChange }) => {
     </motion.div>
   )
 
-  // eslint-disable-next-line react/prop-types
   const NotebookItem = ({ notebook }) => (
     <motion.div
       key={notebook.id}
-      className="bg-solarized-base02 border border-solarized-base01 rounded-lg p-4 hover:bg-solarized-base01 transition-colors"
+      className="theme-bg-secondary border border-theme-border-primary rounded-lg p-4 transition-colors"
+      onMouseEnter={e => {
+        e.currentTarget.style.backgroundColor = 'var(--color-hover-bg)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.backgroundColor = 'var(--color-base02)'
+      }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -168,16 +192,16 @@ const NotebookManager = ({ isVisible, onClose, onNotebookChange }) => {
             <div
               className={`w-3 h-3 rounded-full ${getColorClass(notebook.color).replace('text-', 'bg-')}`}
             />
-            <h3 className="font-medium text-solarized-base4">
+            <h3 className="font-medium text-theme-text-secondary">
               {notebook.name}
             </h3>
           </div>
           {notebook.description && (
-            <p className="text-sm text-solarized-base1 mb-2">
+            <p className="text-sm text-theme-text-tertiary mb-2">
               {notebook.description}
             </p>
           )}
-          <p className="text-xs text-solarized-base0">
+          <p className="text-xs text-theme-text-muted">
             Created {new Date(notebook.createdAt).toLocaleDateString()}
           </p>
         </div>
@@ -185,14 +209,26 @@ const NotebookManager = ({ isVisible, onClose, onNotebookChange }) => {
         <div className="flex items-center space-x-2 ml-4">
           <button
             onClick={() => startEdit(notebook)}
-            className="p-1 text-solarized-base1 hover:text-solarized-base3 hover:bg-solarized-base01 rounded transition-colors"
+            className="p-1 text-theme-text-tertiary hover:text-theme-text-secondary rounded transition-colors"
+            onMouseEnter={e => {
+              e.target.style.backgroundColor = 'var(--color-hover-bg)'
+            }}
+            onMouseLeave={e => {
+              e.target.style.backgroundColor = 'transparent'
+            }}
             title="Edit notebook"
           >
             <Icons.Edit size={14} />
           </button>
           <button
             onClick={() => handleDeleteNotebook(notebook)}
-            className="p-1 text-solarized-base1 hover:text-solarized-red hover:bg-solarized-base01 rounded transition-colors"
+            className="p-1 text-theme-text-tertiary hover:text-theme-accent-red rounded transition-colors"
+            onMouseEnter={e => {
+              e.target.style.backgroundColor = 'var(--color-hover-bg)'
+            }}
+            onMouseLeave={e => {
+              e.target.style.backgroundColor = 'transparent'
+            }}
             title="Delete notebook"
           >
             <Icons.Trash size={14} />
@@ -201,6 +237,20 @@ const NotebookManager = ({ isVisible, onClose, onNotebookChange }) => {
       </div>
     </motion.div>
   )
+
+  NotebookForm.propTypes = {
+    isEdit: PropTypes.bool,
+  }
+
+  NotebookItem.propTypes = {
+    notebook: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      description: PropTypes.string,
+      color: PropTypes.string.isRequired,
+      createdAt: PropTypes.string.isRequired,
+    }).isRequired,
+  }
 
   return (
     <AnimatePresence>
@@ -214,25 +264,31 @@ const NotebookManager = ({ isVisible, onClose, onNotebookChange }) => {
           onClick={onClose}
         >
           <motion.div
-            className="bg-solarized-base03 border border-solarized-base01 rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col"
+            className="theme-bg-primary border border-theme-border-primary rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-solarized-base01">
+            <div className="flex items-center justify-between p-6 border-b border-theme-border-primary">
               <div>
-                <h2 className="text-xl font-semibold text-solarized-base5">
+                <h2 className="text-xl font-semibold text-theme-text-primary">
                   Manage Notebooks
                 </h2>
-                <p className="text-sm text-solarized-base1 mt-1">
+                <p className="text-sm text-theme-text-tertiary mt-1">
                   Create, edit, and organize your notebooks
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 text-solarized-base1 hover:text-solarized-base3 hover:bg-solarized-base01 rounded transition-colors"
+                className="p-2 text-theme-text-tertiary hover:text-theme-text-secondary rounded transition-colors"
+                onMouseEnter={e => {
+                  e.target.style.backgroundColor = 'var(--color-hover-bg)'
+                }}
+                onMouseLeave={e => {
+                  e.target.style.backgroundColor = 'transparent'
+                }}
               >
                 <Icons.X size={20} />
               </button>
@@ -244,7 +300,7 @@ const NotebookManager = ({ isVisible, onClose, onNotebookChange }) => {
               {!showCreateForm && !editingNotebook && (
                 <button
                   onClick={() => setShowCreateForm(true)}
-                  className="w-full mb-6 p-4 border-2 border-dashed border-solarized-base01 rounded-lg text-solarized-base1 hover:border-solarized-blue hover:text-solarized-blue transition-colors"
+                  className="w-full mb-6 p-4 border-2 border-dashed border-theme-border-primary rounded-lg text-theme-text-tertiary hover:border-theme-accent-primary hover:text-theme-accent-primary transition-colors"
                 >
                   <div className="flex items-center justify-center space-x-2">
                     <Icons.Plus size={20} />
@@ -262,7 +318,7 @@ const NotebookManager = ({ isVisible, onClose, onNotebookChange }) => {
 
               {/* Notebooks List */}
               <div className="space-y-3">
-                <h3 className="text-sm font-medium text-solarized-base3 mb-3">
+                <h3 className="text-sm font-medium text-theme-text-secondary mb-3">
                   Your Notebooks ({notebooks.length})
                 </h3>
                 <AnimatePresence>

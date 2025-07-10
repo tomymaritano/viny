@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import './App.css'
 import Sidebar from './components/Sidebar'
 import NotesList from './components/NotesList'
@@ -205,10 +205,28 @@ function App() {
     }
   }
 
-  const handleSaveNote = noteData => {
-    saveNote(noteData)
-    success('Note saved successfully')
-  }
+  const handleSaveNote = useCallback(
+    noteData => {
+      saveNote(noteData)
+      success('Note saved successfully')
+    },
+    [saveNote, success]
+  )
+
+  const handleContentChange = useCallback(newContent => {
+    setCurrentNote(prev => ({ ...prev, content: newContent }))
+  }, [])
+
+  const handleNotebookChange = useCallback(
+    notebook => {
+      setCurrentNote(prev => {
+        const updatedNote = { ...prev, notebook }
+        saveNote(updatedNote)
+        return updatedNote
+      })
+    },
+    [saveNote]
+  )
 
   const handleDuplicateNote = note => {
     const duplicated = duplicateNote(note.id)
@@ -416,7 +434,6 @@ function App() {
         settings={settings}
         sidebar={
           <Sidebar
-            key={`sidebar-${notebooks.map(n => `${n.id}-${n.color}`).join('-')}`}
             activeSection={activeSection}
             setActiveSection={handleSidebarNavigation}
             onNewNote={createNewNote}
@@ -443,18 +460,10 @@ function App() {
           isEditorOpen ? (
             <MarkdownItEditor
               value={currentNote?.content || ''}
-              onChange={newContent => {
-                // Update the current note content in real-time
-                setCurrentNote({ ...currentNote, content: newContent })
-              }}
+              onChange={handleContentChange}
               onSave={handleSaveNote}
               selectedNote={currentNote}
-              onNotebookChange={notebook => {
-                // Update the current note notebook and save
-                const updatedNote = { ...currentNote, notebook }
-                setCurrentNote(updatedNote)
-                saveNote(updatedNote)
-              }}
+              onNotebookChange={handleNotebookChange}
               onExport={() => setShowExportDialog(true)}
               onTogglePreview={() => setIsPreviewVisible(!isPreviewVisible)}
               isPreviewVisible={isPreviewVisible}

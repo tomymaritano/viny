@@ -58,7 +58,7 @@ const ResizableNotesList = ({
   return (
     <div
       ref={containerRef}
-      className="relative flex-shrink-0 bg-solarized-base03 border-r border-solarized-base01 h-full"
+      className="relative flex-shrink-0 theme-bg-primary border-r border-theme-border-primary h-full"
       style={{ width: `${width}px` }}
     >
       <NotesList

@@ -15,14 +15,14 @@ const SettingsSection = () => {
   ]
 
   const SettingItem = ({ label, children, description }) => (
-    <div className="setting-item py-4 border-b border-solarized-base01 last:border-b-0">
+    <div className="setting-item py-4 border-b border-theme-border-primary last:border-b-0">
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <div className="text-sm font-medium text-solarized-base3">
+          <div className="text-sm font-medium text-theme-text-secondary">
             {label}
           </div>
           {description && (
-            <div className="text-xs text-solarized-base1 mt-1">
+            <div className="text-xs text-theme-text-tertiary mt-1">
               {description}
             </div>
           )}
@@ -36,7 +36,7 @@ const SettingsSection = () => {
     <select
       value={value}
       onChange={e => onChange(e.target.value)}
-      className="px-3 py-2 bg-solarized-base02 border border-solarized-base01 rounded text-sm text-solarized-base3 focus:border-solarized-blue focus:outline-none"
+      className="px-3 py-2 theme-bg-secondary border border-theme-border-primary rounded text-sm text-theme-text-secondary focus:border-theme-accent-primary focus:outline-none"
     >
       {options.map(option => (
         <option key={option.value} value={option.value}>
@@ -50,11 +50,11 @@ const SettingsSection = () => {
     <button
       onClick={() => onChange(!checked)}
       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-        checked ? 'bg-solarized-blue' : 'bg-solarized-base01'
+        checked ? 'bg-theme-accent-primary' : 'theme-bg-tertiary'
       }`}
     >
       <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+        className={`inline-block h-4 w-4 transform rounded-full bg-theme-text-primary transition-transform ${
           checked ? 'translate-x-6' : 'translate-x-1'
         }`}
       />
@@ -69,7 +69,7 @@ const SettingsSection = () => {
       min={min}
       max={max}
       step={step}
-      className="px-3 py-2 bg-solarized-base02 border border-solarized-base01 rounded text-sm text-solarized-base3 focus:border-solarized-blue focus:outline-none w-20"
+      className="px-3 py-2 theme-bg-secondary border border-theme-border-primary rounded text-sm text-theme-text-secondary focus:border-theme-accent-primary focus:outline-none w-20"
     />
   )
 
@@ -281,14 +281,14 @@ const SettingsSection = () => {
   }
 
   return (
-    <div className="w-full bg-solarized-base02 flex flex-col h-full font-sans">
+    <div className="w-full theme-bg-secondary flex flex-col h-full font-sans">
       {/* Header */}
-      <div className="p-6 border-b border-solarized-base01">
+      <div className="p-6 border-b border-theme-border-primary">
         <div>
-          <h1 className="text-2xl font-semibold text-solarized-base5">
+          <h1 className="text-2xl font-semibold text-theme-text-primary">
             Settings
           </h1>
-          <p className="text-sm text-solarized-base1 mt-1">
+          <p className="text-sm text-theme-text-tertiary mt-1">
             Customize your Nototo experience
           </p>
         </div>
@@ -296,7 +296,7 @@ const SettingsSection = () => {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <div className="w-64 border-r border-solarized-base01 p-6">
+        <div className="w-64 border-r border-theme-border-primary p-6">
           <div className="space-y-2">
             {tabs.map(tab => (
               <button
@@ -304,8 +304,8 @@ const SettingsSection = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm transition-colors text-left ${
                   activeTab === tab.id
-                    ? 'bg-solarized-blue text-solarized-base5'
-                    : 'text-solarized-base1 hover:text-solarized-base3 hover:bg-solarized-base01'
+                    ? 'bg-theme-accent-primary text-theme-text-primary'
+                    : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:theme-bg-tertiary'
                 }`}
               >
                 {tab.icon}
@@ -330,14 +330,14 @@ const SettingsSection = () => {
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between p-6 border-t border-solarized-base01">
+      <div className="flex items-center justify-between p-6 border-t border-theme-border-primary">
         <button
           onClick={resetSettings}
-          className="px-4 py-2 text-sm text-solarized-orange border border-solarized-orange rounded-lg hover:bg-solarized-orange hover:text-solarized-base5 transition-colors"
+          className="px-4 py-2 text-sm text-theme-accent-orange border border-theme-accent-orange rounded-lg hover:bg-theme-accent-orange hover:text-theme-text-primary transition-colors"
         >
           Reset to Defaults
         </button>
-        <div className="text-xs text-solarized-base0">
+        <div className="text-xs text-theme-text-muted">
           Settings are automatically saved
         </div>
       </div>

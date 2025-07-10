@@ -40,9 +40,9 @@ const ApiStatus = ({ storageMode, isUsingApi, onToggleApi }) => {
       case 'error':
         return 'text-yellow-400'
       case 'checking':
-        return 'text-solarized-base1'
+        return 'text-theme-text-tertiary'
       default:
-        return 'text-solarized-base1'
+        return 'text-theme-text-tertiary'
     }
   }
 
@@ -95,7 +95,7 @@ const ApiStatus = ({ storageMode, isUsingApi, onToggleApi }) => {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 bg-solarized-base02 border border-solarized-base01 rounded-lg p-3 shadow-lg">
+    <div className="fixed bottom-4 left-4 theme-bg-secondary border border-theme-border-primary rounded-lg p-3 shadow-lg">
       <div className="flex items-center space-x-3">
         {/* Storage Mode Indicator */}
         <div className="flex items-center space-x-2">
@@ -105,21 +105,21 @@ const ApiStatus = ({ storageMode, isUsingApi, onToggleApi }) => {
           </div>
 
           {lastCheck && (
-            <span className="text-xs text-solarized-base0">
+            <span className="text-xs text-theme-text-muted">
               {lastCheck.toLocaleTimeString()}
             </span>
           )}
         </div>
 
         {/* Storage Mode Toggle */}
-        <div className="flex items-center space-x-2 border-l border-solarized-base01 pl-3">
-          <span className="text-xs text-solarized-base1">Storage:</span>
+        <div className="flex items-center space-x-2 border-l border-theme-border-primary pl-3">
+          <span className="text-xs text-theme-text-tertiary">Storage:</span>
           <button
             onClick={onToggleApi}
             className={`text-xs px-2 py-1 rounded transition-colors ${
               isUsingApi
-                ? 'bg-solarized-blue text-solarized-base5'
-                : 'bg-solarized-base01 text-solarized-base3 hover:bg-solarized-base00'
+                ? 'bg-theme-accent-primary text-theme-text-primary'
+                : 'theme-bg-tertiary text-theme-text-secondary hover:theme-bg-quaternary'
             }`}
             title={isUsingApi ? 'Switch to localStorage' : 'Switch to API'}
           >
@@ -131,7 +131,7 @@ const ApiStatus = ({ storageMode, isUsingApi, onToggleApi }) => {
         {isUsingApi && (
           <button
             onClick={checkApiHealth}
-            className="text-solarized-base1 hover:text-solarized-base3 transition-colors"
+            className="text-theme-text-tertiary hover:text-theme-text-secondary transition-colors"
             title="Refresh API status"
           >
             <Icons.RefreshCw size={14} />
@@ -141,13 +141,13 @@ const ApiStatus = ({ storageMode, isUsingApi, onToggleApi }) => {
 
       {/* Status Details */}
       {apiStatus === 'offline' && (
-        <div className="mt-2 pt-2 border-t border-solarized-base01">
-          <p className="text-xs text-solarized-base0">
+        <div className="mt-2 pt-2 border-t border-theme-border-primary">
+          <p className="text-xs text-theme-text-muted">
             Make sure the backend server is running on localhost:3001
           </p>
           <button
             onClick={checkApiHealth}
-            className="text-xs text-solarized-blue hover:text-solarized-cyan transition-colors mt-1"
+            className="text-xs text-theme-accent-primary hover:text-theme-accent-cyan transition-colors mt-1"
           >
             Retry connection
           </button>
@@ -155,16 +155,16 @@ const ApiStatus = ({ storageMode, isUsingApi, onToggleApi }) => {
       )}
 
       {isUsingApi && apiStatus === 'online' && (
-        <div className="mt-2 pt-2 border-t border-solarized-base01">
-          <p className="text-xs text-solarized-base0">
+        <div className="mt-2 pt-2 border-t border-theme-border-primary">
+          <p className="text-xs text-theme-text-muted">
             Using database storage via API
           </p>
         </div>
       )}
 
       {!isUsingApi && (
-        <div className="mt-2 pt-2 border-t border-solarized-base01">
-          <p className="text-xs text-solarized-base0">
+        <div className="mt-2 pt-2 border-t border-theme-border-primary">
+          <p className="text-xs text-theme-text-muted">
             Using browser localStorage
           </p>
         </div>

@@ -4,6 +4,7 @@ import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import Icons from './Icons'
 import ExportDialog from './ExportDialog'
+import { useSettings } from '../hooks/useSettings'
 
 const NotePreview = ({
   note,
@@ -18,6 +19,7 @@ const NotePreview = ({
   onPermanentDelete,
   onExport: _onExport,
 }) => {
+  const { settings } = useSettings()
   const [showMenu, setShowMenu] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)
   const menuRef = useRef(null)
@@ -30,18 +32,18 @@ const NotePreview = ({
 
     // Color mapping
     const colorClasses = {
-      default: 'bg-gray-500/20 text-gray-300 border-gray-500/30',
-      blue: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-      green: 'bg-green-500/20 text-green-300 border-green-500/30',
-      purple: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
-      cyan: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-      orange: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
-      pink: 'bg-pink-500/20 text-pink-300 border-pink-500/30',
-      indigo: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
-      amber: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-      emerald: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-      red: 'bg-red-500/20 text-red-300 border-red-500/30',
-      violet: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
+      default: 'theme-tag-default',
+      blue: 'theme-tag-blue',
+      green: 'theme-tag-green',
+      purple: 'theme-tag-purple',
+      cyan: 'theme-tag-cyan',
+      orange: 'theme-tag-orange',
+      pink: 'theme-tag-pink',
+      indigo: 'theme-tag-indigo',
+      amber: 'theme-tag-amber',
+      emerald: 'theme-tag-emerald',
+      red: 'theme-tag-red',
+      violet: 'theme-tag-violet',
     }
 
     // Predefined tag colors for common tags
@@ -80,50 +82,50 @@ const NotePreview = ({
   }, [])
   if (!note) {
     return (
-      <div className="flex-1 bg-solarized-base03 flex items-center justify-center h-full">
+      <div className="flex-1 theme-bg-primary flex items-center justify-center h-full">
         <div className="text-center">
-          <h3 className="text-lg font-medium text-solarized-base2 mb-4">
+          <h3 className="text-lg font-medium text-theme-text-secondary mb-4">
             No note selected
           </h3>
-          <p className="text-solarized-base1 mb-6">
+          <p className="text-theme-text-tertiary mb-6">
             Select a note from the list to view it here
           </p>
 
           <div className="space-y-3 text-sm">
             <div className="flex items-center justify-center space-x-3">
-              <span className="text-solarized-base1">Create note</span>
+              <span className="text-theme-text-tertiary">Create note</span>
               <div className="flex items-center space-x-1">
-                <kbd className="px-2 py-1 text-xs bg-solarized-base01 text-solarized-base3 rounded">
+                <kbd className="px-2 py-1 text-xs theme-bg-tertiary text-theme-text-secondary rounded">
                   ⌘
                 </kbd>
-                <span className="text-solarized-base1">+</span>
-                <kbd className="px-2 py-1 text-xs bg-solarized-base01 text-solarized-base3 rounded">
+                <span className="text-theme-text-tertiary">+</span>
+                <kbd className="px-2 py-1 text-xs theme-bg-tertiary text-theme-text-secondary rounded">
                   N
                 </kbd>
               </div>
             </div>
 
             <div className="flex items-center justify-center space-x-3">
-              <span className="text-solarized-base1">Search notes</span>
+              <span className="text-theme-text-tertiary">Search notes</span>
               <div className="flex items-center space-x-1">
-                <kbd className="px-2 py-1 text-xs bg-solarized-base01 text-solarized-base3 rounded">
+                <kbd className="px-2 py-1 text-xs theme-bg-tertiary text-theme-text-secondary rounded">
                   ⌘
                 </kbd>
-                <span className="text-solarized-base1">+</span>
-                <kbd className="px-2 py-1 text-xs bg-solarized-base01 text-solarized-base3 rounded">
+                <span className="text-theme-text-tertiary">+</span>
+                <kbd className="px-2 py-1 text-xs theme-bg-tertiary text-theme-text-secondary rounded">
                   F
                 </kbd>
               </div>
             </div>
 
             <div className="flex items-center justify-center space-x-3">
-              <span className="text-solarized-base1">Recent files</span>
+              <span className="text-theme-text-tertiary">Recent files</span>
               <div className="flex items-center space-x-1">
-                <kbd className="px-2 py-1 text-xs bg-solarized-base01 text-solarized-base3 rounded">
+                <kbd className="px-2 py-1 text-xs theme-bg-tertiary text-theme-text-secondary rounded">
                   ⌘
                 </kbd>
-                <span className="text-solarized-base1">+</span>
-                <kbd className="px-2 py-1 text-xs bg-solarized-base01 text-solarized-base3 rounded">
+                <span className="text-theme-text-tertiary">+</span>
+                <kbd className="px-2 py-1 text-xs theme-bg-tertiary text-theme-text-secondary rounded">
                   R
                 </kbd>
               </div>
@@ -136,7 +138,7 @@ const NotePreview = ({
 
   const getPreviewHtml = () => {
     if (!note.content)
-      return '<p class="text-solarized-base1">This note is empty</p>'
+      return '<p class="text-theme-text-tertiary">This note is empty</p>'
 
     const html = marked(note.content, {
       breaks: true,
@@ -149,38 +151,38 @@ const NotePreview = ({
   }
 
   return (
-    <div className="flex-1 bg-solarized-base03 flex flex-col font-sans">
+    <div className="flex-1 theme-bg-primary flex flex-col markdown-font">
       {/* Header */}
-      <div className="p-4 border-b border-solarized-base01 bg-solarized-base02">
+      <div className="p-4 border-b border-theme-border-primary theme-bg-secondary">
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <div className="flex items-center space-x-3">
               {note.isPinned && (
-                <Icons.Star size={16} className="text-solarized-yellow" />
+                <Icons.Star size={16} className="text-theme-accent-yellow" />
               )}
-              <h1 className="text-xl font-semibold text-solarized-base5">
+              <h1 className="text-xl font-semibold text-theme-text-primary">
                 {note.title}
               </h1>
             </div>
             <div className="flex items-center space-x-2 mt-1">
-              <span className="text-xs px-2 py-1 bg-solarized-base01 text-solarized-base2 rounded">
+              <span className="text-xs px-2 py-1 theme-bg-tertiary text-theme-text-secondary rounded">
                 {note.notebook}
               </span>
-              <span className="text-xs text-solarized-base0">{note.date}</span>
+              <span className="text-xs text-theme-text-muted">{note.date}</span>
             </div>
           </div>
 
           <div className="flex items-center space-x-1">
             {/* Actions Bar */}
-            <div className="flex items-center bg-solarized-base01 rounded-md p-1 space-x-1">
+            <div className="flex items-center theme-bg-tertiary rounded-md p-1 space-x-1">
               {/* Pin Button */}
               {onTogglePin && !isTrashView && (
                 <button
                   onClick={() => onTogglePin(note)}
                   className={`p-1.5 rounded transition-colors ${
                     note.isPinned
-                      ? 'text-solarized-yellow hover:text-solarized-orange bg-solarized-base00'
-                      : 'text-solarized-base1 hover:text-solarized-yellow hover:bg-solarized-base00'
+                      ? 'text-theme-accent-yellow hover:text-theme-accent-orange bg-theme-bg-quaternary'
+                      : 'text-theme-text-tertiary hover:text-theme-accent-yellow hover:theme-bg-quaternary'
                   }`}
                   title={note.isPinned ? 'Unpin note' : 'Pin note'}
                 >
@@ -198,8 +200,8 @@ const NotePreview = ({
                   }
                   className={`p-1.5 rounded transition-colors ${
                     viewMode === 'edit'
-                      ? 'text-solarized-cyan bg-solarized-base00'
-                      : 'text-solarized-base1 hover:text-solarized-cyan hover:bg-solarized-base00'
+                      ? 'text-theme-accent-cyan bg-theme-bg-quaternary'
+                      : 'text-theme-text-tertiary hover:text-theme-accent-cyan hover:theme-bg-quaternary'
                   }`}
                   title={
                     viewMode === 'edit' ? 'Switch to preview' : 'Switch to edit'
@@ -217,14 +219,14 @@ const NotePreview = ({
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setShowMenu(!showMenu)}
-                  className="p-1.5 text-solarized-base1 hover:text-solarized-base3 hover:bg-solarized-base00 rounded transition-colors"
+                  className="p-1.5 text-theme-text-tertiary hover:text-theme-text-secondary hover:theme-bg-quaternary rounded transition-colors"
                   title="More options"
                 >
                   <Icons.MoreVertical size={14} />
                 </button>
 
                 {showMenu && (
-                  <div className="absolute right-0 top-8 bg-solarized-base02 border border-solarized-base01 rounded shadow-lg py-1 w-48 z-10">
+                  <div className="absolute right-0 top-8 theme-bg-secondary border border-theme-border-primary rounded shadow-lg py-1 w-48 z-10">
                     {isTrashView ? (
                       // Trash view actions
                       <>
@@ -233,19 +235,19 @@ const NotePreview = ({
                             onRestoreNote?.(note)
                             setShowMenu(false)
                           }}
-                          className="w-full px-3 py-2 text-left text-sm text-solarized-green hover:bg-solarized-base01 transition-colors"
+                          className="w-full px-3 py-2 text-left text-sm text-theme-accent-green hover:theme-bg-tertiary transition-colors"
                         >
                           Restore Note
                         </button>
 
-                        <div className="border-t border-solarized-base01 my-1"></div>
+                        <div className="border-t border-theme-border-primary my-1"></div>
 
                         <button
                           onClick={() => {
                             onPermanentDelete?.(note)
                             setShowMenu(false)
                           }}
-                          className="w-full px-3 py-2 text-left text-sm text-solarized-red hover:bg-solarized-base01 transition-colors"
+                          className="w-full px-3 py-2 text-left text-sm text-theme-accent-red hover:theme-bg-tertiary transition-colors"
                         >
                           Delete Permanently
                         </button>
@@ -259,7 +261,7 @@ const NotePreview = ({
                               onDuplicate(note)
                               setShowMenu(false)
                             }}
-                            className="w-full px-3 py-2 text-left text-sm text-solarized-base3 hover:bg-solarized-base01 transition-colors flex items-center space-x-2"
+                            className="w-full px-3 py-2 text-left text-sm text-theme-text-secondary hover:theme-bg-tertiary transition-colors flex items-center space-x-2"
                           >
                             <Icons.Copy size={14} />
                             <span>Duplicate Note</span>
@@ -271,13 +273,13 @@ const NotePreview = ({
                             setShowExportDialog(true)
                             setShowMenu(false)
                           }}
-                          className="w-full px-3 py-2 text-left text-sm text-solarized-base3 hover:bg-solarized-base01 transition-colors flex items-center space-x-2"
+                          className="w-full px-3 py-2 text-left text-sm text-theme-text-secondary hover:theme-bg-tertiary transition-colors flex items-center space-x-2"
                         >
                           <Icons.Download size={14} />
                           <span>Export Note</span>
                         </button>
 
-                        <div className="border-t border-solarized-base01 my-1"></div>
+                        <div className="border-t border-theme-border-primary my-1"></div>
 
                         {onDelete && (
                           <button
@@ -285,7 +287,7 @@ const NotePreview = ({
                               onDelete(note)
                               setShowMenu(false)
                             }}
-                            className="w-full px-3 py-2 text-left text-sm text-solarized-red hover:bg-solarized-base01 transition-colors flex items-center space-x-2"
+                            className="w-full px-3 py-2 text-left text-sm text-theme-accent-red hover:theme-bg-tertiary transition-colors flex items-center space-x-2"
                           >
                             <Icons.Trash size={14} />
                             <span>Delete Note</span>
@@ -294,30 +296,30 @@ const NotePreview = ({
                       </>
                     )}
 
-                    <div className="border-t border-solarized-base01 my-1"></div>
+                    <div className="border-t border-theme-border-primary my-1"></div>
 
                     <div className="px-3 py-1">
-                      <div className="text-xs text-solarized-base0 mb-1">
+                      <div className="text-xs text-theme-text-muted mb-1">
                         Notebook
                       </div>
-                      <div className="text-xs text-solarized-base2">
+                      <div className="text-xs text-theme-text-secondary">
                         {note.notebook}
                       </div>
                     </div>
                     <div className="px-3 py-1">
-                      <div className="text-xs text-solarized-base0 mb-1">
+                      <div className="text-xs text-theme-text-muted mb-1">
                         Created
                       </div>
-                      <div className="text-xs text-solarized-base2">
+                      <div className="text-xs text-theme-text-secondary">
                         {note.date}
                       </div>
                     </div>
                     {note.updatedAt && (
                       <div className="px-3 py-1">
-                        <div className="text-xs text-solarized-base0 mb-1">
+                        <div className="text-xs text-theme-text-muted mb-1">
                           Modified
                         </div>
-                        <div className="text-xs text-solarized-base2">
+                        <div className="text-xs text-theme-text-secondary">
                           {new Date(note.updatedAt).toLocaleDateString()}
                         </div>
                       </div>
@@ -345,11 +347,12 @@ const NotePreview = ({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto relative bg-solarized-base03">
+      <div className="flex-1 overflow-y-auto relative theme-bg-primary">
         <div
-          className="p-6 prose prose-invert max-w-none"
+          key={settings.theme}
+          className="p-6 prose max-w-none"
           style={{
-            color: '#839496',
+            color: 'var(--color-base0)',
             lineHeight: '1.7',
           }}
           dangerouslySetInnerHTML={{ __html: getPreviewHtml() }}
@@ -357,7 +360,7 @@ const NotePreview = ({
       </div>
 
       {/* Footer Stats */}
-      <div className="px-4 py-2 bg-solarized-base02 border-t border-solarized-base01 text-xs text-solarized-base0 flex items-center justify-between">
+      <div className="px-4 py-2 theme-bg-secondary border-t border-theme-border-primary text-xs text-theme-text-muted flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <span>
             Words:{' '}

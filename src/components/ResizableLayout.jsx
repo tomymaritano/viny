@@ -9,6 +9,7 @@ const ResizableLayout = ({
   isPreviewVisible = false,
   isSidebarVisible = true,
   isNotesListVisible = true,
+  settings,
 }) => {
   const containerRef = useRef(null)
   const [containerWidth, setContainerWidth] = useState(0)
@@ -16,15 +17,15 @@ const ResizableLayout = ({
   // Column widths
   const [notesListWidth, setNotesListWidth] = useState(() => {
     const saved = localStorage.getItem('inkrun-noteslist-width')
-    return saved ? parseInt(saved) : 320
+    return saved ? parseInt(saved) : settings?.notesListWidth || 320
   })
 
   const [previewWidth, setPreviewWidth] = useState(() => {
     const saved = localStorage.getItem('inkrun-preview-width')
-    return saved ? parseInt(saved) : 350
+    return saved ? parseInt(saved) : settings?.previewWidth || 350
   })
 
-  const sidebarWidth = 200 // Fixed
+  const sidebarWidth = settings?.sidebarWidth || 200
   const minNotesListWidth = 280
   const maxNotesListWidth = 500
   const minPreviewWidth = 280

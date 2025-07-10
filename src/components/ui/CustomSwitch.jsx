@@ -58,12 +58,12 @@ const CustomSwitch = ({
         onMouseLeave={() => setIsPressed(false)}
         className={`
           ${currentSize.container}
-          ${checked ? 'bg-solarized-blue' : 'bg-solarized-base01'}
+          ${checked ? 'bg-theme-accent-primary' : 'theme-bg-tertiary'}
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-opacity-80'}
           ${isPressed ? 'scale-95' : 'scale-100'}
           relative inline-flex items-center rounded-full border-2 border-transparent 
           transition-all duration-200 ease-in-out 
-          focus:outline-none focus:ring-2 focus:ring-solarized-blue focus:ring-offset-2 focus:ring-offset-solarized-base03
+          focus:outline-none focus:ring-2 focus:ring-theme-accent-primary focus:ring-offset-2 focus:ring-offset-solarized-base03
           active:scale-95
         `}
       >
@@ -71,7 +71,7 @@ const CustomSwitch = ({
           className={`
             ${currentSize.thumb} 
             ${currentSize.translate}
-            ${checked ? 'bg-white' : 'bg-solarized-base3'}
+            ${checked ? 'bg-theme-text-primary' : 'theme-bg-tertiary'}
             inline-block transform rounded-full shadow-lg ring-0 
             transition-all duration-200 ease-in-out
             ${isPressed ? 'shadow-md' : 'shadow-lg'}
@@ -82,12 +82,14 @@ const CustomSwitch = ({
       {(label || description) && (
         <div className="flex-1">
           {label && (
-            <div className="text-sm font-medium text-solarized-base3">
+            <div className="text-sm font-medium text-theme-text-secondary">
               {label}
             </div>
           )}
           {description && (
-            <div className="text-xs text-solarized-base1">{description}</div>
+            <div className="text-xs text-theme-text-tertiary">
+              {description}
+            </div>
           )}
         </div>
       )}

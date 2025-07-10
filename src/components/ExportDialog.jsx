@@ -130,19 +130,19 @@ const ExportDialog = ({
         onClick={onClose}
       >
         <motion.div
-          className="bg-solarized-base02 border border-solarized-base01 rounded-lg shadow-xl w-full max-w-lg"
+          className="theme-bg-secondary border border-theme-border-primary rounded-lg shadow-xl w-full max-w-lg"
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-solarized-base01">
+          <div className="flex items-center justify-between p-6 border-b border-theme-border-primary">
             <div>
-              <h2 className="text-xl font-semibold text-solarized-base5">
+              <h2 className="text-xl font-semibold text-theme-text-primary">
                 Export {isSingleNote ? 'Note' : 'Notes'}
               </h2>
-              <p className="text-sm text-solarized-base1 mt-1">
+              <p className="text-sm text-theme-text-tertiary mt-1">
                 {isSingleNote
                   ? `Export "${notesToExport[0]?.title}" to your preferred format`
                   : `Export ${notesToExport.length} selected notes`}
@@ -150,7 +150,7 @@ const ExportDialog = ({
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-solarized-base1 hover:text-solarized-base3 hover:bg-solarized-base01 rounded transition-colors"
+              className="p-2 text-theme-text-tertiary hover:text-theme-text-secondary hover:theme-bg-tertiary rounded transition-colors"
             >
               <Icons.X size={20} />
             </button>
@@ -160,7 +160,7 @@ const ExportDialog = ({
           <div className="p-6 space-y-6">
             {/* Format Selection */}
             <div>
-              <label className="block text-sm font-medium text-solarized-base3 mb-3">
+              <label className="block text-sm font-medium text-theme-text-secondary mb-3">
                 Export Format
               </label>
               <div className="space-y-2">
@@ -169,8 +169,8 @@ const ExportDialog = ({
                     key={format.value}
                     className={`flex items-start p-3 border rounded-lg cursor-pointer transition-colors ${
                       exportFormat === format.value
-                        ? 'border-solarized-blue bg-solarized-blue/10'
-                        : 'border-solarized-base01 hover:border-solarized-base1'
+                        ? 'border-theme-accent-primary bg-theme-accent-primary/10'
+                        : 'border-theme-border-primary hover:border-theme-text-tertiary'
                     }`}
                   >
                     <input
@@ -183,20 +183,20 @@ const ExportDialog = ({
                     />
                     <div className="flex items-start space-x-3 flex-1">
                       <div
-                        className={`mt-0.5 ${exportFormat === format.value ? 'text-solarized-blue' : 'text-solarized-base1'}`}
+                        className={`mt-0.5 ${exportFormat === format.value ? 'text-theme-accent-primary' : 'text-theme-text-tertiary'}`}
                       >
                         {format.icon}
                       </div>
                       <div className="flex-1">
                         <div
-                          className={`font-medium ${exportFormat === format.value ? 'text-solarized-blue' : 'text-solarized-base3'}`}
+                          className={`font-medium ${exportFormat === format.value ? 'text-theme-accent-primary' : 'text-theme-text-secondary'}`}
                         >
                           {format.label}
                         </div>
-                        <div className="text-sm text-solarized-base1 mt-0.5">
+                        <div className="text-sm text-theme-text-tertiary mt-0.5">
                           {format.description}
                         </div>
-                        <div className="text-xs text-solarized-base0 mt-1">
+                        <div className="text-xs text-theme-text-muted mt-1">
                           {format.note}
                         </div>
                       </div>
@@ -210,10 +210,10 @@ const ExportDialog = ({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-medium text-solarized-base3">
+                  <div className="text-sm font-medium text-theme-text-secondary">
                     Include Metadata
                   </div>
-                  <div className="text-xs text-solarized-base1 mt-0.5">
+                  <div className="text-xs text-theme-text-tertiary mt-0.5">
                     Include title, date, notebook, and tags in export
                   </div>
                 </div>
@@ -221,12 +221,12 @@ const ExportDialog = ({
                   onClick={() => setIncludeMetadata(!includeMetadata)}
                   className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
                     includeMetadata
-                      ? 'bg-solarized-blue'
-                      : 'bg-solarized-base01'
+                      ? 'bg-theme-accent-primary'
+                      : 'theme-bg-tertiary'
                   }`}
                 >
                   <span
-                    className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                    className={`inline-block h-3 w-3 transform rounded-full bg-theme-text-primary transition-transform ${
                       includeMetadata ? 'translate-x-5' : 'translate-x-1'
                     }`}
                   />
@@ -234,7 +234,7 @@ const ExportDialog = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-solarized-base3 mb-2">
+                <label className="block text-sm font-medium text-theme-text-secondary mb-2">
                   Custom Filename (Optional)
                 </label>
                 <input
@@ -242,20 +242,20 @@ const ExportDialog = ({
                   value={customFilename}
                   onChange={e => setCustomFilename(e.target.value)}
                   placeholder={generateDefaultFilename()}
-                  className="w-full px-3 py-2 bg-solarized-base03 border border-solarized-base01 rounded text-solarized-base3 focus:border-solarized-blue focus:outline-none"
+                  className="w-full px-3 py-2 theme-bg-primary border border-theme-border-primary rounded text-theme-text-secondary focus:border-theme-accent-primary focus:outline-none"
                 />
-                <div className="text-xs text-solarized-base0 mt-1">
+                <div className="text-xs text-theme-text-muted mt-1">
                   Leave empty to use default filename
                 </div>
               </div>
             </div>
 
             {/* Preview Info */}
-            <div className="bg-solarized-base01 rounded-lg p-3">
-              <div className="text-sm text-solarized-base3 font-medium mb-2">
+            <div className="theme-bg-tertiary rounded-lg p-3">
+              <div className="text-sm text-theme-text-secondary font-medium mb-2">
                 Export Preview
               </div>
-              <div className="space-y-1 text-xs text-solarized-base1">
+              <div className="space-y-1 text-xs text-theme-text-tertiary">
                 <div>
                   Format:{' '}
                   {formatOptions.find(f => f.value === exportFormat)?.label}
@@ -273,21 +273,21 @@ const ExportDialog = ({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between p-6 border-t border-solarized-base01">
+          <div className="flex items-center justify-between p-6 border-t border-theme-border-primary">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm text-solarized-base1 border border-solarized-base01 rounded hover:bg-solarized-base01 transition-colors"
+              className="px-4 py-2 text-sm text-theme-text-tertiary border border-theme-border-primary rounded hover:theme-bg-tertiary transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleExport}
               disabled={isExporting || notesToExport.length === 0}
-              className="px-4 py-2 text-sm bg-solarized-blue text-solarized-base5 rounded hover:bg-solarized-blue-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+              className="px-4 py-2 text-sm bg-theme-accent-primary text-theme-text-primary rounded hover:bg-theme-accent-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
             >
               {isExporting ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-solarized-base5 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-theme-text-primary border-t-transparent rounded-full animate-spin" />
                   <span>Exporting...</span>
                 </>
               ) : (

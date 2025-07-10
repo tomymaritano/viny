@@ -75,20 +75,20 @@ const SearchModal = ({
       <div className="relative min-h-screen flex items-start justify-center pt-16 px-4 pb-4">
         <div
           ref={modalRef}
-          className={`relative w-full max-w-2xl bg-solarized-base02 rounded-xl shadow-2xl border border-solarized-base01 ${className}`}
+          className={`relative w-full max-w-2xl theme-bg-secondary rounded-xl shadow-2xl border border-theme-border-primary ${className}`}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-solarized-base01">
+          <div className="flex items-center justify-between p-4 border-b border-theme-border-primary">
             <div className="flex items-center space-x-2">
-              <Icons.Search size={18} className="text-solarized-base1" />
-              <h2 className="text-lg font-medium text-solarized-base3">
+              <Icons.Search size={18} className="text-theme-text-tertiary" />
+              <h2 className="text-lg font-medium text-theme-text-secondary">
                 Search Notes
               </h2>
             </div>
 
             <button
               onClick={onClose}
-              className="text-solarized-base1 hover:text-solarized-base3 transition-colors p-1 rounded-md hover:bg-solarized-base01"
+              className="text-theme-text-tertiary hover:text-theme-text-secondary transition-colors p-1 rounded-md hover:theme-bg-tertiary"
             >
               <Icons.X size={18} />
             </button>
@@ -115,21 +115,21 @@ const SearchModal = ({
             </div>
 
             {/* Keyboard Shortcuts Help */}
-            <div className="mt-6 pt-4 border-t border-solarized-base01">
-              <div className="text-xs text-solarized-base1 space-y-2">
+            <div className="mt-6 pt-4 border-t border-theme-border-primary">
+              <div className="text-xs text-theme-text-tertiary space-y-2">
                 <div className="font-medium mb-3">Keyboard Shortcuts</div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div className="flex items-center justify-between">
                     <span>Navigate results</span>
                     <div className="flex items-center space-x-1">
-                      <kbd className="px-1.5 py-0.5 text-xs bg-solarized-base01 rounded border border-solarized-base00">
+                      <kbd className="px-1.5 py-0.5 text-xs theme-bg-tertiary rounded border border-theme-border-secondary">
                         ↑
                       </kbd>
-                      <kbd className="px-1.5 py-0.5 text-xs bg-solarized-base01 rounded border border-solarized-base00">
+                      <kbd className="px-1.5 py-0.5 text-xs theme-bg-tertiary rounded border border-theme-border-secondary">
                         ↓
                       </kbd>
-                      <kbd className="px-1.5 py-0.5 text-xs bg-solarized-base01 rounded border border-solarized-base00">
+                      <kbd className="px-1.5 py-0.5 text-xs theme-bg-tertiary rounded border border-theme-border-secondary">
                         Tab
                       </kbd>
                     </div>
@@ -137,7 +137,7 @@ const SearchModal = ({
 
                   <div className="flex items-center justify-between">
                     <span>Select note</span>
-                    <kbd className="px-1.5 py-0.5 text-xs bg-solarized-base01 rounded border border-solarized-base00">
+                    <kbd className="px-1.5 py-0.5 text-xs theme-bg-tertiary rounded border border-theme-border-secondary">
                       Enter
                     </kbd>
                   </div>
@@ -145,10 +145,10 @@ const SearchModal = ({
                   <div className="flex items-center justify-between">
                     <span>First/Last result</span>
                     <div className="flex items-center space-x-1">
-                      <kbd className="px-1.5 py-0.5 text-xs bg-solarized-base01 rounded border border-solarized-base00">
+                      <kbd className="px-1.5 py-0.5 text-xs theme-bg-tertiary rounded border border-theme-border-secondary">
                         Home
                       </kbd>
-                      <kbd className="px-1.5 py-0.5 text-xs bg-solarized-base01 rounded border border-solarized-base00">
+                      <kbd className="px-1.5 py-0.5 text-xs theme-bg-tertiary rounded border border-theme-border-secondary">
                         End
                       </kbd>
                     </div>
@@ -156,7 +156,7 @@ const SearchModal = ({
 
                   <div className="flex items-center justify-between">
                     <span>Close search</span>
-                    <kbd className="px-1.5 py-0.5 text-xs bg-solarized-base01 rounded border border-solarized-base00">
+                    <kbd className="px-1.5 py-0.5 text-xs theme-bg-tertiary rounded border border-theme-border-secondary">
                       Esc
                     </kbd>
                   </div>
@@ -164,11 +164,11 @@ const SearchModal = ({
                   <div className="flex items-center justify-between">
                     <span>Open with modifier</span>
                     <div className="flex items-center space-x-1">
-                      <kbd className="px-1.5 py-0.5 text-xs bg-solarized-base01 rounded border border-solarized-base00">
+                      <kbd className="px-1.5 py-0.5 text-xs theme-bg-tertiary rounded border border-theme-border-secondary">
                         Cmd
                       </kbd>
-                      <span className="text-solarized-base0">+</span>
-                      <kbd className="px-1.5 py-0.5 text-xs bg-solarized-base01 rounded border border-solarized-base00">
+                      <span className="text-theme-text-muted">+</span>
+                      <kbd className="px-1.5 py-0.5 text-xs theme-bg-tertiary rounded border border-theme-border-secondary">
                         Enter
                       </kbd>
                     </div>
@@ -177,10 +177,10 @@ const SearchModal = ({
                   <div className="flex items-center justify-between">
                     <span>Clear search</span>
                     <div className="flex items-center space-x-1">
-                      <kbd className="px-1.5 py-0.5 text-xs bg-solarized-base01 rounded border border-solarized-base00">
+                      <kbd className="px-1.5 py-0.5 text-xs theme-bg-tertiary rounded border border-theme-border-secondary">
                         Esc
                       </kbd>
-                      <span className="text-solarized-base0">twice</span>
+                      <span className="text-theme-text-muted">twice</span>
                     </div>
                   </div>
                 </div>

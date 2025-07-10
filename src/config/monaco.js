@@ -14,7 +14,8 @@ export const monacoOptions = {
   scrollBeyondLastLine: false,
   fontSize: 14,
   lineHeight: 1.6,
-  fontFamily: 'JetBrains Mono, Monaco, Consolas, monospace',
+  fontFamily:
+    'SF Mono, Monaco, Cascadia Code, Roboto Mono, Consolas, Courier New, monospace',
 
   // Performance optimizations
   quickSuggestions: false,

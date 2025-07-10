@@ -16,6 +16,11 @@ const Settings = ({ isVisible, onClose }) => {
   const tabs = [
     { id: 'general', label: 'General', icon: <Icons.Settings size={16} /> },
     { id: 'editor', label: 'Editor', icon: <Icons.Edit size={16} /> },
+    {
+      id: 'typography',
+      label: 'Typography',
+      icon: <Icons.Settings size={16} />,
+    },
     { id: 'interface', label: 'Interface', icon: <Icons.Settings size={16} /> },
     ...(isFeatureEnabled('PLUGINS_ENABLED')
       ? [
@@ -31,14 +36,14 @@ const Settings = ({ isVisible, onClose }) => {
   ]
 
   const SettingItem = ({ label, children, description }) => (
-    <div className="setting-item py-3 border-b border-solarized-base01 last:border-b-0">
+    <div className="setting-item py-3 border-b border-theme-border-primary last:border-b-0">
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <div className="text-sm font-medium text-solarized-base3">
+          <div className="text-sm font-medium text-theme-text-secondary">
             {label}
           </div>
           {description && (
-            <div className="text-xs text-solarized-base1 mt-1">
+            <div className="text-xs text-theme-text-tertiary mt-1">
               {description}
             </div>
           )}
@@ -52,7 +57,7 @@ const Settings = ({ isVisible, onClose }) => {
     <select
       value={value}
       onChange={e => onChange(e.target.value)}
-      className="px-2 py-1 bg-solarized-base02 border border-solarized-base01 rounded text-sm text-solarized-base3 focus:border-solarized-blue focus:outline-none"
+      className="px-2 py-1 theme-bg-secondary border border-theme-border-primary rounded text-sm text-theme-text-secondary focus:border-theme-accent-primary focus:outline-none"
     >
       {options.map(option => (
         <option key={option.value} value={option.value}>
@@ -72,7 +77,7 @@ const Settings = ({ isVisible, onClose }) => {
       min={min}
       max={max}
       step={step}
-      className="px-2 py-1 bg-solarized-base02 border border-solarized-base01 rounded text-sm text-solarized-base3 focus:border-solarized-blue focus:outline-none w-16"
+      className="px-2 py-1 theme-bg-secondary border border-theme-border-primary rounded text-sm text-theme-text-secondary focus:border-theme-accent-primary focus:outline-none w-16"
     />
   )
 
@@ -88,6 +93,7 @@ const Settings = ({ isVisible, onClose }) => {
           options={[
             { value: 'dark', label: 'Dark' },
             { value: 'light', label: 'Light' },
+            { value: 'solarized', label: 'Solarized' },
             { value: 'system', label: 'System' },
           ]}
         />
@@ -144,7 +150,7 @@ const Settings = ({ isVisible, onClose }) => {
           onChange={value => updateSetting('fontFamily', value)}
           options={[
             { value: 'Fira Code', label: 'Fira Code' },
-            { value: 'JetBrains Mono', label: 'JetBrains Mono' },
+            { value: 'SF Mono', label: 'SF Mono' },
             { value: 'Source Code Pro', label: 'Source Code Pro' },
             { value: 'Monaco', label: 'Monaco' },
             { value: 'Consolas', label: 'Consolas' },
@@ -197,6 +203,77 @@ const Settings = ({ isVisible, onClose }) => {
           checked={settings.minimap}
           onChange={value => updateSetting('minimap', value)}
           size="md"
+        />
+      </SettingItem>
+    </div>
+  )
+
+  const renderTypographySettings = () => (
+    <div className="space-y-1">
+      <SettingItem
+        label="UI Font Family"
+        description="Font for interface elements"
+      >
+        <Select
+          value={settings.uiFontFamily}
+          onChange={value => updateSetting('uiFontFamily', value)}
+          options={[
+            { value: 'System', label: 'System Default' },
+            { value: 'system-ui', label: 'System UI' },
+            { value: 'SF Pro Display', label: 'SF Pro Display' },
+            { value: 'Segoe UI', label: 'Segoe UI' },
+            { value: 'Arial', label: 'Arial' },
+            { value: 'Helvetica', label: 'Helvetica' },
+          ]}
+        />
+      </SettingItem>
+
+      <SettingItem label="UI Font Size" description="Size of UI text">
+        <NumberInput
+          value={settings.uiFontSize}
+          onChange={value => updateSetting('uiFontSize', value)}
+          min={12}
+          max={18}
+        />
+      </SettingItem>
+
+      <SettingItem
+        label="Markdown Font Family"
+        description="Font for markdown preview"
+      >
+        <Select
+          value={settings.markdownFontFamily}
+          onChange={value => updateSetting('markdownFontFamily', value)}
+          options={[
+            { value: 'System', label: 'System Default' },
+            { value: 'Georgia', label: 'Georgia' },
+            { value: 'Times New Roman', label: 'Times New Roman' },
+            { value: 'Charter', label: 'Charter' },
+            { value: 'Source Serif Pro', label: 'Source Serif Pro' },
+            { value: 'system-ui', label: 'System UI' },
+          ]}
+        />
+      </SettingItem>
+
+      <SettingItem
+        label="Markdown Font Size"
+        description="Size of markdown text"
+      >
+        <NumberInput
+          value={settings.markdownFontSize}
+          onChange={value => updateSetting('markdownFontSize', value)}
+          min={12}
+          max={24}
+        />
+      </SettingItem>
+
+      <SettingItem label="Line Height" description="Space between lines">
+        <NumberInput
+          value={settings.lineHeight}
+          onChange={value => updateSetting('lineHeight', value)}
+          min={1.2}
+          max={2.0}
+          step={0.1}
         />
       </SettingItem>
     </div>
@@ -277,10 +354,10 @@ const Settings = ({ isVisible, onClose }) => {
     <div className="space-y-4">
       <div className="text-center py-8">
         <div className="text-4xl mb-4">🧩</div>
-        <h3 className="text-lg font-semibold text-solarized-base3 mb-2">
+        <h3 className="text-lg font-semibold text-theme-text-secondary mb-2">
           Plugin Management
         </h3>
-        <p className="text-solarized-base1 text-sm mb-6">
+        <p className="text-theme-text-tertiary text-sm mb-6">
           Extend Nototo's functionality with community plugins
         </p>
         <button
@@ -294,21 +371,21 @@ const Settings = ({ isVisible, onClose }) => {
               }
             }, 100)
           }}
-          className="bg-solarized-blue text-solarized-base03 px-4 py-2 rounded font-medium hover:bg-solarized-blue/80 transition-colors"
+          className="bg-theme-accent-primary text-theme-text-primary px-4 py-2 rounded font-medium hover:bg-theme-accent-primary/80 transition-colors"
         >
           Open Plugin Manager
         </button>
       </div>
 
-      <div className="bg-solarized-base01 rounded-lg p-4 border border-solarized-base00">
-        <h4 className="font-semibold text-solarized-base3 mb-2">
+      <div className="theme-bg-tertiary rounded-lg p-4 border border-theme-border-secondary">
+        <h4 className="font-semibold text-theme-text-secondary mb-2">
           Plugin System
         </h4>
-        <p className="text-solarized-base1 text-sm mb-3">
+        <p className="text-theme-text-tertiary text-sm mb-3">
           Plugins allow you to customize and extend Nototo with new features
           like:
         </p>
-        <ul className="text-solarized-base1 text-sm space-y-1 ml-4">
+        <ul className="text-theme-text-tertiary text-sm space-y-1 ml-4">
           <li>• Custom export formats</li>
           <li>• Editor themes and syntax highlighting</li>
           <li>• Additional sidebar sections</li>
@@ -331,6 +408,8 @@ const Settings = ({ isVisible, onClose }) => {
         return renderGeneralSettings()
       case 'editor':
         return renderEditorSettings()
+      case 'typography':
+        return renderTypographySettings()
       case 'interface':
         return renderInterfaceSettings()
       case 'plugins':
@@ -353,94 +432,99 @@ const Settings = ({ isVisible, onClose }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onClose}
         >
           <motion.div
-            className="bg-solarized-base02 border border-solarized-base01 rounded-lg shadow-xl w-full max-w-4xl h-full max-h-[80vh] flex flex-col"
+            className="theme-bg-primary border border-theme-border-primary rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            onClick={e => e.stopPropagation()}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-solarized-base01">
-              <div>
-                <h2 className="text-xl font-semibold text-solarized-base5">
-                  Settings
-                </h2>
-                <p className="text-sm text-solarized-base1 mt-1">
-                  Customize your Nototo experience
-                </p>
-              </div>
-              <button
-                onClick={onClose}
-                className="p-2 text-solarized-base1 hover:text-solarized-base3 hover:bg-solarized-base01 rounded transition-colors"
-              >
-                <Icons.X size={20} />
-              </button>
-            </div>
-
-            <div className="flex flex-1 overflow-hidden">
-              {/* Sidebar */}
-              <div className="w-48 border-r border-solarized-base01 p-4">
-                <div className="space-y-1">
-                  {tabs.map(tab => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`w-full flex items-center space-x-3 px-3 py-2 rounded text-sm transition-colors text-left ${
-                        activeTab === tab.id
-                          ? 'bg-solarized-blue text-solarized-base5'
-                          : 'text-solarized-base1 hover:text-solarized-base3 hover:bg-solarized-base01'
-                      }`}
-                    >
-                      {tab.icon}
-                      <span>{tab.label}</span>
-                    </button>
-                  ))}
+            <motion.div
+              className="flex-1 flex flex-col h-full"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -20, opacity: 0 }}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-theme-border-primary">
+                <div>
+                  <h2 className="text-xl font-semibold text-theme-text-primary">
+                    Settings
+                  </h2>
+                  <p className="text-sm text-theme-text-tertiary mt-1">
+                    Customize your Nototo experience
+                  </p>
                 </div>
-              </div>
-
-              {/* Content */}
-              <div className="flex-1 p-6 overflow-y-auto">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={activeTab}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {renderTabContent()}
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="flex items-center justify-between p-6 border-t border-solarized-base01">
-              <div className="flex items-center space-x-6">
                 <button
-                  onClick={resetSettings}
-                  className="px-4 py-2 text-sm text-solarized-orange border border-solarized-orange rounded hover:bg-solarized-orange hover:text-solarized-base5 transition-colors"
+                  onClick={onClose}
+                  className="p-2 text-theme-text-tertiary hover:text-theme-text-secondary hover:theme-bg-tertiary rounded transition-colors"
                 >
-                  Reset to Defaults
+                  <Icons.X size={20} />
                 </button>
+              </div>
 
-                {/* Version Info */}
-                <div className="flex items-center space-x-2 text-sm text-solarized-base1">
-                  <Icons.Info size={14} />
-                  <span>Nototo v{packageInfo.version}</span>
+              <div className="flex flex-1 overflow-hidden">
+                {/* Sidebar */}
+                <div className="w-48 border-r border-theme-border-primary p-4">
+                  <div className="space-y-1">
+                    {tabs.map(tab => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`w-full flex items-center space-x-3 px-3 py-2 rounded text-sm transition-colors text-left ${
+                          activeTab === tab.id
+                            ? 'bg-theme-accent-primary text-theme-text-primary'
+                            : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:theme-bg-tertiary'
+                        }`}
+                      >
+                        {tab.icon}
+                        <span>{tab.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 p-6 overflow-y-auto">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={activeTab}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      {renderTabContent()}
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
               </div>
 
-              <button
-                onClick={onClose}
-                className="px-4 py-2 text-sm bg-solarized-blue text-solarized-base5 rounded hover:bg-solarized-blue-hover transition-colors"
-              >
-                Done
-              </button>
-            </div>
+              {/* Footer */}
+              <div className="flex items-center justify-between p-6 border-t border-theme-border-primary">
+                <div className="flex items-center space-x-6">
+                  <button
+                    onClick={resetSettings}
+                    className="px-4 py-2 text-sm text-theme-accent-yellow border border-theme-accent-yellow rounded hover:bg-theme-accent-yellow hover:text-theme-text-primary transition-colors"
+                  >
+                    Reset to Defaults
+                  </button>
+
+                  {/* Version Info */}
+                  <div className="flex items-center space-x-2 text-sm text-theme-text-tertiary">
+                    <Icons.Info size={14} />
+                    <span>Nototo v{packageInfo.version}</span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={onClose}
+                  className="px-4 py-2 text-sm bg-theme-accent-primary text-theme-text-primary rounded hover:bg-theme-accent-primary/80 transition-colors"
+                >
+                  Done
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         </motion.div>
       )}

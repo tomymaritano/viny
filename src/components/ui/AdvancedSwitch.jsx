@@ -33,24 +33,24 @@ const AdvancedSwitch = ({
 
   const variants = {
     default: {
-      on: 'bg-solarized-blue',
-      off: 'bg-solarized-base01',
-      thumb: 'bg-white',
+      on: 'bg-theme-accent-primary',
+      off: 'theme-bg-tertiary',
+      thumb: 'bg-theme-text-primary',
     },
     success: {
-      on: 'bg-solarized-green',
-      off: 'bg-solarized-base01',
-      thumb: 'bg-white',
+      on: 'bg-theme-accent-green',
+      off: 'theme-bg-tertiary',
+      thumb: 'bg-theme-text-primary',
     },
     warning: {
-      on: 'bg-solarized-yellow',
-      off: 'bg-solarized-base01',
-      thumb: 'bg-white',
+      on: 'bg-theme-accent-yellow',
+      off: 'theme-bg-tertiary',
+      thumb: 'bg-theme-text-primary',
     },
     danger: {
-      on: 'bg-solarized-red',
-      off: 'bg-solarized-base01',
-      thumb: 'bg-white',
+      on: 'bg-theme-accent-red',
+      off: 'theme-bg-tertiary',
+      thumb: 'bg-theme-text-primary',
     },
   }
 
@@ -94,7 +94,7 @@ const AdvancedSwitch = ({
           ${loading ? 'animate-pulse' : ''}
           relative inline-flex items-center rounded-full border-2 border-transparent 
           transition-all duration-200 ease-in-out 
-          focus:outline-none focus:ring-2 focus:ring-solarized-blue focus:ring-offset-2 focus:ring-offset-solarized-base03
+          focus:outline-none focus:ring-2 focus:ring-theme-accent-primary focus:ring-offset-2 focus:ring-offset-solarized-base03
           hover:shadow-lg
           ${isAnimating ? 'scale-95' : 'scale-100'}
         `}
@@ -111,7 +111,7 @@ const AdvancedSwitch = ({
           `}
         >
           {loading && (
-            <div className="w-2 h-2 border border-solarized-base01 border-t-transparent rounded-full animate-spin" />
+            <div className="w-2 h-2 border border-theme-border-primary border-t-transparent rounded-full animate-spin" />
           )}
           {icon && !loading && (
             <div className="w-2 h-2 flex items-center justify-center">
@@ -124,12 +124,14 @@ const AdvancedSwitch = ({
       {(label || description) && (
         <div className="flex-1">
           {label && (
-            <div className="text-sm font-medium text-solarized-base3">
+            <div className="text-sm font-medium text-theme-text-secondary">
               {label}
             </div>
           )}
           {description && (
-            <div className="text-xs text-solarized-base1">{description}</div>
+            <div className="text-xs text-theme-text-tertiary">
+              {description}
+            </div>
           )}
         </div>
       )}

@@ -30,15 +30,15 @@ const Toast = ({ message, type = 'success', duration = 3000, onClose }) => {
   const getTypeStyles = () => {
     switch (type) {
       case 'success':
-        return 'bg-solarized-green text-solarized-base5 border-solarized-green'
+        return 'bg-theme-accent-green text-theme-text-primary border-theme-accent-green'
       case 'error':
-        return 'bg-solarized-red text-solarized-base5 border-solarized-red'
+        return 'bg-theme-accent-red text-theme-text-primary border-theme-accent-red'
       case 'warning':
-        return 'bg-solarized-orange text-solarized-base5 border-solarized-orange'
+        return 'bg-theme-accent-orange text-theme-text-primary border-theme-accent-orange'
       case 'info':
-        return 'bg-solarized-blue text-solarized-base5 border-solarized-blue'
+        return 'bg-theme-accent-primary text-theme-text-primary border-theme-accent-primary'
       default:
-        return 'bg-solarized-green text-solarized-base5 border-solarized-green'
+        return 'bg-theme-accent-green text-theme-text-primary border-theme-accent-green'
     }
   }
 

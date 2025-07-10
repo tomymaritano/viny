@@ -44,7 +44,7 @@ const MainContent = ({ activeSection, notes, onOpenNote, onNewNote }) => {
   }
 
   return (
-    <div className="flex-1 bg-solarized-base03 overflow-hidden font-mono">
+    <div className="flex-1 theme-bg-primary overflow-hidden ui-font">
       <div className="h-full overflow-y-auto">{renderSection()}</div>
     </div>
   )

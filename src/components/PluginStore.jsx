@@ -51,20 +51,20 @@ export default function PluginStore({ isVisible, onClose, onInstall }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-solarized-base02 border border-solarized-base01 rounded-lg shadow-xl w-full max-w-6xl max-h-[85vh] overflow-hidden">
+      <div className="theme-bg-secondary border border-theme-border-primary rounded-lg shadow-xl w-full max-w-6xl max-h-[85vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-solarized-base01">
+        <div className="flex items-center justify-between p-6 border-b border-theme-border-primary">
           <div>
-            <h2 className="text-xl font-bold text-solarized-base3">
+            <h2 className="text-xl font-bold text-theme-text-secondary">
               Plugin Store
             </h2>
-            <p className="text-solarized-base1 text-sm">
+            <p className="text-theme-text-tertiary text-sm">
               Discover and install plugins to enhance Nototo
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-solarized-base1 hover:text-solarized-base3 transition-colors"
+            className="text-theme-text-tertiary hover:text-theme-text-secondary transition-colors"
           >
             <svg
               width="24"
@@ -82,7 +82,7 @@ export default function PluginStore({ isVisible, onClose, onInstall }) {
 
         <div className="flex h-[calc(85vh-120px)]">
           {/* Sidebar */}
-          <div className="w-64 border-r border-solarized-base01 p-4">
+          <div className="w-64 border-r border-theme-border-primary p-4">
             {/* Search */}
             <div className="mb-6">
               <input
@@ -90,13 +90,13 @@ export default function PluginStore({ isVisible, onClose, onInstall }) {
                 placeholder="Search plugins..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full bg-solarized-base01 border border-solarized-base00 rounded px-3 py-2 text-solarized-base3 placeholder-solarized-base0 focus:border-solarized-blue focus:outline-none"
+                className="w-full theme-bg-tertiary border border-theme-border-secondary rounded px-3 py-2 text-theme-text-secondary placeholder-theme-text-muted focus:border-theme-accent-primary focus:outline-none"
               />
             </div>
 
             {/* Categories */}
             <div>
-              <h3 className="text-sm font-semibold text-solarized-base3 mb-3">
+              <h3 className="text-sm font-semibold text-theme-text-secondary mb-3">
                 Categories
               </h3>
               <div className="space-y-1">
@@ -106,8 +106,8 @@ export default function PluginStore({ isVisible, onClose, onInstall }) {
                     onClick={() => setSelectedCategory(category)}
                     className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
                       selectedCategory === category
-                        ? 'bg-solarized-blue text-solarized-base03'
-                        : 'text-solarized-base1 hover:bg-solarized-base01 hover:text-solarized-base3'
+                        ? 'bg-theme-accent-primary text-theme-bg-primary'
+                        : 'text-theme-text-tertiary hover:theme-bg-tertiary hover:text-theme-text-secondary'
                     }`}
                   >
                     {category}
@@ -126,25 +126,25 @@ export default function PluginStore({ isVisible, onClose, onInstall }) {
                   {filteredPlugins.map(plugin => (
                     <div
                       key={plugin.id}
-                      className="bg-solarized-base01 rounded-lg p-4 border border-solarized-base00 hover:border-solarized-blue transition-colors cursor-pointer"
+                      className="theme-bg-tertiary rounded-lg p-4 border border-theme-border-secondary hover:border-theme-accent-primary transition-colors cursor-pointer"
                     >
                       <div onClick={() => setSelectedPlugin(plugin)}>
                         <div className="flex items-start justify-between mb-3">
                           <div className="text-2xl">{plugin.icon}</div>
-                          <div className="flex items-center space-x-1 text-xs text-solarized-orange">
+                          <div className="flex items-center space-x-1 text-xs text-theme-accent-orange">
                             <span>★</span>
                             <span>{plugin.rating}</span>
                           </div>
                         </div>
 
-                        <h3 className="font-semibold text-solarized-base3 mb-2">
+                        <h3 className="font-semibold text-theme-text-secondary mb-2">
                           {plugin.name}
                         </h3>
-                        <p className="text-solarized-base1 text-sm mb-3 line-clamp-2">
+                        <p className="text-theme-text-tertiary text-sm mb-3 line-clamp-2">
                           {plugin.description}
                         </p>
 
-                        <div className="flex items-center justify-between text-xs text-solarized-base0 mb-3">
+                        <div className="flex items-center justify-between text-xs text-theme-text-muted mb-3">
                           <span>by {plugin.author}</span>
                           <span>
                             {plugin.downloads.toLocaleString()} downloads
@@ -155,7 +155,7 @@ export default function PluginStore({ isVisible, onClose, onInstall }) {
                           {plugin.tags.slice(0, 3).map(tag => (
                             <span
                               key={tag}
-                              className="bg-solarized-base00 text-solarized-base1 px-2 py-1 rounded text-xs"
+                              className="bg-theme-border-secondary text-theme-text-tertiary px-2 py-1 rounded text-xs"
                             >
                               {tag}
                             </span>
@@ -173,7 +173,7 @@ export default function PluginStore({ isVisible, onClose, onInstall }) {
                           handleInstallPlugin(plugin)
                         }}
                         disabled={loading}
-                        className="w-full bg-solarized-green text-solarized-base03 py-2 rounded text-sm font-medium hover:bg-solarized-green/80 transition-colors disabled:opacity-50"
+                        className="w-full bg-theme-accent-green text-theme-bg-primary py-2 rounded text-sm font-medium hover:bg-theme-accent-green/80 transition-colors disabled:opacity-50"
                       >
                         {loading ? 'Installing...' : 'Install'}
                       </button>
@@ -186,7 +186,7 @@ export default function PluginStore({ isVisible, onClose, onInstall }) {
               <div className="p-6">
                 <button
                   onClick={() => setSelectedPlugin(null)}
-                  className="flex items-center text-solarized-blue hover:text-solarized-blue/80 mb-6"
+                  className="flex items-center text-theme-accent-primary hover:text-theme-accent-primary/80 mb-6"
                 >
                   <svg
                     width="16"
@@ -208,13 +208,13 @@ export default function PluginStore({ isVisible, onClose, onInstall }) {
                       <div className="flex items-center space-x-4">
                         <div className="text-4xl">{selectedPlugin.icon}</div>
                         <div>
-                          <h1 className="text-2xl font-bold text-solarized-base3">
+                          <h1 className="text-2xl font-bold text-theme-text-secondary">
                             {selectedPlugin.name}
                           </h1>
-                          <p className="text-solarized-base1">
+                          <p className="text-theme-text-tertiary">
                             {selectedPlugin.description}
                           </p>
-                          <div className="flex items-center space-x-4 mt-2 text-sm text-solarized-base0">
+                          <div className="flex items-center space-x-4 mt-2 text-sm text-theme-text-muted">
                             <span>by {selectedPlugin.author}</span>
                             <span>v{selectedPlugin.version}</span>
                             <span>
@@ -227,14 +227,14 @@ export default function PluginStore({ isVisible, onClose, onInstall }) {
                     </div>
 
                     <div className="mb-6">
-                      <h2 className="text-lg font-semibold text-solarized-base3 mb-3">
+                      <h2 className="text-lg font-semibold text-theme-text-secondary mb-3">
                         Features
                       </h2>
                       <ul className="space-y-2">
                         {selectedPlugin.features.map((feature, index) => (
                           <li
                             key={index}
-                            className="flex items-start text-solarized-base1"
+                            className="flex items-start text-theme-text-tertiary"
                           >
                             <svg
                               width="16"
@@ -243,7 +243,7 @@ export default function PluginStore({ isVisible, onClose, onInstall }) {
                               fill="none"
                               stroke="currentColor"
                               strokeWidth="2"
-                              className="mr-2 mt-0.5 text-solarized-green"
+                              className="mr-2 mt-0.5 text-theme-accent-green"
                             >
                               <polyline points="20,6 9,17 4,12" />
                             </svg>
@@ -255,7 +255,7 @@ export default function PluginStore({ isVisible, onClose, onInstall }) {
                   </div>
 
                   <div>
-                    <div className="bg-solarized-base01 rounded-lg p-4 border border-solarized-base00">
+                    <div className="theme-bg-tertiary rounded-lg p-4 border border-theme-border-secondary">
                       <button
                         onClick={() => {
                           console.log(
@@ -265,44 +265,50 @@ export default function PluginStore({ isVisible, onClose, onInstall }) {
                           handleInstallPlugin(selectedPlugin)
                         }}
                         disabled={loading}
-                        className="w-full bg-solarized-green text-solarized-base03 py-3 rounded font-medium hover:bg-solarized-green/80 transition-colors disabled:opacity-50 mb-4"
+                        className="w-full bg-theme-accent-green text-theme-bg-primary py-3 rounded font-medium hover:bg-theme-accent-green/80 transition-colors disabled:opacity-50 mb-4"
                       >
                         {loading ? 'Installing...' : 'Install Plugin'}
                       </button>
 
                       <div className="space-y-3 text-sm">
                         <div className="flex justify-between">
-                          <span className="text-solarized-base1">Version</span>
-                          <span className="text-solarized-base3">
+                          <span className="text-theme-text-tertiary">
+                            Version
+                          </span>
+                          <span className="text-theme-text-secondary">
                             {selectedPlugin.version}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-solarized-base1">Category</span>
-                          <span className="text-solarized-base3">
+                          <span className="text-theme-text-tertiary">
+                            Category
+                          </span>
+                          <span className="text-theme-text-secondary">
                             {selectedPlugin.category}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-solarized-base1">Rating</span>
-                          <div className="flex items-center text-solarized-orange">
+                          <span className="text-theme-text-tertiary">
+                            Rating
+                          </span>
+                          <div className="flex items-center text-theme-accent-orange">
                             <span>★</span>
-                            <span className="ml-1 text-solarized-base3">
+                            <span className="ml-1 text-theme-text-secondary">
                               {selectedPlugin.rating}
                             </span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="mt-4 pt-4 border-t border-solarized-base00">
-                        <h4 className="text-sm font-semibold text-solarized-base3 mb-2">
+                      <div className="mt-4 pt-4 border-t border-theme-border-secondary">
+                        <h4 className="text-sm font-semibold text-theme-text-secondary mb-2">
                           Tags
                         </h4>
                         <div className="flex flex-wrap gap-1">
                           {selectedPlugin.tags.map(tag => (
                             <span
                               key={tag}
-                              className="bg-solarized-base00 text-solarized-base1 px-2 py-1 rounded text-xs"
+                              className="bg-theme-border-secondary text-theme-text-tertiary px-2 py-1 rounded text-xs"
                             >
                               {tag}
                             </span>
