@@ -2709,6 +2709,35 @@ code {
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.8) !important;
 }
 
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .app {
+    overflow: hidden;
+  }
+
+  /* Hide resize handles on mobile */
+  .resize-handle {
+    display: none;
+  }
+
+  /* Adjust editor toolbar for mobile */
+  .editor-toolbar {
+    flex-wrap: wrap;
+    padding: 8px 12px;
+  }
+
+  /* Make buttons more touch-friendly */
+  button {
+    min-height: 44px;
+  }
+
+  /* Adjust modal width on mobile */
+  .modal-content {
+    margin: 16px;
+    max-width: calc(100vw - 32px);
+  }
+}
+
 /* CodeMirror editor kbd and code styling */
 .cm-content kbd,
 .cm-content code {

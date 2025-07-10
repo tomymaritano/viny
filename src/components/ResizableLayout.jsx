@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import ResizeHandle from './ResizeHandle'
+import { Menu, X, Search, Plus } from 'lucide-react'
 
 const ResizableLayout = ({
   sidebar,
@@ -13,6 +14,9 @@ const ResizableLayout = ({
 }) => {
   const containerRef = useRef(null)
   const [containerWidth, setContainerWidth] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
+  const [mobileView, setMobileView] = useState('notes') // 'sidebar', 'notes', 'editor'
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false)
 
   // Column widths
   const [notesListWidth, setNotesListWidth] = useState(() => {
@@ -31,11 +35,13 @@ const ResizableLayout = ({
   const minPreviewWidth = 280
   const minMainContentWidth = 400
 
-  // Update container width on resize
+  // Update container width and mobile detection on resize
   useEffect(() => {
     const updateWidth = () => {
       if (containerRef.current) {
-        setContainerWidth(containerRef.current.offsetWidth)
+        const width = containerRef.current.offsetWidth
+        setContainerWidth(width)
+        setIsMobile(width < 768) // Mobile if less than 768px (md breakpoint)
       }
     }
 
@@ -120,6 +126,108 @@ const ResizableLayout = ({
     (isNotesListVisible ? notesListWidth : 0) -
     (isPreviewVisible ? previewWidth : 0)
 
+  // Mobile render
+  if (isMobile) {
+    return (
+      <div ref={containerRef} className="flex flex-col h-full w-full">
+        {/* Mobile Header */}
+        <div className="flex items-center justify-between p-3 bg-theme-bg-secondary border-b border-theme-border-primary">
+          <button
+            onClick={() => setShowMobileSidebar(true)}
+            className="p-2 rounded hover:bg-theme-bg-tertiary text-theme-text-secondary"
+          >
+            <Menu size={20} />
+          </button>
+
+          <h1 className="text-lg font-semibold text-theme-text-primary">
+            {mobileView === 'sidebar'
+              ? 'Folders'
+              : mobileView === 'notes'
+                ? 'Notes'
+                : 'Editor'}
+          </h1>
+
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => {
+                /* TODO: Add search handler */
+              }}
+              className="p-2 rounded hover:bg-theme-bg-tertiary text-theme-text-secondary"
+            >
+              <Search size={20} />
+            </button>
+            <button
+              onClick={() => {
+                /* TODO: Add new note handler */
+              }}
+              className="p-2 rounded hover:bg-theme-bg-tertiary text-theme-text-secondary"
+            >
+              <Plus size={20} />
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Content */}
+        <div className="flex-1 overflow-hidden">
+          {mobileView === 'notes' && <div className="h-full">{notesList}</div>}
+          {mobileView === 'editor' && (
+            <div className="h-full">{mainContent}</div>
+          )}
+        </div>
+
+        {/* Mobile Bottom Navigation */}
+        <div className="flex bg-theme-bg-secondary border-t border-theme-border-primary">
+          <button
+            onClick={() => setMobileView('notes')}
+            className={`flex-1 py-3 text-center text-sm ${
+              mobileView === 'notes'
+                ? 'text-theme-accent-primary bg-theme-bg-tertiary'
+                : 'text-theme-text-secondary'
+            }`}
+          >
+            Notes
+          </button>
+          <button
+            onClick={() => setMobileView('editor')}
+            className={`flex-1 py-3 text-center text-sm ${
+              mobileView === 'editor'
+                ? 'text-theme-accent-primary bg-theme-bg-tertiary'
+                : 'text-theme-text-secondary'
+            }`}
+            disabled={!mainContent}
+          >
+            Editor
+          </button>
+        </div>
+
+        {/* Mobile Sidebar Overlay */}
+        {showMobileSidebar && (
+          <div className="fixed inset-0 z-50 flex">
+            <div className="w-80 bg-theme-bg-primary border-r border-theme-border-primary">
+              <div className="flex items-center justify-between p-3 border-b border-theme-border-primary">
+                <h2 className="text-lg font-semibold text-theme-text-primary">
+                  Folders
+                </h2>
+                <button
+                  onClick={() => setShowMobileSidebar(false)}
+                  className="p-2 rounded hover:bg-theme-bg-tertiary text-theme-text-secondary"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="h-full overflow-y-auto">{sidebar}</div>
+            </div>
+            <div
+              className="flex-1 bg-black bg-opacity-50"
+              onClick={() => setShowMobileSidebar(false)}
+            />
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // Desktop render
   return (
     <div ref={containerRef} className="flex h-full w-full flex-1">
       {/* Sidebar - Fixed */}
