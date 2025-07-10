@@ -16,7 +16,10 @@ import ToastContainer from './components/ToastContainer'
 
 // Lazy components
 import {
-  MarkdownEditor
+  MarkdownEditor,
+  SearchModal,
+  ExportDialog,
+  NotebookManager
 } from './components/features/LazyComponents'
 import SettingsView from './components/SettingsView'
 
@@ -51,7 +54,8 @@ const AppSimple: React.FC = () => {
     setIsPreviewVisible,
     setCurrentNote,
     setSelectedNoteId,
-    setIsEditorOpen
+    setIsEditorOpen,
+    sortNotes
   } = useSimpleStore()
 
   const { settings } = useSettings()
@@ -113,14 +117,7 @@ const AppSimple: React.FC = () => {
               onDeleteNote={handleDeleteNote}
               onTogglePin={handleTogglePin}
               currentSection={activeSection}
-              onSortNotes={() => {
-                // Sort notes alphabetically by title
-                const sortedNotes = [...filteredNotes].sort((a, b) => 
-                  a.title.toLowerCase().localeCompare(b.title.toLowerCase())
-                )
-                // TODO: Implement sort functionality in the store
-                // For now, sorting is handled locally in the component
-              }}
+              onSortNotes={sortNotes}
             />
           }
           mainContent={
@@ -158,6 +155,33 @@ const AppSimple: React.FC = () => {
         <div className="fixed top-4 right-4 z-50">
           <ToastContainer toasts={toasts} onRemove={removeToast} />
         </div>
+
+        {/* Search Modal */}
+        {modals.search && (
+          <SearchModal
+            isOpen={modals.search}
+            onClose={() => setModal('search', false)}
+            onSelectNote={handleOpenNote}
+          />
+        )}
+
+        {/* Export Dialog */}
+        {modals.export && currentNote && (
+          <ExportDialog
+            isOpen={modals.export}
+            onClose={() => setModal('export', false)}
+            note={currentNote}
+          />
+        )}
+
+        {/* Notebook Manager */}
+        {modals.notebookManager && (
+          <NotebookManager
+            isVisible={modals.notebookManager}
+            onClose={() => setModal('notebookManager', false)}
+            onNotebookChange={handleNotebookChange}
+          />
+        )}
       </div>
     </ErrorBoundary>
   )

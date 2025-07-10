@@ -15,6 +15,8 @@ interface SimpleAppStore {
   viewMode: 'edit' | 'preview'
   searchQuery: string
   filterTags: string[]
+  sortBy: 'title' | 'date' | 'updated' | 'notebook'
+  sortDirection: 'asc' | 'desc'
 
   // UI state
   isPreviewVisible: boolean
@@ -60,6 +62,9 @@ interface SimpleAppStore {
   addNote: (note: Note) => void
   updateNote: (note: Note) => void
   removeNote: (id: string) => void
+  setSortBy: (sortBy: 'title' | 'date' | 'updated' | 'notebook') => void
+  setSortDirection: (direction: 'asc' | 'desc') => void
+  sortNotes: () => void
 }
 
 export const useSimpleStore = create<SimpleAppStore>()(
@@ -76,6 +81,8 @@ export const useSimpleStore = create<SimpleAppStore>()(
       viewMode: 'edit',
       searchQuery: '',
       filterTags: [],
+      sortBy: 'updated',
+      sortDirection: 'desc',
       isPreviewVisible: false,
       expandedSections: {
         notebooks: true,
@@ -150,7 +157,36 @@ export const useSimpleStore = create<SimpleAppStore>()(
           currentNote: state.currentNote?.id === noteId ? null : state.currentNote,
           selectedNoteId: state.selectedNoteId === noteId ? null : state.selectedNoteId,
           isEditorOpen: state.currentNote?.id === noteId ? false : state.isEditorOpen
-        }))
+        })),
+
+      setSortBy: (sortBy) => set({ sortBy }),
+      setSortDirection: (sortDirection) => set({ sortDirection }),
+      
+      sortNotes: () =>
+        set((state) => {
+          const sortedNotes = [...state.notes].sort((a, b) => {
+            let comparison = 0
+            
+            switch (state.sortBy) {
+              case 'title':
+                comparison = a.title.toLowerCase().localeCompare(b.title.toLowerCase())
+                break
+              case 'date':
+                comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+                break
+              case 'updated':
+                comparison = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+                break
+              case 'notebook':
+                comparison = a.notebook.toLowerCase().localeCompare(b.notebook.toLowerCase())
+                break
+            }
+            
+            return state.sortDirection === 'asc' ? comparison : -comparison
+          })
+          
+          return { notes: sortedNotes }
+        })
     }),
     { name: 'simple-store' }
   )
