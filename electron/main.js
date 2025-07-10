@@ -1,9 +1,12 @@
-const { app, BrowserWindow, Menu, shell } = require('electron')
+const { app, BrowserWindow, Menu, shell, ipcMain } = require('electron')
 const { autoUpdater } = require('electron-updater')
 const path = require('path')
 
+let mainWindow = null
+let settingsWindow = null
+
 const createWindow = () => {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     webPreferences: {
@@ -49,6 +52,55 @@ const createWindow = () => {
     mainWindow.show()
   })
 }
+
+// Create settings window
+function createSettingsWindow() {
+  if (settingsWindow) {
+    settingsWindow.focus()
+    return
+  }
+
+  settingsWindow = new BrowserWindow({
+    width: 900,
+    height: 600,
+    parent: mainWindow,
+    modal: false,
+    show: false,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js'),
+    },
+    titleBarStyle: 'default',
+    title: 'Nototo Settings',
+    minWidth: 800,
+    minHeight: 500,
+  })
+
+  const isDev = process.env.NODE_ENV === 'development'
+
+  if (isDev) {
+    const devUrl = process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173'
+    settingsWindow.loadURL(`${devUrl}#/settings`)
+  } else {
+    settingsWindow.loadFile(path.join(__dirname, '../dist/index.html'), {
+      hash: '/settings',
+    })
+  }
+
+  settingsWindow.once('ready-to-show', () => {
+    settingsWindow.show()
+  })
+
+  settingsWindow.on('closed', () => {
+    settingsWindow = null
+  })
+}
+
+// IPC handlers
+ipcMain.on('open-settings', () => {
+  createSettingsWindow()
+})
 
 app.whenReady().then(() => {
   createWindow()

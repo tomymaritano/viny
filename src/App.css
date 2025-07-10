@@ -2636,3 +2636,93 @@ p {
   text-align: center;
   padding: 3em 1em;
 }
+
+/* Preview white text override */
+.preview-white-text,
+.preview-white-text * {
+  color: #ffffff !important;
+}
+
+.preview-white-text h1,
+.preview-white-text h2,
+.preview-white-text h3,
+.preview-white-text h4,
+.preview-white-text h5,
+.preview-white-text h6 {
+  color: #ffffff !important;
+  border-bottom: 1px solid #ffffff !important;
+}
+
+.preview-white-text p,
+.preview-white-text li,
+.preview-white-text span,
+.preview-white-text div,
+.preview-white-text td,
+.preview-white-text th,
+.preview-white-text strong,
+.preview-white-text em,
+.preview-white-text code,
+.preview-white-text pre {
+  color: #ffffff !important;
+}
+
+.preview-white-text ul,
+.preview-white-text ol {
+  color: #ffffff !important;
+  list-style-type: disc !important;
+}
+
+.preview-white-text ul li,
+.preview-white-text ol li {
+  color: #ffffff !important;
+  display: list-item !important;
+}
+
+.preview-white-text ul li::marker,
+.preview-white-text ol li::marker {
+  color: #ffffff !important;
+}
+
+.preview-white-text ul {
+  list-style-type: disc !important;
+}
+
+.preview-white-text ol {
+  list-style-type: decimal !important;
+}
+
+/* KBD and CODE styling for both editor and preview */
+kbd,
+code {
+  background-color: #404040 !important;
+  border: 1px solid #666666 !important;
+  border-radius: 4px !important;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  color: #da5677 !important;
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace !important;
+  font-size: 0.85em !important;
+  font-weight: 600 !important;
+  padding: 2px 6px !important;
+  margin: 0 2px !important;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.8) !important;
+}
+
+/* CodeMirror editor kbd and code styling */
+.cm-content kbd,
+.cm-content code {
+  background-color: #404040 !important;
+  border: 1px solid #666666 !important;
+  border-radius: 4px !important;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  color: #da5677 !important;
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace !important;
+  font-size: 0.85em !important;
+  font-weight: 600 !important;
+  padding: 2px 6px !important;
+  margin: 0 2px !important;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.8) !important;
+}

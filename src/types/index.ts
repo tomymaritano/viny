@@ -6,7 +6,7 @@ export interface Note {
   content: string
   notebook: string
   tags: string[]
-  status: 'active' | 'on-hold' | 'completed' | 'dropped'
+  status: 'none' | 'active' | 'on-hold' | 'completed' | 'dropped'
   isPinned: boolean
   isTrashed: boolean
   createdAt: string

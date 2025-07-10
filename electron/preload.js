@@ -1,5 +1,6 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  // Add secure APIs here
+  openSettings: () => ipcRenderer.send('open-settings'),
+  isElectron: true,
 })

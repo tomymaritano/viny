@@ -5,6 +5,7 @@ import DOMPurify from 'dompurify'
 import Icons from './Icons'
 import ExportDialog from './ExportDialog'
 import { useSettings } from '../hooks/useSettings'
+import TaskProgress from './ui/TaskProgress'
 
 const NotePreview = ({
   note,
@@ -169,6 +170,11 @@ const NotePreview = ({
                 {note.notebook}
               </span>
               <span className="text-xs text-theme-text-muted">{note.date}</span>
+            </div>
+
+            {/* Task Progress */}
+            <div className="mt-2">
+              <TaskProgress content={note.content} size="sm" />
             </div>
           </div>
 
@@ -359,24 +365,7 @@ const NotePreview = ({
         />
       </div>
 
-      {/* Footer Stats */}
-      <div className="px-4 py-2 theme-bg-secondary border-t border-theme-border-primary text-xs text-theme-text-muted flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <span>
-            Words:{' '}
-            {note.content
-              ? note.content.split(/\s+/).filter(word => word.length > 0).length
-              : 0}
-          </span>
-          <span>Characters: {note.content ? note.content.length : 0}</span>
-          <span>
-            Lines: {note.content ? note.content.split('\n').length : 0}
-          </span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <span>Last modified: {note.updatedAt || note.date}</span>
-        </div>
-      </div>
+      {/* Footer removed - stats shown in editor status bar */}
 
       {/* Export Dialog */}
       <ExportDialog

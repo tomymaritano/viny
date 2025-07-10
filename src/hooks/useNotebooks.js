@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 const defaultNotebooks = [
   {
     id: 'personal',
-    name: 'Personal',
+    name: 'personal',
     color: 'blue',
     description: 'Personal notes and thoughts',
     createdAt: new Date().toISOString(),
@@ -11,7 +11,7 @@ const defaultNotebooks = [
   },
   {
     id: 'work',
-    name: 'Work',
+    name: 'work',
     color: 'green',
     description: 'Work-related notes and projects',
     createdAt: new Date().toISOString(),
@@ -19,7 +19,7 @@ const defaultNotebooks = [
   },
   {
     id: 'projects',
-    name: 'Projects',
+    name: 'projects',
     color: 'orange',
     description: 'Development projects and ideas',
     createdAt: new Date().toISOString(),
@@ -36,7 +36,7 @@ const generateId = () => {
 export const useNotebooks = () => {
   const [notebooks, setNotebooks] = useState(() => {
     try {
-      const saved = localStorage.getItem('inkrun-notebooks')
+      const saved = localStorage.getItem('nototo_notebooks')
       return saved ? JSON.parse(saved) : defaultNotebooks
     } catch (error) {
       console.warn('Failed to load notebooks:', error)
@@ -47,7 +47,7 @@ export const useNotebooks = () => {
   // Save to localStorage whenever notebooks change
   useEffect(() => {
     try {
-      localStorage.setItem('inkrun-notebooks', JSON.stringify(notebooks))
+      localStorage.setItem('nototo_notebooks', JSON.stringify(notebooks))
     } catch (error) {
       console.warn('Failed to save notebooks:', error)
     }

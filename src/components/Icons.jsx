@@ -47,6 +47,18 @@ import {
   Code,
   Quote,
   Table,
+  Heading1,
+  Heading2,
+  Heading3,
+  Code2,
+  Minus,
+  Strikethrough,
+  Hash,
+  Type,
+  RotateCw,
+  AlertCircle,
+  Upload,
+  Package,
 } from 'lucide-react'
 
 // Unified icon library using lucide-react
@@ -244,6 +256,57 @@ const Icons = {
 
   Table: ({ size = 16, className = '' }) => (
     <Table size={size} className={className} />
+  ),
+
+  // Heading icons
+  Heading1: ({ size = 16, className = '' }) => (
+    <Heading1 size={size} className={className} />
+  ),
+
+  Heading2: ({ size = 16, className = '' }) => (
+    <Heading2 size={size} className={className} />
+  ),
+
+  Heading3: ({ size = 16, className = '' }) => (
+    <Heading3 size={size} className={className} />
+  ),
+
+  // Additional formatting icons
+  Code2: ({ size = 16, className = '' }) => (
+    <Code2 size={size} className={className} />
+  ),
+
+  Minus: ({ size = 16, className = '' }) => (
+    <Minus size={size} className={className} />
+  ),
+
+  Strikethrough: ({ size = 16, className = '' }) => (
+    <Strikethrough size={size} className={className} />
+  ),
+
+  // Status bar icons
+  Hash: ({ size = 16, className = '' }) => (
+    <Hash size={size} className={className} />
+  ),
+
+  Type: ({ size = 16, className = '' }) => (
+    <Type size={size} className={className} />
+  ),
+
+  RotateCw: ({ size = 16, className = '' }) => (
+    <RotateCw size={size} className={className} />
+  ),
+
+  AlertCircle: ({ size = 16, className = '' }) => (
+    <AlertCircle size={size} className={className} />
+  ),
+
+  Upload: ({ size = 16, className = '' }) => (
+    <Upload size={size} className={className} />
+  ),
+
+  Package: ({ size = 16, className = '' }) => (
+    <Package size={size} className={className} />
   ),
 }
 

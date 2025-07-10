@@ -94,15 +94,7 @@ const PreviewPanel = ({ note, isVisible, onClose }) => {
             </div>
           </div>
 
-          <motion.button
-            onClick={onClose}
-            className="p-1 text-theme-text-tertiary hover:text-theme-text-secondary hover:theme-bg-tertiary rounded transition-colors"
-            title="Close preview"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <Icons.X size={16} />
-          </motion.button>
+          {/* Close button removed - panel should be toggled via toolbar */}
         </div>
 
         {/* Tags */}
@@ -146,26 +138,7 @@ const PreviewPanel = ({ note, isVisible, onClose }) => {
         />
       </motion.div>
 
-      {/* Footer Stats */}
-      <motion.div
-        className="px-4 py-2 theme-bg-secondary border-t border-theme-border-primary text-xs text-theme-text-muted flex items-center justify-between"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-      >
-        <div className="flex items-center space-x-4">
-          <span>
-            Words:{' '}
-            {note.content
-              ? note.content.split(/\s+/).filter(word => word.length > 0).length
-              : 0}
-          </span>
-          <span>Characters: {note.content ? note.content.length : 0}</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <span>Preview</span>
-        </div>
-      </motion.div>
+      {/* Footer removed - stats shown in main editor status bar */}
     </motion.div>
   )
 }

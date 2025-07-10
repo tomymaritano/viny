@@ -6,8 +6,8 @@ import { useSettings } from './hooks/useSettings'
 import { useNotebooks } from './hooks/useNotebooks'
 
 // Components
-import { LoadingPage } from './components/ui/feedback/LoadingSpinner'
-import ErrorBoundary from './components/ui/feedback/ErrorBoundary'
+import LoadingSpinner from './components/LoadingSpinner'
+import ErrorBoundary from './components/ErrorBoundary'
 import ResizableLayout from './components/ResizableLayout'
 import SidebarSimple from './components/features/SidebarSimple'
 import NotesListSimple from './components/features/NotesListSimple'
@@ -23,6 +23,7 @@ import {
   NotebookManager,
   ExportDialog
 } from './components/features/LazyComponents'
+import SettingsView from './components/SettingsView'
 
 import './App.css'
 
@@ -59,6 +60,9 @@ const AppSimple: React.FC = () => {
 
   const { settings } = useSettings()
   const { notebooks } = useNotebooks()
+  
+  // Get current section from store for dynamic title
+  const { activeSection } = useSimpleStore()
 
   // Simple handlers
   const handleOpenNote = (noteId: string) => {
@@ -87,7 +91,7 @@ const AppSimple: React.FC = () => {
 
   // Loading state
   if (isLoading) {
-    return <LoadingPage text="Loading Nototo..." />
+    return <LoadingSpinner text="Loading Nototo..." />
   }
 
   // Settings view
@@ -95,9 +99,7 @@ const AppSimple: React.FC = () => {
     return (
       <ErrorBoundary>
         <div className="app">
-          <Suspense fallback={<LoadingPage text="Loading Settings..." />}>
-            <SettingsPage onClose={() => setModal('settings', false)} />
-          </Suspense>
+          <SettingsView onClose={() => setModal('settings', false)} />
         </div>
       </ErrorBoundary>
     )
@@ -116,11 +118,22 @@ const AppSimple: React.FC = () => {
               onNewNote={createNewNote}
               selectedNoteId={currentNote?.id || null}
               onDeleteNote={handleDeleteNote}
+              onTogglePin={handleTogglePin}
+              currentSection={activeSection}
+              onSortNotes={() => {
+                // Sort notes alphabetically by title
+                const sortedNotes = [...filteredNotes].sort((a, b) => 
+                  a.title.toLowerCase().localeCompare(b.title.toLowerCase())
+                )
+                // Update the store with sorted notes
+                // This would need to be implemented in the store
+                console.log('Sorting notes alphabetically', sortedNotes)
+              }}
             />
           }
           mainContent={
             isEditorOpen ? (
-              <Suspense fallback={<LoadingPage text="Loading Editor..." />}>
+              <Suspense fallback={<LoadingSpinner text="Loading Editor..." />}>
                 <MarkdownEditor
                   value={currentNote?.content || ''}
                   onChange={handleContentChange}
@@ -143,14 +156,8 @@ const AppSimple: React.FC = () => {
               />
             )
           }
-          previewPanel={
-            <PreviewPanel
-              note={isEditorOpen ? currentNote : selectedNote}
-              isVisible={isEditorOpen && isPreviewVisible}
-              onClose={() => setIsPreviewVisible(false)}
-            />
-          }
-          isPreviewVisible={isEditorOpen && isPreviewVisible}
+          previewPanel={null}
+          isPreviewVisible={false}
           isSidebarVisible={true}
           isNotesListVisible={true}
         />

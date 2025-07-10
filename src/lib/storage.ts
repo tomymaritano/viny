@@ -10,9 +10,23 @@ class StorageService {
   getNotes(): Note[] {
     try {
       const stored = localStorage.getItem(this.NOTES_KEY)
-      return stored ? JSON.parse(stored) : []
+      if (!stored) {
+        return []
+      }
+      
+      const parsed = JSON.parse(stored)
+      // Ensure we always return an array
+      if (!Array.isArray(parsed)) {
+        console.warn('Notes data is not an array, resetting to empty array')
+        localStorage.removeItem(this.NOTES_KEY)
+        return []
+      }
+      
+      return parsed
     } catch (error) {
       console.error('Error loading notes from localStorage:', error)
+      // Clear corrupted data
+      localStorage.removeItem(this.NOTES_KEY)
       return []
     }
   }
@@ -27,16 +41,28 @@ class StorageService {
   }
 
   saveNote(note: Note): void {
-    const notes = this.getNotes()
-    const existingIndex = notes.findIndex(n => n.id === note.id)
-    
-    if (existingIndex >= 0) {
-      notes[existingIndex] = note
-    } else {
-      notes.push(note)
+    try {
+      const notes = this.getNotes()
+      
+      // Double-check that notes is an array
+      if (!Array.isArray(notes)) {
+        console.error('Notes is not an array in saveNote:', notes)
+        throw new Error('Invalid notes data structure')
+      }
+      
+      const existingIndex = notes.findIndex(n => n.id === note.id)
+      
+      if (existingIndex >= 0) {
+        notes[existingIndex] = note
+      } else {
+        notes.push(note)
+      }
+      
+      this.saveNotes(notes)
+    } catch (error) {
+      console.error('Error in saveNote:', error)
+      throw error
     }
-    
-    this.saveNotes(notes)
   }
 
   deleteNote(noteId: string): void {

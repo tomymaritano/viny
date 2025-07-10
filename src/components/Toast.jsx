@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import Icons from './Icons'
 
-const Toast = ({ message, type = 'success', duration = 3000, onClose }) => {
+const Toast = ({ message, type = 'success', duration = 5000, onClose }) => {
   const [isVisible, setIsVisible] = useState(true)
   const [isExiting, setIsExiting] = useState(false)
 
@@ -30,15 +30,15 @@ const Toast = ({ message, type = 'success', duration = 3000, onClose }) => {
   const getTypeStyles = () => {
     switch (type) {
       case 'success':
-        return 'bg-theme-accent-green text-theme-text-primary border-theme-accent-green'
+        return 'bg-green-600 text-white border-green-700'
       case 'error':
-        return 'bg-theme-accent-red text-theme-text-primary border-theme-accent-red'
+        return 'bg-red-600 text-white border-red-700'
       case 'warning':
-        return 'bg-theme-accent-orange text-theme-text-primary border-theme-accent-orange'
+        return 'bg-orange-600 text-white border-orange-700'
       case 'info':
-        return 'bg-theme-accent-primary text-theme-text-primary border-theme-accent-primary'
+        return 'bg-blue-600 text-white border-blue-700'
       default:
-        return 'bg-theme-accent-green text-theme-text-primary border-theme-accent-green'
+        return 'bg-green-600 text-white border-green-700'
     }
   }
 
@@ -60,21 +60,23 @@ const Toast = ({ message, type = 'success', duration = 3000, onClose }) => {
   return (
     <div
       className={`
-        fixed top-4 right-4 z-50 min-w-80 max-w-96
+        fixed top-4 right-4 z-50 min-w-[320px] max-w-md
         ${getTypeStyles()}
-        border rounded-lg shadow-xl p-4
+        border-2 rounded-lg shadow-2xl p-4
         transform transition-all duration-300 ease-in-out
         ${isExiting ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'}
       `}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          {getIcon()}
-          <span className="text-sm font-medium">{message}</span>
+          <div className="flex-shrink-0">{getIcon()}</div>
+          <span className="text-sm font-medium whitespace-pre-wrap">
+            {message}
+          </span>
         </div>
         <button
           onClick={handleClose}
-          className="text-current hover:opacity-70 transition-opacity border-0 bg-transparent hover:bg-transparent p-1 ml-2"
+          className="text-white hover:text-gray-200 transition-colors p-1 ml-2"
         >
           <Icons.X size={14} />
         </button>

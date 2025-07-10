@@ -1,6 +1,6 @@
 // Lazy-loaded components for better performance
 import { lazy, Suspense } from 'react'
-import { LoadingSpinner } from '../ui/feedback/LoadingSpinner'
+import LoadingSpinner from '../LoadingSpinner'
 
 // Lazy load heavy components
 export const LazyMarkdownEditor = lazy(() => 

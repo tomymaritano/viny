@@ -18,17 +18,19 @@ export const getFilteredNotes = (
 
   switch (activeSection) {
     case 'all-notes':
-      filtered = notes.filter(note => !note.isTrashed)
+      // Hide completed and dropped notes by default (like Inkdrop)
+      filtered = notes.filter(note => !note.isTrashed && !['completed', 'dropped'].includes(note.status))
       break
     case 'pinned':
-      filtered = notes.filter(note => note.isPinned && !note.isTrashed)
+      // Show pinned notes but exclude completed/dropped unless specifically in those tabs
+      filtered = notes.filter(note => note.isPinned && !note.isTrashed && !['completed', 'dropped'].includes(note.status))
       break
     case 'trash':
       filtered = notes.filter(note => note.isTrashed)
       break
     case 'recent':
       filtered = notes
-        .filter(note => !note.isTrashed)
+        .filter(note => !note.isTrashed && !['completed', 'dropped'].includes(note.status))
         .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
         .slice(0, 10)
       break
@@ -41,9 +43,11 @@ export const getFilteredNotes = (
         filtered = notes.filter(note => note.tags.includes(tag) && !note.isTrashed)
       } else if (activeSection.startsWith('notebook-')) {
         const notebook = activeSection.replace('notebook-', '')
-        filtered = notes.filter(note => note.notebook === notebook && !note.isTrashed)
+        // When viewing a notebook, hide completed/dropped unless specifically viewing those status tabs
+        filtered = notes.filter(note => note.notebook === notebook && !note.isTrashed && !['completed', 'dropped'].includes(note.status))
       } else {
-        filtered = notes.filter(note => !note.isTrashed)
+        // Default filter excludes completed/dropped
+        filtered = notes.filter(note => !note.isTrashed && !['completed', 'dropped'].includes(note.status))
       }
   }
 
@@ -63,20 +67,36 @@ export const getFilteredNotes = (
     )
   }
 
-  return filtered
+  // Sort pinned notes to the top
+  return filtered.sort((a, b) => {
+    if (a.isPinned !== b.isPinned) {
+      return a.isPinned ? -1 : 1
+    }
+    // Then sort by updated date (most recent first)
+    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+  })
 }
 
-export const getStats = (notes: Note[]) => ({
-  total: notes.filter(note => !note.isTrashed).length,
-  pinned: notes.filter(note => note.isPinned && !note.isTrashed).length,
-  trashed: notes.filter(note => note.isTrashed).length,
-  byStatus: {
-    active: notes.filter(note => note.status === 'active' && !note.isTrashed).length,
-    'on-hold': notes.filter(note => note.status === 'on-hold' && !note.isTrashed).length,
-    completed: notes.filter(note => note.status === 'completed' && !note.isTrashed).length,
-    dropped: notes.filter(note => note.status === 'dropped' && !note.isTrashed).length
+export const getStats = (notes: Note[]) => {
+  // Filter out trashed notes
+  const activeNotes = notes.filter(note => !note.isTrashed)
+  
+  // Filter out completed/dropped for main counts (consistent with UI filtering)
+  const visibleNotes = activeNotes.filter(note => !['completed', 'dropped'].includes(note.status))
+  
+  return {
+    total: visibleNotes.length,
+    pinned: visibleNotes.filter(note => note.isPinned).length,
+    trashed: notes.filter(note => note.isTrashed).length,
+    byStatus: {
+      none: activeNotes.filter(note => note.status === 'none').length,
+      active: activeNotes.filter(note => note.status === 'active').length,
+      'on-hold': activeNotes.filter(note => note.status === 'on-hold').length,
+      completed: activeNotes.filter(note => note.status === 'completed').length,
+      dropped: activeNotes.filter(note => note.status === 'dropped').length
+    }
   }
-})
+}
 
 // Main app logic hook
 export const useAppLogic = () => {
@@ -158,6 +178,7 @@ export const useAppLogic = () => {
 // Note actions hook
 export const useNoteActions = () => {
   const {
+    activeSection,
     addNote,
     updateNote,
     removeNote,
@@ -168,14 +189,19 @@ export const useNoteActions = () => {
   } = useSimpleStore()
 
   const createNewNote = useCallback(() => {
+    // Determine properties based on current context
+    const isPinned = activeSection === 'pinned'
+    const status = activeSection.startsWith('status-') ? activeSection.replace('status-', '') : 'none'
+    const notebook = activeSection.startsWith('notebook-') ? activeSection.replace('notebook-', '') : 'personal'
+    
     const newNote: Note = {
       id: Date.now().toString(),
       title: 'Untitled Note',
       content: '',
-      notebook: 'personal',
+      notebook,
       tags: [],
-      status: 'active',
-      isPinned: false,
+      status,
+      isPinned,
       isTrashed: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -195,20 +221,32 @@ export const useNoteActions = () => {
     }
 
     return newNote
-  }, [addNote, setCurrentNote, setSelectedNoteId, setIsEditorOpen, addToast])
+  }, [activeSection, addNote, setCurrentNote, setSelectedNoteId, setIsEditorOpen, addToast])
 
   const handleOpenNote = useCallback((noteId: string) => {
     // This will be handled by the component
   }, [])
 
   const handleSaveNote = useCallback((note: Note) => {
-    const title = MarkdownProcessor.extractTitle(note.content) || 'Untitled Note'
-    const tags = MarkdownProcessor.extractTags(note.content)
+    // Use the provided title, or extract from content if not provided or empty
+    const title = note.title && note.title.trim() 
+      ? note.title 
+      : MarkdownProcessor.extractTitle(note.content) || 'Untitled Note'
+    
+    // Extract tags from content and merge with existing tags
+    const contentTags = MarkdownProcessor.extractTags(note.content)
+    const existingTags = note.tags || []
+    
+    // Combine and deduplicate tags (case-insensitive)
+    const combinedTags = [...existingTags, ...contentTags]
+    const uniqueTags = combinedTags.filter((tag, index, arr) => 
+      arr.findIndex(t => t.toLowerCase() === tag.toLowerCase()) === index
+    )
     
     const updatedNote = {
       ...note,
       title,
-      tags,
+      tags: uniqueTags,
       updatedAt: new Date().toISOString()
     }
 
@@ -216,7 +254,7 @@ export const useNoteActions = () => {
     
     try {
       storageService.saveNote(updatedNote)
-      addToast({ type: 'success', message: 'Note saved successfully' })
+      // Removed success toast - it's too annoying for auto-save
     } catch (error) {
       console.error('Error saving note:', error)
       addToast({ type: 'error', message: 'Failed to save note' })
@@ -298,7 +336,8 @@ export const useSidebarLogic = () => {
     activeSection, 
     expandedSections,
     setActiveSection,
-    setExpandedSection
+    setExpandedSection,
+    setModal
   } = useSimpleStore()
   
   const { notebooks, getColorClass } = useNotebooks()
@@ -307,7 +346,7 @@ export const useSidebarLogic = () => {
 
   const notebooksWithCounts = useMemo(() => {
     const notebookCounts = notes.reduce((acc, note) => {
-      if (!note.isTrashed) {
+      if (!note.isTrashed && !['completed', 'dropped'].includes(note.status)) {
         acc[note.notebook] = (acc[note.notebook] || 0) + 1
       }
       return acc
@@ -323,7 +362,7 @@ export const useSidebarLogic = () => {
 
   const tagsWithCounts = useMemo(() => {
     const tagCounts = notes.reduce((acc, note) => {
-      if (!note.isTrashed && note.tags) {
+      if (!note.isTrashed && !['completed', 'dropped'].includes(note.status) && note.tags) {
         note.tags.forEach(tag => {
           acc[tag] = (acc[tag] || 0) + 1
         })
@@ -343,7 +382,8 @@ export const useSidebarLogic = () => {
   ], [stats])
 
   const statusSections = useMemo(() => [
-    { id: 'status-active', label: 'Active', count: stats.byStatus.active, icon: 'Circle', color: 'text-theme-accent-green' },
+    { id: 'status-none', label: 'Notes', count: stats.byStatus.none || 0, icon: 'FileText', color: 'text-theme-text-secondary' },
+    { id: 'status-active', label: 'Active', count: stats.byStatus.active, icon: 'Circle', color: 'text-theme-accent-blue' },
     { id: 'status-on-hold', label: 'On Hold', count: stats.byStatus['on-hold'], icon: 'Clock', color: 'text-theme-accent-yellow' },
     { id: 'status-completed', label: 'Completed', count: stats.byStatus.completed, icon: 'CheckCircle', color: 'text-theme-accent-green' },
     { id: 'status-dropped', label: 'Dropped', count: stats.byStatus.dropped, icon: 'XCircle', color: 'text-theme-accent-red' },
@@ -355,8 +395,19 @@ export const useSidebarLogic = () => {
   ], [stats])
 
   const handleSectionClick = useCallback((sectionId: string) => {
-    setActiveSection(sectionId)
-  }, [setActiveSection])
+    if (sectionId === 'settings') {
+      // Check if we're in Electron
+      if ((window as any).electronAPI?.isElectron) {
+        // Open settings in new window
+        (window as any).electronAPI.openSettings()
+      } else {
+        // Fallback to modal for web version
+        setModal('settings', true)
+      }
+    } else {
+      setActiveSection(sectionId)
+    }
+  }, [setActiveSection, setModal])
 
   const handleToggleSection = useCallback((section: string) => {
     setExpandedSection(section, !expandedSections[section as keyof typeof expandedSections])

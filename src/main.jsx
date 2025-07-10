@@ -1,12 +1,16 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './AppSimple.tsx'
+import SettingsStandalone from './SettingsStandalone.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import { runMigration } from './utils/migration.js'
 
 // Run migration before app initialization
 runMigration()
 // Migration completed
+
+// Check if we should render settings based on URL hash
+const isSettingsRoute = window.location.hash === '#/settings'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -19,7 +23,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         // like Sentry, LogRocket, etc.
       }}
     >
-      <App />
+      {isSettingsRoute ? <SettingsStandalone /> : <App />}
     </ErrorBoundary>
   </React.StrictMode>
 )
