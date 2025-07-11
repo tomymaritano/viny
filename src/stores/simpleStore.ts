@@ -444,6 +444,9 @@ Created: {{date}}`,
               throw new Error('Generated note is invalid')
             }
 
+            // Persist the newly created note
+            storageService.saveNote(newNote)
+
             return {
               notes: [newNote, ...state.notes],
               currentNote: newNote,
