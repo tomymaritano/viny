@@ -271,14 +271,12 @@ export const useNoteActions = () => {
         : MarkdownProcessor.extractTitle(note.content) || 'Untitled Note'
       
       // Extract tags from content and merge with existing tags
-      const contentTags = MarkdownProcessor.extractTags(note.content)
+      // Comment out automatic tag extraction to allow manual tag management
+      // const contentTags = MarkdownProcessor.extractTags(note.content)
       const existingTags = note.tags || []
       
-      // Combine and deduplicate tags (case-insensitive)
-      const combinedTags = [...existingTags, ...contentTags]
-      const uniqueTags = combinedTags.filter((tag, index, arr) => 
-        arr.findIndex(t => t.toLowerCase() === tag.toLowerCase()) === index
-      )
+      // For now, only use manually set tags
+      const uniqueTags = existingTags
       
       const updatedNote = {
         ...note,
