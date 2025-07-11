@@ -94,12 +94,12 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center flex-1 mr-2">
             {/* Status Circle */}
-            {note.status && note.status !== 'none' && (
+            {note.status && note.status !== 'draft' && (
               <div className={`w-2 h-2 rounded-full mr-2 flex-shrink-0 ${
-                note.status === 'active' ? 'bg-blue-500' :
-                note.status === 'on-hold' ? 'bg-yellow-500' :
+                note.status === 'in-progress' ? 'bg-blue-500' :
+                note.status === 'review' ? 'bg-yellow-500' :
                 note.status === 'completed' ? 'bg-green-500' :
-                note.status === 'dropped' ? 'bg-red-500' :
+                note.status === 'archived' ? 'bg-red-500' :
                 'bg-gray-500'
               }`} title={note.status} />
             )}
@@ -188,10 +188,10 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
       const tagName = currentSection.replace('tag-', '')
       return `#${tagName}`
     }
-    if (currentSection === 'active') return 'Active'
-    if (currentSection === 'on-hold') return 'On Hold'
+    if (currentSection === 'in-progress') return 'In Progress'
+    if (currentSection === 'review') return 'Review'
     if (currentSection === 'completed') return 'Completed'
-    if (currentSection === 'dropped') return 'Dropped'
+    if (currentSection === 'archived') return 'Archived'
     return 'Notes'
   }
 
