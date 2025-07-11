@@ -122,24 +122,29 @@ export const useAppLogic = () => {
     setTheme
   } = useSimpleStore()
 
-  // Initialize data
+  // Initialize data with proper async loading
   useEffect(() => {
     const initializeApp = async () => {
       try {
         setLoading(true)
+        setError(null)
+        
+        // Only load if we haven't loaded notes yet
         if (notes.length === 0) {
-          const storedNotes = storageService.getNotes()
+          const storedNotes = await storageService.loadNotes()
+          
           if (storedNotes.length > 0) {
             setNotes(storedNotes)
           }
         }
       } catch (error) {
         console.error('Failed to initialize app:', error)
-        setError('Failed to load your notes')
+        setError('Failed to load your notes. Please refresh the page.')
       } finally {
         setLoading(false)
       }
     }
+    
     initializeApp()
   }, [notes.length, setNotes, setLoading, setError])
 
@@ -228,8 +233,6 @@ export const useNoteActions = () => {
   }, [])
 
   const handleSaveNote = useCallback((note: Note) => {
-    console.log('[SaveNote] Saving note:', note.id, 'Title:', note.title)
-    
     // Use the provided title, or extract from content if not provided or empty
     const title = note.title && note.title.trim() 
       ? note.title 

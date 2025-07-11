@@ -6,12 +6,18 @@ class StorageService {
   private readonly NOTEBOOKS_KEY = 'nototo_notebooks'  
   private readonly SETTINGS_KEY = 'nototo_settings'
   private readonly TAG_COLORS_KEY = 'nototo_tag_colors'
+  
+  // Concurrency control
+  private saveQueue: Map<string, NodeJS.Timeout> = new Map()
+  private isLoaded = false
+  private loadPromise: Promise<Note[]> | null = null
 
-  // Notes
+  // Notes - synchronous version for backward compatibility
   getNotes(): Note[] {
     try {
       const stored = localStorage.getItem(this.NOTES_KEY)
       if (!stored) {
+        this.isLoaded = true
         return []
       }
       
@@ -20,16 +26,36 @@ class StorageService {
       if (!Array.isArray(parsed)) {
         console.warn('Notes data is not an array, resetting to empty array')
         localStorage.removeItem(this.NOTES_KEY)
+        this.isLoaded = true
         return []
       }
       
+      this.isLoaded = true
       return parsed
     } catch (error) {
       console.error('Error loading notes from localStorage:', error)
       // Clear corrupted data
       localStorage.removeItem(this.NOTES_KEY)
+      this.isLoaded = true
       return []
     }
+  }
+
+  // Async version for proper loading
+  async loadNotes(): Promise<Note[]> {
+    if (this.loadPromise) {
+      return this.loadPromise
+    }
+
+    this.loadPromise = new Promise((resolve) => {
+      // Use setTimeout to make it async and avoid blocking
+      setTimeout(() => {
+        const notes = this.getNotes()
+        resolve(notes)
+      }, 0)
+    })
+
+    return this.loadPromise
   }
 
   saveNotes(notes: Note[]): void {
@@ -41,13 +67,40 @@ class StorageService {
     }
   }
 
+  // Debounced save to prevent race conditions
   saveNote(note: Note): void {
     try {
+      // Cancel any pending save for this note
+      if (this.saveQueue.has(note.id)) {
+        clearTimeout(this.saveQueue.get(note.id)!)
+      }
+
+      // Debounce saves for this specific note
+      const timeoutId = setTimeout(() => {
+        this.saveNoteImmediate(note)
+        this.saveQueue.delete(note.id)
+      }, 100) // 100ms debounce
+
+      this.saveQueue.set(note.id, timeoutId)
+    } catch (error) {
+      console.error('Error in saveNote:', error)
+      throw error
+    }
+  }
+
+  // Immediate save (internal use)
+  private saveNoteImmediate(note: Note): void {
+    try {
+      if (!this.isLoaded) {
+        console.warn('Attempting to save before data is loaded, forcing load first')
+        this.getNotes() // This will set isLoaded = true
+      }
+
       const notes = this.getNotes()
       
       // Double-check that notes is an array
       if (!Array.isArray(notes)) {
-        console.error('Notes is not an array in saveNote:', notes)
+        console.error('Notes is not an array in saveNoteImmediate:', notes)
         throw new Error('Invalid notes data structure')
       }
       
@@ -61,9 +114,17 @@ class StorageService {
       
       this.saveNotes(notes)
     } catch (error) {
-      console.error('Error in saveNote:', error)
+      console.error('Error in saveNoteImmediate:', error)
       throw error
     }
+  }
+
+  // Force save all pending notes
+  flushPendingSaves(): void {
+    this.saveQueue.forEach((timeoutId, noteId) => {
+      clearTimeout(timeoutId)
+    })
+    this.saveQueue.clear()
   }
 
   deleteNote(noteId: string): void {

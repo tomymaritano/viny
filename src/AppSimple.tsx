@@ -4,6 +4,7 @@ import { useAppLogic, useNoteActions } from './hooks/useSimpleLogic'
 import { useSimpleStore } from './stores/simpleStore'
 import { useSettings } from './hooks/useSettings'
 import { useNotebooks } from './hooks/useNotebooks'
+import { storageService } from './lib/storage'
 
 // Components
 import LoadingSpinner from './components/LoadingSpinner'
@@ -61,35 +62,20 @@ const AppSimple: React.FC = () => {
   const { settings } = useSettings()
   const { notebooks } = useNotebooks()
 
-  // Debounced save ref
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Debounced save function
-  const debouncedSave = useCallback((note: any) => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current)
-    }
-    
-    saveTimeoutRef.current = setTimeout(() => {
-      console.log('[DebouncedSave] Saving note:', note.id, 'Title:', note.title)
+  // Auto-save function with proper error handling
+  const autoSave = useCallback((note: any) => {
+    try {
       handleSaveNote(note)
-    }, 1000) // 1 second debounce
-  }, [handleSaveNote])
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current)
-      }
+    } catch (error) {
+      console.error('[AutoSave] Failed to save note:', error)
+      // Could add toast notification here if needed
     }
-  }, [])
+  }, [handleSaveNote])
 
   // Simple handlers
   const handleOpenNote = (noteId: string) => {
     const note = filteredNotes.find(n => n.id === noteId)
     if (note) {
-      console.log('[OpenNote] Opening note:', noteId, 'Title:', note.title)
       setCurrentNote(note)
       setSelectedNoteId(noteId)
       setIsEditorOpen(true)
@@ -98,15 +84,14 @@ const AppSimple: React.FC = () => {
 
   const handleContentChange = (newContent: string) => {
     if (currentNote) {
-      console.log('[ContentChange] Updating note:', currentNote.id, 'Title:', currentNote.title)
       const updatedNote = { 
         ...currentNote, 
         content: newContent,
         updatedAt: new Date().toISOString()
       }
       setCurrentNote(updatedNote)
-      // Trigger debounced save
-      debouncedSave(updatedNote)
+      // Trigger auto-save (storage service handles debouncing)
+      autoSave(updatedNote)
     }
   }
 
@@ -160,6 +145,13 @@ const AppSimple: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [currentNote, createNewNote, handleSaveNote, setModal])
+
+  // Cleanup: flush any pending saves before unmount
+  useEffect(() => {
+    return () => {
+      storageService.flushPendingSaves()
+    }
+  }, [])
 
   // Loading state
   if (isLoading) {

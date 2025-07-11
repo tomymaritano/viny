@@ -46,13 +46,7 @@ export const useMarkdownEditor = ({
         setIsSaving(true)
         setSaveError(null)
 
-        // Debug logging to track note ID consistency
-        console.log(
-          '[Auto-save] Saving note:',
-          selectedNote.id,
-          'Title:',
-          selectedNote.title
-        )
+        // Ensure we have the correct note for auto-save
 
         // Ensure we're working with the most up-to-date note data
         // by preserving the selectedNote structure but updating content
