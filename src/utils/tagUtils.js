@@ -2,6 +2,8 @@
  * Tag utility functions
  */
 
+import { getCustomTagColor } from './customTagColors'
+
 /**
  * Get tag color based on tag name using custom color system
  * @param {string} tagName - Name of the tag
@@ -9,7 +11,6 @@
  * @returns {Object} Color object with style properties
  */
 export const getTagColor = (tagName, tagColors = {}) => {
-  const { getCustomTagColor } = require('./customTagColors')
   return getCustomTagColor(tagName, tagColors)
 }
 

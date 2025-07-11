@@ -269,13 +269,38 @@ Created: {{date}}`,
 
       getTagColor: (tag) => {
         const state = useSimpleStore.getState()
-        const { getCustomTagColor } = require('../utils/customTagColors')
+        // Import moved to top level - will be handled by component imports
+        // Return stored color key or generate hash-based selection
+        if (state.tagColors[tag]) {
+          return state.tagColors[tag]
+        }
         
-        // Get custom color object
-        const colorObj = getCustomTagColor(tag, state.tagColors)
+        // Use the legacy system for now - components will handle custom colors
+        const predefinedColors = {
+          'project': 'ocean',
+          'work': 'steel',
+          'personal': 'forest',
+          'urgent': 'cherry',
+          'important': 'sunset',
+          'idea': 'golden',
+          'note': 'sage',
+          'todo': 'royal',
+          'meeting': 'turquoise',
+          'draft': 'lavender'
+        }
         
-        // Return the color key for storage compatibility, but we'll use colorObj for rendering
-        return colorObj
+        if (predefinedColors[tag.toLowerCase()]) {
+          return predefinedColors[tag.toLowerCase()]
+        }
+        
+        // Generate color key based on tag hash
+        const colorOptions = ['ocean', 'forest', 'royal', 'sunset', 'cherry', 'golden', 'lavender', 'turquoise', 'rose', 'sage', 'steel', 'copper']
+        let hash = 0
+        for (let i = 0; i < tag.length; i++) {
+          hash = tag.charCodeAt(i) + ((hash << 5) - hash)
+        }
+        const colorIndex = Math.abs(hash) % colorOptions.length
+        return colorOptions[colorIndex]
       },
 
       // Basic note operations
