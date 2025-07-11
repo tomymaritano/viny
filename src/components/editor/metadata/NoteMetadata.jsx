@@ -31,11 +31,11 @@ const NoteMetadata = ({
   }, [note?.id, note?.title])
 
   const statusOptions = [
-    { value: 'none', label: 'Notes', color: 'bg-gray-400' },
-    { value: 'active', label: 'Active', color: 'bg-blue-400' },
-    { value: 'on-hold', label: 'On Hold', color: 'bg-yellow-400' },
+    { value: 'draft', label: 'Draft', color: 'bg-gray-400' },
+    { value: 'in-progress', label: 'In Progress', color: 'bg-blue-400' },
+    { value: 'review', label: 'Review', color: 'bg-yellow-400' },
     { value: 'completed', label: 'Completed', color: 'bg-green-400' },
-    { value: 'dropped', label: 'Dropped', color: 'bg-red-400' },
+    { value: 'archived', label: 'Archived', color: 'bg-red-400' },
   ]
 
   const handleTagsInput = e => {

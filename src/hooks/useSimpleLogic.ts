@@ -18,19 +18,19 @@ export const getFilteredNotes = (
 
   switch (activeSection) {
     case 'all-notes':
-      // Hide completed and dropped notes by default (like Inkdrop)
-      filtered = notes.filter(note => !note.isTrashed && !['completed', 'dropped'].includes(note.status))
+      // Hide completed and archived notes by default (like Inkdrop)
+      filtered = notes.filter(note => !note.isTrashed && !['completed', 'archived'].includes(note.status))
       break
     case 'pinned':
-      // Show pinned notes but exclude completed/dropped unless specifically in those tabs
-      filtered = notes.filter(note => note.isPinned && !note.isTrashed && !['completed', 'dropped'].includes(note.status))
+      // Show pinned notes but exclude completed/archived unless specifically in those tabs
+      filtered = notes.filter(note => note.isPinned && !note.isTrashed && !['completed', 'archived'].includes(note.status))
       break
     case 'trash':
       filtered = notes.filter(note => note.isTrashed)
       break
     case 'recent':
       filtered = notes
-        .filter(note => !note.isTrashed && !['completed', 'dropped'].includes(note.status))
+        .filter(note => !note.isTrashed && !['completed', 'archived'].includes(note.status))
         .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
         .slice(0, 10)
       break
@@ -43,11 +43,11 @@ export const getFilteredNotes = (
         filtered = notes.filter(note => note.tags.includes(tag) && !note.isTrashed)
       } else if (activeSection.startsWith('notebook-')) {
         const notebook = activeSection.replace('notebook-', '')
-        // When viewing a notebook, hide completed/dropped unless specifically viewing those status tabs
-        filtered = notes.filter(note => note.notebook === notebook && !note.isTrashed && !['completed', 'dropped'].includes(note.status))
+        // When viewing a notebook, hide completed/archived unless specifically viewing those status tabs
+        filtered = notes.filter(note => note.notebook === notebook && !note.isTrashed && !['completed', 'archived'].includes(note.status))
       } else {
-        // Default filter excludes completed/dropped
-        filtered = notes.filter(note => !note.isTrashed && !['completed', 'dropped'].includes(note.status))
+        // Default filter excludes completed/archived
+        filtered = notes.filter(note => !note.isTrashed && !['completed', 'archived'].includes(note.status))
       }
   }
 
@@ -81,19 +81,19 @@ export const getStats = (notes: Note[]) => {
   // Filter out trashed notes
   const activeNotes = notes.filter(note => !note.isTrashed)
   
-  // Filter out completed/dropped for main counts (consistent with UI filtering)
-  const visibleNotes = activeNotes.filter(note => !['completed', 'dropped'].includes(note.status))
+  // Filter out completed/archived for main counts (consistent with UI filtering)
+  const visibleNotes = activeNotes.filter(note => !['completed', 'archived'].includes(note.status))
   
   return {
     total: visibleNotes.length,
     pinned: visibleNotes.filter(note => note.isPinned).length,
     trashed: notes.filter(note => note.isTrashed).length,
     byStatus: {
-      none: activeNotes.filter(note => note.status === 'none').length,
-      active: activeNotes.filter(note => note.status === 'active').length,
-      'on-hold': activeNotes.filter(note => note.status === 'on-hold').length,
+      draft: activeNotes.filter(note => note.status === 'draft').length,
+      'in-progress': activeNotes.filter(note => note.status === 'in-progress').length,
+      review: activeNotes.filter(note => note.status === 'review').length,
       completed: activeNotes.filter(note => note.status === 'completed').length,
-      dropped: activeNotes.filter(note => note.status === 'dropped').length
+      archived: activeNotes.filter(note => note.status === 'archived').length
     }
   }
 }
@@ -196,7 +196,7 @@ export const useNoteActions = () => {
   const createNewNote = useCallback(() => {
     // Determine properties based on current context
     const isPinned = activeSection === 'pinned'
-    const status = activeSection.startsWith('status-') ? activeSection.replace('status-', '') : 'none'
+    const status = activeSection.startsWith('status-') ? activeSection.replace('status-', '') as Note['status'] : 'draft'
     const notebook = activeSection.startsWith('notebook-') ? activeSection.replace('notebook-', '') : 'personal'
     
     const newNote: Note = {
@@ -351,7 +351,7 @@ export const useSidebarLogic = () => {
 
   const notebooksWithCounts = useMemo(() => {
     const notebookCounts = notes.reduce((acc, note) => {
-      if (!note.isTrashed && !['completed', 'dropped'].includes(note.status)) {
+      if (!note.isTrashed && !['completed', 'archived'].includes(note.status)) {
         acc[note.notebook] = (acc[note.notebook] || 0) + 1
       }
       return acc
@@ -367,7 +367,7 @@ export const useSidebarLogic = () => {
 
   const tagsWithCounts = useMemo(() => {
     const tagCounts = notes.reduce((acc, note) => {
-      if (!note.isTrashed && !['completed', 'dropped'].includes(note.status) && note.tags) {
+      if (!note.isTrashed && !['completed', 'archived'].includes(note.status) && note.tags) {
         note.tags.forEach(tag => {
           acc[tag] = (acc[tag] || 0) + 1
         })
@@ -387,11 +387,11 @@ export const useSidebarLogic = () => {
   ], [stats])
 
   const statusSections = useMemo(() => [
-    { id: 'status-none', label: 'Notes', count: stats.byStatus.none || 0, icon: 'FileText', color: 'text-theme-text-secondary' },
-    { id: 'status-active', label: 'Active', count: stats.byStatus.active, icon: 'Circle', color: 'text-theme-accent-blue' },
-    { id: 'status-on-hold', label: 'On Hold', count: stats.byStatus['on-hold'], icon: 'Clock', color: 'text-theme-accent-yellow' },
+    { id: 'status-draft', label: 'Draft', count: stats.byStatus.draft || 0, icon: 'FileText', color: 'text-theme-text-secondary' },
+    { id: 'status-in-progress', label: 'In Progress', count: stats.byStatus['in-progress'], icon: 'Circle', color: 'text-theme-accent-blue' },
+    { id: 'status-review', label: 'Review', count: stats.byStatus.review, icon: 'Clock', color: 'text-theme-accent-yellow' },
     { id: 'status-completed', label: 'Completed', count: stats.byStatus.completed, icon: 'CheckCircle', color: 'text-theme-accent-green' },
-    { id: 'status-dropped', label: 'Dropped', count: stats.byStatus.dropped, icon: 'XCircle', color: 'text-theme-accent-red' },
+    { id: 'status-archived', label: 'Archived', count: stats.byStatus.archived, icon: 'XCircle', color: 'text-theme-accent-red' },
   ], [stats])
 
   const systemSections = useMemo(() => [
