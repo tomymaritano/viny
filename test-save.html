@@ -17,15 +17,92 @@
     </ol>
     
     <h2>Lo que deberías ver en la consola:</h2>
+    <h3>Para cambios de contenido (debe ser debounced):</h3>
     <ul>
         <li><code>[AutoSave] Saving note: ...</code></li>
         <li><code>[SaveNote] Successfully saved note: ...</code></li>
+        <li><code>[AutoSave] Note saved successfully</code></li>
+    </ul>
+    
+    <h3>Para cambios de metadata (título, tags, etc):</h3>
+    <ul>
+        <li><code>[MetadataChange] Saving metadata for: ...</code></li>
+        <li><code>[SaveNote] Successfully saved note: ...</code></li>
+    </ul>
+    
+    <h3>❌ NO deberías ver:</h3>
+    <ul>
+        <li>Múltiples mensajes de save consecutivos</li>
+        <li>Save disparándose en cada tecla sin debounce</li>
     </ul>
     
     <script>
         console.log('🔧 Testing note saving system...')
         console.log('📝 Open the app and create a note to test auto-save')
         console.log('💾 Check console for save messages')
+    </script>
+    
+    <h2>Storage Test</h2>
+    <button onclick="runStorageTest()">Run Storage Diagnostics</button>
+    <div id="storage-results"></div>
+    
+    <script>
+        function runStorageTest() {
+            const results = document.getElementById('storage-results')
+            results.innerHTML = '<h3>Running storage tests...</h3>'
+            
+            // Test 1: Basic localStorage
+            try {
+                localStorage.setItem('test', 'value')
+                const retrieved = localStorage.getItem('test')
+                localStorage.removeItem('test')
+                results.innerHTML += '<p>✅ localStorage basic test: ' + (retrieved === 'value' ? 'PASSED' : 'FAILED') + '</p>'
+            } catch (error) {
+                results.innerHTML += '<p>❌ localStorage basic test FAILED: ' + error.message + '</p>'
+            }
+            
+            // Test 2: Check current notes
+            const notesKey = 'nototo_notes'
+            const currentNotes = localStorage.getItem(notesKey)
+            results.innerHTML += '<p>📝 Current notes count: ' + (currentNotes ? JSON.parse(currentNotes).length : 0) + '</p>'
+            
+            // Test 3: Test save
+            const testNote = {
+                id: 'test-' + Date.now(),
+                title: 'Test Note',
+                content: 'Test content',
+                notebook: 'test',
+                tags: [],
+                status: 'draft',
+                isPinned: false,
+                isTrashed: false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            }
+            
+            try {
+                const existing = JSON.parse(localStorage.getItem(notesKey) || '[]')
+                existing.push(testNote)
+                localStorage.setItem(notesKey, JSON.stringify(existing))
+                
+                // Verify
+                const verify = JSON.parse(localStorage.getItem(notesKey) || '[]')
+                const found = verify.find(n => n.id === testNote.id)
+                
+                if (found) {
+                    results.innerHTML += '<p>✅ Test note save: PASSED</p>'
+                    // Clean up
+                    const cleaned = verify.filter(n => n.id !== testNote.id)
+                    localStorage.setItem(notesKey, JSON.stringify(cleaned))
+                } else {
+                    results.innerHTML += '<p>❌ Test note save: FAILED - not found</p>'
+                }
+            } catch (error) {
+                results.innerHTML += '<p>❌ Test note save: FAILED - ' + error.message + '</p>'
+            }
+            
+            console.log('Storage diagnostics completed')
+        }
     </script>
 </body>
 </html>

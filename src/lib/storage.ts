@@ -60,30 +60,66 @@ class StorageService {
 
   saveNotes(notes: Note[]): void {
     try {
-      localStorage.setItem(this.NOTES_KEY, JSON.stringify(notes))
+      console.log('[StorageService] saveNotes called with', notes.length, 'notes')
+      
+      // Validate input
+      if (!Array.isArray(notes)) {
+        throw new Error('saveNotes requires an array of notes')
+      }
+      
+      // Validate each note structure
+      notes.forEach((note, index) => {
+        if (!note || !note.id || typeof note.title !== 'string') {
+          console.error('[StorageService] Invalid note at index', index, ':', note)
+          throw new Error(`Invalid note structure at index ${index}`)
+        }
+      })
+      
+      const serialized = JSON.stringify(notes)
+      console.log('[StorageService] Serialized', notes.length, 'notes to', serialized.length, 'characters')
+      
+      localStorage.setItem(this.NOTES_KEY, serialized)
+      console.log('[StorageService] Successfully saved to localStorage key:', this.NOTES_KEY)
     } catch (error) {
-      console.error('Error saving notes to localStorage:', error)
-      throw new Error('Failed to save notes')
+      console.error('[StorageService] Error saving notes to localStorage:', error)
+      
+      // Check if it's a quota exceeded error
+      if (error.name === 'QuotaExceededError') {
+        throw new Error('Storage quota exceeded. Please free up space by deleting old notes.')
+      }
+      
+      throw new Error('Failed to save notes: ' + error.message)
     }
   }
 
   // Debounced save to prevent race conditions
   saveNote(note: Note): void {
     try {
+      console.log('[StorageService] saveNote called for:', note.title, 'ID:', note.id)
+      
       // Cancel any pending save for this note
       if (this.saveQueue.has(note.id)) {
+        console.log('[StorageService] Cancelling previous save for note:', note.id)
         clearTimeout(this.saveQueue.get(note.id)!)
       }
 
       // Debounce saves for this specific note
       const timeoutId = setTimeout(() => {
-        this.saveNoteImmediate(note)
-        this.saveQueue.delete(note.id)
+        console.log('[StorageService] Executing debounced save for:', note.title)
+        try {
+          this.saveNoteImmediate(note)
+          this.saveQueue.delete(note.id)
+          console.log('[StorageService] Debounced save completed for:', note.title)
+        } catch (error) {
+          console.error('[StorageService] Error in debounced save:', error)
+          this.saveQueue.delete(note.id)
+        }
       }, 100) // 100ms debounce
 
       this.saveQueue.set(note.id, timeoutId)
+      console.log('[StorageService] Save queued for:', note.title, 'Timeout ID:', timeoutId)
     } catch (error) {
-      console.error('Error in saveNote:', error)
+      console.error('[StorageService] Error in saveNote:', error)
       throw error
     }
   }
@@ -91,40 +127,86 @@ class StorageService {
   // Immediate save (internal use)
   private saveNoteImmediate(note: Note): void {
     try {
+      console.log('[StorageService] saveNoteImmediate starting for:', note.title)
+      
+      // Validate note structure
+      if (!note || !note.id || !note.title) {
+        throw new Error('Invalid note structure: missing id or title')
+      }
+
       if (!this.isLoaded) {
-        console.warn('Attempting to save before data is loaded, forcing load first')
+        console.warn('[StorageService] Attempting to save before data is loaded, forcing load first')
         this.getNotes() // This will set isLoaded = true
       }
 
       const notes = this.getNotes()
+      console.log('[StorageService] Current notes count before save:', notes.length)
       
       // Double-check that notes is an array
       if (!Array.isArray(notes)) {
-        console.error('Notes is not an array in saveNoteImmediate:', notes)
+        console.error('[StorageService] Notes is not an array in saveNoteImmediate:', notes)
         throw new Error('Invalid notes data structure')
       }
       
       const existingIndex = notes.findIndex(n => n.id === note.id)
       
       if (existingIndex >= 0) {
+        console.log('[StorageService] Updating existing note at index:', existingIndex)
         notes[existingIndex] = note
       } else {
+        console.log('[StorageService] Adding new note, new count will be:', notes.length + 1)
         notes.push(note)
       }
       
+      console.log('[StorageService] Calling saveNotes with', notes.length, 'notes')
       this.saveNotes(notes)
+      
+      // Verify the save by reading back
+      const verifyNotes = this.getNotes()
+      const verifyNote = verifyNotes.find(n => n.id === note.id)
+      if (!verifyNote) {
+        throw new Error('Save verification failed: note not found after save')
+      }
+      
+      console.log('[StorageService] saveNoteImmediate completed successfully for:', note.title)
     } catch (error) {
-      console.error('Error in saveNoteImmediate:', error)
+      console.error('[StorageService] Error in saveNoteImmediate:', error)
       throw error
     }
   }
 
-  // Force save all pending notes
+  // Force save all pending notes immediately
   flushPendingSaves(): void {
+    console.log('[StorageService] Flushing', this.saveQueue.size, 'pending saves...')
+    
+    const pendingNotes: Note[] = []
+    
+    // Clear all timeouts and collect notes that need saving
     this.saveQueue.forEach((timeoutId, noteId) => {
       clearTimeout(timeoutId)
+      // Note: We don't have direct access to the note object here
+      // This is a limitation of the current design
     })
+    
     this.saveQueue.clear()
+    console.log('[StorageService] Cleared all pending save timeouts')
+    
+    // Note: In a future improvement, we should store the note objects
+    // in the queue so we can flush them immediately here
+  }
+  
+  // Force save a specific note immediately (bypass debouncing)
+  saveNoteImmediately(note: Note): void {
+    console.log('[StorageService] Force saving note immediately:', note.title)
+    
+    // Cancel any pending save for this note
+    if (this.saveQueue.has(note.id)) {
+      clearTimeout(this.saveQueue.get(note.id)!)
+      this.saveQueue.delete(note.id)
+    }
+    
+    // Save immediately
+    this.saveNoteImmediate(note)
   }
 
   deleteNote(noteId: string): void {

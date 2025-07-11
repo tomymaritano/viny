@@ -71,8 +71,11 @@ const AppSimple: React.FC = () => {
   // Debounced auto-save function with stable reference
   const debouncedAutoSave = useMemo(() => {
     let timeoutId: NodeJS.Timeout | null = null
+    let lastSaveTime = 0
     
     return (note: any) => {
+      const now = Date.now()
+      
       // Clear previous timeout
       if (timeoutId) {
         clearTimeout(timeoutId)
@@ -81,13 +84,20 @@ const AppSimple: React.FC = () => {
       // Set new timeout for auto-save
       timeoutId = setTimeout(async () => {
         try {
-          console.log('[AutoSave] Saving note:', note.title)
+          console.log('[AutoSave] Starting auto-save for note:', note.title, 'ID:', note.id)
+          console.log('[AutoSave] Note content length:', note.content?.length || 0)
+          
+          const startTime = Date.now()
           await saveNoteRef.current(note)
-          console.log('[AutoSave] Note saved successfully')
+          const endTime = Date.now()
+          
+          lastSaveTime = endTime
+          console.log('[AutoSave] Auto-save completed successfully in', endTime - startTime, 'ms')
         } catch (error) {
-          console.error('[AutoSave] Failed to save note:', error)
+          console.error('[AutoSave] Failed to auto-save note:', error)
+          // Don't throw here - auto-save failures shouldn't break the UI
         }
-      }, 500) // 500ms debounce
+      }, 1000) // Increased to 1 second debounce for auto-save
     }
   }, []) // Empty dependency array to prevent recreation
 
@@ -176,12 +186,37 @@ const AppSimple: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [currentNote, createNewNote, handleSaveNote, setModal])
 
-  // Cleanup: flush any pending saves before unmount
+  // Cleanup: flush any pending saves before unmount or page close
   useEffect(() => {
-    return () => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      console.log('[AppSimple] Page unloading, flushing pending saves...')
       storageService.flushPendingSaves()
+      
+      // If there are unsaved changes, warn the user
+      if (currentNote) {
+        e.preventDefault()
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?'
+        return e.returnValue
+      }
     }
-  }, [])
+    
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        console.log('[AppSimple] Page hidden, flushing pending saves...')
+        storageService.flushPendingSaves()
+      }
+    }
+    
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    
+    return () => {
+      console.log('[AppSimple] Component unmounting, flushing pending saves...')
+      storageService.flushPendingSaves()
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [currentNote])
 
   // Loading state
   if (isLoading) {

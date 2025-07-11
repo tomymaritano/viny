@@ -122,23 +122,43 @@ export const useAppLogic = () => {
     setTheme
   } = useSimpleStore()
 
-  // Initialize data with proper async loading
+  // Initialize data with proper async loading - fix race condition
   useEffect(() => {
+    let isInitialized = false
+    
     const initializeApp = async () => {
+      if (isInitialized) return // Prevent double initialization
+      
       try {
         setLoading(true)
         setError(null)
         
-        // Only load if we haven't loaded notes yet
-        if (notes.length === 0) {
-          const storedNotes = await storageService.loadNotes()
-          
-          if (storedNotes.length > 0) {
-            setNotes(storedNotes)
-          }
+        // First, run storage diagnostics
+        console.log('[Init] Running storage diagnostics...')
+        const { diagnoseSaveIssues, checkStorageAvailability } = await import('../lib/storageUtils')
+        
+        const storageInfo = checkStorageAvailability()
+        console.log('[Init] Storage availability:', storageInfo)
+        
+        const issues = await diagnoseSaveIssues()
+        if (issues.length > 0) {
+          console.warn('[Init] Storage issues detected:', issues)
+          issues.forEach(issue => console.warn('[Init] Issue:', issue))
+        } else {
+          console.log('[Init] No storage issues detected')
+        }
+        
+        console.log('[Init] Loading notes from storage...')
+        const storedNotes = await storageService.loadNotes()
+        
+        console.log('[Init] Loaded notes count:', storedNotes.length)
+        if (storedNotes.length >= 0) { // Always set notes, even if empty array
+          setNotes(storedNotes)
+          isInitialized = true
+          console.log('[Init] App initialization completed successfully')
         }
       } catch (error) {
-        console.error('Failed to initialize app:', error)
+        console.error('[Init] Failed to initialize app:', error)
         setError('Failed to load your notes. Please refresh the page.')
       } finally {
         setLoading(false)
@@ -146,7 +166,7 @@ export const useAppLogic = () => {
     }
     
     initializeApp()
-  }, [notes.length, setNotes, setLoading, setError])
+  }, [setNotes, setLoading, setError]) // Remove notes.length dependency to prevent infinite loops
 
   // Apply theme
   useEffect(() => {
@@ -234,6 +254,8 @@ export const useNoteActions = () => {
 
   const handleSaveNote = useCallback(async (note: Note) => {
     try {
+      console.log('[SaveNote] Starting save for note:', note.title)
+      
       // Use the provided title, or extract from content if not provided or empty
       const title = note.title && note.title.trim() 
         ? note.title 
@@ -256,17 +278,51 @@ export const useNoteActions = () => {
         updatedAt: new Date().toISOString()
       }
 
+      console.log('[SaveNote] Prepared note for saving:', {
+        id: updatedNote.id,
+        title: updatedNote.title,
+        contentLength: updatedNote.content.length,
+        updatedAt: updatedNote.updatedAt
+      })
+
       // Update in-memory state first
       updateNote(updatedNote)
+      console.log('[SaveNote] Updated in-memory state')
       
-      // Then persist to storage
-      storageService.saveNote(updatedNote)
+      // Then persist to storage - ensure this actually saves
+      await new Promise<void>((resolve, reject) => {
+        try {
+          storageService.saveNote(updatedNote)
+          console.log('[SaveNote] Storage service saveNote called')
+          
+          // Verify the save worked by checking if we can retrieve it
+          setTimeout(() => {
+            try {
+              const savedNotes = storageService.getNotes()
+              const foundNote = savedNotes.find(n => n.id === updatedNote.id)
+              if (foundNote && foundNote.updatedAt === updatedNote.updatedAt) {
+                console.log('[SaveNote] Verified note was saved successfully')
+                resolve()
+              } else {
+                console.error('[SaveNote] Note not found after save or timestamp mismatch')
+                reject(new Error('Save verification failed'))
+              }
+            } catch (verifyError) {
+              console.error('[SaveNote] Error verifying save:', verifyError)
+              reject(verifyError)
+            }
+          }, 150) // Give debouncing time to complete
+        } catch (saveError) {
+          console.error('[SaveNote] Storage service error:', saveError)
+          reject(saveError)
+        }
+      })
       
-      console.log('[SaveNote] Successfully saved note:', updatedNote.title)
+      console.log('[SaveNote] Successfully saved and verified note:', updatedNote.title)
       return updatedNote
     } catch (error) {
       console.error('[SaveNote] Error saving note:', error)
-      addToast({ type: 'error', message: 'Failed to save note' })
+      addToast({ type: 'error', message: 'Failed to save note: ' + error.message })
       throw error // Re-throw so auto-save can handle it
     }
   }, [updateNote, addToast])
