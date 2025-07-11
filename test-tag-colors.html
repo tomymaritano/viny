@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Tag Colors</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            max-width: 400px;
+            margin: 20px 0;
+        }
+        .color-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: #2a2a2a;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .color-item:hover {
+            background: #3a3a3a;
+            transform: scale(1.05);
+        }
+        .color-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid;
+            margin-bottom: 8px;
+            transition: transform 0.2s ease;
+        }
+        .color-item:hover .color-dot {
+            transform: scale(1.1);
+        }
+        .color-name {
+            font-size: 12px;
+            text-align: center;
+            color: #ccc;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: #2a2a2a;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 Custom Tag Colors Test</h1>
+    
+    <div class="test-section">
+        <h2>Available Colors Preview</h2>
+        <p>These are the 12 custom colors that should appear in the TagContextMenu:</p>
+        
+        <div class="color-grid" id="colorGrid">
+            <!-- Colors will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Instructions</h2>
+        <ol>
+            <li>Open the Nototo app</li>
+            <li>Right-click on any tag</li>
+            <li>Select "Change Color"</li>
+            <li>You should see a color picker similar to the preview above</li>
+            <li>Click on any color to apply it to the tag</li>
+        </ol>
+    </div>
+
+    <script>
+        // Custom tag colors from the system
+        const CUSTOM_TAG_COLORS = {
+            ocean: {
+                bg: '#1e3a8a20',
+                border: '#3b82f650',
+                text: '#60a5fa',
+                name: 'Ocean'
+            },
+            forest: {
+                bg: '#14532d20',
+                border: '#22c55e50',
+                text: '#4ade80',
+                name: 'Forest'
+            },
+            royal: {
+                bg: '#581c8720',
+                border: '#8b5cf650',
+                text: '#a78bfa',
+                name: 'Royal'
+            },
+            sunset: {
+                bg: '#9a340720',
+                border: '#f97316650',
+                text: '#fb923c',
+                name: 'Sunset'
+            },
+            cherry: {
+                bg: '#99142520',
+                border: '#ef444450',
+                text: '#f87171',
+                name: 'Cherry'
+            },
+            golden: {
+                bg: '#92400e20',
+                border: '#eab30850',
+                text: '#facc15',
+                name: 'Golden'
+            },
+            lavender: {
+                bg: '#7c2d9220',
+                border: '#c084fc50',
+                text: '#d8b4fe',
+                name: 'Lavender'
+            },
+            turquoise: {
+                bg: '#04706520',
+                border: '#14b8a650',
+                text: '#5eead4',
+                name: 'Turquoise'
+            },
+            rose: {
+                bg: '#9a224520',
+                border: '#f4388850',
+                text: '#fb7299',
+                name: 'Rose'
+            },
+            sage: {
+                bg: '#16573620',
+                border: '#059e5950',
+                text: '#34d399',
+                name: 'Sage'
+            },
+            steel: {
+                bg: '#37415120',
+                border: '#6b728050',
+                text: '#9ca3af',
+                name: 'Steel'
+            },
+            copper: {
+                bg: '#92262320',
+                border: '#dc262650',
+                text: '#fca5a5',
+                name: 'Copper'
+            }
+        };
+
+        // Populate the color grid
+        const colorGrid = document.getElementById('colorGrid');
+        Object.entries(CUSTOM_TAG_COLORS).forEach(([key, color]) => {
+            const colorItem = document.createElement('div');
+            colorItem.className = 'color-item';
+            colorItem.innerHTML = `
+                <div class="color-dot" style="background-color: ${color.bg}; border-color: ${color.border}"></div>
+                <div class="color-name">${color.name}</div>
+            `;
+            colorItem.addEventListener('click', () => {
+                alert(`Selected: ${color.name} (${key})`);
+            });
+            colorGrid.appendChild(colorItem);
+        });
+    </script>
+</body>
+</html>

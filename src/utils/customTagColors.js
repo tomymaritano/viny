@@ -52,9 +52,8 @@ export const getTagStyle = (tagName, customTagColors = {}) => {
   const color = getCustomTagColor(tagName, customTagColors)
   return {
     backgroundColor: color.bg,
-    borderColor: color.border,
+    border: `1px solid ${color.border}`,
     color: color.text,
-    border: '1px solid',
   }
 }
 

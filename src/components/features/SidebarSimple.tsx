@@ -5,6 +5,7 @@ import { useNoteActions } from '../../hooks/useSimpleLogic'
 import { useSimpleStore } from '../../stores/simpleStore'
 import Icons from '../Icons'
 import TagContextMenu from '../ui/TagContextMenu'
+import TagSettingsModal from '../editor/tags/TagSettingsModal'
 import DropdownMenu, { DropdownMenuItem } from '../ui/DropdownMenu'
 
 const SidebarSimple: React.FC = memo(() => {
@@ -43,6 +44,9 @@ const SidebarSimple: React.FC = memo(() => {
   // Tags dropdown state
   const [showTagsDropdown, setShowTagsDropdown] = useState(false)
   const [activeTagDropdown, setActiveTagDropdown] = useState<string | null>(null)
+
+  // Tag settings modal state
+  const [tagSettingsModal, setTagSettingsModal] = useState({ show: false, tagName: '' })
   
   // Tag modal is now managed by ModalContext
 
@@ -78,18 +82,15 @@ const SidebarSimple: React.FC = memo(() => {
     setTrashContextMenu(prev => ({ ...prev, isVisible: false }))
   }
 
-  const handleEditTag = () => {
-    // Implement tag editing
+  const handleTagSettings = () => {
+    setTagSettingsModal({ show: true, tagName: contextMenu.tagName })
     closeContextMenu()
   }
 
-  const handleChangeTagColor = () => {
-    setContextMenu(prev => ({ ...prev, showColorPicker: !prev.showColorPicker }))
-  }
-
-  const handleSelectTagColor = (colorClass: string) => {
-    // Implement color change
-    closeContextMenu()
+  const handleTagNameChange = (oldName: string, newName: string) => {
+    // This would need to be implemented based on how tags are managed in the store
+    // For now, we'll just close the modal
+    console.log('Tag name change:', oldName, '->', newName)
   }
 
   // Trash context menu handlers
@@ -412,15 +413,17 @@ const SidebarSimple: React.FC = memo(() => {
         isVisible={contextMenu.isVisible}
         position={contextMenu.position}
         tagName={contextMenu.tagName}
-        onEdit={handleEditTag}
-        onChangeColor={handleChangeTagColor}
         onRemove={handleRemoveTag}
         onClose={closeContextMenu}
-        showColorPicker={contextMenu.showColorPicker}
-        onToggleColorPicker={handleChangeTagColor}
-        onSelectColor={handleSelectTagColor}
-        onFilterByTag={handleFilterByTag}
-        onManageTags={handleManageTags}
+        onTagSettings={handleTagSettings}
+      />
+
+      {/* Tag Settings Modal */}
+      <TagSettingsModal
+        isOpen={tagSettingsModal.show}
+        onClose={() => setTagSettingsModal({ show: false, tagName: '' })}
+        tagName={tagSettingsModal.tagName}
+        onTagNameChange={handleTagNameChange}
       />
 
       {/* Trash Context Menu */}

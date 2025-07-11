@@ -6,6 +6,7 @@ import TagEditInput from '../../ui/TagEditInput'
 import DropdownMenu, { DropdownMenuItem } from '../../ui/DropdownMenu'
 import CustomTag from '../../ui/CustomTag'
 import TagColorPicker from '../../ui/TagColorPicker'
+import TagSettingsModal from './TagSettingsModal'
 import { useSimpleStore } from '../../../stores/simpleStore'
 import { useTagEdit } from '../../../hooks/useTagEdit'
 import { addTag, removeTag } from '../../../utils/tagValidation'
@@ -24,6 +25,7 @@ const TagManager = ({
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1)
   const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0, tag: null, index: null })
   const [showColorPicker, setShowColorPicker] = useState(false)
+  const [tagSettingsModal, setTagSettingsModal] = useState({ show: false, tagName: '' })
   const inputRef = useRef(null)
   const { setTagColor } = useSimpleStore()
 
@@ -161,6 +163,19 @@ const TagManager = ({
     }
   }
 
+  const handleTagSettings = () => {
+    setTagSettingsModal({ show: true, tagName: contextMenu.tag })
+    setContextMenu({ show: false, x: 0, y: 0, tag: null, index: null })
+  }
+
+  const handleTagNameChange = (oldName, newName) => {
+    if (oldName !== newName && contextMenu.index !== null) {
+      const updatedTags = [...tags]
+      updatedTags[contextMenu.index] = newName
+      onTagsChange(updatedTags)
+    }
+  }
+
   return (
     <div className="relative">
       <div className="flex flex-wrap items-center gap-1 p-2 min-h-[36px] border border-theme-border-primary rounded-md bg-theme-bg-secondary">
@@ -258,15 +273,9 @@ const TagManager = ({
         isVisible={contextMenu.show}
         position={{ x: contextMenu.x, y: contextMenu.y }}
         tagName={contextMenu.tag || ''}
-        onEdit={handleContextEdit}
-        onChangeColor={handleToggleColorPicker}
         onRemove={handleContextRemove}
         onClose={() => setContextMenu({ show: false, x: 0, y: 0, tag: null, index: null })}
-        showColorPicker={showColorPicker}
-        onToggleColorPicker={handleToggleColorPicker}
-        onSelectColor={handleSelectColor}
-        onFilterByTag={() => {}}
-        onManageTags={() => {}}
+        onTagSettings={handleTagSettings}
       />
     </div>
   )

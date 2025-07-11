@@ -20,7 +20,7 @@
 .markdown-content h1 {
   font-size: 2.25em;
   color: var(--color-blue);
-  border-bottom: 0.5px solid var(--color-base01) !important;
+  border-bottom: 0.3px solid var(--color-base01) !important;
   padding-bottom: 0.4em;
   margin-bottom: 1em;
   font-weight: 700;

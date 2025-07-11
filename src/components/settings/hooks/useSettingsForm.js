@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useSettings } from '../../../hooks/useSettings'
 
-export const useSettingsForm = () => {
+export const useSettingsForm = (initialTab = 'general') => {
   const { settings, updateSetting, resetSettings } = useSettings()
-  const [activeTab, setActiveTab] = useState('general')
+  const [activeTab, setActiveTab] = useState(initialTab)
 
   const handleTabChange = tabId => {
     setActiveTab(tabId)

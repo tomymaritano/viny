@@ -40,7 +40,7 @@ const TagModal = ({
 
   return (
     <div
-      className={`fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 ${ANIMATIONS.FADE_IN}`}
+      className={`fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 ${ANIMATIONS.FADE_IN}`}
       onClick={handleCancel}
     >
       <div
@@ -88,20 +88,26 @@ const TagModal = ({
           {/* Popular tags */}
           {availableTags.length > 0 && (
             <div>
-              <label className="block text-sm font-medium text-theme-text-secondary mb-2">
-                Popular tags
-              </label>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-sm font-medium text-theme-text-secondary">
+                  Popular tags
+                </label>
+                <span className="text-xs text-theme-text-muted">
+                  {availableTags.filter(tag => !localTags.includes(tag)).length} available
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-1">
                 {availableTags
                   .filter(tag => !localTags.includes(tag))
-                  .slice(0, 10)
+                  .slice(0, 15)
                   .map(tag => (
                     <button
                       key={tag}
                       onClick={() => setLocalTags(prev => [...prev, tag])}
                       className="px-2 py-1 text-xs border border-theme-border-primary hover:border-theme-accent-primary hover:text-theme-accent-primary rounded-md transition-colors"
                     >
-                      #{tag}
+                      <span>#</span>
+                      <span>{tag}</span>
                     </button>
                   ))}
               </div>

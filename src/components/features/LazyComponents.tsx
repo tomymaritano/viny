@@ -8,9 +8,6 @@ export const LazyMarkdownEditor = lazy(() =>
   import('../MarkdownItEditor').then(module => ({ default: module.default }))
 )
 
-export const LazySettingsPage = lazy(() => 
-  import('../SettingsPage').then(module => ({ default: module.default }))
-)
 
 export const LazySearchModal = lazy(() => 
   import('../SearchModal').then(module => ({ default: module.default }))
@@ -54,7 +51,6 @@ export function withSuspense<P extends object>(
 
 // Pre-wrapped components ready to use
 export const MarkdownEditor = withSuspense(LazyMarkdownEditor, undefined, 'MarkdownEditor')
-export const SettingsPage = withSuspense(LazySettingsPage, undefined, 'SettingsPage')
 export const SearchModal = withSuspense(LazySearchModal, undefined, 'SearchModal')
 export const NotebookManager = withSuspense(LazyNotebookManager, undefined, 'NotebookManager')
 export const ExportDialog = withSuspense(LazyExportDialog, undefined, 'ExportDialog')

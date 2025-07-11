@@ -30,7 +30,7 @@ const DropdownMenu = forwardRef<HTMLDivElement, DropdownMenuProps>(({
 }, ref) => {
   if (!isOpen) return null
 
-  const baseClasses = `absolute ${position} mt-1 ${width} min-w-fit bg-theme-bg-secondary border border-theme-border-primary rounded-md shadow-lg py-1 ${zIndex} ${maxHeight} overflow-y-auto`
+  const baseClasses = `absolute ${position} mt-1 ${width} min-w-fit bg-theme-bg-secondary border border-theme-border-primary rounded-lg shadow-xl backdrop-blur-sm py-1 ${zIndex} ${maxHeight} overflow-y-auto`
 
   return (
     <div
@@ -79,7 +79,7 @@ export const DropdownMenuItem = forwardRef<HTMLButtonElement, DropdownMenuItemPr
     <button
       ref={ref}
       type="button"
-      className={`${baseClasses} ${stateClasses} ${className}`}
+      className={`${baseClasses} ${stateClasses} ${className} group`}
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
       role="menuitem"

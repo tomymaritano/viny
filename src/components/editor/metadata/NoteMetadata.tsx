@@ -5,6 +5,7 @@ import TagContextMenu from '../../ui/TagContextMenu'
 import TagEditInput from '../../ui/TagEditInput'
 import DropdownMenu, { DropdownMenuItem } from '../../ui/DropdownMenu'
 import CustomTag from '../../ui/CustomTag'
+import TagSettingsModal from '../tags/TagSettingsModal'
 import { useSimpleStore } from '../../../stores/simpleStore'
 import { useTagEdit } from '../../../hooks/useTagEdit'
 import { addTag, removeTag } from '../../../utils/tagValidation'
@@ -29,7 +30,7 @@ const NoteMetadata = ({
     tag: null,
     index: null,
   })
-  const [showColorPicker, setShowColorPicker] = useState(false)
+  const [tagSettingsModal, setTagSettingsModal] = useState({ show: false, tagName: '' })
   const { setTagColor, setModal } = useSimpleStore()
 
   // Use the custom tag editing hook
@@ -48,7 +49,6 @@ const NoteMetadata = ({
   // Helper function to close context menu
   const closeContextMenu = () => {
     setContextMenu({ show: false, x: 0, y: 0, tag: null, index: null })
-    setShowColorPicker(false)
   }
 
   // Update local title when note changes
@@ -126,17 +126,6 @@ const NoteMetadata = ({
   }, [contextMenu.show])
 
   // Context menu handlers
-  const handleContextEdit = () => {
-    if (contextMenu.tag && contextMenu.index !== null) {
-      handleEditTag(contextMenu.index, contextMenu.tag)
-      closeContextMenu()
-    }
-  }
-
-  const handleToggleColorPicker = () => {
-    setShowColorPicker(!showColorPicker)
-  }
-
   const handleContextRemove = () => {
     if (contextMenu.index !== null) {
       const updatedTags = removeTag(contextMenu.index, note?.tags || [])
@@ -145,11 +134,17 @@ const NoteMetadata = ({
     }
   }
 
-  const handleSelectColor = colorClass => {
-    if (contextMenu.tag) {
-      setTagColor(contextMenu.tag, colorClass)
-    }
+  const handleTagSettings = () => {
+    setTagSettingsModal({ show: true, tagName: contextMenu.tag })
     closeContextMenu()
+  }
+
+  const handleTagNameChange = (oldName, newName) => {
+    if (oldName !== newName && contextMenu.index !== null) {
+      const updatedTags = [...(note?.tags || [])]
+      updatedTags[contextMenu.index] = newName
+      onTagsChange(updatedTags)
+    }
   }
 
   const formatDate = dateString => {
@@ -414,18 +409,17 @@ const NoteMetadata = ({
         isVisible={contextMenu.show}
         position={{ x: contextMenu.x, y: contextMenu.y }}
         tagName={contextMenu.tag || ''}
-        onEdit={handleContextEdit}
-        onChangeColor={handleToggleColorPicker}
         onRemove={handleContextRemove}
         onClose={closeContextMenu}
-        showColorPicker={showColorPicker}
-        onToggleColorPicker={handleToggleColorPicker}
-        onSelectColor={handleSelectColor}
-        onFilterByTag={() => {}}
-        onManageTags={() => {
-          closeContextMenu()
-          setModal('tagModal', true)
-        }}
+        onTagSettings={handleTagSettings}
+      />
+
+      {/* Tag Settings Modal */}
+      <TagSettingsModal
+        isOpen={tagSettingsModal.show}
+        onClose={() => setTagSettingsModal({ show: false, tagName: '' })}
+        tagName={tagSettingsModal.tagName}
+        onTagNameChange={handleTagNameChange}
       />
     </div>
   )
