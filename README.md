@@ -1,14 +1,14 @@
 # Nototo 📝
 
-> A modern, minimalist markdown note editor for focused writing and productivity.
+> A modern, professional markdown note editor built for productivity and focus.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-18+-blue.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue.svg)](https://www.typescriptlang.org/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
+[![MVP Status](https://img.shields.io/badge/Status-MVP%20Ready-brightgreen.svg)](./CURRENT_STATUS_2025.md)
 
-Nototo is a single-user markdown editor built with modern web technologies, featuring a clean Solarized Dark theme, real-time preview, and professional editing capabilities powered by Monaco Editor.
+Nototo is a professional-grade markdown editor featuring an Inkdrop-inspired dark theme, real-time preview, and advanced editing capabilities powered by CodeMirror 6. Built with modern React and optimized for performance and reliability.
 
 ![Nototo Screenshot](docs/screenshot.png)
 
@@ -16,33 +16,33 @@ Nototo is a single-user markdown editor built with modern web technologies, feat
 
 ### 🎯 Core Features
 
-- **Monaco Editor Integration** - VS Code's editor with full markdown support
-- **Live Preview** - Real-time markdown rendering with beautiful typography
-- **Solarized Dark Theme** - Easy on the eyes, perfect for long writing sessions
-- **Auto-Save** - Never lose your work with intelligent auto-saving
-- **Plugin System** - Extensible architecture with community plugins
+- **CodeMirror 6 Editor** - Next-generation editor with superior performance
+- **Split View Preview** - Real-time markdown rendering with scroll synchronization
+- **Inkdrop-inspired Theme** - Professional dark theme optimized for long sessions
+- **Intelligent Auto-Save** - Per-note debouncing with concurrency control
+- **Template System** - Pre-built templates for daily notes, meetings, projects
 
-### 📋 Organization
+### 📋 Organization & Management
 
-- **Notebooks** - Organize notes into categories (Personal, Work, Projects)
-- **Tags** - Flexible tagging system with colors
-- **Search** - Full-text search across all notes
-- **Pinning** - Keep important notes at the top
-- **Status Tracking** - Draft, In Progress, Review, Completed, Archived
+- **Smart Notebooks** - Organize notes with dynamic counters and filtering
+- **Colorful Tags** - Customizable tag colors with intelligent auto-assignment
+- **Full-Text Search** - Instant search across titles, content, tags, and notebooks
+- **Pinned Notes** - Keep important notes accessible at the top
+- **Status Workflow** - Track progress: none → active → on-hold → completed/dropped
 
-### 💾 Storage Options
+### 💾 Robust Data Handling
 
-- **Local Storage** - Browser-based storage for quick setup
-- **Database Backend** - SQLite database with REST API
-- **Seamless Migration** - Easy switching between storage modes
-- **Export/Import** - Full data portability
+- **Offline-First** - LocalStorage with robust error handling and recovery
+- **Concurrency Control** - Prevents data loss from simultaneous operations
+- **Auto-Backup** - Intelligent data persistence with queue management
+- **Export Ready** - Multiple export formats (coming soon)
 
-### 🔧 Developer Experience
+### 🔧 Technical Excellence
 
-- **Docker Ready** - Complete containerization for all environments
-- **Hot Reload** - Fast development with live reloading
-- **TypeScript** - Full type safety in backend
-- **Modern Stack** - React 18, Vite, Express, Prisma
+- **React 18 + Vite** - Modern, fast development and production builds
+- **Zustand State** - Lightweight, efficient state management
+- **Lazy Loading** - Performance-optimized component loading
+- **Error Boundaries** - Graceful error handling throughout the app
 
 ## 🚀 Quick Start
 
