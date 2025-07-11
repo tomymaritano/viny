@@ -236,10 +236,15 @@ export const useNoteActions = () => {
       updatedAt: new Date().toISOString()
     }
 
+    console.log('[createNewNote] Creating new note with ID:', newNote.id)
+    
     addNote(newNote)
     setCurrentNote(newNote)
     setSelectedNoteId(newNote.id)
     setIsEditorOpen(true)
+    
+    // Verify the note was set correctly
+    console.log('[createNewNote] Current note after setting:', useSimpleStore.getState().currentNote?.id)
 
     try {
       storageService.saveNote(newNote)
@@ -258,7 +263,7 @@ export const useNoteActions = () => {
 
   const handleSaveNote = useCallback(async (note: Note) => {
     try {
-      console.log('[SaveNote] Starting save for note:', note.title)
+      console.log('[SaveNote] Starting save for note:', note.title, 'ID:', note.id)
       
       // Use the provided title, or extract from content if not provided or empty
       const title = note.title && note.title.trim() 

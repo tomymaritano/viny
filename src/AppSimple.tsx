@@ -112,23 +112,35 @@ const AppSimple: React.FC = () => {
   }
 
   const handleContentChange = (newContent: string) => {
-    if (currentNote) {
+    // Get the latest currentNote from the store to avoid stale closure issues
+    const latestCurrentNote = useSimpleStore.getState().currentNote
+    
+    if (latestCurrentNote) {
       const updatedNote = { 
-        ...currentNote, 
+        ...latestCurrentNote, 
         content: newContent,
         updatedAt: new Date().toISOString()
       }
+      console.log('[ContentChange] Updating note:', updatedNote.title, 'ID:', updatedNote.id)
       setCurrentNote(updatedNote)
       // Trigger debounced auto-save
       debouncedAutoSave(updatedNote)
+    } else {
+      console.warn('[ContentChange] No current note found in store!')
     }
   }
 
   const handleNotebookChange = (notebook: string) => {
-    if (currentNote) {
-      const updatedNote = { ...currentNote, notebook }
+    // Get the latest currentNote from the store to avoid stale closure issues
+    const latestCurrentNote = useSimpleStore.getState().currentNote
+    
+    if (latestCurrentNote) {
+      const updatedNote = { ...latestCurrentNote, notebook }
+      console.log('[NotebookChange] Updating note:', updatedNote.title, 'ID:', updatedNote.id)
       setCurrentNote(updatedNote)
       handleSaveNote(updatedNote)
+    } else {
+      console.warn('[NotebookChange] No current note found in store!')
     }
   }
 
@@ -262,10 +274,11 @@ const AppSimple: React.FC = () => {
               />
             }
             mainContent={
-              isEditorOpen ? (
+              isEditorOpen && currentNote ? (
                 <Suspense fallback={<LoadingSpinner text="Loading Editor..." />}>
                   <MarkdownEditor
-                    value={currentNote?.content || ''}
+                    key={currentNote.id}  // Force re-mount when note changes
+                    value={currentNote.content || ''}
                     onChange={handleContentChange}
                     onSave={handleMetadataChange}
                     selectedNote={currentNote}
