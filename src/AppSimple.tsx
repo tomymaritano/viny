@@ -64,7 +64,11 @@ const AppSimple: React.FC = () => {
   const { settings } = useSettings()
   const { notebooks } = useNotebooks()
 
-  // Debounced auto-save function
+  // Stable reference to avoid debounce recreation
+  const saveNoteRef = useRef(handleSaveNote)
+  saveNoteRef.current = handleSaveNote
+
+  // Debounced auto-save function with stable reference
   const debouncedAutoSave = useMemo(() => {
     let timeoutId: NodeJS.Timeout | null = null
     
@@ -78,14 +82,14 @@ const AppSimple: React.FC = () => {
       timeoutId = setTimeout(async () => {
         try {
           console.log('[AutoSave] Saving note:', note.title)
-          await handleSaveNote(note)
+          await saveNoteRef.current(note)
           console.log('[AutoSave] Note saved successfully')
         } catch (error) {
           console.error('[AutoSave] Failed to save note:', error)
         }
-      }, 500) // 500ms debounce - adjust as needed
+      }, 500) // 500ms debounce
     }
-  }, [handleSaveNote])
+  }, []) // Empty dependency array to prevent recreation
 
   // Simple handlers
   const handleOpenNote = (noteId: string) => {
@@ -117,6 +121,17 @@ const AppSimple: React.FC = () => {
       handleSaveNote(updatedNote)
     }
   }
+
+  // Handler for metadata changes (immediate save, no auto-save)
+  const handleMetadataChange = useCallback(async (updatedNote: any) => {
+    try {
+      console.log('[MetadataChange] Saving metadata for:', updatedNote.title)
+      setCurrentNote(updatedNote)
+      await handleSaveNote(updatedNote)
+    } catch (error) {
+      console.error('[MetadataChange] Failed to save metadata:', error)
+    }
+  }, [handleSaveNote, setCurrentNote])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -217,7 +232,7 @@ const AppSimple: React.FC = () => {
                   <MarkdownEditor
                     value={currentNote?.content || ''}
                     onChange={handleContentChange}
-                    onSave={handleSaveNote}
+                    onSave={handleMetadataChange}
                     selectedNote={currentNote}
                     onNotebookChange={handleNotebookChange}
                     onExport={() => setModal('export', true)}
