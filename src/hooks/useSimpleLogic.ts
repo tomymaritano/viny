@@ -297,50 +297,44 @@ export const useNoteActions = () => {
       console.log('[SaveNote] Updated in-memory state')
       
       // Then persist to storage - ensure this actually saves
-      await new Promise<void>((resolve, reject) => {
-        try {
-          storageService.saveNote(updatedNote)
-          console.log('[SaveNote] Storage service saveNote called')
-          
-          // Verify the save worked by checking if we can retrieve it
-          setTimeout(() => {
-            try {
-              const savedNotes = storageService.getNotes()
-              const foundNote = savedNotes.find(n => n.id === updatedNote.id)
-              if (foundNote) {
-                // Note found - check if it's reasonably recent (allow for small timestamp differences)
-                const savedTime = new Date(foundNote.updatedAt).getTime()
-                const expectedTime = new Date(updatedNote.updatedAt).getTime()
-                const timeDiff = Math.abs(savedTime - expectedTime)
-                
-                if (timeDiff < 1000) { // Allow 1 second difference
-                  console.log('[SaveNote] Verified note was saved successfully')
-                  resolve()
-                } else {
-                  console.warn('[SaveNote] Note found but timestamp mismatch:', {
-                    expected: updatedNote.updatedAt,
-                    found: foundNote.updatedAt,
-                    diff: timeDiff
-                  })
-                  // Still resolve since the note exists
-                  resolve()
-                }
-              } else {
-                console.error('[SaveNote] Note not found after save. Notes in storage:', savedNotes.length)
-                console.error('[SaveNote] Looking for note ID:', updatedNote.id)
-                console.error('[SaveNote] Existing note IDs:', savedNotes.map(n => n.id))
-                reject(new Error('Save verification failed - note not found'))
-              }
-            } catch (verifyError) {
-              console.error('[SaveNote] Error verifying save:', verifyError)
-              reject(verifyError)
-            }
-          }, 200) // Increased timeout to give more time for debouncing
-        } catch (saveError) {
-          console.error('[SaveNote] Storage service error:', saveError)
-          reject(saveError)
+      try {
+        storageService.saveNote(updatedNote)
+        console.log('[SaveNote] Storage service saveNote called')
+        
+        // Force immediate save and wait for completion
+        await storageService.flushPendingSaves()
+        console.log('[SaveNote] Pending saves flushed')
+        
+        // Verify the save worked by checking if we can retrieve it
+        const savedNotes = storageService.getNotes()
+        const foundNote = savedNotes.find(n => n.id === updatedNote.id)
+        
+        if (!foundNote) {
+          console.error('[SaveNote] Note not found after save. Notes in storage:', savedNotes.length)
+          console.error('[SaveNote] Looking for note ID:', updatedNote.id)
+          console.error('[SaveNote] Existing note IDs:', savedNotes.map(n => n.id))
+          throw new Error('Save verification failed - note not found')
         }
-      })
+        
+        // Note found - check if it's reasonably recent (allow for small timestamp differences)
+        const savedTime = new Date(foundNote.updatedAt).getTime()
+        const expectedTime = new Date(updatedNote.updatedAt).getTime()
+        const timeDiff = Math.abs(savedTime - expectedTime)
+        
+        if (timeDiff < 1000) { // Allow 1 second difference
+          console.log('[SaveNote] Verified note was saved successfully')
+        } else {
+          console.warn('[SaveNote] Note found but timestamp mismatch:', {
+            expected: updatedNote.updatedAt,
+            found: foundNote.updatedAt,
+            diff: timeDiff
+          })
+          // Still continue since the note exists
+        }
+      } catch (saveError) {
+        console.error('[SaveNote] Storage service error:', saveError)
+        throw saveError
+      }
       
       console.log('[SaveNote] Successfully saved and verified note:', updatedNote.title)
       return updatedNote

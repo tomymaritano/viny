@@ -48,6 +48,9 @@ export async function diagnoseSaveIssues(): Promise<string[]> {
   const issues: string[] = []
   
   try {
+    // Initialize storage service first
+    storageService.initialize()
+    
     // Check localStorage availability
     const storageInfo = checkStorageAvailability()
     if (!storageInfo.available) {
@@ -82,8 +85,8 @@ export async function diagnoseSaveIssues(): Promise<string[]> {
     try {
       storageService.saveNote(testNote)
       
-      // Wait for debouncing
-      await new Promise(resolve => setTimeout(resolve, 200))
+      // Force immediate save instead of waiting for debouncing
+      await storageService.flushPendingSaves()
       
       // Verify save
       const savedNotes = storageService.getNotes()

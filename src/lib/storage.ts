@@ -8,9 +8,17 @@ class StorageService {
   private readonly TAG_COLORS_KEY = 'nototo_tag_colors'
   
   // Concurrency control
-  private saveQueue: Map<string, NodeJS.Timeout> = new Map()
+  private saveQueue: Map<string, { timeoutId: NodeJS.Timeout; note: Note }> = new Map()
   private isLoaded = false
   private loadPromise: Promise<Note[]> | null = null
+
+  // Initialize storage service
+  initialize(): void {
+    if (!this.isLoaded) {
+      console.log('[StorageService] Initializing storage service')
+      this.getNotes() // This will set isLoaded = true
+    }
+  }
 
   // Notes - synchronous version for backward compatibility
   getNotes(): Note[] {
@@ -100,7 +108,7 @@ class StorageService {
       // Cancel any pending save for this note
       if (this.saveQueue.has(note.id)) {
         console.log('[StorageService] Cancelling previous save for note:', note.id)
-        clearTimeout(this.saveQueue.get(note.id)!)
+        clearTimeout(this.saveQueue.get(note.id)!.timeoutId)
       }
 
       // Debounce saves for this specific note
@@ -116,8 +124,8 @@ class StorageService {
         }
       }, 100) // 100ms debounce
 
-      this.saveQueue.set(note.id, timeoutId)
-      console.log('[StorageService] Save queued for:', note.title, 'Timeout ID:', timeoutId)
+      this.saveQueue.set(note.id, { timeoutId, note })
+      console.log('[StorageService] Save queued for:', note.title)
     } catch (error) {
       console.error('[StorageService] Error in saveNote:', error)
       throw error
@@ -135,7 +143,7 @@ class StorageService {
       }
 
       if (!this.isLoaded) {
-        console.warn('[StorageService] Attempting to save before data is loaded, forcing load first')
+        console.log('[StorageService] Data not loaded yet, initializing storage first')
         this.getNotes() // This will set isLoaded = true
       }
 
@@ -176,23 +184,32 @@ class StorageService {
   }
 
   // Force save all pending notes immediately
-  flushPendingSaves(): void {
+  flushPendingSaves(): Promise<void> {
     console.log('[StorageService] Flushing', this.saveQueue.size, 'pending saves...')
     
-    const pendingNotes: Note[] = []
+    const promises: Promise<void>[] = []
     
-    // Clear all timeouts and collect notes that need saving
-    this.saveQueue.forEach((timeoutId, noteId) => {
+    // Process all pending saves immediately
+    this.saveQueue.forEach(({ timeoutId, note }) => {
       clearTimeout(timeoutId)
-      // Note: We don't have direct access to the note object here
-      // This is a limitation of the current design
+      const promise = new Promise<void>((resolve, reject) => {
+        try {
+          console.log('[StorageService] Flushing save for:', note.title)
+          this.saveNoteImmediate(note)
+          resolve()
+        } catch (error) {
+          console.error('[StorageService] Error flushing save for note:', note.title, error)
+          reject(error)
+        }
+      })
+      promises.push(promise)
     })
     
     this.saveQueue.clear()
-    console.log('[StorageService] Cleared all pending save timeouts')
     
-    // Note: In a future improvement, we should store the note objects
-    // in the queue so we can flush them immediately here
+    return Promise.all(promises).then(() => {
+      console.log('[StorageService] All pending saves flushed')
+    })
   }
   
   // Force save a specific note immediately (bypass debouncing)
