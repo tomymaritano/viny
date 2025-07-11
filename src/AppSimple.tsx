@@ -216,7 +216,7 @@ const AppSimple: React.FC = () => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [currentNote])
+  }, []) // Remove currentNote dependency to prevent constant remounting
 
   // Loading state
   if (isLoading) {
