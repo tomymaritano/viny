@@ -1,5 +1,5 @@
 // Simplified App component using simple store
-import React, { Suspense, useEffect } from 'react'
+import React, { Suspense, useEffect, useCallback, useRef } from 'react'
 import { useAppLogic, useNoteActions } from './hooks/useSimpleLogic'
 import { useSimpleStore } from './stores/simpleStore'
 import { useSettings } from './hooks/useSettings'
@@ -61,10 +61,35 @@ const AppSimple: React.FC = () => {
   const { settings } = useSettings()
   const { notebooks } = useNotebooks()
 
+  // Debounced save ref
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Debounced save function
+  const debouncedSave = useCallback((note: any) => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+    
+    saveTimeoutRef.current = setTimeout(() => {
+      console.log('[DebouncedSave] Saving note:', note.id, 'Title:', note.title)
+      handleSaveNote(note)
+    }, 1000) // 1 second debounce
+  }, [handleSaveNote])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [])
+
   // Simple handlers
   const handleOpenNote = (noteId: string) => {
     const note = filteredNotes.find(n => n.id === noteId)
     if (note) {
+      console.log('[OpenNote] Opening note:', noteId, 'Title:', note.title)
       setCurrentNote(note)
       setSelectedNoteId(noteId)
       setIsEditorOpen(true)
@@ -73,8 +98,15 @@ const AppSimple: React.FC = () => {
 
   const handleContentChange = (newContent: string) => {
     if (currentNote) {
-      const updatedNote = { ...currentNote, content: newContent }
+      console.log('[ContentChange] Updating note:', currentNote.id, 'Title:', currentNote.title)
+      const updatedNote = { 
+        ...currentNote, 
+        content: newContent,
+        updatedAt: new Date().toISOString()
+      }
       setCurrentNote(updatedNote)
+      // Trigger debounced save
+      debouncedSave(updatedNote)
     }
   }
 

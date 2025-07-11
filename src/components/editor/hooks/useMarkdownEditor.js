@@ -46,12 +46,23 @@ export const useMarkdownEditor = ({
         setIsSaving(true)
         setSaveError(null)
 
+        // Debug logging to track note ID consistency
+        console.log(
+          '[Auto-save] Saving note:',
+          selectedNote.id,
+          'Title:',
+          selectedNote.title
+        )
+
+        // Ensure we're working with the most up-to-date note data
+        // by preserving the selectedNote structure but updating content
         const updatedNote = {
           ...selectedNote,
           content,
           updatedAt: new Date().toISOString(),
         }
 
+        // Pass the complete updated note to the save function
         await onSave(updatedNote)
         setLastSaved(new Date().toISOString())
         setSaveError(null)
@@ -73,13 +84,14 @@ export const useMarkdownEditor = ({
     [selectedNote, onSave, addToast]
   )
 
-  // Auto-save hook
+  // Auto-save hook - DISABLED to prevent conflicts with app-level saving
+  // Auto-save is now handled at the app level in AppSimple.tsx
   useAutoSave(
     autoSaveFunction,
     value,
     (settings.autoSaveInterval || 30) * 1000,
     {
-      enabled: settings.autoSave,
+      enabled: false, // Disabled - app handles saving now
     }
   )
 

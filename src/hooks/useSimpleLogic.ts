@@ -228,6 +228,8 @@ export const useNoteActions = () => {
   }, [])
 
   const handleSaveNote = useCallback((note: Note) => {
+    console.log('[SaveNote] Saving note:', note.id, 'Title:', note.title)
+    
     // Use the provided title, or extract from content if not provided or empty
     const title = note.title && note.title.trim() 
       ? note.title 
