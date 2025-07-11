@@ -219,13 +219,7 @@ Created: {{date}}`,
 
       // Simple setters
       setNotes: (notes) => set({ notes }),
-      setCurrentNote: (currentNote) => set((state) => ({
-        currentNote,
-        // Also update the note in the notes array if it exists
-        notes: currentNote 
-          ? state.notes.map(note => note.id === currentNote.id ? currentNote : note)
-          : state.notes
-      })),
+      setCurrentNote: (currentNote) => set({ currentNote }),
       setSelectedNoteId: (selectedNoteId) => set({ selectedNoteId }),
       setIsEditorOpen: (isEditorOpen) => set({ isEditorOpen }),
       setLoading: (isLoading) => set({ isLoading }),

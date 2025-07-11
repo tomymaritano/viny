@@ -1,5 +1,5 @@
 // Simplified App component using simple store
-import React, { Suspense, useEffect, useCallback, useRef } from 'react'
+import React, { Suspense, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useAppLogic, useNoteActions } from './hooks/useSimpleLogic'
 import { useSimpleStore } from './stores/simpleStore'
 import { useSettings } from './hooks/useSettings'
@@ -64,13 +64,26 @@ const AppSimple: React.FC = () => {
   const { settings } = useSettings()
   const { notebooks } = useNotebooks()
 
-  // Auto-save function with proper error handling
-  const autoSave = useCallback((note: any) => {
-    try {
-      handleSaveNote(note)
-    } catch (error) {
-      console.error('[AutoSave] Failed to save note:', error)
-      // Could add toast notification here if needed
+  // Debounced auto-save function
+  const debouncedAutoSave = useMemo(() => {
+    let timeoutId: NodeJS.Timeout | null = null
+    
+    return (note: any) => {
+      // Clear previous timeout
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+      
+      // Set new timeout for auto-save
+      timeoutId = setTimeout(async () => {
+        try {
+          console.log('[AutoSave] Saving note:', note.title)
+          await handleSaveNote(note)
+          console.log('[AutoSave] Note saved successfully')
+        } catch (error) {
+          console.error('[AutoSave] Failed to save note:', error)
+        }
+      }, 500) // 500ms debounce - adjust as needed
     }
   }, [handleSaveNote])
 
@@ -92,8 +105,8 @@ const AppSimple: React.FC = () => {
         updatedAt: new Date().toISOString()
       }
       setCurrentNote(updatedNote)
-      // Trigger auto-save (storage service handles debouncing)
-      autoSave(updatedNote)
+      // Trigger debounced auto-save
+      debouncedAutoSave(updatedNote)
     }
   }
 

@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useSettings } from '../../../hooks/useSettings'
-import { useAutoSave } from '../../../hooks/useAutoSave'
 import { calculateStats } from '../utils/markdownFormatter'
 import { useSimpleStore } from '../../../stores/simpleStore'
 
@@ -37,57 +36,8 @@ export const useMarkdownEditor = ({
     })
   }, [value])
 
-  // Auto-save function
-  const autoSaveFunction = useCallback(
-    async content => {
-      if (!selectedNote || !onSave) return
-
-      try {
-        setIsSaving(true)
-        setSaveError(null)
-
-        // Ensure we have the correct note for auto-save
-
-        // Ensure we're working with the most up-to-date note data
-        // by preserving the selectedNote structure but updating content
-        const updatedNote = {
-          ...selectedNote,
-          content,
-          updatedAt: new Date().toISOString(),
-        }
-
-        // Pass the complete updated note to the save function
-        await onSave(updatedNote)
-        setLastSaved(new Date().toISOString())
-        setSaveError(null)
-      } catch (error) {
-        const errorMessage = error.message || 'Failed to save note'
-        setSaveError(errorMessage)
-        console.error('Auto-save failed:', error)
-
-        // Show toast notification for save errors
-        addToast({
-          type: 'error',
-          message: `Save failed: ${errorMessage}`,
-          duration: 5000,
-        })
-      } finally {
-        setIsSaving(false)
-      }
-    },
-    [selectedNote, onSave, addToast]
-  )
-
-  // Auto-save hook - DISABLED to prevent conflicts with app-level saving
-  // Auto-save is now handled at the app level in AppSimple.tsx
-  useAutoSave(
-    autoSaveFunction,
-    value,
-    (settings.autoSaveInterval || 30) * 1000,
-    {
-      enabled: false, // Disabled - app handles saving now
-    }
-  )
+  // Auto-save is handled at the app level in AppSimple.tsx
+  // No auto-save logic needed here to prevent conflicts
 
   // Debounce timer for title changes
   const titleDebounceTimer = useRef(null)

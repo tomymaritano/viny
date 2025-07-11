@@ -232,37 +232,42 @@ export const useNoteActions = () => {
     // This will be handled by the component
   }, [])
 
-  const handleSaveNote = useCallback((note: Note) => {
-    // Use the provided title, or extract from content if not provided or empty
-    const title = note.title && note.title.trim() 
-      ? note.title 
-      : MarkdownProcessor.extractTitle(note.content) || 'Untitled Note'
-    
-    // Extract tags from content and merge with existing tags
-    const contentTags = MarkdownProcessor.extractTags(note.content)
-    const existingTags = note.tags || []
-    
-    // Combine and deduplicate tags (case-insensitive)
-    const combinedTags = [...existingTags, ...contentTags]
-    const uniqueTags = combinedTags.filter((tag, index, arr) => 
-      arr.findIndex(t => t.toLowerCase() === tag.toLowerCase()) === index
-    )
-    
-    const updatedNote = {
-      ...note,
-      title,
-      tags: uniqueTags,
-      updatedAt: new Date().toISOString()
-    }
-
-    updateNote(updatedNote)
-    
+  const handleSaveNote = useCallback(async (note: Note) => {
     try {
+      // Use the provided title, or extract from content if not provided or empty
+      const title = note.title && note.title.trim() 
+        ? note.title 
+        : MarkdownProcessor.extractTitle(note.content) || 'Untitled Note'
+      
+      // Extract tags from content and merge with existing tags
+      const contentTags = MarkdownProcessor.extractTags(note.content)
+      const existingTags = note.tags || []
+      
+      // Combine and deduplicate tags (case-insensitive)
+      const combinedTags = [...existingTags, ...contentTags]
+      const uniqueTags = combinedTags.filter((tag, index, arr) => 
+        arr.findIndex(t => t.toLowerCase() === tag.toLowerCase()) === index
+      )
+      
+      const updatedNote = {
+        ...note,
+        title,
+        tags: uniqueTags,
+        updatedAt: new Date().toISOString()
+      }
+
+      // Update in-memory state first
+      updateNote(updatedNote)
+      
+      // Then persist to storage
       storageService.saveNote(updatedNote)
-      // Removed success toast - it's too annoying for auto-save
+      
+      console.log('[SaveNote] Successfully saved note:', updatedNote.title)
+      return updatedNote
     } catch (error) {
-      console.error('Error saving note:', error)
+      console.error('[SaveNote] Error saving note:', error)
       addToast({ type: 'error', message: 'Failed to save note' })
+      throw error // Re-throw so auto-save can handle it
     }
   }, [updateNote, addToast])
 
