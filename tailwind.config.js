@@ -51,7 +51,7 @@ module.exports = {
           'green-hover': '#2C3300',
           'purple-hover': '#25285B'
         },
-        'theme': {
+        'theme-palette': {
           'dark-1': '#00141A',
           'dark-2': '#002B36',
           'dark-3': '#073642',

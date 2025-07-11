@@ -43,6 +43,7 @@ interface SimpleAppStore {
     export: boolean
     notebookManager: boolean
     template: boolean
+    tagModal: boolean
   }
   toasts: Array<{
     id: string
@@ -211,7 +212,8 @@ Created: {{date}}`,
         search: false,
         export: false,
         notebookManager: false,
-        template: false
+        template: false,
+        tagModal: false
       },
       toasts: [],
       theme: 'dark',

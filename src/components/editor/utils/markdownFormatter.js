@@ -1,4 +1,11 @@
 // Markdown formatting utilities for editor toolbar
+//
+// SECURITY NOTE: Image handling
+// For security reasons, only the following image sources are allowed:
+// - Local files: ./image.jpg, /assets/image.png
+// - Data URIs: data:image/jpeg;base64,... (recommended for small images)
+// - Blob URLs: blob:... (for uploaded files)
+// External URLs (http/https) are blocked by Content Security Policy
 
 export const createMarkdownFormatter = insertText => {
   return {
@@ -16,7 +23,11 @@ export const createMarkdownFormatter = insertText => {
 
     // Links and media
     insertLink: () => insertText('[link text](https://example.com)'),
-    insertImage: () => insertText('![alt text](image-url.jpg)'),
+    // Image placeholder - now just triggers file picker via toolbar button
+    insertImage: () =>
+      insertText(
+        '![Image description](./image.jpg)\n\n<!-- Use the Image button in toolbar to upload files securely -->'
+      ),
 
     // Lists
     insertList: () => insertText('\n- Item 1\n- Item 2\n- Item 3\n'),

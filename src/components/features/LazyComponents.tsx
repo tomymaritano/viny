@@ -43,7 +43,7 @@ export function withSuspense<P extends object>(
         resetLabel="Retry Loading"
       >
         <Suspense 
-          fallback={fallback || <LoadingSpinner size="lg" text="Loading component..." />}
+          fallback={fallback || <LoadingSpinner size="large" text="Loading component..." />}
         >
           <Component {...props} />
         </Suspense>

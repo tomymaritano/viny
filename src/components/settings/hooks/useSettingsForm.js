@@ -45,7 +45,7 @@ export const useSettingsForm = () => {
         if (typeof importedSettings === 'object' && importedSettings !== null) {
           // Apply imported settings
           Object.keys(importedSettings).forEach(key => {
-            if (settings.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(settings, key)) {
               updateSetting(key, importedSettings[key])
             }
           })
