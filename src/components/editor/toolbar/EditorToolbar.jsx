@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types'
 import Icons from '../../Icons'
 import IconButton from '../../ui/IconButton'
-import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 
 const EditorToolbar = ({
   onBold,
@@ -177,7 +176,7 @@ const EditorToolbar = ({
     if (isSaving) {
       return (
         <div className="flex items-center text-theme-text-tertiary text-xs">
-          <Loader2 size={14} className="animate-spin mr-1" />
+          <Icons.Loader2 size={14} className="animate-spin mr-1" />
           <span>Saving...</span>
         </div>
       )
@@ -186,7 +185,7 @@ const EditorToolbar = ({
     if (saveError) {
       return (
         <div className="flex items-center text-theme-accent-red text-xs">
-          <AlertCircle size={14} className="mr-1" />
+          <Icons.AlertCircle size={14} className="mr-1" />
           <span>Error saving</span>
         </div>
       )
@@ -199,7 +198,7 @@ const EditorToolbar = ({
       if (seconds < 5) {
         return (
           <div className="flex items-center text-theme-accent-green text-xs">
-            <CheckCircle size={14} className="mr-1" />
+            <Icons.CheckCircle size={14} className="mr-1" />
             <span>Saved</span>
           </div>
         )

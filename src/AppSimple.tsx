@@ -9,6 +9,7 @@ import { storageService } from './lib/storage'
 // Components
 import LoadingSpinner from './components/LoadingSpinner'
 import ErrorBoundary from './components/ErrorBoundary'
+import StorageErrorBoundary from './components/errors/StorageErrorBoundary'
 import ResizableLayout from './components/ResizableLayout'
 import SidebarSimple from './components/features/SidebarSimple'
 import NotesListSimple from './components/features/NotesListSimple'
@@ -20,7 +21,8 @@ import {
   MarkdownEditor,
   SearchModal,
   ExportDialog,
-  NotebookManager
+  NotebookManager,
+  TemplateModal
 } from './components/features/LazyComponents'
 import SettingsView from './components/SettingsView'
 
@@ -171,52 +173,61 @@ const AppSimple: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="app">
-        <ResizableLayout
-          settings={settings}
-          sidebar={<SidebarSimple />}
-          notesList={
-            <NotesListSimple
-              notes={filteredNotes}
-              onOpenNote={handleOpenNote}
-              onNewNote={createNewNote}
-              selectedNoteId={currentNote?.id || null}
-              onDeleteNote={handleDeleteNote}
-              onTogglePin={handleTogglePin}
-              currentSection={activeSection}
-              onSortNotes={sortNotes}
-            />
-          }
-          mainContent={
-            isEditorOpen ? (
-              <Suspense fallback={<LoadingSpinner text="Loading Editor..." />}>
-                <MarkdownEditor
-                  value={currentNote?.content || ''}
-                  onChange={handleContentChange}
-                  onSave={handleSaveNote}
-                  selectedNote={currentNote}
-                  onNotebookChange={handleNotebookChange}
-                  onExport={() => setModal('export', true)}
-                  onTogglePreview={() => setIsPreviewVisible(!isPreviewVisible)}
-                  isPreviewVisible={isPreviewVisible}
-                  notebooks={notebooks}
-                />
-              </Suspense>
-            ) : (
-              <NotePreview
-                note={selectedNote}
-                onEdit={handleOpenNote}
+      <StorageErrorBoundary
+        clearStorageOnRetry={true}
+        onError={(error) => {
+          console.error('Storage service error:', error)
+        }}
+        onRetry={() => {
+          window.location.reload()
+        }}
+      >
+        <div className="app">
+          <ResizableLayout
+            settings={settings}
+            sidebar={<SidebarSimple />}
+            notesList={
+              <NotesListSimple
+                notes={filteredNotes}
+                onOpenNote={handleOpenNote}
+                onNewNote={createNewNote}
+                selectedNoteId={currentNote?.id || null}
+                onDeleteNote={handleDeleteNote}
                 onTogglePin={handleTogglePin}
-                onDuplicate={handleDuplicateNote}
-                onDelete={handleDeleteNote}
+                currentSection={activeSection}
+                onSortNotes={sortNotes}
               />
-            )
-          }
-          previewPanel={null}
-          isPreviewVisible={false}
-          isSidebarVisible={true}
-          isNotesListVisible={true}
-        />
+            }
+            mainContent={
+              isEditorOpen ? (
+                <Suspense fallback={<LoadingSpinner text="Loading Editor..." />}>
+                  <MarkdownEditor
+                    value={currentNote?.content || ''}
+                    onChange={handleContentChange}
+                    onSave={handleSaveNote}
+                    selectedNote={currentNote}
+                    onNotebookChange={handleNotebookChange}
+                    onExport={() => setModal('export', true)}
+                    onTogglePreview={() => setIsPreviewVisible(!isPreviewVisible)}
+                    isPreviewVisible={isPreviewVisible}
+                    notebooks={notebooks}
+                  />
+                </Suspense>
+              ) : (
+                <NotePreview
+                  note={selectedNote}
+                  onEdit={handleOpenNote}
+                  onTogglePin={handleTogglePin}
+                  onDuplicate={handleDuplicateNote}
+                  onDelete={handleDeleteNote}
+                />
+              )
+            }
+            previewPanel={null}
+            isPreviewVisible={false}
+            isSidebarVisible={true}
+            isNotesListVisible={true}
+          />
 
         {/* Toast Container */}
         <div className="fixed top-4 right-4 z-50">
@@ -252,7 +263,16 @@ const AppSimple: React.FC = () => {
             onNotebookChange={handleNotebookChange}
           />
         )}
-      </div>
+
+        {/* Template Modal */}
+        {modals.template && (
+          <TemplateModal
+            isOpen={modals.template}
+            onClose={() => setModal('template', false)}
+          />
+        )}
+        </div>
+      </StorageErrorBoundary>
     </ErrorBoundary>
   )
 }

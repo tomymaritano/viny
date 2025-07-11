@@ -64,6 +64,12 @@ import {
   Briefcase,
   Globe,
   ArrowRight,
+  Loader2,
+  ArrowDownAZ,
+  ArrowUpAZ,
+  NotebookPen,
+  Menu,
+  Database,
 } from 'lucide-react'
 
 // Unified icon library using lucide-react
@@ -332,6 +338,31 @@ const Icons = {
 
   ArrowRight: ({ size = 16, className = '' }) => (
     <ArrowRight size={size} className={className} />
+  ),
+
+  // Additional icons for missing references
+  Loader2: ({ size = 16, className = '' }) => (
+    <Loader2 size={size} className={className} />
+  ),
+
+  ArrowDownAZ: ({ size = 16, className = '' }) => (
+    <ArrowDownAZ size={size} className={className} />
+  ),
+
+  ArrowUpAZ: ({ size = 16, className = '' }) => (
+    <ArrowUpAZ size={size} className={className} />
+  ),
+
+  NotebookPen: ({ size = 16, className = '' }) => (
+    <NotebookPen size={size} className={className} />
+  ),
+
+  Menu: ({ size = 16, className = '' }) => (
+    <Menu size={size} className={className} />
+  ),
+
+  Database: ({ size = 16, className = '' }) => (
+    <Database size={size} className={className} />
   ),
 }
 

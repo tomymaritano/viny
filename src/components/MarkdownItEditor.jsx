@@ -18,6 +18,9 @@ import { useEditorToolbar } from './editor/hooks/useEditorToolbar'
 import { useSimpleStore } from '../stores/simpleStore'
 import { useMemo } from 'react'
 
+// Error Boundary
+import ComponentErrorBoundary from './errors/ComponentErrorBoundary'
+
 // Configure markdown-it
 const md = new MarkdownIt({
   html: true,
@@ -138,88 +141,121 @@ const MarkdownItEditor = ({
   }, [handleEditorKeyDown, handleToolbarKeyDown])
 
   return (
-    <div
-      className={`${
-        isFullscreen ? 'fixed inset-0 z-50' : 'w-full h-full'
-      } flex flex-col`}
-      style={{ backgroundColor: '#171617' }}
+    <ComponentErrorBoundary
+      componentName="MarkdownEditor"
+      title="Markdown Editor Error"
+      message="The markdown editor encountered an error. This might be due to invalid markdown content or a rendering issue."
+      onError={(error, errorInfo) => {
+        console.error('MarkdownEditor Error:', error, errorInfo)
+      }}
     >
-      {/* Note Metadata */}
-      <NoteMetadata
-        note={selectedNote}
-        notebooks={notebooks}
-        onTitleChange={handleTitleChange}
-        onNotebookChange={handleNoteMetadataNotebookChange}
-        onStatusChange={handleStatusChange}
-        onTagsChange={handleTagsChange}
-        isPreviewMode={false}
-      />
-
-      {/* Toolbar */}
-      <EditorToolbar
-        onBold={insertBold}
-        onItalic={insertItalic}
-        onStrikethrough={insertStrikethrough}
-        onCode={insertCode}
-        onHeading={insertHeading}
-        isSaving={isSaving}
-        lastSaved={lastSaved}
-        saveError={saveError}
-        onLink={insertLink}
-        onImage={insertImage}
-        onList={insertList}
-        onOrderedList={insertOrderedList}
-        onCheckbox={insertCheckbox}
-        onCodeBlock={insertCodeBlock}
-        onQuote={insertQuote}
-        onTable={insertTable}
-        onHorizontalRule={insertHorizontalRule}
-        onTags={handleOpenTagModal}
-        onToggleLineNumbers={handleToggleLineNumbers}
-        showLineNumbers={showLineNumbers}
-      />
-
-      {/* Split Editor with Preview */}
-      <SplitEditor
-        ref={editorRef}
-        value={value}
-        onChange={onChange}
-        placeholder="Start writing your markdown here..."
-        selectedNote={selectedNote}
-        showLineNumbers={showLineNumbers}
-      />
-
-      {/* Fullscreen toggle button */}
-      {!isFullscreen && (
-        <button
-          onClick={() => setIsFullscreen(true)}
-          className="absolute top-4 right-4 p-2 theme-bg-tertiary text-theme-text-secondary rounded hover:theme-bg-quaternary transition-colors opacity-0 hover:opacity-100"
-          title="Enter fullscreen mode (Ctrl+Enter)"
+      <div
+        className={`${
+          isFullscreen ? 'fixed inset-0 z-50' : 'w-full h-full'
+        } flex flex-col`}
+        style={{ backgroundColor: '#171617' }}
+      >
+        {/* Note Metadata */}
+        <ComponentErrorBoundary
+          componentName="NoteMetadata"
+          title="Note Metadata Error"
+          message="Failed to load note metadata. You can still edit the note content."
         >
-          📱
-        </button>
-      )}
+          <NoteMetadata
+            note={selectedNote}
+            notebooks={notebooks}
+            onTitleChange={handleTitleChange}
+            onNotebookChange={handleNoteMetadataNotebookChange}
+            onStatusChange={handleStatusChange}
+            onTagsChange={handleTagsChange}
+            isPreviewMode={false}
+          />
+        </ComponentErrorBoundary>
 
-      {/* Exit fullscreen button */}
-      {isFullscreen && (
-        <button
-          onClick={() => setIsFullscreen(false)}
-          className="absolute top-4 right-4 p-2 theme-bg-tertiary text-theme-text-secondary rounded hover:theme-bg-quaternary transition-colors"
-          title="Exit fullscreen mode (Ctrl+Enter)"
+        {/* Toolbar */}
+        <ComponentErrorBoundary
+          componentName="EditorToolbar"
+          title="Editor Toolbar Error"
+          message="Failed to load editor toolbar. You can still type in the editor."
         >
-          ❌
-        </button>
-      )}
+          <EditorToolbar
+            onBold={insertBold}
+            onItalic={insertItalic}
+            onStrikethrough={insertStrikethrough}
+            onCode={insertCode}
+            onHeading={insertHeading}
+            isSaving={isSaving}
+            lastSaved={lastSaved}
+            saveError={saveError}
+            onLink={insertLink}
+            onImage={insertImage}
+            onList={insertList}
+            onOrderedList={insertOrderedList}
+            onCheckbox={insertCheckbox}
+            onCodeBlock={insertCodeBlock}
+            onQuote={insertQuote}
+            onTable={insertTable}
+            onHorizontalRule={insertHorizontalRule}
+            onTags={handleOpenTagModal}
+            onToggleLineNumbers={handleToggleLineNumbers}
+            showLineNumbers={showLineNumbers}
+          />
+        </ComponentErrorBoundary>
 
-      {/* Tag Modal */}
-      <TagModal
-        isOpen={isTagModalOpen}
-        onClose={handleCloseTagModal}
-        currentTags={selectedNote?.tags || []}
-        onTagsChange={handleTagsChange}
-        availableTags={availableTags}
-      />
-    </div>
+        {/* Split Editor with Preview */}
+        <ComponentErrorBoundary
+          componentName="SplitEditor"
+          title="Split Editor Error"
+          message="Failed to load the split editor. Try refreshing the page."
+        >
+          <SplitEditor
+            ref={editorRef}
+            value={value}
+            onChange={onChange}
+            placeholder="Start writing your markdown here..."
+            selectedNote={selectedNote}
+            showLineNumbers={showLineNumbers}
+          />
+        </ComponentErrorBoundary>
+
+        {/* Fullscreen toggle button */}
+        {!isFullscreen && (
+          <button
+            onClick={() => setIsFullscreen(true)}
+            className="absolute top-4 right-4 p-2 theme-bg-tertiary text-theme-text-secondary rounded hover:theme-bg-quaternary transition-colors opacity-0 hover:opacity-100"
+            title="Enter fullscreen mode (Ctrl+Enter)"
+          >
+            📱
+          </button>
+        )}
+
+        {/* Exit fullscreen button */}
+        {isFullscreen && (
+          <button
+            onClick={() => setIsFullscreen(false)}
+            className="absolute top-4 right-4 p-2 theme-bg-tertiary text-theme-text-secondary rounded hover:theme-bg-quaternary transition-colors"
+            title="Exit fullscreen mode (Ctrl+Enter)"
+          >
+            ❌
+          </button>
+        )}
+
+        {/* Tag Modal */}
+        <ComponentErrorBoundary
+          componentName="TagModal"
+          title="Tag Modal Error"
+          message="Failed to load tag editor. You can still save your note."
+        >
+          <TagModal
+            isOpen={isTagModalOpen}
+            onClose={handleCloseTagModal}
+            currentTags={selectedNote?.tags || []}
+            onTagsChange={handleTagsChange}
+            availableTags={availableTags}
+          />
+        </ComponentErrorBoundary>
+      </div>
+    </ComponentErrorBoundary>
   )
 }
 

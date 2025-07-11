@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import SearchBar from './SearchBar'
+import SearchErrorBoundary from './errors/SearchErrorBoundary'
 import Icons from './Icons'
 
 const SearchModal = ({
@@ -96,23 +97,32 @@ const SearchModal = ({
 
           {/* Search Content */}
           <div className="p-4">
-            <div ref={searchBarRef}>
-              <SearchBar
-                notes={notes}
-                onSelectResult={note => {
-                  onSelectNote(note)
-                  onClose()
-                }}
-                onPinNote={onPinNote}
-                onDeleteNote={onDeleteNote}
-                onMoveNote={onMoveNote}
-                placeholder="Search by title, content, tags, or notebook..."
-                autoFocus={true}
-                showResults={true}
-                showHistory={true}
-                className="w-full"
-              />
-            </div>
+            <SearchErrorBoundary
+              fallbackMessage="Search failed due to complex search terms or filtering. Try simplifying your search."
+              onClearSearch={() => {
+                // Reset search - this would need to be implemented in SearchBar
+                console.log('Clearing search due to error')
+              }}
+              onClose={onClose}
+            >
+              <div ref={searchBarRef}>
+                <SearchBar
+                  notes={notes}
+                  onSelectResult={note => {
+                    onSelectNote(note)
+                    onClose()
+                  }}
+                  onPinNote={onPinNote}
+                  onDeleteNote={onDeleteNote}
+                  onMoveNote={onMoveNote}
+                  placeholder="Search by title, content, tags, or notebook..."
+                  autoFocus={true}
+                  showResults={true}
+                  showHistory={true}
+                  className="w-full"
+                />
+              </div>
+            </SearchErrorBoundary>
 
             {/* Keyboard Shortcuts Help */}
             <div className="mt-6 pt-4 border-t border-theme-border-primary">

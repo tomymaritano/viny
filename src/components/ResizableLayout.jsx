@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import ResizeHandle from './ResizeHandle'
-import { Menu, X, Search, Plus } from 'lucide-react'
+import Icons from './Icons'
 
 const ResizableLayout = ({
   sidebar,
@@ -136,7 +136,7 @@ const ResizableLayout = ({
             onClick={() => setShowMobileSidebar(true)}
             className="p-2 rounded hover:bg-theme-bg-tertiary text-theme-text-secondary"
           >
-            <Menu size={20} />
+            <Icons.Menu size={20} />
           </button>
 
           <h1 className="text-lg font-semibold text-theme-text-primary">
@@ -154,7 +154,7 @@ const ResizableLayout = ({
               }}
               className="p-2 rounded hover:bg-theme-bg-tertiary text-theme-text-secondary"
             >
-              <Search size={20} />
+              <Icons.Search size={20} />
             </button>
             <button
               onClick={() => {
@@ -162,7 +162,7 @@ const ResizableLayout = ({
               }}
               className="p-2 rounded hover:bg-theme-bg-tertiary text-theme-text-secondary"
             >
-              <Plus size={20} />
+              <Icons.Plus size={20} />
             </button>
           </div>
         </div>
@@ -212,7 +212,7 @@ const ResizableLayout = ({
                   onClick={() => setShowMobileSidebar(false)}
                   className="p-2 rounded hover:bg-theme-bg-tertiary text-theme-text-secondary"
                 >
-                  <X size={20} />
+                  <Icons.X size={20} />
                 </button>
               </div>
               <div className="h-full overflow-y-auto">{sidebar}</div>

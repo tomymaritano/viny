@@ -1,6 +1,5 @@
 // Simplified NotesList component
 import React, { memo, useState, useRef, useEffect, useCallback } from 'react'
-import { ArrowDownAZ, ArrowUpAZ, NotebookPen } from 'lucide-react'
 import { Note } from '../../types'
 import { useNotesListLogic } from '../../hooks/useNotesListLogic'
 import TaskProgress from '../ui/TaskProgress'
@@ -236,7 +235,7 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
             className="p-2 rounded hover:bg-theme-bg-tertiary transition-colors text-theme-text-secondary hover:text-theme-text-primary"
             title="Sort notes"
           >
-            {sortDirection === 'asc' ? <ArrowUpAZ size={16} /> : <ArrowDownAZ size={16} />}
+            {sortDirection === 'asc' ? <Icons.ArrowUpAZ size={16} /> : <Icons.ArrowDownAZ size={16} />}
           </button>
           
           {/* Sort dropdown menu */}
@@ -301,7 +300,7 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
             className="p-2 hover:bg-theme-bg-tertiary transition-colors text-theme-text-secondary hover:text-theme-text-primary"
             title="Create new note"
           >
-            <NotebookPen size={16} />
+            <Icons.NotebookPen size={16} />
           </button>
         </div>
       </div>
