@@ -269,49 +269,13 @@ Created: {{date}}`,
 
       getTagColor: (tag) => {
         const state = useSimpleStore.getState()
-        const predefinedColors = {
-          'project': 'bg-blue-900/40 border-blue-500/50 text-blue-300',
-          'work': 'bg-indigo-900/40 border-indigo-500/50 text-indigo-300',
-          'personal': 'bg-green-900/40 border-green-500/50 text-green-300',
-          'urgent': 'bg-red-900/40 border-red-500/50 text-red-300',
-          'important': 'bg-orange-900/40 border-orange-500/50 text-orange-300',
-          'idea': 'bg-yellow-900/40 border-yellow-500/50 text-yellow-300',
-          'note': 'bg-gray-800/40 border-gray-500/50 text-gray-300',
-          'todo': 'bg-purple-900/40 border-purple-500/50 text-purple-300',
-          'meeting': 'bg-cyan-900/40 border-cyan-500/50 text-cyan-300',
-          'draft': 'bg-pink-900/40 border-pink-500/50 text-pink-300'
-        }
+        const { getCustomTagColor } = require('../utils/customTagColors')
         
-        const tagColors = [
-          'bg-blue-900/40 border-blue-500/50 text-blue-300',
-          'bg-green-900/40 border-green-500/50 text-green-300', 
-          'bg-purple-900/40 border-purple-500/50 text-purple-300',
-          'bg-pink-900/40 border-pink-500/50 text-pink-300',
-          'bg-yellow-900/40 border-yellow-500/50 text-yellow-300',
-          'bg-indigo-900/40 border-indigo-500/50 text-indigo-300',
-          'bg-red-900/40 border-red-500/50 text-red-300',
-          'bg-cyan-900/40 border-cyan-500/50 text-cyan-300',
-          'bg-orange-900/40 border-orange-500/50 text-orange-300',
-          'bg-emerald-900/40 border-emerald-500/50 text-emerald-300'
-        ]
-
-        // Check stored colors first
-        if (state.tagColors[tag]) {
-          return state.tagColors[tag]
-        }
+        // Get custom color object
+        const colorObj = getCustomTagColor(tag, state.tagColors)
         
-        // Check predefined colors
-        if (predefinedColors[tag.toLowerCase()]) {
-          return predefinedColors[tag.toLowerCase()]
-        }
-        
-        // Generate color based on tag hash
-        let hash = 0
-        for (let i = 0; i < tag.length; i++) {
-          hash = tag.charCodeAt(i) + ((hash << 5) - hash)
-        }
-        const colorIndex = Math.abs(hash) % tagColors.length
-        return tagColors[colorIndex]
+        // Return the color key for storage compatibility, but we'll use colorObj for rendering
+        return colorObj
       },
 
       // Basic note operations

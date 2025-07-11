@@ -9,6 +9,7 @@
 @import './styles/components.css';
 @import './styles/search.css';
 @import './styles/sidebar.css';
+@import './styles/customTags.css';
 
 @tailwind base;
 @tailwind components;

@@ -4,6 +4,8 @@ import Icons from '../../Icons'
 import TagContextMenu from '../../ui/TagContextMenu'
 import TagEditInput from '../../ui/TagEditInput'
 import DropdownMenu, { DropdownMenuItem } from '../../ui/DropdownMenu'
+import CustomTag from '../../ui/CustomTag'
+import TagColorPicker from '../../ui/TagColorPicker'
 import { useSimpleStore } from '../../../stores/simpleStore'
 import { useTagEdit } from '../../../hooks/useTagEdit'
 import { addTag, removeTag } from '../../../utils/tagValidation'
@@ -23,7 +25,7 @@ const TagManager = ({
   const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0, tag: null, index: null })
   const [showColorPicker, setShowColorPicker] = useState(false)
   const inputRef = useRef(null)
-  const { getTagColor, setTagColor } = useSimpleStore()
+  const { setTagColor } = useSimpleStore()
 
   // Use the custom tag editing hook
   const {
@@ -164,39 +166,38 @@ const TagManager = ({
       <div className="flex flex-wrap items-center gap-1 p-2 min-h-[36px] border border-theme-border-primary rounded-md bg-theme-bg-secondary">
         {/* Existing Tags */}
         {tags.map((tag, index) => (
-          <span
-            key={`${tag}-${index}`}
-            className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-md border transition-colors ${
-              isEditing(index) ? THEME_COLORS.RING_FOCUS : 'cursor-pointer hover:opacity-80'
-            } ${getTagColor(tag)}`}
-            onContextMenu={e => !isEditing(index) && handleTagRightClick(e, tag, index)}
-            title={isEditing(index) ? "Editing tag" : "Right-click for options"}
-          >
+          <div key={`${tag}-${index}`} className="relative">
             {isEditing(index) ? (
-              <TagEditInput
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                onKeyDown={handleEditKeyDown}
-                onBlur={handleSaveEdit}
-                inputRef={editInputRef}
-                className="min-w-[40px] max-w-[100px]"
-              />
+              <div className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-md border transition-colors ${THEME_COLORS.RING_FOCUS}`}>
+                <TagEditInput
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  onKeyDown={handleEditKeyDown}
+                  onBlur={handleSaveEdit}
+                  inputRef={editInputRef}
+                  className="min-w-[40px] max-w-[100px]"
+                />
+              </div>
             ) : (
-              <>
-                #{tag}
-                {!disabled && (
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveTag(index)}
-                    className="hover:bg-black hover:bg-opacity-20 rounded-full p-0.5 transition-colors"
-                    title={`Remove ${tag} tag`}
-                  >
-                    <Icons.X size={12} />
-                  </button>
-                )}
-              </>
+              <div
+                onContextMenu={e => handleTagRightClick(e, tag, index)}
+                title="Right-click for options"
+              >
+                <CustomTag
+                  tagName={tag}
+                  size="sm"
+                  removable={!disabled}
+                  onRemove={() => handleRemoveTag(index)}
+                  onClick={(e) => {
+                    if (e && e.detail === 2) { // Double click to edit
+                      handleEditTag(index, tag)
+                    }
+                  }}
+                  className="cursor-pointer"
+                />
+              </div>
             )}
-          </span>
+          </div>
         ))}
 
         {/* Input or Add Button */}

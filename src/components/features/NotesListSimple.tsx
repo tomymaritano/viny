@@ -6,6 +6,7 @@ import TaskProgress from '../ui/TaskProgress'
 import { useSimpleStore } from '../../stores/simpleStore'
 import Icons from '../Icons'
 import IconButton from '../ui/IconButton'
+import CustomTag from '../ui/CustomTag'
 
 interface NotesListSimpleProps {
   notes: Note[]
@@ -29,7 +30,7 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
   onSortNotes
 }) => {
   const { isEmpty, formatDate, getPreviewText } = useNotesListLogic(notes)
-  const { sortBy, sortDirection, setSortBy, setSortDirection, sortNotes, setModal, getTagColor } = useSimpleStore()
+  const { sortBy, sortDirection, setSortBy, setSortDirection, sortNotes, setModal } = useSimpleStore()
   const [searchTerm, setSearchTerm] = useState('')
   const [showSortMenu, setShowSortMenu] = useState(false)
 
@@ -134,14 +135,19 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
           <div className="flex items-center space-x-2">
             {/* Tags */}
             {note.tags.length > 0 && (
-              <div className="flex items-center space-x-1 flex-wrap">
+              <div className="flex items-center gap-1 flex-wrap">
                 {note.tags.slice(0, 3).map((tag, index) => (
-                  <span key={index} className={`text-xs px-1.5 py-0.5 rounded-xl border ${getTagColor(tag)}`}>
-                    #{tag}
-                  </span>
+                  <CustomTag 
+                    key={index} 
+                    tagName={tag} 
+                    size="sm"
+                    onClick={() => {
+                      // Optional: Add functionality to filter by tag
+                    }}
+                  />
                 ))}
                 {note.tags.length > 3 && (
-                  <span className="text-theme-text-muted text-xs">
+                  <span className="text-theme-text-muted text-xs ml-1">
                     +{note.tags.length - 3}
                   </span>
                 )}

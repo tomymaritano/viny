@@ -3,67 +3,25 @@
  */
 
 /**
- * Get tag color based on tag name
+ * Get tag color based on tag name using custom color system
  * @param {string} tagName - Name of the tag
- * @param {Object} tagColors - Map of tag names to colors
- * @returns {string} Color class for the tag
+ * @param {Object} tagColors - Map of tag names to color keys
+ * @returns {Object} Color object with style properties
  */
 export const getTagColor = (tagName, tagColors = {}) => {
-  const defaultColors = [
-    'theme-tag-blue',
-    'theme-tag-green',
-    'theme-tag-purple',
-    'theme-tag-cyan',
-    'theme-tag-orange',
-    'theme-tag-pink',
-    'theme-tag-indigo',
-    'theme-tag-amber',
-    'theme-tag-emerald',
-    'theme-tag-red',
-    'theme-tag-violet',
-  ]
-
-  // Check if tag has a custom color
-  if (tagColors[tagName]) {
-    return tagColors[tagName]
-  }
-
-  // Generate consistent color based on tag name hash
-  let hash = 0
-  for (let i = 0; i < tagName.length; i++) {
-    hash = tagName.charCodeAt(i) + ((hash << 5) - hash)
-  }
-
-  const index = Math.abs(hash) % defaultColors.length
-  return defaultColors[index]
+  const { getCustomTagColor } = require('./customTagColors')
+  return getCustomTagColor(tagName, tagColors)
 }
 
 /**
- * Get circle color for tag (converts theme-tag-* to bg-*)
+ * Get circle color for tag using custom color system
  * @param {string} tagName - Name of the tag
- * @param {Object} tagColors - Map of tag names to colors
- * @returns {string} Background color class
+ * @param {Object} tagColors - Map of tag names to color keys
+ * @returns {string} Background color for circles/dots
  */
 export const getTagCircleColor = (tagName, tagColors = {}) => {
-  const tagColorClass = getTagColor(tagName, tagColors)
-
-  // Map theme-tag-* classes to corresponding background colors
-  const colorMap = {
-    'theme-tag-blue': 'bg-blue-500',
-    'theme-tag-green': 'bg-green-500',
-    'theme-tag-purple': 'bg-purple-500',
-    'theme-tag-cyan': 'bg-cyan-500',
-    'theme-tag-orange': 'bg-orange-500',
-    'theme-tag-pink': 'bg-pink-500',
-    'theme-tag-indigo': 'bg-indigo-500',
-    'theme-tag-amber': 'bg-amber-500',
-    'theme-tag-emerald': 'bg-emerald-500',
-    'theme-tag-red': 'bg-red-500',
-    'theme-tag-violet': 'bg-violet-500',
-    'theme-tag-default': 'bg-gray-500',
-  }
-
-  return colorMap[tagColorClass] || 'bg-gray-500'
+  const colorObj = getTagColor(tagName, tagColors)
+  return colorObj.text // Use the text color as the circle color for visibility
 }
 
 /**
