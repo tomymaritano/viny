@@ -1,7 +1,7 @@
 import React from 'react'
 import Icons from '../Icons'
 import DropdownMenu, { DropdownMenuItem, DropdownHeader, DropdownDivider } from './DropdownMenu'
-import { TAG_COLOR_OPTIONS } from '../../constants/theme'
+import { getAvailableTagColors } from '../../utils/customTagColors'
 
 interface TagContextMenuProps {
   isVisible: boolean
@@ -16,7 +16,7 @@ interface TagContextMenuProps {
   onClose: () => void
   showColorPicker: boolean
   onToggleColorPicker: () => void
-  onSelectColor: (color: string) => void
+  onSelectColor: (colorKey: string) => void
   onFilterByTag: () => void
   onManageTags: () => void
 }
@@ -43,7 +43,7 @@ const TagContextMenu: React.FC<TagContextMenuProps> = ({
     <DropdownMenu
       isOpen={isVisible}
       position="fixed"
-      width="min-w-32"
+      width="min-w-48"
       style={{
         left: position.x,
         top: position.y,
@@ -101,20 +101,26 @@ const TagContextMenu: React.FC<TagContextMenuProps> = ({
           {/* Color Picker */}
           {showColorPicker && (
             <div className="px-2 py-2 border-t border-theme-border-primary">
-              <div className="grid grid-cols-5 gap-1">
-                {TAG_COLOR_OPTIONS.map((colorClass, index) => {
-                  const colorParts = colorClass.split(' ')
-                  const bgClass = colorParts[0]
-                  const borderClass = colorParts[1]
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => onSelectColor(colorClass)}
-                      className={`w-4 h-4 rounded border ${bgClass} ${borderClass} hover:scale-110 transition-transform`}
-                      title={`Color ${index + 1}`}
+              <div className="grid grid-cols-4 gap-2">
+                {getAvailableTagColors().map(({ key, name, preview }) => (
+                  <button
+                    key={key}
+                    onClick={() => onSelectColor(key)}
+                    className="group flex flex-col items-center p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    title={name}
+                  >
+                    <div
+                      className="w-5 h-5 rounded-full border-2 group-hover:scale-110 transition-transform"
+                      style={{
+                        backgroundColor: preview.bg,
+                        borderColor: preview.border
+                      }}
                     />
-                  )
-                })}
+                    <span className="text-xs text-theme-text-secondary mt-1 truncate w-full text-center">
+                      {name}
+                    </span>
+                  </button>
+                ))}
               </div>
             </div>
           )}
