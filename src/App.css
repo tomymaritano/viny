@@ -77,7 +77,6 @@ body {
   border-bottom: none !important;
 
   /* Add margin at top for window controls */
-  padding-top: 28px;
 }
 
 /* Remove all borders from sidebar elements */
@@ -118,7 +117,6 @@ body {
   border-left: none !important;
   border-top: none !important;
   border-bottom: none !important;
-  padding-top: 28px;
 }
 
 /* Light theme text colors remain the same as dark for consistency */
@@ -148,7 +146,6 @@ body {
   border-left: none !important;
   border-top: none !important;
   border-bottom: none !important;
-  padding-top: 28px;
 }
 
 /* Editor font family */

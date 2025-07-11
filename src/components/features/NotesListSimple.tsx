@@ -1,10 +1,11 @@
 // Simplified NotesList component
-import React, { memo, useState, useRef, useEffect, useCallback } from 'react'
+import React, { memo, useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { Note } from '../../types'
 import { useNotesListLogic } from '../../hooks/useNotesListLogic'
 import TaskProgress from '../ui/TaskProgress'
 import { useSimpleStore } from '../../stores/simpleStore'
 import Icons from '../Icons'
+import IconButton from '../ui/IconButton'
 
 interface NotesListSimpleProps {
   notes: Note[]
@@ -27,27 +28,24 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
   currentSection = 'notes',
   onSortNotes
 }) => {
-  const { isEmpty, notesCount, formatDate, getPreviewText } = useNotesListLogic(notes)
+  const { isEmpty, formatDate, getPreviewText } = useNotesListLogic(notes)
   const { sortBy, sortDirection, setSortBy, setSortDirection, sortNotes, setModal, getTagColor } = useSimpleStore()
-  const [showSortMenu, setShowSortMenu] = useState(false)
-  const sortMenuRef = useRef<HTMLDivElement>(null)
+  const [searchTerm, setSearchTerm] = useState('')
 
-  // Handle click outside sort menu
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (sortMenuRef.current && !sortMenuRef.current.contains(event.target as Node)) {
-        setShowSortMenu(false)
-      }
-    }
+  // Filter notes based on search term
+  const filteredNotes = useMemo(() => {
+    if (!searchTerm.trim()) return notes
+    
+    const searchLower = searchTerm.toLowerCase()
+    return notes.filter(note => 
+      note.title.toLowerCase().includes(searchLower) ||
+      note.content.toLowerCase().includes(searchLower) ||
+      note.tags.some(tag => tag.toLowerCase().includes(searchLower))
+    )
+  }, [notes, searchTerm])
 
-    if (showSortMenu) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
+  const notesCount = filteredNotes.length
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [showSortMenu])
 
   const handleSort = useCallback((field: 'title' | 'date' | 'updated' | 'notebook') => {
     if (sortBy === field) {
@@ -60,9 +58,6 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
     setShowSortMenu(false)
   }, [sortBy, sortDirection, setSortBy, setSortDirection, sortNotes])
 
-  const handleOpenTemplate = useCallback(() => {
-    setModal('template', true)
-  }, [setModal])
 
   const handleNoteClick = useCallback((noteId: string) => {
     onOpenNote(noteId)
@@ -86,12 +81,10 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
         selectedNoteId === note.id ? 'bg-[#323D4B]' : ''
       }`}
       onClick={() => handleNoteClick(note.id)}
-      style={selectedNoteId === note.id ? {
-        boxShadow: 'inset 3px 0 0 #ED6E3F'
-      } : {}}
+      style={{}}
     >
       <div className="p-3">
-        <div className="flex items-start justify-between mb-2">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center flex-1 mr-2">
             {/* Status Circle */}
             {note.status && note.status !== 'draft' && (
@@ -104,39 +97,26 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
               }`} title={note.status} />
             )}
             
-            <h3 className="font-semibold text-theme-text-primary truncate flex-1">
+            <h3 className="text-sm font-medium text-theme-text-primary truncate flex-1">
               {note.title}
             </h3>
           </div>
           <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
+            <IconButton
+              icon={Icons.Star}
               onClick={(e) => handlePinToggle(e, note)}
-              className="p-1 rounded hover:bg-theme-bg-secondary transition-colors"
+              isActive={note.isPinned}
               title={note.isPinned ? "Unpin note" : "Pin to top"}
-            >
-              <svg 
-                className={`w-4 h-4 transition-colors ${
-                  note.isPinned 
-                    ? 'text-theme-accent-yellow' 
-                    : 'text-theme-text-muted hover:text-theme-accent-yellow'
-                }`} 
-                fill={note.isPinned ? "currentColor" : "none"} 
-                viewBox="0 0 20 20"
-                stroke={note.isPinned ? "none" : "currentColor"}
-                strokeWidth={note.isPinned ? 0 : 1.5}
-              >
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-            </button>
-            <button
+              size={16}
+              variant="default"
+            />
+            <IconButton
+              icon={Icons.Trash}
               onClick={(e) => handleDelete(e, note)}
-              className="p-1 rounded hover:bg-theme-bg-secondary transition-colors"
               title="Delete note"
-            >
-              <svg className="w-4 h-4 text-theme-text-muted hover:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </button>
+              size={16}
+              variant="default"
+            />
           </div>
         </div>
         
@@ -204,14 +184,7 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
           </svg>
           <h3 className="text-lg font-medium text-theme-text-secondary mb-2">No notes yet</h3>
           <p className="text-sm text-theme-text-muted mb-4">Create your first note to get started</p>
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={handleOpenTemplate}
-              className="px-4 py-2 bg-theme-bg-tertiary text-theme-text-secondary rounded-lg hover:bg-theme-bg-quaternary transition-colors flex items-center space-x-2"
-            >
-              <Icons.FileTemplate size={16} />
-              <span>Use Template</span>
-            </button>
+          <div className="flex items-center justify-center">
             <button
               onClick={onNewNote}
               className="px-4 py-2 bg-theme-accent-primary text-white rounded-lg hover:bg-theme-accent-primary/90 transition-colors"
@@ -227,87 +200,60 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
   return (
     <div className="flex-1 flex flex-col" style={{ backgroundColor: '#1D1C1D' }}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-theme-border-primary">
-        {/* Sort dropdown */}
-        <div className="relative" ref={sortMenuRef}>
-          <button
-            onClick={() => setShowSortMenu(!showSortMenu)}
-            className="p-2 rounded hover:bg-theme-bg-tertiary transition-colors text-theme-text-secondary hover:text-theme-text-primary"
-            title="Sort notes"
-          >
-            {sortDirection === 'asc' ? <Icons.ArrowUpAZ size={16} /> : <Icons.ArrowDownAZ size={16} />}
-          </button>
-          
-          {/* Sort dropdown menu */}
-          {showSortMenu && (
-            <div className="absolute left-0 mt-1 w-48 rounded-md shadow-lg bg-theme-bg-secondary border border-theme-border-primary z-10">
-              <div className="py-1">
-                <button
-                  onClick={() => handleSort('title')}
-                  className={`w-full px-4 py-2 text-sm text-left hover:bg-theme-bg-tertiary ${
-                    sortBy === 'title' ? 'text-theme-accent-primary' : 'text-theme-text-secondary'
-                  }`}
-                >
-                  Title {sortBy === 'title' && (sortDirection === 'asc' ? '↑' : '↓')}
-                </button>
-                <button
-                  onClick={() => handleSort('updated')}
-                  className={`w-full px-4 py-2 text-sm text-left hover:bg-theme-bg-tertiary ${
-                    sortBy === 'updated' ? 'text-theme-accent-primary' : 'text-theme-text-secondary'
-                  }`}
-                >
-                  Last Updated {sortBy === 'updated' && (sortDirection === 'asc' ? '↑' : '↓')}
-                </button>
-                <button
-                  onClick={() => handleSort('date')}
-                  className={`w-full px-4 py-2 text-sm text-left hover:bg-theme-bg-tertiary ${
-                    sortBy === 'date' ? 'text-theme-accent-primary' : 'text-theme-text-secondary'
-                  }`}
-                >
-                  Date Created {sortBy === 'date' && (sortDirection === 'asc' ? '↑' : '↓')}
-                </button>
-                <button
-                  onClick={() => handleSort('notebook')}
-                  className={`w-full px-4 py-2 text-sm text-left hover:bg-theme-bg-tertiary ${
-                    sortBy === 'notebook' ? 'text-theme-accent-primary' : 'text-theme-text-secondary'
-                  }`}
-                >
-                  Notebook {sortBy === 'notebook' && (sortDirection === 'asc' ? '↑' : '↓')}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+      <div className="relative flex items-center justify-between p-2 border-b border-theme-border-primary">
+        {/* Sort by title */}
+        <IconButton
+          icon={sortDirection === 'asc' ? Icons.ArrowUpAZ : Icons.ArrowDownAZ}
+          onClick={() => handleSort('title')}
+          title={`Sort by title ${sortDirection === 'asc' ? 'A-Z' : 'Z-A'}`}
+          size={16}
+          variant="default"
+          aria-label="Sort by title"
+          aria-pressed={false}
+          aria-keyshortcuts=""
+        />
 
         {/* Centered title */}
-        <div className="flex-1 text-center">
-          <h2 className="text-lg font-semibold text-theme-text-primary">
+        <div className="absolute left-1/2 transform -translate-x-1/2">
+          <h2 className="text-lg font-semibold text-theme-text-primary m-0">
             {getDynamicTitle()} ({notesCount})
           </h2>
         </div>
 
         {/* Action buttons */}
         <div className="flex items-center space-x-1">
-          <button
-            onClick={handleOpenTemplate}
-            className="p-2 hover:bg-theme-bg-tertiary transition-colors text-theme-text-secondary hover:text-theme-text-primary"
-            title="Create from template"
-          >
-            <Icons.FileTemplate size={16} />
-          </button>
-          <button
+          <IconButton
+            icon={Icons.NotebookPen}
             onClick={onNewNote}
-            className="p-2 hover:bg-theme-bg-tertiary transition-colors text-theme-text-secondary hover:text-theme-text-primary"
             title="Create new note"
-          >
-            <Icons.NotebookPen size={16} />
-          </button>
+            size={16}
+            variant="default"
+            aria-label="Create new note"
+            aria-pressed={false}
+            aria-keyshortcuts=""
+          />
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="p-2 border-b border-theme-border-primary">
+        <div className="relative">
+          <Icons.Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-theme-text-muted" />
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-9 pr-16 py-1.5 border border-theme-border-primary rounded-md text-white placeholder-theme-text-muted focus:outline-none focus:border-theme-accent-primary"
+            style={{ backgroundColor: '#161616' }}
+          />
+          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-theme-text-muted text-xs">⌘K</span>
         </div>
       </div>
 
       {/* Notes List */}
       <div className="flex-1 overflow-y-auto flex flex-col">
-        {notes.length === 0 ? (
+        {filteredNotes.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-theme-text-muted text-center">
               <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -315,14 +261,7 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
               </svg>
               <h3 className="text-lg font-medium text-theme-text-secondary mb-2">No notes here</h3>
               <p className="text-sm text-theme-text-muted mb-4">No notes match the current filter</p>
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={handleOpenTemplate}
-                  className="px-4 py-2 bg-theme-bg-tertiary text-theme-text-secondary rounded-lg hover:bg-theme-bg-quaternary transition-colors flex items-center space-x-2"
-                >
-                  <Icons.FileTemplate size={16} />
-                  <span>Use Template</span>
-                </button>
+              <div className="flex items-center justify-center">
                 <button
                   onClick={onNewNote}
                   className="px-4 py-2 bg-theme-accent-primary text-white rounded-lg hover:bg-theme-accent-primary/90 transition-colors"
@@ -334,7 +273,7 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto">
-            {notes.map((note) => (
+            {filteredNotes.map((note) => (
               <NoteItem key={note.id} note={note} />
             ))}
           </div>

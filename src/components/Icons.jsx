@@ -70,6 +70,9 @@ import {
   NotebookPen,
   Menu,
   Database,
+  Pin,
+  FileChartLine,
+  NotebookText,
 } from 'lucide-react'
 
 // Unified icon library using lucide-react
@@ -363,6 +366,18 @@ const Icons = {
 
   Database: ({ size = 16, className = '' }) => (
     <Database size={size} className={className} />
+  ),
+
+  Pin: ({ size = 16, className = '' }) => (
+    <Pin size={size} className={className} />
+  ),
+
+  FileChartLine: ({ size = 16, className = '' }) => (
+    <FileChartLine size={size} className={className} />
+  ),
+
+  NotebookText: ({ size = 16, className = '' }) => (
+    <NotebookText size={size} className={className} />
   ),
 }
 

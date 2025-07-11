@@ -38,8 +38,8 @@ const defaultSettings = {
   vimMode: false,
 
   // Interface
-  sidebarWidth: 240,
-  notesListWidth: 320,
+  sidebarWidth: 160,
+  notesListWidth: 300,
   previewWidth: 350,
 
   // Export

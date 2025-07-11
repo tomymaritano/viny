@@ -17,7 +17,8 @@ const SidebarSimple: React.FC = memo(() => {
     tagsWithCounts,
     getColorClass,
     handleSectionClick,
-    handleToggleSection
+    handleToggleSection,
+    handleSettingsClick
   } = useSidebarLogic()
 
   const { createNewNote } = useNoteActions()
@@ -48,6 +49,17 @@ const SidebarSimple: React.FC = memo(() => {
 
   return (
     <nav className="w-full sidebar-modern flex flex-col h-full ui-font">
+      {/* Settings Icon - Top Right */}
+      <div className="flex justify-end pr-1">
+        <button
+          onClick={handleSettingsClick}
+          className="p-2 text-theme-text-secondary hover:text-theme-text-primary transition-colors"
+          title="Settings"
+        >
+          <Icons.Settings size={20} />
+        </button>
+      </div>
+
       {/* Main Sections */}
       <section className="space-y-0">
         {mainSections.map(section => (
@@ -64,10 +76,12 @@ const SidebarSimple: React.FC = memo(() => {
             } : {}}
           >
             <div className="flex items-center space-x-2">
-              <span className="opacity-75">{renderIcon(section.icon)}</span>
+              <span className="opacity-75">
+                {renderIcon(section.icon)}
+              </span>
               <span>{section.label}</span>
             </div>
-            <span className="text-xs opacity-75">{section.count}</span>
+            <span className="text-sm opacity-75">{section.count}</span>
           </button>
         ))}
       </section>
@@ -76,13 +90,13 @@ const SidebarSimple: React.FC = memo(() => {
       <section>
         <button
           onClick={() => handleToggleSection('status')}
-          className="w-full flex items-center justify-between px-3 py-2 text-xs uppercase tracking-wider text-theme-text-muted font-medium hover:text-theme-text-tertiary transition-colors"
+          className="w-full flex items-center justify-between px-3 py-2 text-sm text-theme-text-muted font-medium hover:text-theme-text-tertiary transition-colors"
         >
           <div className="flex items-center space-x-2">
-            {renderIcon('Circle', 14)}
+            {renderIcon('FileChartLine', 16)}
             <span>Status</span>
           </div>
-          {renderIcon('ChevronRight', 12)}
+          {renderIcon('ChevronRight', 16)}
         </button>
         
         {expandedSections.status && (
@@ -99,11 +113,11 @@ const SidebarSimple: React.FC = memo(() => {
               >
                 <div className="flex items-center space-x-2 ml-4">
                   <span className={`opacity-75 ${status.color || 'text-theme-text-secondary'}`}>
-                    {renderIcon(status.icon, 12)}
+                    {renderIcon(status.icon, 16)}
                   </span>
-                  <span className="text-xs">{status.label}</span>
+                  <span className="text-sm">{status.label}</span>
                 </div>
-                <span className="text-xs opacity-75">{status.count}</span>
+                <span className="text-sm opacity-75">{status.count}</span>
               </button>
             ))}
           </div>
@@ -114,13 +128,13 @@ const SidebarSimple: React.FC = memo(() => {
       <section>
         <button
           onClick={() => handleToggleSection('notebooks')}
-          className="w-full flex items-center justify-between px-3 py-2 text-xs uppercase tracking-wider text-theme-text-muted font-medium hover:text-theme-text-tertiary transition-colors"
+          className="w-full flex items-center justify-between px-3 py-2 text-sm text-theme-text-muted font-medium hover:text-theme-text-tertiary transition-colors"
         >
           <div className="flex items-center space-x-2">
-            {renderIcon('Book', 14)}
+            {renderIcon('Book', 16)}
             <span>Notebooks</span>
           </div>
-          {renderIcon('ChevronRight', 12)}
+          {renderIcon('ChevronRight', 16)}
         </button>
         
         {expandedSections.notebooks && (
@@ -139,22 +153,22 @@ const SidebarSimple: React.FC = memo(() => {
                     boxShadow: 'inset 4px 0 0 #ED6E3F'
                   } : {}}
                 >
-                  <div className="flex items-center space-x-2 ml-2">
+                  <div className="flex items-center space-x-2 ml-4">
                     <div className={`w-1.5 h-1.5 rounded-full ${getColorClass(notebook.color).replace('text-', 'bg-')}`} />
-                    <span className="text-xs">{notebook.name.charAt(0).toUpperCase() + notebook.name.slice(1)}</span>
+                    <span className="text-sm">{notebook.name.charAt(0).toUpperCase() + notebook.name.slice(1)}</span>
                   </div>
-                  <span className="text-xs opacity-75">{notebook.count}</span>
+                  <span className="text-sm opacity-75">{notebook.count}</span>
                 </button>
               ))
             ) : (
-              <div className="px-7 py-4 text-xs text-theme-text-muted italic text-center">
+              <div className="px-7 py-4 text-sm text-theme-text-muted italic text-center">
                 No notebooks yet
               </div>
             )}
             
             <button
               onClick={createNewNote}
-              className="w-full px-7 py-2 text-xs text-theme-accent-primary hover:text-theme-accent-primary/80 text-left transition-colors"
+              className="w-full px-7 py-2 text-sm text-theme-accent-primary hover:text-theme-accent-primary/80 text-left transition-colors"
             >
               + New Note
             </button>
@@ -166,13 +180,13 @@ const SidebarSimple: React.FC = memo(() => {
       <section>
         <button
           onClick={() => handleToggleSection('tags')}
-          className="w-full flex items-center justify-between px-3 py-2 text-xs uppercase tracking-wider text-theme-text-muted font-medium hover:text-theme-text-tertiary transition-colors"
+          className="w-full flex items-center justify-between px-3 py-2 text-sm text-theme-text-muted font-medium hover:text-theme-text-tertiary transition-colors"
         >
           <div className="flex items-center space-x-2">
-            {renderIcon('Tag', 14)}
+            {renderIcon('Tag', 16)}
             <span>Tags</span>
           </div>
-          {renderIcon('ChevronRight', 12)}
+          {renderIcon('ChevronRight', 16)}
         </button>
         
         {expandedSections.tags && (
@@ -191,15 +205,15 @@ const SidebarSimple: React.FC = memo(() => {
                     boxShadow: 'inset 4px 0 0 #ED6E3F'
                   } : {}}
                 >
-                  <div className="flex items-center space-x-2 ml-2">
+                  <div className="flex items-center space-x-2 ml-4">
                     <div className={`w-2 h-2 rounded-full ${getTagCircleColor(tag.tag)}`} />
-                    <span className="text-xs">#{tag.tag}</span>
+                    <span className="text-sm">#{tag.tag}</span>
                   </div>
-                  <span className="text-xs opacity-75">{tag.count}</span>
+                  <span className="text-sm opacity-75">{tag.count}</span>
                 </button>
               ))
             ) : (
-              <div className="px-7 py-4 text-xs text-theme-text-muted italic text-center">
+              <div className="px-7 py-4 text-sm text-theme-text-muted italic text-center">
                 No tags yet
               </div>
             )}
@@ -227,7 +241,7 @@ const SidebarSimple: React.FC = memo(() => {
               <span>{section.label}</span>
             </div>
             {section.count !== undefined && (
-              <span className="text-xs opacity-75">
+              <span className="text-sm opacity-75">
                 {section.count === 0 && section.id === 'trash' ? 'Empty' : section.count}
               </span>
             )}

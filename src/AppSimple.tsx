@@ -21,8 +21,7 @@ import {
   MarkdownEditor,
   SearchModal,
   ExportDialog,
-  NotebookManager,
-  TemplateModal
+  NotebookManager
 } from './components/features/LazyComponents'
 import SettingsView from './components/SettingsView'
 
@@ -340,13 +339,6 @@ const AppSimple: React.FC = () => {
           />
         )}
 
-        {/* Template Modal */}
-        {modals.template && (
-          <TemplateModal
-            isOpen={modals.template}
-            onClose={() => setModal('template', false)}
-          />
-        )}
         </div>
       </StorageErrorBoundary>
     </ErrorBoundary>

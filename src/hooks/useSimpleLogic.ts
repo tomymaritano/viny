@@ -248,7 +248,7 @@ export const useNoteActions = () => {
 
     try {
       storageService.saveNote(newNote)
-      addToast({ type: 'success', message: `Created "${newNote.title}"` })
+      // Removed success toast for cleaner UX
     } catch (error) {
       console.error('Error saving new note:', error)
       addToast({ type: 'error', message: 'Failed to save note' })
@@ -352,21 +352,19 @@ export const useNoteActions = () => {
   }, [updateNote, addToast])
 
   const handleDeleteNote = useCallback((note: Note) => {
-    if (window.confirm(`Are you sure you want to move "${note.title}" to trash?`)) {
-      const trashedNote = {
-        ...note,
-        isTrashed: true,
-        trashedAt: new Date().toISOString(),
-      }
-      updateNote(trashedNote)
-      
-      try {
-        storageService.saveNote(trashedNote)
-        addToast({ type: 'success', message: `"${note.title}" moved to trash` })
-      } catch (error) {
-        console.error('Error deleting note:', error)
-        addToast({ type: 'error', message: 'Failed to delete note' })
-      }
+    const trashedNote = {
+      ...note,
+      isTrashed: true,
+      trashedAt: new Date().toISOString(),
+    }
+    updateNote(trashedNote)
+    
+    try {
+      storageService.saveNote(trashedNote)
+      // Removed toast notification for cleaner UX
+    } catch (error) {
+      console.error('Error deleting note:', error)
+      addToast({ type: 'error', message: 'Failed to delete note' })
     }
   }, [updateNote, addToast])
 
@@ -400,7 +398,7 @@ export const useNoteActions = () => {
     
     try {
       storageService.saveNote(duplicatedNote)
-      addToast({ type: 'success', message: `"${note.title}" duplicated` })
+      // Removed success toast for cleaner UX
     } catch (error) {
       console.error('Error duplicating note:', error)
       addToast({ type: 'error', message: 'Failed to duplicate note' })
@@ -467,8 +465,8 @@ export const useSidebarLogic = () => {
   }, [notes])
 
   const mainSections = useMemo(() => [
-    { id: 'all-notes', label: 'All Notes', count: stats.total, icon: 'FileText' },
-    { id: 'pinned', label: 'Pinned', count: stats.pinned, icon: 'Star' },
+    { id: 'all-notes', label: 'All Notes', count: stats.total, icon: 'NotebookText' },
+    { id: 'pinned', label: 'Pinned', count: stats.pinned, icon: 'Pin' },
   ], [stats])
 
   const statusSections = useMemo(() => [
@@ -481,7 +479,6 @@ export const useSidebarLogic = () => {
 
   const systemSections = useMemo(() => [
     { id: 'trash', label: 'Trash', count: stats.trashed, icon: 'Trash' },
-    { id: 'settings', label: 'Settings', icon: 'Settings' },
   ], [stats])
 
   const handleSectionClick = useCallback((sectionId: string) => {
@@ -503,6 +500,17 @@ export const useSidebarLogic = () => {
     setExpandedSection(section, !expandedSections[section as keyof typeof expandedSections])
   }, [expandedSections, setExpandedSection])
 
+  const handleSettingsClick = useCallback(() => {
+    // Check if we're in Electron
+    if ((window as any).electronAPI?.isElectron) {
+      // Open settings in new window
+      (window as any).electronAPI.openSettings()
+    } else {
+      // Fallback to modal for web version
+      setModal('settings', true)
+    }
+  }, [setModal])
+
   return {
     activeSection,
     expandedSections,
@@ -514,6 +522,7 @@ export const useSidebarLogic = () => {
     tagsWithCounts,
     getColorClass,
     handleSectionClick,
-    handleToggleSection
+    handleToggleSection,
+    handleSettingsClick
   }
 }

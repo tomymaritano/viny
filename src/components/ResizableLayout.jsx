@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import ResizeHandle from './ResizeHandle'
-import Icons from './Icons'
 
 const ResizableLayout = ({
   sidebar,
@@ -14,14 +13,18 @@ const ResizableLayout = ({
 }) => {
   const containerRef = useRef(null)
   const [containerWidth, setContainerWidth] = useState(0)
-  const [isMobile, setIsMobile] = useState(false)
-  const [mobileView, setMobileView] = useState('notes') // 'sidebar', 'notes', 'editor'
-  const [showMobileSidebar, setShowMobileSidebar] = useState(false)
 
   // Column widths
   const [notesListWidth, setNotesListWidth] = useState(() => {
     const saved = localStorage.getItem('inkrun-noteslist-width')
-    return saved ? parseInt(saved) : settings?.notesListWidth || 320
+    const savedWidth = saved ? parseInt(saved) : null
+
+    // If no saved value or it's the old default (320), use new default (300)
+    if (!savedWidth || savedWidth === 320) {
+      return settings?.notesListWidth || 300
+    }
+
+    return savedWidth
   })
 
   const [previewWidth, setPreviewWidth] = useState(() => {
@@ -29,19 +32,18 @@ const ResizableLayout = ({
     return saved ? parseInt(saved) : settings?.previewWidth || 350
   })
 
-  const sidebarWidth = settings?.sidebarWidth || 200
-  const minNotesListWidth = 280
+  const sidebarWidth = 200 // Force new width
+  const minNotesListWidth = 220
   const maxNotesListWidth = 500
   const minPreviewWidth = 280
   const minMainContentWidth = 400
 
-  // Update container width and mobile detection on resize
+  // Update container width on resize
   useEffect(() => {
     const updateWidth = () => {
       if (containerRef.current) {
         const width = containerRef.current.offsetWidth
         setContainerWidth(width)
-        setIsMobile(width < 768) // Mobile if less than 768px (md breakpoint)
       }
     }
 
@@ -109,7 +111,7 @@ const ResizableLayout = ({
   const handlePreviewResize = useCallback(
     (clientX, startX, startWidth) => {
       const constraints = getConstraints()
-      const deltaX = startX - clientX // Inverted for left handle
+      const deltaX = startX - clientX // Reverse delta for right-side resize
       const newWidth = Math.max(
         constraints.minPreviewWidth,
         Math.min(constraints.maxPreviewWidth, startWidth + deltaX)
@@ -125,107 +127,6 @@ const ResizableLayout = ({
     (isSidebarVisible ? sidebarWidth : 0) -
     (isNotesListVisible ? notesListWidth : 0) -
     (isPreviewVisible ? previewWidth : 0)
-
-  // Mobile render
-  if (isMobile) {
-    return (
-      <div ref={containerRef} className="flex flex-col h-full w-full">
-        {/* Mobile Header */}
-        <div className="flex items-center justify-between p-3 bg-theme-bg-secondary border-b border-theme-border-primary">
-          <button
-            onClick={() => setShowMobileSidebar(true)}
-            className="p-2 rounded hover:bg-theme-bg-tertiary text-theme-text-secondary"
-          >
-            <Icons.Menu size={20} />
-          </button>
-
-          <h1 className="text-lg font-semibold text-theme-text-primary">
-            {mobileView === 'sidebar'
-              ? 'Folders'
-              : mobileView === 'notes'
-                ? 'Notes'
-                : 'Editor'}
-          </h1>
-
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => {
-                /* TODO: Add search handler */
-              }}
-              className="p-2 rounded hover:bg-theme-bg-tertiary text-theme-text-secondary"
-            >
-              <Icons.Search size={20} />
-            </button>
-            <button
-              onClick={() => {
-                /* TODO: Add new note handler */
-              }}
-              className="p-2 rounded hover:bg-theme-bg-tertiary text-theme-text-secondary"
-            >
-              <Icons.Plus size={20} />
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Content */}
-        <div className="flex-1 overflow-hidden">
-          {mobileView === 'notes' && <div className="h-full">{notesList}</div>}
-          {mobileView === 'editor' && (
-            <div className="h-full">{mainContent}</div>
-          )}
-        </div>
-
-        {/* Mobile Bottom Navigation */}
-        <div className="flex bg-theme-bg-secondary border-t border-theme-border-primary">
-          <button
-            onClick={() => setMobileView('notes')}
-            className={`flex-1 py-3 text-center text-sm ${
-              mobileView === 'notes'
-                ? 'text-theme-accent-primary bg-theme-bg-tertiary'
-                : 'text-theme-text-secondary'
-            }`}
-          >
-            Notes
-          </button>
-          <button
-            onClick={() => setMobileView('editor')}
-            className={`flex-1 py-3 text-center text-sm ${
-              mobileView === 'editor'
-                ? 'text-theme-accent-primary bg-theme-bg-tertiary'
-                : 'text-theme-text-secondary'
-            }`}
-            disabled={!mainContent}
-          >
-            Editor
-          </button>
-        </div>
-
-        {/* Mobile Sidebar Overlay */}
-        {showMobileSidebar && (
-          <div className="fixed inset-0 z-50 flex">
-            <div className="w-80 bg-theme-bg-primary border-r border-theme-border-primary">
-              <div className="flex items-center justify-between p-3 border-b border-theme-border-primary">
-                <h2 className="text-lg font-semibold text-theme-text-primary">
-                  Folders
-                </h2>
-                <button
-                  onClick={() => setShowMobileSidebar(false)}
-                  className="p-2 rounded hover:bg-theme-bg-tertiary text-theme-text-secondary"
-                >
-                  <Icons.X size={20} />
-                </button>
-              </div>
-              <div className="h-full overflow-y-auto">{sidebar}</div>
-            </div>
-            <div
-              className="flex-1 bg-black bg-opacity-50"
-              onClick={() => setShowMobileSidebar(false)}
-            />
-          </div>
-        )}
-      </div>
-    )
-  }
 
   // Desktop render
   return (
@@ -246,23 +147,17 @@ const ResizableLayout = ({
           {notesList}
           <ResizeHandle
             onMouseDown={startX => {
-              const startWidth = notesListWidth
-
               const handleMouseMove = e => {
-                handleNotesListResize(e.clientX, startX, startWidth)
+                handleNotesListResize(e.clientX, startX, notesListWidth)
               }
 
               const handleMouseUp = () => {
                 document.removeEventListener('mousemove', handleMouseMove)
                 document.removeEventListener('mouseup', handleMouseUp)
-                document.body.style.cursor = ''
-                document.body.style.userSelect = ''
               }
 
               document.addEventListener('mousemove', handleMouseMove)
               document.addEventListener('mouseup', handleMouseUp)
-              document.body.style.cursor = 'col-resize'
-              document.body.style.userSelect = 'none'
             }}
             position="right"
           />
@@ -270,34 +165,25 @@ const ResizableLayout = ({
       )}
 
       {/* Main Content - Flexible */}
-      <div className="flex-1" style={{ minWidth: minMainContentWidth }}>
+      <div
+        className="flex-1 overflow-hidden"
+        style={{ minWidth: minMainContentWidth }}
+      >
         {mainContent}
       </div>
 
-      {/* Preview Panel - Resizable when visible */}
+      {/* Preview Panel - Resizable */}
       {isPreviewVisible && (
         <div className="relative flex-shrink-0" style={{ width: previewWidth }}>
           <ResizeHandle
             onMouseDown={startX => {
               const startWidth = previewWidth
-
-              const handleMouseMove = e => {
-                handlePreviewResize(e.clientX, startX, startWidth)
-              }
-
-              const handleMouseUp = () => {
-                document.removeEventListener('mousemove', handleMouseMove)
-                document.removeEventListener('mouseup', handleMouseUp)
-                document.body.style.cursor = ''
-                document.body.style.userSelect = ''
-              }
-
-              document.addEventListener('mousemove', handleMouseMove)
-              document.addEventListener('mouseup', handleMouseUp)
-              document.body.style.cursor = 'col-resize'
-              document.body.style.userSelect = 'none'
+              return { startX, startWidth }
             }}
-            position="left"
+            onMouseMove={(data, e) => {
+              handlePreviewResize(e.clientX, data.startX, data.startWidth)
+            }}
+            direction="left"
           />
           {previewPanel}
         </div>
