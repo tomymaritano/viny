@@ -5,6 +5,7 @@ class StorageService {
   private readonly NOTES_KEY = 'nototo_notes'
   private readonly NOTEBOOKS_KEY = 'nototo_notebooks'  
   private readonly SETTINGS_KEY = 'nototo_settings'
+  private readonly TAG_COLORS_KEY = 'nototo_tag_colors'
 
   // Notes
   getNotes(): Note[] {
@@ -110,11 +111,32 @@ class StorageService {
     }
   }
 
+  // Tag Colors
+  getTagColors(): Record<string, string> {
+    try {
+      const stored = localStorage.getItem(this.TAG_COLORS_KEY)
+      return stored ? JSON.parse(stored) : {}
+    } catch (error) {
+      console.error('Error loading tag colors from localStorage:', error)
+      return {}
+    }
+  }
+
+  saveTagColors(tagColors: Record<string, string>): void {
+    try {
+      localStorage.setItem(this.TAG_COLORS_KEY, JSON.stringify(tagColors))
+    } catch (error) {
+      console.error('Error saving tag colors to localStorage:', error)
+      throw new Error('Failed to save tag colors')
+    }
+  }
+
   // Utility methods
   clear(): void {
     localStorage.removeItem(this.NOTES_KEY)
     localStorage.removeItem(this.NOTEBOOKS_KEY)
     localStorage.removeItem(this.SETTINGS_KEY)
+    localStorage.removeItem(this.TAG_COLORS_KEY)
   }
 
   export(): string {
@@ -122,6 +144,7 @@ class StorageService {
       notes: this.getNotes(),
       notebooks: this.getNotebooks(),
       settings: this.getSettings(),
+      tagColors: this.getTagColors(),
       exportedAt: new Date().toISOString()
     }, null, 2)
   }
@@ -133,6 +156,7 @@ class StorageService {
       if (parsed.notes) this.saveNotes(parsed.notes)
       if (parsed.notebooks) this.saveNotebooks(parsed.notebooks)
       if (parsed.settings) this.saveSettings(parsed.settings)
+      if (parsed.tagColors) this.saveTagColors(parsed.tagColors)
     } catch (error) {
       console.error('Error importing data:', error)
       throw new Error('Invalid import data format')

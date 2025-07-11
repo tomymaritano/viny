@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import Icons from '../../Icons'
+import IconButton from '../../ui/IconButton'
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 
 const EditorToolbar = ({
@@ -18,6 +19,8 @@ const EditorToolbar = ({
   onTable,
   onHorizontalRule,
   onTags,
+  onToggleLineNumbers,
+  showLineNumbers,
   isSaving,
   lastSaved,
   saveError,
@@ -155,6 +158,19 @@ const EditorToolbar = ({
         },
       ],
     },
+    // Editor Settings
+    {
+      name: 'settings',
+      items: [
+        {
+          icon: Icons.Hash,
+          onClick: onToggleLineNumbers,
+          title: 'Toggle Line Numbers',
+          shortcut: '',
+          active: showLineNumbers,
+        },
+      ],
+    },
   ]
 
   const getSaveIndicator = () => {
@@ -195,35 +211,53 @@ const EditorToolbar = ({
 
   return (
     <div
-      className="flex items-center justify-between px-4 py-2 border-b border-theme-border-primary"
+      className="flex items-center justify-between px-2 sm:px-4 py-2 border-b border-theme-border-primary overflow-x-auto custom-scrollbar-thin"
       style={{ backgroundColor: '#171617' }}
     >
-      <div className="flex items-center space-x-3">
+      {/* Toolbar buttons - responsive layout */}
+      <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-1">
         {toolbarSections.map((section, sectionIndex) => (
-          <div key={section.name} className="flex items-center space-x-1">
-            {section.items.map((item, itemIndex) => (
-              <button
-                key={itemIndex}
-                onClick={item.onClick}
-                className={`p-1.5 rounded text-theme-text-tertiary hover:text-theme-text-secondary hover:theme-bg-tertiary transition-colors ${
-                  item.active
-                    ? 'bg-theme-accent-primary text-theme-text-primary'
-                    : ''
-                }`}
-                title={item.title}
-              >
-                <item.icon size={16} />
-              </button>
-            ))}
+          <div
+            key={section.name}
+            className="flex items-center space-x-1 flex-shrink-0"
+          >
+            {/* Hide some sections on smaller screens */}
+            <div
+              className={`flex items-center space-x-1 ${
+                section.name === 'headings'
+                  ? 'hidden sm:flex'
+                  : section.name === 'blocks'
+                    ? 'hidden md:flex'
+                    : 'flex'
+              }`}
+            >
+              {section.items.map((item, itemIndex) => (
+                <IconButton
+                  key={itemIndex}
+                  icon={item.icon}
+                  onClick={item.onClick}
+                  isActive={item.active}
+                  title={item.title}
+                  size={14}
+                  variant="default"
+                  aria-label={item.title}
+                  aria-pressed={item.active}
+                  aria-keyshortcuts={item.shortcut}
+                />
+              ))}
+            </div>
+            {/* Responsive separators */}
             {sectionIndex < toolbarSections.length - 1 && (
-              <div className="w-px h-4 bg-theme-border-primary mx-2" />
+              <div className="w-px h-4 bg-white/10 mx-1 sm:mx-2 hidden sm:block" />
             )}
           </div>
         ))}
       </div>
 
-      {/* Save indicator */}
-      <div className="flex items-center">{getSaveIndicator()}</div>
+      {/* Save indicator - hide on very small screens */}
+      <div className="hidden sm:flex items-center ml-2 flex-shrink-0">
+        {getSaveIndicator()}
+      </div>
     </div>
   )
 }
@@ -244,6 +278,8 @@ EditorToolbar.propTypes = {
   onTable: PropTypes.func.isRequired,
   onHorizontalRule: PropTypes.func.isRequired,
   onTags: PropTypes.func.isRequired,
+  onToggleLineNumbers: PropTypes.func.isRequired,
+  showLineNumbers: PropTypes.bool,
   isSaving: PropTypes.bool,
   lastSaved: PropTypes.string,
   saveError: PropTypes.string,

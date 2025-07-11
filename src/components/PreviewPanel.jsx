@@ -1,26 +1,15 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { marked } from 'marked'
-import DOMPurify from 'dompurify'
 import Icons from './Icons'
 import { useSettings } from '../hooks/useSettings'
+import { renderMarkdownToHtml } from '../utils/markdownRenderer'
 
 const PreviewPanel = ({ note, isVisible, onClose }) => {
   const { settings } = useSettings()
   if (!note || !isVisible) return null
 
   const getPreviewHtml = () => {
-    if (!note.content)
-      return '<p class="text-theme-text-tertiary">This note is empty</p>'
-
-    const html = marked(note.content, {
-      breaks: true,
-      gfm: true,
-      headerIds: false,
-      mangle: false,
-    })
-
-    return DOMPurify.sanitize(html)
+    return renderMarkdownToHtml(note.content)
   }
 
   // Get tag color from localStorage or fallback to predefined colors
@@ -122,17 +111,18 @@ const PreviewPanel = ({ note, isVisible, onClose }) => {
 
       {/* Content */}
       <motion.div
-        className="flex-1 overflow-y-auto relative theme-bg-primary"
+        className="flex-1 overflow-y-auto relative theme-bg-primary custom-scrollbar"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
         <div
           key={settings.theme}
-          className="p-6 prose max-w-none"
+          className="p-6 markdown-content"
           style={{
             color: 'var(--color-base0)',
-            lineHeight: '1.7',
+            lineHeight: '1.4',
+            maxWidth: 'none',
           }}
           dangerouslySetInnerHTML={{ __html: getPreviewHtml() }}
         />
@@ -143,4 +133,11 @@ const PreviewPanel = ({ note, isVisible, onClose }) => {
   )
 }
 
-export default PreviewPanel
+// Memoize the component to prevent unnecessary re-renders
+export default memo(PreviewPanel, (prevProps, nextProps) => {
+  return (
+    prevProps.note?.id === nextProps.note?.id &&
+    prevProps.note?.content === nextProps.note?.content &&
+    prevProps.isVisible === nextProps.isVisible
+  )
+})

@@ -59,6 +59,11 @@ import {
   AlertCircle,
   Upload,
   Package,
+  Layout,
+  User,
+  Briefcase,
+  Globe,
+  ArrowRight,
 } from 'lucide-react'
 
 // Unified icon library using lucide-react
@@ -307,6 +312,26 @@ const Icons = {
 
   Package: ({ size = 16, className = '' }) => (
     <Package size={size} className={className} />
+  ),
+
+  FileTemplate: ({ size = 16, className = '' }) => (
+    <Layout size={size} className={className} />
+  ),
+
+  User: ({ size = 16, className = '' }) => (
+    <User size={size} className={className} />
+  ),
+
+  Briefcase: ({ size = 16, className = '' }) => (
+    <Briefcase size={size} className={className} />
+  ),
+
+  Globe: ({ size = 16, className = '' }) => (
+    <Globe size={size} className={className} />
+  ),
+
+  ArrowRight: ({ size = 16, className = '' }) => (
+    <ArrowRight size={size} className={className} />
   ),
 }
 

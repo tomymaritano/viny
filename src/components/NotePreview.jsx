@@ -1,11 +1,12 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, memo } from 'react'
 import PropTypes from 'prop-types'
-import { marked } from 'marked'
-import DOMPurify from 'dompurify'
 import Icons from './Icons'
 import ExportDialog from './ExportDialog'
+import NoteMetadata from './editor/metadata/NoteMetadata'
 import { useSettings } from '../hooks/useSettings'
+import { useSimpleStore } from '../stores/simpleStore'
 import TaskProgress from './ui/TaskProgress'
+import { renderMarkdownToHtml } from '../utils/markdownRenderer'
 
 const NotePreview = ({
   note,
@@ -21,51 +22,14 @@ const NotePreview = ({
   onExport: _onExport,
 }) => {
   const { settings } = useSettings()
+  const { getTagColor } = useSimpleStore()
   const [showMenu, setShowMenu] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)
   const menuRef = useRef(null)
 
-  // Get tag color from localStorage or fallback to predefined colors
-  const getTagColor = tag => {
-    // Get stored tag colors
-    const storedColors = localStorage.getItem('inkrun-tag-colors')
-    const customColors = storedColors ? JSON.parse(storedColors) : {}
-
-    // Color mapping
-    const colorClasses = {
-      default: 'theme-tag-default',
-      blue: 'theme-tag-blue',
-      green: 'theme-tag-green',
-      purple: 'theme-tag-purple',
-      cyan: 'theme-tag-cyan',
-      orange: 'theme-tag-orange',
-      pink: 'theme-tag-pink',
-      indigo: 'theme-tag-indigo',
-      amber: 'theme-tag-amber',
-      emerald: 'theme-tag-emerald',
-      red: 'theme-tag-red',
-      violet: 'theme-tag-violet',
-    }
-
-    // Predefined tag colors for common tags
-    const predefinedColors = {
-      project: 'blue',
-      planning: 'green',
-      documentation: 'purple',
-      architecture: 'cyan',
-      api: 'orange',
-      reference: 'pink',
-      'user-guide': 'indigo',
-      help: 'amber',
-      setup: 'emerald',
-      development: 'red',
-      learning: 'violet',
-      vim: 'default',
-    }
-
-    // Check custom colors first, then predefined, then default
-    const colorKey = customColors[tag] || predefinedColors[tag] || 'default'
-    return colorClasses[colorKey] || colorClasses.default
+  // Get tag style from centralized system
+  const getTagStyle = tag => {
+    return getTagColor(tag)
   }
 
   // Close menu when clicking outside
@@ -138,21 +102,22 @@ const NotePreview = ({
   }
 
   const getPreviewHtml = () => {
-    if (!note.content)
-      return '<p class="text-theme-text-tertiary">This note is empty</p>'
-
-    const html = marked(note.content, {
-      breaks: true,
-      gfm: true,
-      headerIds: false,
-      mangle: false,
-    })
-
-    return DOMPurify.sanitize(html)
+    return renderMarkdownToHtml(note.content)
   }
 
   return (
     <div className="flex-1 theme-bg-primary flex flex-col markdown-font">
+      {/* Note Metadata in Preview Mode */}
+      <NoteMetadata
+        note={note}
+        notebooks={[]}
+        onTitleChange={() => {}} // No-op in preview mode
+        onNotebookChange={() => {}} // No-op in preview mode
+        onStatusChange={() => {}} // No-op in preview mode
+        onTagsChange={() => {}} // No-op in preview mode
+        isPreviewMode={true}
+      />
+
       {/* Header */}
       <div className="p-4 border-b border-theme-border-primary theme-bg-secondary">
         <div className="flex items-center justify-between">
@@ -164,12 +129,6 @@ const NotePreview = ({
               <h1 className="text-xl font-semibold text-theme-text-primary">
                 {note.title}
               </h1>
-            </div>
-            <div className="flex items-center space-x-2 mt-1">
-              <span className="text-xs px-2 py-1 theme-bg-tertiary text-theme-text-secondary rounded">
-                {note.notebook}
-              </span>
-              <span className="text-xs text-theme-text-muted">{note.date}</span>
             </div>
 
             {/* Task Progress */}
@@ -343,7 +302,7 @@ const NotePreview = ({
             {note.tags.map(tag => (
               <span
                 key={tag}
-                className={`text-xs px-2 py-1 rounded border ${getTagColor(tag)}`}
+                className={`text-xs px-2 py-1 rounded-xl border ${getTagStyle(tag)}`}
               >
                 #{tag}
               </span>
@@ -353,13 +312,14 @@ const NotePreview = ({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto relative theme-bg-primary">
+      <div className="flex-1 overflow-y-auto relative theme-bg-primary custom-scrollbar">
         <div
           key={settings.theme}
-          className="p-6 prose max-w-none"
+          className="p-6 markdown-content"
           style={{
             color: 'var(--color-base0)',
-            lineHeight: '1.7',
+            lineHeight: '1.4',
+            maxWidth: 'none',
           }}
           dangerouslySetInnerHTML={{ __html: getPreviewHtml() }}
         />
@@ -414,4 +374,14 @@ NotePreview.defaultProps = {
   onExport: null,
 }
 
-export default NotePreview
+// Memoize the component to prevent unnecessary re-renders
+export default memo(NotePreview, (prevProps, nextProps) => {
+  return (
+    prevProps.note?.id === nextProps.note?.id &&
+    prevProps.note?.content === nextProps.note?.content &&
+    prevProps.note?.title === nextProps.note?.title &&
+    prevProps.note?.updatedAt === nextProps.note?.updatedAt &&
+    prevProps.viewMode === nextProps.viewMode &&
+    prevProps.isTrashView === nextProps.isTrashView
+  )
+})

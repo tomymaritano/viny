@@ -4,6 +4,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import preview styles */
+@import './styles/preview.css';
+
+/* Import custom scrollbar styles */
+@import './styles/scrollbar.css';
+
+/* Override preview text color to ensure visibility */
+.preview-white-text {
+  color: var(--color-base0) !important;
+}
+
+.preview-white-text * {
+  color: inherit;
+}
+
 /* Apply typography variables */
 body {
   font-family: var(--font-family-ui);

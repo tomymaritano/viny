@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { defaultEditorColors, applyEditorColors } from '../config/editorColors'
 
 const defaultSettings = {
   // General
@@ -8,7 +9,7 @@ const defaultSettings = {
   autoSaveInterval: 30, // seconds
 
   // Editor
-  fontSize: 15,
+  fontSize: 12,
   fontFamily: 'SF Mono',
   tabSize: 2,
   wordWrap: true,
@@ -27,6 +28,9 @@ const defaultSettings = {
   showSidebar: true,
   animationSpeed: 'normal',
   confirmDeletes: true,
+
+  // Editor colors
+  editorColors: defaultEditorColors,
   pluginsEnabled: false,
   autoUpdatePlugins: false,
   defaultExportFormat: 'markdown',
@@ -74,6 +78,9 @@ const loadSettings = () => {
     '--font-family-ui',
     globalSettings.uiFontFamily || defaultSettings.uiFontFamily
   )
+
+  // Initialize editor color variables
+  applyEditorColors(globalSettings.editorColors)
   root.style.setProperty(
     '--font-size-ui',
     `${globalSettings.uiFontSize || defaultSettings.uiFontSize}px`
@@ -127,6 +134,9 @@ const saveSettings = newSettings => {
     }
     if (newSettings.lineHeight) {
       root.style.setProperty('--line-height', newSettings.lineHeight)
+    }
+    if (newSettings.editorColors) {
+      applyEditorColors(newSettings.editorColors)
     }
 
     // Notify all subscribers

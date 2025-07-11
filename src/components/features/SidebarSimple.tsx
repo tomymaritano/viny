@@ -2,6 +2,7 @@
 import React, { memo } from 'react'
 import { useSidebarLogic } from '../../hooks/useSimpleLogic'
 import { useNoteActions } from '../../hooks/useSimpleLogic'
+import { useSimpleStore } from '../../stores/simpleStore'
 import Icons from '../Icons'
 
 const SidebarSimple: React.FC = memo(() => {
@@ -20,6 +21,25 @@ const SidebarSimple: React.FC = memo(() => {
   } = useSidebarLogic()
 
   const { createNewNote } = useNoteActions()
+  const { getTagColor } = useSimpleStore()
+
+  // Helper function to extract background color from tag color class
+  const getTagCircleColor = (tag: string) => {
+    const colorClass = getTagColor(tag)
+    // Extract the border color and convert to background
+    if (colorClass.includes('border-blue-500')) return 'bg-blue-500'
+    if (colorClass.includes('border-green-500')) return 'bg-green-500'
+    if (colorClass.includes('border-purple-500')) return 'bg-purple-500'
+    if (colorClass.includes('border-pink-500')) return 'bg-pink-500'
+    if (colorClass.includes('border-yellow-500')) return 'bg-yellow-500'
+    if (colorClass.includes('border-indigo-500')) return 'bg-indigo-500'
+    if (colorClass.includes('border-red-500')) return 'bg-red-500'
+    if (colorClass.includes('border-cyan-500')) return 'bg-cyan-500'
+    if (colorClass.includes('border-orange-500')) return 'bg-orange-500'
+    if (colorClass.includes('border-emerald-500')) return 'bg-emerald-500'
+    if (colorClass.includes('border-gray-500')) return 'bg-gray-500'
+    return 'bg-gray-500' // fallback
+  }
 
   const renderIcon = (iconName: string, size = 16) => {
     const IconComponent = Icons[iconName as keyof typeof Icons] as any
@@ -172,9 +192,7 @@ const SidebarSimple: React.FC = memo(() => {
                   } : {}}
                 >
                   <div className="flex items-center space-x-2 ml-2">
-                    <span className="opacity-75">
-                      {renderIcon('Tag', 12)}
-                    </span>
+                    <div className={`w-2 h-2 rounded-full ${getTagCircleColor(tag.tag)}`} />
                     <span className="text-xs">#{tag.tag}</span>
                   </div>
                   <span className="text-xs opacity-75">{tag.count}</span>

@@ -50,6 +50,9 @@ const MarkdownItEditor = ({
   // Tag modal state
   const [isTagModalOpen, setIsTagModalOpen] = useState(false)
 
+  // Line numbers state
+  const [showLineNumbers, setShowLineNumbers] = useState(false)
+
   // Editor ref for text insertion
   const editorRef = useRef(null)
 
@@ -118,6 +121,11 @@ const MarkdownItEditor = ({
     setIsTagModalOpen(false)
   }
 
+  // Line numbers toggle handler
+  const handleToggleLineNumbers = () => {
+    setShowLineNumbers(!showLineNumbers)
+  }
+
   // Combine keyboard handlers
   useEffect(() => {
     const combinedKeyDown = event => {
@@ -144,6 +152,7 @@ const MarkdownItEditor = ({
         onNotebookChange={handleNoteMetadataNotebookChange}
         onStatusChange={handleStatusChange}
         onTagsChange={handleTagsChange}
+        isPreviewMode={false}
       />
 
       {/* Toolbar */}
@@ -166,6 +175,8 @@ const MarkdownItEditor = ({
         onTable={insertTable}
         onHorizontalRule={insertHorizontalRule}
         onTags={handleOpenTagModal}
+        onToggleLineNumbers={handleToggleLineNumbers}
+        showLineNumbers={showLineNumbers}
       />
 
       {/* Split Editor with Preview */}
@@ -174,6 +185,8 @@ const MarkdownItEditor = ({
         value={value}
         onChange={onChange}
         placeholder="Start writing your markdown here..."
+        selectedNote={selectedNote}
+        showLineNumbers={showLineNumbers}
       />
 
       {/* Fullscreen toggle button */}

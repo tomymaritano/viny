@@ -1,83 +1,95 @@
 import { useEffect, useRef, useImperativeHandle, forwardRef } from 'react'
-import { EditorView, basicSetup } from 'codemirror'
+import { EditorView, minimalSetup } from 'codemirror'
 import { EditorState } from '@codemirror/state'
 import { markdown } from '@codemirror/lang-markdown'
 import { placeholder as placeholderExtension } from '@codemirror/view'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { tags as t } from '@lezer/highlight'
+import { searchKeymap, search } from '@codemirror/search'
+import { keymap } from '@codemirror/view'
+import { defaultKeymap, historyKeymap } from '@codemirror/commands'
+import { history } from '@codemirror/commands'
+import { lineNumbers } from '@codemirror/view'
+import { getEditorColor } from '../config/editorColors'
 
-// Custom color scheme with specified colors
-const customHighlightStyle = HighlightStyle.define([
-  // Headers - #EEC951
-  {
-    tag: t.heading1,
-    color: '#EEC951',
-    fontWeight: '700',
-    fontSize: '1.8em',
-    lineHeight: '1.3',
-  },
-  {
-    tag: t.heading2,
-    color: '#EEC951',
-    fontWeight: '700',
-    fontSize: '1.6em',
-    lineHeight: '1.3',
-  },
-  {
-    tag: t.heading3,
-    color: '#EEC951',
-    fontWeight: '700',
-    fontSize: '1.4em',
-    lineHeight: '1.3',
-  },
-  {
-    tag: t.heading4,
-    color: '#EEC951',
-    fontWeight: '600',
-    fontSize: '1.2em',
-    lineHeight: '1.3',
-  },
-  {
-    tag: t.heading5,
-    color: '#EEC951',
-    fontWeight: '600',
-    fontSize: '1.1em',
-    lineHeight: '1.3',
-  },
-  {
-    tag: t.heading6,
-    color: '#EEC951',
-    fontWeight: '600',
-    fontSize: '1em',
-    lineHeight: '1.3',
-  },
+// Custom color scheme using configurable colors
+const createCustomHighlightStyle = () =>
+  HighlightStyle.define([
+    // Headers
+    {
+      tag: t.heading1,
+      color: getEditorColor('heading'),
+      fontWeight: '700',
+      fontSize: '1.8em',
+      lineHeight: '1.3',
+    },
+    {
+      tag: t.heading2,
+      color: getEditorColor('heading'),
+      fontWeight: '700',
+      fontSize: '1.6em',
+      lineHeight: '1.3',
+    },
+    {
+      tag: t.heading3,
+      color: getEditorColor('heading'),
+      fontWeight: '700',
+      fontSize: '1.4em',
+      lineHeight: '1.3',
+    },
+    {
+      tag: t.heading4,
+      color: getEditorColor('heading'),
+      fontWeight: '600',
+      fontSize: '1.2em',
+      lineHeight: '1.3',
+    },
+    {
+      tag: t.heading5,
+      color: getEditorColor('heading'),
+      fontWeight: '600',
+      fontSize: '1.1em',
+      lineHeight: '1.3',
+    },
+    {
+      tag: t.heading6,
+      color: getEditorColor('heading'),
+      fontWeight: '600',
+      fontSize: '1em',
+      lineHeight: '1.3',
+    },
 
-  // Bold text - #ED6E3F
-  { tag: t.strong, fontWeight: 'bold', color: '#ED6E3F' },
+    // Bold text
+    { tag: t.strong, fontWeight: 'bold', color: getEditorColor('bold') },
 
-  // Links and images - #587EC6
-  { tag: t.link, color: '#587EC6', textDecoration: 'underline' },
-  { tag: t.url, color: '#587EC6' },
+    // Links and images
+    { tag: t.link, color: getEditorColor('link'), textDecoration: 'underline' },
+    { tag: t.url, color: getEditorColor('link') },
 
-  // Code tags - #DA5677
-  {
-    tag: t.monospace,
-    backgroundColor: 'rgba(218, 86, 119, 0.15)',
-    padding: '2px 4px',
-    color: '#DA5677',
-    borderRadius: '3px',
-  },
+    // Code tags
+    {
+      tag: t.monospace,
+      backgroundColor: getEditorColor('codeBackground'),
+      padding: '2px 4px',
+      color: getEditorColor('code'),
+      borderRadius: '3px',
+    },
 
-  // Other elements
-  { tag: t.emphasis, fontStyle: 'italic', color: '#ffffff' },
-  { tag: t.quote, color: '#b0b0b0', fontStyle: 'italic' },
-  { tag: t.list, color: '#ffffff' },
-])
+    // Other elements
+    { tag: t.emphasis, fontStyle: 'italic', color: getEditorColor('text') },
+    { tag: t.quote, color: getEditorColor('quote'), fontStyle: 'italic' },
+    { tag: t.list, color: getEditorColor('text') },
+  ])
 
 const InkdropEditor = forwardRef(
   (
-    { value, onChange, placeholder = 'Start writing your markdown here...' },
+    {
+      value,
+      onChange,
+      placeholder = 'Start writing your markdown here...',
+      showLineNumbers = false,
+    },
     ref
   ) => {
     const editorRef = useRef(null)
@@ -126,8 +138,8 @@ const InkdropEditor = forwardRef(
       // Inkdrop-style theme
       const inkdropTheme = EditorView.theme({
         '&': {
-          color: '#ffffff',
-          backgroundColor: 'transparent',
+          color: getEditorColor('text'),
+          backgroundColor: getEditorColor('background'),
           fontSize: '12px',
           fontFamily:
             '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
@@ -135,53 +147,75 @@ const InkdropEditor = forwardRef(
         },
         '.cm-content': {
           padding: '16px',
-          caretColor: '#4FC3F7',
-          minHeight: '400px',
-          lineHeight: '1.6',
+          caretColor: getEditorColor('cursor'),
+          minHeight: '100%',
+          lineHeight: '1.5',
+          backgroundColor: getEditorColor('background'),
+          fontSize: '12px',
+        },
+        '.cm-cursor, .cm-dropCursor': {
+          borderLeft: `2px solid ${getEditorColor('cursor')}`,
         },
         '.cm-focused': {
           outline: 'none',
         },
         '.cm-editor': {
           border: 'none',
+          backgroundColor: getEditorColor('background'),
         },
         '.cm-scroller': {
           overflow: 'auto',
-          maxHeight: '100%',
           height: '100%',
+          backgroundColor: getEditorColor('background'),
         },
         '.cm-lineNumbers': {
           paddingRight: '4px',
           minWidth: '20px',
+          color: getEditorColor('lineNumber'),
+          backgroundColor: getEditorColor('background'),
+        },
+        '.cm-gutters': {
+          backgroundColor: getEditorColor('background'),
+          color: getEditorColor('lineNumber'),
+          border: 'none',
         },
       })
 
       // Custom placeholder theme
       const placeholderTheme = EditorView.theme({
         '.cm-placeholder': {
-          color: '#546E7A',
+          color: getEditorColor('placeholder'),
           fontStyle: 'italic',
         },
       })
 
+      const extensions = [
+        minimalSetup,
+        history(),
+        keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap]),
+        search(),
+        markdown(),
+        syntaxHighlighting(createCustomHighlightStyle()),
+        inkdropTheme,
+        placeholderTheme,
+        placeholderExtension(placeholder),
+        EditorView.lineWrapping, // Enable line wrapping
+        EditorView.updateListener.of(update => {
+          if (update.docChanged) {
+            const newValue = update.state.doc.toString()
+            onChange?.(newValue)
+          }
+        }),
+      ]
+
+      // Add line numbers extension if enabled
+      if (showLineNumbers) {
+        extensions.push(lineNumbers())
+      }
+
       const startState = EditorState.create({
         doc: value || '',
-        extensions: [
-          basicSetup,
-          markdown(),
-          oneDark,
-          syntaxHighlighting(customHighlightStyle),
-          inkdropTheme,
-          placeholderTheme,
-          placeholderExtension(placeholder),
-          EditorView.lineWrapping, // Enable line wrapping
-          EditorView.updateListener.of(update => {
-            if (update.docChanged) {
-              const newValue = update.state.doc.toString()
-              onChange?.(newValue)
-            }
-          }),
-        ],
+        extensions,
       })
 
       const view = new EditorView({
@@ -200,7 +234,7 @@ const InkdropEditor = forwardRef(
           viewRef.current = null
         }
       }
-    }, [placeholder])
+    }, [placeholder, showLineNumbers])
 
     // Update content when value prop changes externally
     useEffect(() => {
@@ -224,7 +258,6 @@ const InkdropEditor = forwardRef(
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden',
           width: '100%',
           height: '100%',
           border: 'none',

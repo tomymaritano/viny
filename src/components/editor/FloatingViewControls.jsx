@@ -1,5 +1,5 @@
-import { Eye, EyeOff, PanelRightOpen, PanelRightClose } from 'lucide-react'
 import PropTypes from 'prop-types'
+import Icons from '../Icons'
 
 const FloatingViewControls = ({ viewMode, onViewModeChange }) => {
   const handlePreviewOnlyToggle = () => {
@@ -11,43 +11,28 @@ const FloatingViewControls = ({ viewMode, onViewModeChange }) => {
   }
 
   const buttonBaseStyle =
-    'p-2 rounded-full transition-all duration-300 border border-white/10 shadow-lg'
-
-  const getButtonStyle = isActive => ({
-    backgroundColor: isActive
-      ? 'rgba(50, 61, 75, 0.7)'
-      : 'rgba(50, 61, 75, 0.15)',
-    '--tw-shadow-color': '#323D4B',
-  })
-
-  const handleMouseEnter = (e, isActive) => {
-    if (!isActive) {
-      e.target.style.backgroundColor = 'rgba(50, 61, 75, 0.25)'
-    }
-  }
-
-  const handleMouseLeave = (e, isActive) => {
-    if (!isActive) {
-      e.target.style.backgroundColor = 'rgba(50, 61, 75, 0.15)'
-    }
-  }
+    'p-1.5 rounded-full transition-all duration-200 border border-transparent'
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+    <div className="fixed bottom-2 sm:bottom-4 right-2 sm:right-4 z-50 flex flex-col gap-2 p-2 bg-black/20 backdrop-blur-sm rounded-xl border border-white/10">
       {/* Preview Only Button */}
       <button
         onClick={handlePreviewOnlyToggle}
         className={`${buttonBaseStyle} ${
           viewMode === 'preview'
-            ? 'text-white shadow-[#323D4B]/25'
-            : 'text-theme-text-primary hover:scale-105 shadow-[#323D4B]/10'
+            ? 'text-white border-white/20 bg-white/10'
+            : 'text-theme-text-secondary hover:text-theme-text-primary hover:border-white/10 hover:bg-white/5'
         }`}
-        style={getButtonStyle(viewMode === 'preview')}
-        onMouseEnter={e => handleMouseEnter(e, viewMode === 'preview')}
-        onMouseLeave={e => handleMouseLeave(e, viewMode === 'preview')}
         title={viewMode === 'preview' ? 'Close preview' : 'Open preview only'}
+        aria-label={
+          viewMode === 'preview' ? 'Close preview' : 'Open preview only'
+        }
       >
-        {viewMode === 'preview' ? <EyeOff size={16} /> : <Eye size={16} />}
+        {viewMode === 'preview' ? (
+          <Icons.EyeOff size={16} />
+        ) : (
+          <Icons.Eye size={16} />
+        )}
       </button>
 
       {/* Split View Button */}
@@ -55,18 +40,18 @@ const FloatingViewControls = ({ viewMode, onViewModeChange }) => {
         onClick={handleSplitToggle}
         className={`${buttonBaseStyle} ${
           viewMode === 'split'
-            ? 'text-white shadow-[#323D4B]/25'
-            : 'text-theme-text-primary hover:scale-105 shadow-[#323D4B]/10'
+            ? 'text-white border-white/20 bg-white/10'
+            : 'text-theme-text-secondary hover:text-theme-text-primary hover:border-white/10 hover:bg-white/5'
         }`}
-        style={getButtonStyle(viewMode === 'split')}
-        onMouseEnter={e => handleMouseEnter(e, viewMode === 'split')}
-        onMouseLeave={e => handleMouseLeave(e, viewMode === 'split')}
         title={viewMode === 'split' ? 'Close split view' : 'Open split view'}
+        aria-label={
+          viewMode === 'split' ? 'Close split view' : 'Open split view'
+        }
       >
         {viewMode === 'split' ? (
-          <PanelRightClose size={16} />
+          <Icons.Sidebar size={16} />
         ) : (
-          <PanelRightOpen size={16} />
+          <Icons.PanelRight size={16} />
         )}
       </button>
     </div>
