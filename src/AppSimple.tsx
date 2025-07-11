@@ -278,7 +278,7 @@ const AppSimple: React.FC = () => {
                 </Suspense>
               ) : (
                 <NotePreview
-                  note={selectedNote}
+                  note={selectedNote || currentNote}
                   onEdit={handleOpenNote}
                   onTogglePin={handleTogglePin}
                   onDuplicate={handleDuplicateNote}

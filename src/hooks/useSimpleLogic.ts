@@ -184,10 +184,14 @@ export const useAppLogic = () => {
     [notes, activeSection, searchQuery, filterTags]
   )
 
-  const selectedNote = useMemo(() => 
-    filteredNotes.find(note => note.id === selectedNoteId), 
-    [filteredNotes, selectedNoteId]
-  )
+  const selectedNote = useMemo(() => {
+    // If we're editing a note, use currentNote to avoid losing it due to filter changes
+    if (isEditorOpen && currentNote) {
+      return currentNote
+    }
+    // Otherwise find from filtered notes
+    return filteredNotes.find(note => note.id === selectedNoteId)
+  }, [filteredNotes, selectedNoteId, isEditorOpen, currentNote])
 
   return {
     notes,
