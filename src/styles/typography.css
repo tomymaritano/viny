@@ -31,55 +31,33 @@ body {
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  border-radius: 12px;
 }
 
-/* Draggable title bar area for Electron */
-.app::before {
-  content: '';
+/* Add top padding for macOS traffic lights */
+.app-container {
+  padding-top: 40px;
+}
+
+/* Electron window dragging - simple approach */
+.drag-region {
   position: fixed;
   top: 0;
-  left: 0;
+  left: 70px;
   right: 0;
-  height: 30px;
-  background: transparent;
+  height: 40px;
   z-index: 9999;
-  -webkit-app-region: drag;
-  pointer-events: none;
+  background: transparent;
 }
 
-/* Ensure all content areas are explicitly not draggable */
-.app-container,
-.app-container *,
-.sidebar-modern,
-.sidebar-modern *,
-.notes-list,
-.notes-list *,
-.editor,
-.editor *,
-.monaco-editor,
-.monaco-editor *,
-.preview,
-.preview *,
-.toolbar,
-.toolbar *,
-.resizable-layout,
-.resizable-layout *,
-main,
-main *,
-button,
-input,
-textarea,
-select,
-[role='button'],
-[tabindex],
-.modal,
-.modal *,
-.dropdown,
-.dropdown *,
-.markdown-content,
-.markdown-content * {
-  -webkit-app-region: no-drag !important;
-  pointer-events: auto;
+/* Ensure all interactive content is not draggable */
+* {
+  -webkit-app-region: no-drag;
+}
+
+/* Only the drag region should be draggable */
+.drag-region {
+  -webkit-app-region: drag !important;
 }
 
 /* Text selection control */

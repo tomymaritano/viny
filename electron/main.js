@@ -9,6 +9,8 @@ const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    titleBarStyle: 'hiddenInset',
+    trafficLightPosition: { x: 12, y: 10 },
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -18,12 +20,6 @@ const createWindow = () => {
       experimentalFeatures: false,
       v8CacheOptions: 'code',
       backgroundThrottling: false,
-    },
-    titleBarStyle: 'hiddenInset',
-    titleBarOverlay: {
-      color: '#1a1a1a',
-      symbolColor: '#ffffff',
-      height: 30,
     },
     title: 'Nototo v1.1.1 - Note Taking App',
     show: false,
@@ -105,6 +101,35 @@ function createSettingsWindow() {
 // IPC handlers
 ipcMain.on('open-settings', () => {
   createSettingsWindow()
+})
+
+// Window control handlers
+ipcMain.on('window-minimize', () => {
+  if (mainWindow) {
+    mainWindow.minimize()
+  }
+})
+
+ipcMain.on('window-maximize', () => {
+  if (mainWindow) {
+    if (mainWindow.isMaximized()) {
+      mainWindow.unmaximize()
+    } else {
+      mainWindow.maximize()
+    }
+  }
+})
+
+ipcMain.on('window-unmaximize', () => {
+  if (mainWindow) {
+    mainWindow.unmaximize()
+  }
+})
+
+ipcMain.on('window-close', () => {
+  if (mainWindow) {
+    mainWindow.close()
+  }
 })
 
 app.whenReady().then(() => {

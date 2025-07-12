@@ -114,6 +114,7 @@ const AppSimple: React.FC = () => {
     )
   }
 
+
   return (
       <ErrorBoundary>
         <StorageErrorBoundary
@@ -126,6 +127,20 @@ const AppSimple: React.FC = () => {
         }}
       >
         <div className="app-container">
+          {/* Electron drag region - debug version */}
+          <div 
+            className="drag-region" 
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: '70px',
+              right: 0,
+              height: '40px',
+              backgroundColor: 'transparent',
+              zIndex: 9999,
+              WebkitAppRegion: 'drag'
+            }}
+          />
           <ResizableLayout
             settings={settings}
             sidebar={<SidebarSimple />}
