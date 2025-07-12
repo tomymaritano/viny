@@ -3,16 +3,38 @@ import { useEffect, useMemo, useCallback } from 'react'
 import { useSimpleStore } from '../stores/simpleStore'
 import { useSettings } from './useSettings'
 import { useNotebooks } from './useNotebooks'
+import { getNotebookWithCounts } from '../utils/notebookTree'
 import { storageService } from '../lib/storage'
 import MarkdownProcessor from '../lib/markdown'
 import { Note } from '../types'
+
+// Helper function to get all child notebook names recursively
+const getAllChildNotebooks = (notebooks: any[], parentName: string): string[] => {
+  const children: string[] = []
+  // Case-insensitive search for parent notebook
+  const parentNotebook = notebooks.find(nb => nb.name.toLowerCase() === parentName.toLowerCase())
+  
+  if (parentNotebook && parentNotebook.children?.length > 0) {
+    parentNotebook.children.forEach((childId: string) => {
+      const childNotebook = notebooks.find(nb => nb.id === childId)
+      if (childNotebook) {
+        children.push(childNotebook.name)
+        // Recursively get children of children
+        children.push(...getAllChildNotebooks(notebooks, childNotebook.name))
+      }
+    })
+  }
+  
+  return children
+}
 
 // Helper functions
 export const getFilteredNotes = (
   notes: Note[], 
   activeSection: string, 
   searchQuery: string, 
-  filterTags: string[]
+  filterTags: string[],
+  notebooks: any[] = []
 ): Note[] => {
   let filtered = notes
 
@@ -42,9 +64,22 @@ export const getFilteredNotes = (
         const tag = activeSection.replace('tag-', '')
         filtered = notes.filter(note => note.tags.includes(tag) && !note.isTrashed)
       } else if (activeSection.startsWith('notebook-')) {
-        const notebook = activeSection.replace('notebook-', '')
-        // When viewing a notebook, hide completed/archived unless specifically viewing those status tabs
-        filtered = notes.filter(note => note.notebook === notebook && !note.isTrashed && !['completed', 'archived'].includes(note.status))
+        const notebookFromSection = activeSection.replace('notebook-', '')
+        
+        // Find the actual notebook object to get its real name (preserving case)
+        const actualNotebook = notebooks.find(nb => nb.name.toLowerCase() === notebookFromSection.toLowerCase())
+        const notebookName = actualNotebook ? actualNotebook.name : notebookFromSection
+        
+        // Get all child notebooks recursively
+        const childNotebooks = getAllChildNotebooks(notebooks, notebookName)
+        const allNotebooksToInclude = [notebookName, ...childNotebooks]
+        
+        // Filter notes from parent notebook and all its children (case-insensitive)
+        filtered = notes.filter(note => 
+          allNotebooksToInclude.some(nb => nb.toLowerCase() === note.notebook.toLowerCase()) && 
+          !note.isTrashed && 
+          !['completed', 'archived'].includes(note.status)
+        )
       } else {
         // Default filter excludes completed/archived
         filtered = notes.filter(note => !note.isTrashed && !['completed', 'archived'].includes(note.status))
@@ -101,6 +136,7 @@ export const getStats = (notes: Note[]) => {
 // Main app logic hook
 export const useAppLogic = () => {
   const { settings } = useSettings()
+  const { flatNotebooks } = useNotebooks()
   
   const {
     notes,
@@ -180,8 +216,8 @@ export const useAppLogic = () => {
 
   // Computed values with proper memoization
   const filteredNotes = useMemo(() => 
-    getFilteredNotes(notes, activeSection, searchQuery, filterTags), 
-    [notes, activeSection, searchQuery, filterTags]
+    getFilteredNotes(notes, activeSection, searchQuery, filterTags, flatNotebooks), 
+    [notes, activeSection, searchQuery, filterTags, flatNotebooks]
   )
 
   const selectedNote = useMemo(() => {
@@ -422,24 +458,13 @@ export const useSidebarLogic = () => {
     setModal
   } = useSimpleStore()
   
-  const { notebooks, getColorClass } = useNotebooks()
+  const { notebooks, flatNotebooks, getColorClass, createNotebook, updateNotebook, deleteNotebook, moveNotebook, getRootNotebooks, getNotebookChildren } = useNotebooks()
 
   const stats = useMemo(() => getStats(notes), [notes])
 
   const notebooksWithCounts = useMemo(() => {
-    const notebookCounts = notes.reduce((acc, note) => {
-      if (!note.isTrashed && !['completed', 'archived'].includes(note.status)) {
-        acc[note.notebook] = (acc[note.notebook] || 0) + 1
-      }
-      return acc
-    }, {} as Record<string, number>)
-
-    return notebooks
-      .map(notebook => ({
-        ...notebook,
-        count: notebookCounts[notebook.name] || 0,
-      }))
-      .sort((a, b) => b.count - a.count)
+    return getNotebookWithCounts(notebooks, notes)
+      .sort((a, b) => b.totalCount - a.totalCount)
   }, [notes, notebooks])
 
   const tagsWithCounts = useMemo(() => {
@@ -517,6 +542,12 @@ export const useSidebarLogic = () => {
     getColorClass,
     handleSectionClick,
     handleToggleSection,
-    handleSettingsClick
+    handleSettingsClick,
+    createNotebook,
+    updateNotebook,
+    deleteNotebook,
+    moveNotebook,
+    getRootNotebooks,
+    getNotebookChildren
   }
 }

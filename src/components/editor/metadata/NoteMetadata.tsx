@@ -7,13 +7,13 @@ import DropdownMenu, { DropdownMenuItem } from '../../ui/DropdownMenu'
 import CustomTag from '../../ui/CustomTag'
 import TagSettingsModal from '../tags/TagSettingsModal'
 import { useSimpleStore } from '../../../stores/simpleStore'
+import { useNotebooks } from '../../../hooks/useNotebooks'
 import { useTagEdit } from '../../../hooks/useTagEdit'
 import { addTag, removeTag } from '../../../utils/tagValidation'
 import { THEME_COLORS } from '../../../constants/theme'
 
 const NoteMetadata = ({
   note,
-  notebooks = [],
   onTitleChange,
   onNotebookChange,
   onStatusChange,
@@ -32,6 +32,7 @@ const NoteMetadata = ({
   })
   const [tagSettingsModal, setTagSettingsModal] = useState({ show: false, tagName: '' })
   const { setTagColor, setModal } = useSimpleStore()
+  const { flatNotebooks } = useNotebooks()
 
   // Use the custom tag editing hook
   const {
@@ -64,16 +65,12 @@ const NoteMetadata = ({
     { value: 'archived', label: 'Archived', color: 'bg-red-400', icon: 'Archive' },
   ]
 
-  // Prepare notebook options for dropdown
-  const notebookOptions = notebooks.map(notebook => {
-    const notebookName = typeof notebook === 'string' ? notebook : notebook.name || notebook.id
-    const notebookId = typeof notebook === 'string' ? notebook : notebook.id || notebook.name
-    return {
-      value: notebookId,
-      label: notebookName,
-      icon: 'Book'
-    }
-  })
+  // Prepare notebook options for dropdown using data from store
+  const notebookOptions = flatNotebooks.map(notebook => ({
+    value: notebook.name, // Use name for compatibility
+    label: notebook.name.charAt(0).toUpperCase() + notebook.name.slice(1),
+    icon: 'Book'
+  }))
 
   const handleTagsInput = e => {
     if (e.key === 'Enter' || e.key === ',') {
@@ -247,158 +244,147 @@ const NoteMetadata = ({
             />
           </div>
 
-          {/* Metadata Controls - Compact inline layout */}
-          <div className="flex items-center justify-between space-x-1 flex-wrap gap-1 mb-2">
-            <div className="flex items-center space-x-1 flex-wrap gap-1">
-            {/* Notebook selector */}
-            <div className="relative dropdown-container min-w-24">
-              <button
-                onClick={() => setShowNotebookDropdown(!showNotebookDropdown)}
-                className="flex items-center space-x-1.5 px-3 py-1.5 text-xs bg-transparent text-theme-text-muted rounded-xl hover:bg-theme-bg-secondary/50 transition-colors border border-transparent hover:border-theme-border-primary"
-              >
-                <Icons.Book size={12} />
-                <span className="max-w-20 truncate">
-                  {note?.notebook?.name || note?.notebook || 'Notebook'}
-                </span>
-                <Icons.ChevronDown size={10} />
-              </button>
-              
-              <DropdownMenu
-                isOpen={showNotebookDropdown}
-                width="w-48"
-              >
-                {notebookOptions.map((option) => (
-                  <DropdownMenuItem
-                    key={option.value}
-                    onClick={() => {
-                      onNotebookChange({ target: { value: option.value } })
-                      setShowNotebookDropdown(false)
-                    }}
-                    icon={<Icons.Book size={12} />}
+          {/* Metadata Controls - Improved compact layout */}
+          <div className="space-y-2">
+            {/* First row: Notebook and Status - consistent height and spacing */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                {/* Notebook selector */}
+                <div className="relative dropdown-container">
+                  <button
+                    onClick={() => setShowNotebookDropdown(!showNotebookDropdown)}
+                    className="flex items-center space-x-2 px-3 py-2 text-xs bg-theme-bg-secondary/30 text-theme-text-secondary rounded-lg hover:bg-theme-bg-secondary/50 transition-colors border border-theme-border-primary/30"
                   >
-                    {option.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenu>
-            </div>
-
-            {/* Status selector */}
-            <div className="relative dropdown-container min-w-28">
-              <button
-                onClick={() => setShowStatusDropdown(!showStatusDropdown)}
-                className="flex items-center space-x-1.5 px-3 py-1.5 text-xs bg-transparent text-theme-text-muted rounded-xl hover:bg-theme-bg-secondary/50 transition-colors border border-transparent hover:border-theme-border-primary"
-              >
-                <Icons.FileChartLine size={12} />
-                <span>
-                  {statusOptions.find(s => s.value === note?.status)?.label || 'Status'}
-                </span>
-                <Icons.ChevronDown size={10} />
-              </button>
-              
-              <DropdownMenu
-                isOpen={showStatusDropdown}
-                width="w-36"
-              >
-                {statusOptions.map((option) => (
-                  <DropdownMenuItem
-                    key={option.value}
-                    onClick={() => {
-                      onStatusChange({ target: { value: option.value } })
-                      setShowStatusDropdown(false)
-                    }}
-                    icon={<div className={`w-2 h-2 rounded-full ${option.color}`} />}
+                    <Icons.Book size={12} className="text-theme-accent-primary" />
+                    <span className="max-w-24 truncate font-medium">
+                      {note?.notebook?.name || note?.notebook || 'Select notebook'}
+                    </span>
+                    <Icons.ChevronDown size={10} className={`transition-transform ${showNotebookDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  <DropdownMenu
+                    isOpen={showNotebookDropdown}
+                    width="w-48"
                   >
-                    {option.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenu>
-            </div>
+                    {notebookOptions.map((option) => (
+                      <DropdownMenuItem
+                        key={option.value}
+                        onClick={() => {
+                          onNotebookChange({ target: { value: option.value } })
+                          setShowNotebookDropdown(false)
+                        }}
+                        icon={<Icons.Book size={12} />}
+                      >
+                        {option.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenu>
+                </div>
 
-            {/* Tags input with inline tags */}
-            <div className="flex-1 min-w-48">
-              <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-transparent rounded-xl hover:bg-theme-bg-secondary/50 transition-colors border border-transparent hover:border-theme-border-primary flex-wrap gap-1">
-                <Icons.Tag
-                  size={12}
-                  className="text-theme-text-muted flex-shrink-0"
-                />
+                {/* Status selector */}
+                <div className="relative dropdown-container">
+                  <button
+                    onClick={() => setShowStatusDropdown(!showStatusDropdown)}
+                    className="flex items-center space-x-2 px-3 py-2 text-xs bg-theme-bg-secondary/30 text-theme-text-secondary rounded-lg hover:bg-theme-bg-secondary/50 transition-colors border border-theme-border-primary/30"
+                  >
+                    {(() => {
+                      const currentStatus = statusOptions.find(s => s.value === note?.status)
+                      return (
+                        <>
+                          <div className={`w-2 h-2 rounded-full ${currentStatus?.color || 'bg-gray-400'}`} />
+                          <span className="font-medium">
+                            {currentStatus?.label || 'Set status'}
+                          </span>
+                          <Icons.ChevronDown size={10} className={`transition-transform ${showStatusDropdown ? 'rotate-180' : ''}`} />
+                        </>
+                      )
+                    })()}
+                  </button>
+                  
+                  <DropdownMenu
+                    isOpen={showStatusDropdown}
+                    width="w-40"
+                  >
+                    {statusOptions.map((option) => (
+                      <DropdownMenuItem
+                        key={option.value}
+                        onClick={() => {
+                          onStatusChange({ target: { value: option.value } })
+                          setShowStatusDropdown(false)
+                        }}
+                        icon={<div className={`w-2 h-2 rounded-full ${option.color}`} />}
+                      >
+                        {option.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenu>
+                </div>
+              </div>
 
-                {/* Display existing tags inline - LEFT of input */}
-                {note?.tags &&
-                  note.tags.length > 0 &&
-                  note.tags.map((tag, index) => (
-                    <div key={`${tag}-${index}`} className="relative">
-                      {isEditing(index) ? (
-                        <div className={`inline-flex items-center px-1.5 py-0.5 text-xs rounded-xl border flex-shrink-0 transition-opacity ${THEME_COLORS.RING_FOCUS}`}>
-                          <TagEditInput
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onKeyDown={handleEditKeyDown}
-                            onBlur={handleSaveEdit}
-                            inputRef={editInputRef}
-                            className="min-w-[30px] max-w-[80px]"
-                          />
-                        </div>
-                      ) : (
-                        <div
-                          onContextMenu={e => handleTagRightClick(e, tag, index)}
-                          title="Right-click for options"
-                        >
-                          <CustomTag
-                            tagName={tag}
-                            size="sm"
-                            onClick={(e) => {
-                              if (e && e.detail === 2) { // Double click to edit
-                                handleEditTag(index, tag)
-                              }
-                            }}
-                            className="cursor-pointer"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-
-                <input
-                  type="text"
-                  placeholder="Add tags..."
-                  onKeyDown={handleTagsInput}
-                  className="flex-1 min-w-16 bg-transparent text-xs text-theme-text-muted border-none outline-none placeholder-theme-text-muted"
-                />
+              {/* Date Information - Compact on right */}
+              <div className="flex items-center space-x-3 text-xs text-theme-text-muted">
+                {note?.createdAt && (
+                  <div className="flex items-center space-x-1">
+                    <Icons.Plus size={11} className="text-theme-accent-green" />
+                    <span>{formatDate(note.createdAt)}</span>
+                  </div>
+                )}
+                {note?.updatedAt && (
+                  <div className="flex items-center space-x-1">
+                    <Icons.Clock size={11} className="text-theme-accent-cyan" />
+                    <span>{formatDate(note.updatedAt)}</span>
+                  </div>
+                )}
               </div>
             </div>
-            </div>
 
-            {/* Date Information - Right side */}
-            <div className="flex space-x-4">
-              {/* Created At */}
-              {note?.createdAt && (
-                <div className="flex items-center space-x-2">
-                  <Icons.Clock4 size={12} className="text-theme-text-muted" />
-                  <div>
-                    <div className="text-[10px] font-medium text-theme-text-muted uppercase tracking-wide">
-                      Created At
-                    </div>
-                    <div className="text-xs text-theme-text-muted/80 font-mono">
-                      {formatDatetime(note.createdAt)}
-                    </div>
-                  </div>
-                </div>
-              )}
+            {/* Second row: Tags - full width for better tag management */}
+            <div className="flex items-center space-x-2 px-3 py-2 bg-theme-bg-secondary/20 rounded-lg border border-theme-border-primary/20 hover:bg-theme-bg-secondary/30 transition-colors">
+              <Icons.Tag size={12} className="text-theme-accent-secondary flex-shrink-0" />
               
-              {/* Updated At */}
-              {note?.updatedAt && (
-                <div className="flex items-center space-x-2">
-                  <Icons.SquarePen size={12} className="text-theme-text-muted" />
-                  <div>
-                    <div className="text-[10px] font-medium text-theme-text-muted uppercase tracking-wide">
-                      Updated At
-                    </div>
-                    <div className="text-xs text-theme-text-muted/80 font-mono">
-                      {formatDatetime(note.updatedAt)}
-                    </div>
+              {/* Existing tags */}
+              <div className="flex items-center flex-wrap gap-1 flex-1">
+                {note?.tags && note.tags.length > 0 && note.tags.map((tag, index) => (
+                  <div key={`${tag}-${index}`} className="relative">
+                    {isEditing(index) ? (
+                      <div className={`inline-flex items-center px-2 py-1 text-xs rounded-lg border flex-shrink-0 transition-opacity ${THEME_COLORS.RING_FOCUS}`}>
+                        <TagEditInput
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onKeyDown={handleEditKeyDown}
+                          onBlur={handleSaveEdit}
+                          inputRef={editInputRef}
+                          className="min-w-[40px] max-w-[100px]"
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        onContextMenu={e => handleTagRightClick(e, tag, index)}
+                        title="Right-click for options, double-click to edit"
+                      >
+                        <CustomTag
+                          tagName={tag}
+                          size="sm"
+                          onClick={(e) => {
+                            if (e && e.detail === 2) { // Double click to edit
+                              handleEditTag(index, tag)
+                            }
+                          }}
+                          className="cursor-pointer hover:scale-105 transition-transform"
+                        />
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
+                ))}
+                
+                {/* Tag input */}
+                <input
+                  type="text"
+                  placeholder={note?.tags?.length > 0 ? "Add more tags..." : "Add tags..."}
+                  onKeyDown={handleTagsInput}
+                  className="flex-1 min-w-24 bg-transparent text-xs text-theme-text-secondary border-none outline-none placeholder-theme-text-muted/60"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -434,15 +420,6 @@ NoteMetadata.propTypes = {
     createdAt: PropTypes.string,
     updatedAt: PropTypes.string,
   }),
-  notebooks: PropTypes.arrayOf(
-    PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.shape({
-        id: PropTypes.string,
-        name: PropTypes.string,
-      }),
-    ])
-  ),
   onTitleChange: PropTypes.func.isRequired,
   onNotebookChange: PropTypes.func.isRequired,
   onStatusChange: PropTypes.func.isRequired,

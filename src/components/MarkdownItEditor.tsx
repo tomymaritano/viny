@@ -148,7 +148,6 @@ const MarkdownItEditor: React.FC<MarkdownItEditorProps> = ({
         >
           <NoteMetadata
             note={selectedNote}
-            notebooks={notebooks}
             onTitleChange={handleTitleChange}
             onNotebookChange={handleNoteMetadataNotebookChange}
             onStatusChange={handleStatusChange}

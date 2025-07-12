@@ -2,7 +2,7 @@ import React from 'react'
 
 interface IconButtonProps {
   icon: React.ComponentType<{ size?: number; 'aria-hidden'?: string }>
-  onClick: () => void
+  onClick: (e?: React.MouseEvent) => void
   isActive?: boolean
   title?: string
   size?: number
@@ -10,6 +10,7 @@ interface IconButtonProps {
   'aria-label'?: string
   'aria-pressed'?: boolean
   'aria-keyshortcuts'?: string
+  className?: string
   [key: string]: any
 }
 
@@ -20,6 +21,7 @@ const IconButton: React.FC<IconButtonProps> = ({
   title,
   size = 16,
   variant = 'default',
+  className,
   'aria-label': ariaLabel,
   'aria-pressed': ariaPressed,
   'aria-keyshortcuts': ariaKeyshortcuts,
@@ -33,7 +35,7 @@ const IconButton: React.FC<IconButtonProps> = ({
           isActive
             ? 'text-white shadow-[#323D4B]/25'
             : 'text-theme-text-primary hover:scale-105 shadow-[#323D4B]/10'
-        }`}
+        } ${className || ''}`}
         style={{
           backgroundColor: isActive
             ? 'rgba(50, 61, 75, 0.7)'
@@ -69,7 +71,7 @@ const IconButton: React.FC<IconButtonProps> = ({
         isActive
           ? 'text-white border-white/20 bg-white/10'
           : 'text-theme-text-secondary hover:text-theme-text-primary border-transparent hover:border-white/10 hover:bg-white/5'
-      }`}
+      } ${className || ''}`}
       title={title}
       aria-label={ariaLabel || title}
       aria-pressed={ariaPressed}

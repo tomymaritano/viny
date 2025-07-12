@@ -75,7 +75,6 @@ const SplitEditor = forwardRef(
         {selectedNote && (
           <NoteMetadata
             note={selectedNote}
-            notebooks={[]}
             onTitleChange={() => {}} // No-op in preview mode
             onNotebookChange={() => {}} // No-op in preview mode
             onStatusChange={() => {}} // No-op in preview mode

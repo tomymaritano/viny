@@ -4,9 +4,13 @@ import { useSidebarLogic } from '../../hooks/useSimpleLogic'
 import { useNoteActions } from '../../hooks/useSimpleLogic'
 import { useSimpleStore } from '../../stores/simpleStore'
 import Icons from '../Icons'
+import IconButton from '../ui/IconButton'
 import TagContextMenu from '../ui/TagContextMenu'
 import TagSettingsModal from '../editor/tags/TagSettingsModal'
+import NotebookContextMenu from '../ui/NotebookContextMenu'
+import CreateNotebookModal from '../ui/CreateNotebookModal'
 import DropdownMenu, { DropdownMenuItem } from '../ui/DropdownMenu'
+import { getCustomTagColor } from '../../utils/customTagColors'
 
 const SidebarSimple: React.FC = memo(() => {
   const {
@@ -21,11 +25,17 @@ const SidebarSimple: React.FC = memo(() => {
     getColorClass,
     handleSectionClick,
     handleToggleSection,
-    handleSettingsClick
+    handleSettingsClick,
+    createNotebook,
+    updateNotebook,
+    deleteNotebook,
+    moveNotebook,
+    getRootNotebooks,
+    getNotebookChildren
   } = useSidebarLogic()
 
   const { createNewNote } = useNoteActions()
-  const { getTagColor, setModal } = useSimpleStore()
+  const { tagColors, setModal, updateNote } = useSimpleStore()
 
   // Context menu state
   const [contextMenu, setContextMenu] = useState({
@@ -41,12 +51,30 @@ const SidebarSimple: React.FC = memo(() => {
     position: { x: 0, y: 0 }
   })
 
-  // Tags dropdown state
-  const [showTagsDropdown, setShowTagsDropdown] = useState(false)
-  const [activeTagDropdown, setActiveTagDropdown] = useState<string | null>(null)
 
   // Tag settings modal state
   const [tagSettingsModal, setTagSettingsModal] = useState({ show: false, tagName: '' })
+  
+  
+  // Notebook context menu state
+  const [notebookContextMenu, setNotebookContextMenu] = useState({
+    isVisible: false,
+    position: { x: 0, y: 0 },
+    notebook: null as any
+  })
+  
+  // Editing notebook state
+  const [editingNotebook, setEditingNotebook] = useState<string | null>(null)
+  const [editValue, setEditValue] = useState('')
+  
+  // Create notebook modal state
+  const [createNotebookModal, setCreateNotebookModal] = useState(false)
+  
+  // Notebook expansion state
+  const [expandedNotebooks, setExpandedNotebooks] = useState<Set<string>>(new Set())
+  
+  
+  // Simplified sidebar without workspace view complexity
   
   // Tag modal is now managed by ModalContext
 
@@ -65,13 +93,7 @@ const SidebarSimple: React.FC = memo(() => {
   const handleTagsHeaderRightClick = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    // Create a special context menu for Tags header
-    setContextMenu({
-      isVisible: true,
-      position: { x: e.clientX, y: e.clientY },
-      tagName: 'Tags', // Special identifier for header
-      showColorPicker: false
-    })
+    // Don't show context menu for Tags header
   }
 
   const closeContextMenu = () => {
@@ -83,7 +105,10 @@ const SidebarSimple: React.FC = memo(() => {
   }
 
   const handleTagSettings = () => {
-    setTagSettingsModal({ show: true, tagName: contextMenu.tagName })
+    // Don't allow settings for "Tags" header
+    if (contextMenu.tagName !== 'Tags') {
+      setTagSettingsModal({ show: true, tagName: contextMenu.tagName })
+    }
     closeContextMenu()
   }
 
@@ -91,6 +116,112 @@ const SidebarSimple: React.FC = memo(() => {
     // This would need to be implemented based on how tags are managed in the store
     // For now, we'll just close the modal
     console.log('Tag name change:', oldName, '->', newName)
+  }
+
+  const handleCreateNotebook = () => {
+    setCreateNotebookModal(true)
+  }
+
+  const handleCreateNotebookSubmit = (name: string, color: string, parentId?: string | null) => {
+    createNotebook({
+      name,
+      color,
+      parentId
+    })
+    // Don't navigate to the new notebook, just create it
+  }
+
+  const handleToggleNotebookExpansion = (notebookId: string) => {
+    setExpandedNotebooks(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(notebookId)) {
+        newSet.delete(notebookId)
+      } else {
+        newSet.add(notebookId)
+      }
+      return newSet
+    })
+  }
+
+  // Notebook context menu handlers
+  const handleNotebookRightClick = (e: React.MouseEvent, notebook: any) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setNotebookContextMenu({
+      isVisible: true,
+      position: { x: e.clientX, y: e.clientY },
+      notebook
+    })
+  }
+
+  const closeNotebookContextMenu = () => {
+    setNotebookContextMenu(prev => ({ ...prev, isVisible: false }))
+  }
+
+  const handleRenameNotebook = () => {
+    if (notebookContextMenu.notebook) {
+      setEditingNotebook(notebookContextMenu.notebook.id)
+      setEditValue(notebookContextMenu.notebook.name)
+    }
+    closeNotebookContextMenu()
+  }
+
+  const handleDeleteNotebook = () => {
+    if (notebookContextMenu.notebook) {
+      // Check if there are notes in this notebook
+      const { notes } = useSimpleStore.getState()
+      const notesInNotebook = notes.filter(note => note.notebook === notebookContextMenu.notebook.name)
+      
+      if (notesInNotebook.length > 0) {
+        // Show warning or move notes to another notebook
+        const confirmDelete = window.confirm(
+          `This notebook contains ${notesInNotebook.length} notes. ` +
+          `Deleting it will move all notes to the default notebook. Continue?`
+        )
+        
+        if (!confirmDelete) {
+          closeNotebookContextMenu()
+          return
+        }
+        
+        // Move notes to default notebook
+        notesInNotebook.forEach(note => {
+          updateNote({ ...note, notebook: 'personal' })
+        })
+      }
+      
+      const success = deleteNotebook(notebookContextMenu.notebook.id)
+      if (success) {
+        // If the deleted notebook was active, switch to another one
+        if (activeSection === `notebook-${notebookContextMenu.notebook.name.toLowerCase()}`) {
+          handleSectionClick('all')
+        }
+      }
+    }
+    closeNotebookContextMenu()
+  }
+
+  const handleSaveNotebookName = (notebookId: string) => {
+    const notebook = notebooksWithCounts.find(n => n.id === notebookId)
+    if (editValue.trim() && editValue !== notebook?.name) {
+      const oldName = notebook?.name
+      const newName = editValue.trim()
+      
+      // Update the notebook name
+      updateNotebook(notebookId, { name: newName })
+      
+      // Update all notes that belong to this notebook
+      if (oldName) {
+        const { notes } = useSimpleStore.getState()
+        notes.forEach(note => {
+          if (note.notebook === oldName) {
+            updateNote({ ...note, notebook: newName })
+          }
+        })
+      }
+    }
+    setEditingNotebook(null)
+    setEditValue('')
   }
 
   // Trash context menu handlers
@@ -119,43 +250,125 @@ const SidebarSimple: React.FC = memo(() => {
     closeContextMenu()
   }
 
-  const handleManageTags = () => {
-    setModal('tagModal', true)
-    closeContextMenu()
-  }
+
+
 
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement
-      // Close dropdowns if clicking outside
-      if (!target?.closest?.('.dropdown-container')) {
-        setShowTagsDropdown(false)
-        setActiveTagDropdown(null)
-      }
+      // Close all context menus
+      closeContextMenu()
+      closeNotebookContextMenu()
+      closeTrashContextMenu()
     }
 
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
   }, [])
 
-  // Helper function to extract background color from tag color class
-  const getTagCircleColor = (tag: string) => {
-    const colorClass = getTagColor(tag)
-    // Extract the border color and convert to background
-    if (colorClass.includes('border-blue-500')) return 'bg-blue-500'
-    if (colorClass.includes('border-green-500')) return 'bg-green-500'
-    if (colorClass.includes('border-purple-500')) return 'bg-purple-500'
-    if (colorClass.includes('border-pink-500')) return 'bg-pink-500'
-    if (colorClass.includes('border-yellow-500')) return 'bg-yellow-500'
-    if (colorClass.includes('border-indigo-500')) return 'bg-indigo-500'
-    if (colorClass.includes('border-red-500')) return 'bg-red-500'
-    if (colorClass.includes('border-cyan-500')) return 'bg-cyan-500'
-    if (colorClass.includes('border-orange-500')) return 'bg-orange-500'
-    if (colorClass.includes('border-emerald-500')) return 'bg-emerald-500'
-    if (colorClass.includes('border-gray-500')) return 'bg-gray-500'
-    return 'bg-gray-500' // fallback
+
+  // Memoize tag colors to avoid recalculating on every render
+  const getTagColorMemo = React.useMemo(() => {
+    return (tag: string) => getCustomTagColor(tag, tagColors)
+  }, [tagColors])
+
+  // Render notebook tree with simple, clean navigation
+  const renderNotebookTree = (notebooks: any[], parentId: string | null = null, level = 0): React.ReactNode[] => {
+    const childNotebooks = notebooks.filter(n => n.parentId === parentId)
+    
+    return childNotebooks.map(notebook => {
+      const isExpanded = expandedNotebooks.has(notebook.id)
+      const hasChildren = notebooks.some(n => n.parentId === notebook.id)
+      const isActive = activeSection === `notebook-${notebook.name.toLowerCase()}`
+      const paddingLeft = 12 + (level * 16)
+
+      return (
+        <div key={notebook.id} className="relative">
+            <button
+              className={`w-full flex items-center justify-between py-1.5 text-sm text-left transition-all duration-200 ${
+                isActive
+                  ? 'text-theme-text-primary bg-[#323D4B] relative'
+                  : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary'
+              }`}
+              onClick={() => handleSectionClick(`notebook-${notebook.name.toLowerCase()}`)}
+              onContextMenu={(e) => handleNotebookRightClick(e, notebook)}
+              style={{
+                paddingLeft: `${paddingLeft}px`,
+                paddingRight: '8px',
+                ...(isActive ? { boxShadow: 'inset 3px 0 0 #ED6E3F' } : {})
+              }}
+            >
+              <div className="flex items-center space-x-1.5 flex-1 min-w-0">
+                {/* Triangle expand/collapse control */}
+                {hasChildren ? (
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleToggleNotebookExpansion(notebook.id)
+                    }}
+                    className={`w-4 h-4 flex-shrink-0 flex items-center justify-center cursor-pointer transition-transform duration-150 ${isExpanded ? 'rotate-90' : 'rotate-0'}`}
+                  >
+                    <Icons.ChevronRight size={10} className="text-theme-text-muted hover:text-theme-text-secondary" />
+                  </div>
+                ) : (
+                  <div className="w-4 h-4 flex-shrink-0" />
+                )}
+                
+                {/* Color indicator */}
+                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getColorClass(notebook.color).replace('text-', 'bg-')}`} />
+                
+                {/* Name (editable) */}
+                {editingNotebook === notebook.id ? (
+                  <input
+                    type="text"
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onBlur={() => handleSaveNotebookName(notebook.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleSaveNotebookName(notebook.id)
+                      } else if (e.key === 'Escape') {
+                        setEditingNotebook(null)
+                        setEditValue('')
+                      }
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="bg-transparent outline-none text-sm w-full border-b border-theme-accent-primary"
+                    autoFocus
+                  />
+                ) : (
+                  <span 
+                    className="text-sm truncate flex-1 min-w-0"
+                    title={notebook.path || notebook.name}
+                  >
+                    {notebook.name.charAt(0).toUpperCase() + notebook.name.slice(1)}
+                  </span>
+                )}
+              </div>
+              
+              {/* Count badge */}
+              <div className="flex items-center space-x-1 flex-shrink-0">
+                {notebook.directCount > 0 && (
+                  <span 
+                    className="text-xs px-1.5 py-0.5 bg-theme-accent-primary/20 text-theme-accent-primary rounded-full min-w-[20px] text-center"
+                    title={`${notebook.directCount} notes in this category`}
+                  >
+                    {notebook.directCount}
+                  </span>
+                )}
+              </div>
+            </button>
+          {/* Children (recursive) */}
+          {hasChildren && isExpanded && (
+            <div className="relative">
+              {renderNotebookTree(notebooks, notebook.id, level + 1)}
+            </div>
+          )}
+        </div>
+      )
+    })
   }
+
 
   const renderIcon = (iconName: string, size = 16) => {
     const IconComponent = Icons[iconName as keyof typeof Icons] as any
@@ -166,7 +379,14 @@ const SidebarSimple: React.FC = memo(() => {
     <>
       <nav 
         className="w-full sidebar-modern flex flex-col h-full ui-font"
-        onClick={closeContextMenu}
+        onClick={(e) => {
+          // Don't close context menus if clicking on context menu items
+          if (!(e.target as Element)?.closest('.dropdown-menu')) {
+            closeContextMenu()
+            closeNotebookContextMenu()
+            closeTrashContextMenu()
+          }
+        }}
       >
       {/* Settings Icon - Top Right */}
       <div className="flex justify-end pr-1">
@@ -247,54 +467,33 @@ const SidebarSimple: React.FC = memo(() => {
 
       {/* Notebooks Section */}
       <section>
-        <button
-          onClick={() => handleToggleSection('notebooks')}
-          className="w-full flex items-center justify-between px-3 py-2 text-sm text-theme-text-muted font-medium hover:text-theme-text-tertiary transition-colors"
-        >
-          <div className="flex items-center space-x-2">
+        <div className="w-full flex items-center justify-between px-3 py-2 text-sm text-theme-text-muted font-medium">
+          <button
+            onClick={() => handleToggleSection('notebooks')}
+            className="flex items-center space-x-2 hover:text-theme-text-tertiary transition-colors"
+          >
             {renderIcon('Book', 16)}
             <span>Notebooks</span>
-          </div>
-          <div className={`transition-transform duration-200 ${expandedSections.notebooks ? 'rotate-90' : ''}`}>
-            {renderIcon('ChevronRight', 16)}
-          </div>
-        </button>
+          </button>
+          <IconButton
+            icon={Icons.Plus}
+            onClick={handleCreateNotebook}
+            title="New Category"
+            size={14}
+            variant="default"
+            className="text-theme-text-muted hover:text-theme-text-tertiary"
+          />
+        </div>
         
         {expandedSections.notebooks && (
           <div className="space-y-0 mt-1">
             {notebooksWithCounts.length > 0 ? (
-              notebooksWithCounts.map((notebook) => (
-                <button
-                  key={notebook.id}
-                  className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left transition-all duration-200 ${
-                    activeSection === `notebook-${notebook.name.toLowerCase()}`
-                      ? 'text-theme-text-primary bg-[#323D4B] relative'
-                      : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary'
-                  }`}
-                  onClick={() => handleSectionClick(`notebook-${notebook.name.toLowerCase()}`)}
-                  style={activeSection === `notebook-${notebook.name.toLowerCase()}` ? {
-                    boxShadow: 'inset 4px 0 0 #ED6E3F'
-                  } : {}}
-                >
-                  <div className="flex items-center space-x-2 ml-4">
-                    <div className={`w-1.5 h-1.5 rounded-full ${getColorClass(notebook.color).replace('text-', 'bg-')}`} />
-                    <span className="text-sm">{notebook.name.charAt(0).toUpperCase() + notebook.name.slice(1)}</span>
-                  </div>
-                  <span className="text-sm opacity-75">{notebook.count}</span>
-                </button>
-              ))
+              renderNotebookTree(notebooksWithCounts)
             ) : (
               <div className="px-7 py-4 text-sm text-theme-text-muted italic text-center">
                 No notebooks yet
               </div>
             )}
-            
-            <button
-              onClick={createNewNote}
-              className="w-full px-7 py-2 text-sm text-theme-accent-primary hover:text-theme-accent-primary/80 text-left transition-colors"
-            >
-              + New Note
-            </button>
           </div>
         )}
       </section>
@@ -318,57 +517,40 @@ const SidebarSimple: React.FC = memo(() => {
         {expandedSections.tags && (
           <div className="space-y-0 mt-1">
             {tagsWithCounts.length > 0 ? (
-              tagsWithCounts.map((tag) => (
-                <div key={tag.tag} className="relative dropdown-container">
-                  <button
-                    className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left transition-all duration-200 ${
-                      activeSection === `tag-${tag.tag.toLowerCase()}`
-                        ? 'text-theme-text-primary bg-[#323D4B] relative'
-                        : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary'
-                    }`}
-                    onClick={() => setActiveTagDropdown(activeTagDropdown === tag.tag ? null : tag.tag)}
-                    onContextMenu={(e) => handleTagRightClick(e, tag.tag)}
-                    style={activeSection === `tag-${tag.tag.toLowerCase()}` ? {
-                      boxShadow: 'inset 4px 0 0 #ED6E3F'
-                    } : {}}
-                  >
-                    <div className="flex items-center space-x-2 ml-4">
-                      <div className={`w-2 h-2 rounded-full ${getTagCircleColor(tag.tag)}`} />
-                      <span className="text-sm">#{tag.tag}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <span className="text-sm opacity-75">{tag.count}</span>
-                      <Icons.ChevronDown size={12} className={`transition-transform duration-200 ${
-                        activeTagDropdown === tag.tag ? 'rotate-180' : ''
-                      }`} />
-                    </div>
+              tagsWithCounts.map((tag) => {
+                const tagColor = getTagColorMemo(tag.tag)
+                const isActive = activeSection === `tag-${tag.tag.toLowerCase()}`
+                
+                return (
+                  <div key={tag.tag} className="relative dropdown-container">
+                    <button
+                      className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left transition-all duration-200 ${
+                        isActive
+                          ? 'text-theme-text-primary bg-[#323D4B] relative'
+                          : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary'
+                      }`}
+                      onClick={() => handleSectionClick(`tag-${tag.tag.toLowerCase()}`)}
+                      onContextMenu={(e) => handleTagRightClick(e, tag.tag)}
+                      style={isActive ? {
+                        boxShadow: 'inset 4px 0 0 #ED6E3F'
+                      } : {}}
+                    >
+                      <div className="flex items-center space-x-2 ml-4">
+                        <div 
+                          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                          style={{ 
+                            backgroundColor: tagColor.bg,
+                            outline: `1px solid ${tagColor.border}`,
+                            outlineOffset: '-1px'
+                          }}
+                        />
+                        <span className="text-sm">#{tag.tag}</span>
+                      </div>
+                    <span className="text-sm opacity-75">{tag.count}</span>
                   </button>
-                  
-                  <DropdownMenu
-                    isOpen={activeTagDropdown === tag.tag}
-                    width="w-48"
-                  >
-                    <DropdownMenuItem
-                      onClick={() => {
-                        handleSectionClick(`tag-${tag.tag.toLowerCase()}`)
-                        setActiveTagDropdown(null)
-                      }}
-                      icon={<Icons.Search size={12} />}
-                    >
-                      Filter by Tag
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        setModal('tagModal', true)
-                        setActiveTagDropdown(null)
-                      }}
-                      icon={<Icons.Settings size={12} />}
-                    >
-                      Manage Tags
-                    </DropdownMenuItem>
-                  </DropdownMenu>
                 </div>
-              ))
+              )
+            })
             ) : (
               <div className="px-7 py-4 text-sm text-theme-text-muted italic text-center">
                 No tags yet
@@ -426,6 +608,26 @@ const SidebarSimple: React.FC = memo(() => {
         onTagNameChange={handleTagNameChange}
       />
 
+      {/* Notebook Context Menu */}
+      <NotebookContextMenu
+        isVisible={notebookContextMenu.isVisible}
+        position={notebookContextMenu.position}
+        notebookName={notebookContextMenu.notebook?.name || ''}
+        onRename={handleRenameNotebook}
+        onDelete={handleDeleteNotebook}
+        onClose={closeNotebookContextMenu}
+      />
+
+      {/* Create Notebook Modal */}
+      <CreateNotebookModal
+        isOpen={createNotebookModal}
+        onClose={() => setCreateNotebookModal(false)}
+        onCreate={handleCreateNotebookSubmit}
+        existingNames={notebooksWithCounts.map(n => n.name)}
+        availableParents={notebooksWithCounts}
+        maxLevel={3}
+      />
+
       {/* Trash Context Menu */}
       {trashContextMenu.isVisible && (
         <DropdownMenu
@@ -447,6 +649,7 @@ const SidebarSimple: React.FC = memo(() => {
           </DropdownMenuItem>
         </DropdownMenu>
       )}
+
     </>
   )
 })
