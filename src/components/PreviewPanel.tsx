@@ -149,11 +149,17 @@ const PreviewPanel = ({ note, isVisible, onClose }) => {
             :global(kbd) {
               background-color: #292828 !important;
               color: #ffffff !important;
-              padding: 0.1em 0.4em;
-              border-radius: 4px;
+              padding: 0.1em 0.4em !important;
+              border-radius: 4px !important;
               border: 1px solid #1a1a1a !important;
-              font-size: 0.85em;
-              font-family: monospace;
+              font-size: 0.85em !important;
+              font-family: 'SF Mono', 'Monaco', 'Consolas', 'Fira Code', monospace !important;
+              font-weight: 600 !important;
+              box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+              margin: 0 2px !important;
+              display: inline-block !important;
+              text-shadow: none !important;
+              white-space: nowrap !important;
             }
             
             /* Headers */

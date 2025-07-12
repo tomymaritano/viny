@@ -148,15 +148,22 @@
 
 /* Keyboard shortcuts */
 .markdown-content kbd {
-  background-color: var(--color-base02);
-  color: var(--color-base2);
-  padding: 0.2em 0.4em;
-  border: 1px solid var(--color-base01);
-  border-radius: 3px;
-  font-size: 0.85em;
-  font-family: var(--font-family-editor);
-  box-shadow: 0 1px 0 var(--color-base01);
-  font-weight: 600;
+  background-color: #292828 !important;
+  color: #ffffff !important;
+  padding: 0.1em 0.4em !important;
+  border: 1px solid #1a1a1a !important;
+  border-radius: 4px !important;
+  font-size: 0.85em !important;
+  font-family:
+    'SF Mono', 'Monaco', 'Consolas', 'Fira Code', monospace !important;
+  font-weight: 600 !important;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  margin: 0 2px !important;
+  display: inline-block !important;
+  text-shadow: none !important;
+  white-space: nowrap !important;
 }
 
 /* Code blocks */

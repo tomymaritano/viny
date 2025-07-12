@@ -130,6 +130,32 @@ export const FONT_CONFIG = {
   EDITOR: "'SF Mono', 'Monaco', 'Consolas', 'Fira Code', monospace",
   UI: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   MARKDOWN: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  KBD: "'SF Mono', 'Monaco', 'Consolas', 'Fira Code', monospace",
+} as const
+
+// KBD (keyboard) styling constants
+export const KBD_STYLES = {
+  DARK: {
+    backgroundColor: '#292828',
+    color: '#ffffff',
+    borderColor: '#1a1a1a',
+    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+  },
+  LIGHT: {
+    backgroundColor: '#f5f5f5',
+    color: '#333333',
+    borderColor: '#d0d0d0',
+    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
+  },
+  COMMON: {
+    padding: '0.1em 0.4em',
+    borderRadius: '4px',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    fontSize: '0.85em',
+    fontWeight: '600',
+    fontFamily: FONT_CONFIG.KBD,
+  },
 } as const
 
 // Size configuration
