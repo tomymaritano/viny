@@ -4,7 +4,7 @@ import GeneralSettings from './components/settings/sections/GeneralSettings'
 import EditorSettings from './components/settings/sections/EditorSettings'
 import TypographySettings from './components/settings/sections/TypographySettings'
 import { useSettings } from './hooks/useSettings'
-import useSimpleStore from './stores/simpleStore'
+import useAppStore from './stores/newSimpleStore'
 import './App.css'
 
 interface Tab {
@@ -24,7 +24,7 @@ const SettingsStandalone: React.FC = () => {
     exportSettings,
     importSettings,
   } = useSettings()
-  const { theme } = useSimpleStore()
+  const { theme } = useAppStore()
 
   const tabs: Tab[] = [
     { id: 'general', label: 'General', icon: Icons.Settings },

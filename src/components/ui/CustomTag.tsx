@@ -1,6 +1,6 @@
 import React from 'react'
 import { getTagStyle, getCustomTagColor } from '../../utils/customTagColors'
-import { useSimpleStore } from '../../stores/simpleStore'
+import { useAppStore } from '../../stores/newSimpleStore'
 
 interface CustomTagProps {
   tagName: string
@@ -19,7 +19,7 @@ export const CustomTag: React.FC<CustomTagProps> = ({
   size = 'md',
   className = ''
 }) => {
-  const { tagColors } = useSimpleStore()
+  const { tagColors } = useAppStore()
   
   const colorObj = getCustomTagColor(tagName, tagColors)
   const style = getTagStyle(tagName, tagColors)

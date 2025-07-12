@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearch } from '../hooks/useSearch'
-import { useSimpleStore } from '../stores/simpleStore'
+import { useAppStore } from '../stores/newSimpleStore'
 import { SearchLoading } from './LoadingStates'
 import Icons from './Icons'
 import BaseModal from './ui/BaseModal'
@@ -17,7 +17,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
   onClose,
   onSelectNote
 }) => {
-  const { notes } = useSimpleStore()
+  const { notes } = useAppStore()
   const inputRef = useRef<HTMLInputElement>(null)
   const [selectedIndex, setSelectedIndex] = useState(0)
 

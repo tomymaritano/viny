@@ -6,6 +6,15 @@ import {
   UpdateNotebookData,
   NOTEBOOK_COLORS 
 } from '../types/notebook'
+
+// Legacy type for migration
+interface LegacyNotebook {
+  id: string
+  name: string
+  color: string
+  description?: string
+  createdAt: string
+}
 import { validateNotebookName, validateNotebookNesting, validateNotebookMove } from '../utils/notebookValidation'
 import { 
   buildNotebookTree, 
@@ -65,7 +74,7 @@ export const useNotebooks = () => {
       const parsed = saved ? JSON.parse(saved) : defaultNotebooks
       
       // Migrate old notebooks to new structure if needed
-      const migrated = parsed.map((notebook: any) => ({
+      const migrated = parsed.map((notebook: LegacyNotebook) => ({
         ...notebook,
         parentId: notebook.parentId || null,
         children: notebook.children || [],

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { getAvailableTagColors, getTagStyle } from '../../utils/customTagColors'
-import { useSimpleStore } from '../../stores/simpleStore'
+import { useAppStore } from '../../stores/newSimpleStore'
 
 interface TagColorPickerProps {
   tagName: string
@@ -17,7 +17,7 @@ export const TagColorPicker: React.FC<TagColorPickerProps> = ({
   onColorChange,
   currentColorKey
 }) => {
-  const { setTagColor } = useSimpleStore()
+  const { setTagColor } = useAppStore()
   const availableColors = getAvailableTagColors()
   
   const handleColorSelect = (colorKey: string) => {

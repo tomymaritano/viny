@@ -4,7 +4,7 @@ import Icons from '../../Icons'
 import BaseModal from '../../ui/BaseModal'
 import CustomTag from '../../ui/CustomTag'
 import { getAvailableTagColors } from '../../../utils/customTagColors'
-import { useSimpleStore } from '../../../stores/simpleStore'
+import { useAppStore } from '../../../stores/newSimpleStore'
 
 const TagSettingsModal = ({
   isOpen,
@@ -13,7 +13,7 @@ const TagSettingsModal = ({
   onTagNameChange
 }) => {
   const [localTagName, setLocalTagName] = useState(tagName || '')
-  const { setTagColor } = useSimpleStore()
+  const { setTagColor } = useAppStore()
   const availableColors = getAvailableTagColors()
 
   useEffect(() => {

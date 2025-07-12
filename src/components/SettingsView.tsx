@@ -5,7 +5,7 @@ import GeneralSettings from './settings/sections/GeneralSettings'
 import EditorSettings from './settings/sections/EditorSettings'
 import TypographySettings from './settings/sections/TypographySettings'
 import { useSettings } from '../hooks/useSettings'
-import useSimpleStore from '../stores/simpleStore'
+import useAppStore from '../stores/newSimpleStore'
 
 const SettingsView = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState('general')
@@ -16,7 +16,7 @@ const SettingsView = ({ onClose }) => {
     exportSettings,
     importSettings,
   } = useSettings()
-  const { theme } = useSimpleStore()
+  const { theme } = useAppStore()
 
   const tabs = [
     { id: 'general', label: 'General', icon: Icons.Settings },

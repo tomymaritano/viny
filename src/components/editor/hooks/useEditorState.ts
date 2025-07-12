@@ -1,10 +1,10 @@
 import { useState, useMemo } from 'react'
-import { useSimpleStore } from '../../../stores/simpleStore'
+import { useAppStore } from '../../../stores/newSimpleStore'
 import { storageService } from '../../../lib/storage'
 import { Note } from '../../../types'
 
 export const useEditorState = (selectedNote: Note | null) => {
-  const { addNote, removeNote, addToast } = useSimpleStore()
+  const { addNote, removeNote, addToast } = useAppStore()
   // Tag modal state
   const [isTagModalOpen, setIsTagModalOpen] = useState(false)
 
@@ -17,7 +17,7 @@ export const useEditorState = (selectedNote: Note | null) => {
   const [isOpeningModal, setIsOpeningModal] = useState(false)
 
   // Get all notes to extract available tags
-  const { notes } = useSimpleStore()
+  const { notes } = useAppStore()
 
   // Calculate available tags from all notes
   const availableTags = useMemo(() => {

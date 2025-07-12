@@ -2,7 +2,7 @@
  * Custom hook for app-level event handlers
  */
 import { useCallback } from 'react'
-import { useSimpleStore } from '../stores/simpleStore'
+import { useAppStore } from '../stores/newSimpleStore'
 
 interface Note {
   id: string
@@ -27,7 +27,7 @@ export const useAppHandlers = ({
     setCurrentNote,
     setSelectedNoteId,
     setIsEditorOpen
-  } = useSimpleStore()
+  } = useAppStore()
 
   const handleOpenNote = useCallback((noteId: string) => {
     const note = filteredNotes.find(n => n.id === noteId)
@@ -40,7 +40,7 @@ export const useAppHandlers = ({
 
   const handleContentChange = useCallback((newContent: string) => {
     // Get the latest currentNote from the store to avoid stale closure issues
-    const latestCurrentNote = useSimpleStore.getState().currentNote
+    const latestCurrentNote = useAppStore.getState().currentNote
     
     if (latestCurrentNote) {
       const updatedNote = { 
@@ -59,7 +59,7 @@ export const useAppHandlers = ({
 
   const handleNotebookChange = useCallback((notebook: string) => {
     // Get the latest currentNote from the store to avoid stale closure issues
-    const latestCurrentNote = useSimpleStore.getState().currentNote
+    const latestCurrentNote = useAppStore.getState().currentNote
     
     if (latestCurrentNote) {
       const updatedNote = { ...latestCurrentNote, notebook }

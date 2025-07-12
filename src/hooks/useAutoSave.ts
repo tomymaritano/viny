@@ -1,7 +1,8 @@
 import { useEffect, useRef, useCallback } from 'react'
+import { Note } from '../types'
 
 interface AutoSaveOptions {
-  onSave: (note: any) => Promise<void>
+  onSave: (note: Note) => Promise<void>
   debounceMs?: number
   enabled?: boolean
   immediate?: boolean
@@ -37,7 +38,7 @@ export const useAutoSave = (options: AutoSaveOptions) => {
     }
   }, [])
 
-  const performSave = useCallback(async (note: any) => {
+  const performSave = useCallback(async (note: Note) => {
     if (!onSave || isSavingRef.current) return
 
     try {
@@ -66,7 +67,7 @@ export const useAutoSave = (options: AutoSaveOptions) => {
   }, [onSave, onSaveStart, onSaveComplete, onSaveError])
 
   // Debounced auto-save function that can be called with a note
-  const debouncedAutoSave = useCallback((note: any) => {
+  const debouncedAutoSave = useCallback((note: Note) => {
     hasUnsavedChangesRef.current = true
 
     // Clear existing timeout
@@ -87,7 +88,7 @@ export const useAutoSave = (options: AutoSaveOptions) => {
   }, [performSave, immediate, debounceMs])
 
   // Manual save function
-  const saveNow = useCallback((note: any) => {
+  const saveNow = useCallback((note: Note) => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
     }

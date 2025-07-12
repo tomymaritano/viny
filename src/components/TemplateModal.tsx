@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Icons from './Icons'
-import { useSimpleStore } from '../stores/simpleStore'
+import { useAppStore } from '../stores/newSimpleStore'
 
 interface Template {
   id: string
@@ -17,7 +17,7 @@ interface TemplateModalProps {
 }
 
 const TemplateModal: React.FC<TemplateModalProps> = ({ isOpen, onClose }) => {
-  const { templates, createNoteFromTemplate, addToast } = useSimpleStore()
+  const { templates, createNoteFromTemplate, addToast } = useAppStore()
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
   const [isCreating, setIsCreating] = useState<boolean>(false)
 

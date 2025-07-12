@@ -13,7 +13,7 @@ import IconButton from './ui/IconButton'
 import { useMarkdownEditor } from './editor/hooks/useMarkdownEditor'
 import { useEditorToolbar } from './editor/hooks/useEditorToolbar'
 import { useEditorState } from './editor/hooks/useEditorState'
-import { useSimpleStore } from '../stores/simpleStore'
+import { useAppStore } from '../stores/newSimpleStore'
 
 // Error Boundary
 import ComponentErrorBoundary from './errors/ComponentErrorBoundary'
@@ -59,7 +59,7 @@ const MarkdownItEditor: React.FC<MarkdownItEditorProps> = ({
   const editorRef = useRef<any>(null)
 
   // Modal management
-  const { modals, setModal } = useSimpleStore()
+  const { modals, setModal } = useAppStore()
 
   // Editor state management
   const {

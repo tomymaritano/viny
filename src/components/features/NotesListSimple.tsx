@@ -1,12 +1,11 @@
 // Simplified NotesList component
-import React, { memo, useState, useRef, useEffect, useCallback, useMemo } from 'react'
+import React, { memo, useState, useCallback, useMemo } from 'react'
 import { Note } from '../../types'
 import { useNotesListLogic } from '../../hooks/useNotesListLogic'
-import TaskProgress from '../ui/TaskProgress'
-import { useSimpleStore } from '../../stores/simpleStore'
+import { useAppStore } from '../../stores/newSimpleStore'
 import Icons from '../Icons'
 import IconButton from '../ui/IconButton'
-import CustomTag from '../ui/CustomTag'
+import NoteListItem from './notes-list/NoteListItem'
 
 interface NotesListSimpleProps {
   notes: Note[]
@@ -30,7 +29,7 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
   onSortNotes
 }) => {
   const { isEmpty, formatDate, getPreviewText } = useNotesListLogic(notes)
-  const { sortBy, sortDirection, setSortBy, setSortDirection, sortNotes, setModal } = useSimpleStore()
+  const { sortBy, sortDirection, setSortBy, setSortDirection, sortNotes, setModal } = useAppStore()
   const [searchTerm, setSearchTerm] = useState('')
   const [showSortMenu, setShowSortMenu] = useState(false)
 
@@ -75,91 +74,11 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
     onDeleteNote(note)
   }, [onDeleteNote])
 
-  // Memoized note item component to prevent unnecessary re-renders
-  const NoteItem = memo(({ note }: { note: Note }) => (
-    <div
-      key={note.id}
-      className={`group relative border-b border-theme-border-primary hover:bg-theme-bg-tertiary transition-colors cursor-pointer overflow-hidden ${
-        selectedNoteId === note.id ? 'bg-[#323D4B]' : ''
-      }`}
-      onClick={() => handleNoteClick(note.id)}
-    >
-      <div className="p-3">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center flex-1 mr-2 min-w-0">
-            {/* Status Circle */}
-            {note.status && note.status !== 'draft' && (
-              <div className={`w-2 h-2 rounded-full mr-2 flex-shrink-0 ${
-                note.status === 'in-progress' ? 'bg-blue-500' :
-                note.status === 'review' ? 'bg-yellow-500' :
-                note.status === 'completed' ? 'bg-green-500' :
-                note.status === 'archived' ? 'bg-red-500' :
-                'bg-gray-500'
-              }`} title={note.status} />
-            )}
-            
-            <h3 className="text-sm font-medium text-theme-text-primary truncate flex-1">
-              {note.title}
-            </h3>
-          </div>
-          <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <IconButton
-              icon={Icons.Star}
-              onClick={(e) => handlePinToggle(e, note)}
-              isActive={note.isPinned}
-              title={note.isPinned ? "Unpin note" : "Pin to top"}
-              size={16}
-              variant="default"
-            />
-            <IconButton
-              icon={Icons.Trash}
-              onClick={(e) => handleDelete(e, note)}
-              title="Delete note"
-              size={16}
-              variant="default"
-            />
-          </div>
-        </div>
-        
-        <p className="text-sm text-theme-text-secondary line-clamp-2 mb-2 overflow-hidden">
-          {getPreviewText(note.content)}
-        </p>
-        
-        {/* Task Progress */}
-        <div className="mb-2">
-          <TaskProgress content={note.content} size="xs" />
-        </div>
-        
-        <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center space-x-2 min-w-0 flex-1">
-            {/* Tags */}
-            {note.tags.length > 0 && (
-              <div className="flex items-center gap-1 flex-wrap min-w-0">
-                {note.tags.slice(0, 3).map((tag, index) => (
-                  <CustomTag 
-                    key={index} 
-                    tagName={tag} 
-                    size="sm"
-                    onClick={() => {
-                      // Optional: Add functionality to filter by tag
-                    }}
-                  />
-                ))}
-                {note.tags.length > 3 && (
-                  <span className="text-theme-text-muted text-xs ml-1">
-                    +{note.tags.length - 3}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-          <span className="text-theme-text-muted flex-shrink-0">{formatDate(note.updatedAt)}</span>
-        </div>
-      </div>
-    </div>
-  ))
-
-  NoteItem.displayName = 'NoteItem'
+  const handleTagClick = useCallback((tag: string) => {
+    // Filter by tag when clicking on a tag
+    setModal('search', true)
+    // TODO: Implement tag filtering logic
+  }, [setModal])
 
   const getDynamicTitle = () => {
     if (currentSection === 'all-notes') return 'All Notes'
@@ -350,7 +269,17 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
           </div>
         ) : (
           filteredNotes.map((note) => (
-            <NoteItem key={note.id} note={note} />
+            <NoteListItem 
+              key={note.id} 
+              note={note}
+              isSelected={selectedNoteId === note.id}
+              onNoteClick={handleNoteClick}
+              onPinToggle={handlePinToggle}
+              onDelete={handleDelete}
+              formatDate={formatDate}
+              getPreviewText={getPreviewText}
+              onTagClick={handleTagClick}
+            />
           ))
         )}
       </div>

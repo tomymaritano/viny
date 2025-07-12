@@ -1,7 +1,7 @@
 // Simplified App component using simple store - Refactored with custom hooks
 import React, { Suspense, useRef } from 'react'
 import { useAppLogic, useNoteActions } from './hooks/useSimpleLogic'
-import { useSimpleStore } from './stores/simpleStore'
+import { useAppStore } from './stores/newSimpleStore'
 import { useSettings } from './hooks/useSettings'
 import { useNotebooks } from './hooks/useNotebooks'
 import { useAutoSave } from './hooks/useAutoSave'
@@ -63,7 +63,7 @@ const AppSimple: React.FC = () => {
     removeToast,
     setIsPreviewVisible,
     sortNotes
-  } = useSimpleStore()
+  } = useAppStore()
 
   const { settings } = useSettings()
   const { notebooks } = useNotebooks()

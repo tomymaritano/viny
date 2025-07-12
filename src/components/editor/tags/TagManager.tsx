@@ -7,7 +7,7 @@ import DropdownMenu, { DropdownMenuItem } from '../../ui/DropdownMenu'
 import CustomTag from '../../ui/CustomTag'
 import TagColorPicker from '../../ui/TagColorPicker'
 import TagSettingsModal from './TagSettingsModal'
-import { useSimpleStore } from '../../../stores/simpleStore'
+import { useAppStore } from '../../../stores/newSimpleStore'
 import { useTagEdit } from '../../../hooks/useTagEdit'
 import { addTag, removeTag } from '../../../utils/tagValidation'
 import { Z_INDEX, THEME_COLORS } from '../../../constants/theme'
@@ -27,7 +27,7 @@ const TagManager = ({
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [tagSettingsModal, setTagSettingsModal] = useState({ show: false, tagName: '' })
   const inputRef = useRef(null)
-  const { setTagColor } = useSimpleStore()
+  const { setTagColor } = useAppStore()
 
   // Use the custom tag editing hook
   const {

@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useSettings } from '../../../hooks/useSettings'
 import { calculateStats } from '../utils/markdownFormatter'
-import { useSimpleStore } from '../../../stores/simpleStore'
+import { useAppStore } from '../../../stores/newSimpleStore'
 
 export const useMarkdownEditor = ({
   value = '',
@@ -11,7 +11,7 @@ export const useMarkdownEditor = ({
   onNotebookChange,
 }) => {
   const { settings } = useSettings()
-  const { addToast } = useSimpleStore()
+  const { addToast } = useAppStore()
 
   // UI state
   const [isFullscreen, setIsFullscreen] = useState(false)

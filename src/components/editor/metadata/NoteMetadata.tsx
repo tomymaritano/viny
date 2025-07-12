@@ -7,7 +7,7 @@ import DropdownMenu, { DropdownMenuItem } from '../../ui/DropdownMenu'
 import CustomTag from '../../ui/CustomTag'
 import TagSettingsModal from '../tags/TagSettingsModal'
 import BaseModal from '../../ui/BaseModal'
-import { useSimpleStore } from '../../../stores/simpleStore'
+import { useAppStore } from '../../../stores/newSimpleStore'
 import { useNotebooks } from '../../../hooks/useNotebooks'
 import { useTagEdit } from '../../../hooks/useTagEdit'
 import { addTag, removeTag, updateTag } from '../../../utils/tagValidation'
@@ -42,7 +42,7 @@ const NoteMetadata = ({
     index: null,
   })
   const [tagSettingsModal, setTagSettingsModal] = useState({ show: false, tagName: '', tagIndex: null })
-  const { setTagColor, setModal, notes } = useSimpleStore()
+  const { setTagColor, setModal, notes } = useAppStore()
   const { flatNotebooks } = useNotebooks()
   
   // Get all unique tags from all notes for suggestions

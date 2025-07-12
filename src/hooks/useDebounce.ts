@@ -22,7 +22,7 @@ export const useDebounce = <T>(value: T, delay: number): T => {
 /**
  * Hook that provides a debounced callback function
  */
-export const useDebouncedCallback = <T extends (...args: any[]) => any>(
+export const useDebouncedCallback = <T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number
 ): T => {

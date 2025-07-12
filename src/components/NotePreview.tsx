@@ -3,7 +3,7 @@ import Icons from './Icons'
 import ExportDialog from './ExportDialog'
 import NoteMetadata from './editor/metadata/NoteMetadata'
 import { useSettings } from '../hooks/useSettings'
-import { useSimpleStore } from '../stores/simpleStore'
+import { useAppStore } from '../stores/newSimpleStore'
 import TaskProgress from './ui/TaskProgress'
 import { renderMarkdownToHtml } from '../utils/markdownRenderer'
 
@@ -46,7 +46,7 @@ const NotePreview: React.FC<NotePreviewProps> = ({
   onExport,
 }) => {
   const { settings } = useSettings()
-  const { getTagColor } = useSimpleStore()
+  const { getTagColor } = useAppStore()
   const [showMenu, setShowMenu] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)

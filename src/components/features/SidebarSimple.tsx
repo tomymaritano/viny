@@ -1,8 +1,8 @@
-// Simplified Sidebar component - RESTORED ORIGINAL UI
-import React, { memo, useState, useEffect } from 'react'
-import { useSidebarLogic } from '../../hooks/useSimpleLogic'
-import { useNoteActions } from '../../hooks/useSimpleLogic'
-import { useSimpleStore } from '../../stores/simpleStore'
+// Refactored Sidebar component using modular subcomponents
+import React, { memo, useState, useEffect, useMemo } from 'react'
+import { useSidebarLogic } from '../../hooks/useSidebarLogic'
+import { useNoteActions } from '../../hooks/useNoteActions'
+import { useAppStore } from '../../stores/newSimpleStore'
 import Icons from '../Icons'
 import IconButton from '../ui/IconButton'
 import TagContextMenu from '../ui/TagContextMenu'
@@ -11,6 +11,14 @@ import NotebookContextMenu from '../ui/NotebookContextMenu'
 import CreateNotebookModal from '../ui/CreateNotebookModal'
 import DropdownMenu, { DropdownMenuItem } from '../ui/DropdownMenu'
 import { getCustomTagColor } from '../../utils/customTagColors'
+
+// Import modular sidebar components
+import SidebarHeader from './sidebar/SidebarHeader'
+import MainNavigationSection from './sidebar/MainNavigationSection'
+import NotebooksSection from './sidebar/NotebooksSection'
+import StatusSection from './sidebar/StatusSection'
+import TagsSection from './sidebar/TagsSection'
+import SystemSection from './sidebar/SystemSection'
 
 const SidebarSimple: React.FC = memo(() => {
   const {
@@ -35,7 +43,7 @@ const SidebarSimple: React.FC = memo(() => {
   } = useSidebarLogic()
 
   const { createNewNote } = useNoteActions()
-  const { tagColors, setModal, updateNote } = useSimpleStore()
+  const { setModal, updateNote, getTagColor } = useAppStore()
 
   // Context menu state
   const [contextMenu, setContextMenu] = useState({
@@ -169,7 +177,7 @@ const SidebarSimple: React.FC = memo(() => {
   const handleDeleteNotebook = () => {
     if (notebookContextMenu.notebook) {
       // Check if there are notes in this notebook
-      const { notes } = useSimpleStore.getState()
+      const { notes } = useAppStore.getState()
       const notesInNotebook = notes.filter(note => note.notebook === notebookContextMenu.notebook.name)
       
       if (notesInNotebook.length > 0) {
@@ -212,7 +220,7 @@ const SidebarSimple: React.FC = memo(() => {
       
       // Update all notes that belong to this notebook
       if (oldName) {
-        const { notes } = useSimpleStore.getState()
+        const { notes } = useAppStore.getState()
         notes.forEach(note => {
           if (note.notebook === oldName) {
             updateNote({ ...note, notebook: newName })
@@ -269,8 +277,8 @@ const SidebarSimple: React.FC = memo(() => {
 
   // Memoize tag colors to avoid recalculating on every render
   const getTagColorMemo = React.useMemo(() => {
-    return (tag: string) => getCustomTagColor(tag, tagColors)
-  }, [tagColors])
+    return (tag: string) => getTagColor(tag)
+  }, [getTagColor])
 
   // Render notebook tree with simple, clean navigation
   const renderNotebookTree = (notebooks: any[], parentId: string | null = null, level = 0): React.ReactNode[] => {

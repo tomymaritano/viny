@@ -1,7 +1,7 @@
 import React from 'react'
 import Icons from '../Icons'
 import IconButton from './IconButton'
-import { useSimpleStore } from '../../stores/simpleStore'
+import { useAppStore } from '../../stores/newSimpleStore'
 
 interface AppHeaderProps {
   title?: string
@@ -22,7 +22,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   onSearch,
   rightContent
 }) => {
-  const { setModal } = useSimpleStore()
+  const { setModal } = useAppStore()
 
   const handleSearch = () => {
     if (onSearch) {
