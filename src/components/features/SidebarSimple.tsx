@@ -378,7 +378,7 @@ const SidebarSimple: React.FC = memo(() => {
   return (
     <>
       <nav 
-        className="w-full sidebar-modern flex flex-col h-full ui-font"
+        className="w-full sidebar-modern flex flex-col h-full ui-font bg-theme-bg-secondary border-r border-theme-border-primary"
         onClick={(e) => {
           // Don't close context menus if clicking on context menu items
           if (!(e.target as Element)?.closest('.dropdown-menu')) {

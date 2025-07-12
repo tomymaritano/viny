@@ -1,4 +1,6 @@
 import React, { ErrorInfo, ReactNode } from 'react'
+import Icons from './Icons'
+import StyledButton from './ui/StyledButton'
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -23,7 +25,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
     }
   }
 
-  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
+  static getDerivedStateFromError(_error: Error): Partial<ErrorBoundaryState> {
     // Update state so the next render will show the fallback UI
     return { hasError: true }
   }
@@ -58,54 +60,81 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
       }
 
       return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-theme-bg-primary text-theme-text-primary p-8">
-          <div className="max-w-md w-full bg-theme-bg-secondary rounded-lg p-6 border border-theme-border-primary">
-            <div className="text-center mb-4">
-              <div className="text-6xl mb-4">💥</div>
-              <h1 className="text-xl font-bold text-red-500 mb-2">
-                Oops! Something went wrong
-              </h1>
-              <p className="text-theme-text-secondary mb-4">
-                The editor encountered an unexpected error. Don't worry, your
-                notes are safe.
-              </p>
+        <div className="min-h-screen bg-theme-bg-primary flex items-center justify-center p-8">
+          <div className="max-w-2xl w-full bg-theme-bg-secondary rounded-lg border border-theme-border-primary p-8">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-theme-accent-red/20 rounded-full flex items-center justify-center mr-4">
+                <Icons.AlertTriangle size={24} className="text-theme-accent-red" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-semibold text-theme-text-primary">
+                  Something went wrong
+                </h1>
+                <p className="text-theme-text-secondary mt-1">
+                  An unexpected error occurred in the application
+                </p>
+              </div>
             </div>
 
-            {this.props.showDetails && this.state.error && (
-              <details className="mb-4 p-3 bg-theme-bg-tertiary rounded border">
-                <summary className="cursor-pointer text-sm font-medium text-theme-text-secondary mb-2">
-                  Error Details
+            {this.state.error && (
+              <div className="mb-6">
+                <h2 className="text-sm font-medium text-theme-text-secondary mb-2">
+                  Error Details:
+                </h2>
+                <div className="bg-theme-bg-primary rounded p-4 border border-theme-border-primary">
+                  <code className="text-sm text-theme-accent-red font-mono">
+                    {this.state.error.toString()}
+                  </code>
+                </div>
+              </div>
+            )}
+
+            {(this.props.showDetails ?? process.env.NODE_ENV === 'development') && this.state.errorInfo && (
+              <details className="mb-6">
+                <summary className="cursor-pointer text-sm text-theme-text-secondary hover:text-theme-text-primary">
+                  View stack trace
                 </summary>
-                <div className="text-xs font-mono text-red-400 whitespace-pre-wrap">
-                  {this.state.error.toString()}
-                  {this.state.errorInfo?.componentStack}
+                <div className="mt-2 bg-theme-bg-primary rounded p-4 border border-theme-border-primary overflow-x-auto">
+                  <pre className="text-xs text-theme-text-muted font-mono">
+                    {this.state.errorInfo.componentStack}
+                  </pre>
                 </div>
               </details>
             )}
 
-            <div className="flex flex-col space-y-2">
-              <button
-                onClick={this.handleReset}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors"
-              >
-                Try Again
-              </button>
-
-              <button
+            <div className="flex gap-4">
+              <StyledButton
+                variant="primary"
                 onClick={() => window.location.reload()}
-                className="w-full bg-theme-bg-tertiary hover:bg-theme-bg-quaternary text-theme-text-secondary font-medium py-2 px-4 rounded transition-colors"
+                className="flex items-center gap-2"
               >
+                <Icons.RefreshCw size={16} />
                 Reload Page
-              </button>
+              </StyledButton>
 
-              <div className="text-center">
-                <a
-                  href="mailto:support@nototo.app?subject=Error Report"
-                  className="text-blue-500 hover:text-blue-400 text-sm underline"
-                >
-                  Report this issue
-                </a>
-              </div>
+              <StyledButton
+                variant="default"
+                onClick={this.handleReset}
+                className="flex items-center gap-2"
+              >
+                <Icons.RotateCw size={16} />
+                Try Again
+              </StyledButton>
+
+              <StyledButton
+                variant="default"
+                onClick={() => window.history.back()}
+                className="flex items-center gap-2"
+              >
+                <Icons.ArrowLeft size={16} />
+                Go Back
+              </StyledButton>
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-theme-border-primary">
+              <p className="text-xs text-theme-text-muted">
+                If this problem persists, please try clearing your browser cache or contact support.
+              </p>
             </div>
           </div>
         </div>
@@ -116,10 +145,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
   }
 }
 
-// Default props
-ErrorBoundary.defaultProps = {
-  showDetails: process.env.NODE_ENV === 'development',
-}
+// Default props - using static defaultProps for class components
 
 export default ErrorBoundary
 

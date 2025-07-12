@@ -1,5 +1,5 @@
 // Simplified App component using simple store - Refactored with custom hooks
-import React, { Suspense } from 'react'
+import React, { Suspense, useRef } from 'react'
 import { useAppLogic, useNoteActions } from './hooks/useSimpleLogic'
 import { useSimpleStore } from './stores/simpleStore'
 import { useSettings } from './hooks/useSettings'
@@ -17,21 +17,25 @@ import ResizableLayout from './components/ResizableLayout'
 import SidebarSimple from './components/features/SidebarSimple'
 import NotesListSimple from './components/features/NotesListSimple'
 import NotePreview from './components/NotePreview'
+import MarkdownPreview, { MarkdownPreviewHandle } from './components/MarkdownPreview'
 import ToastContainer from './components/ToastContainer'
 
 // Lazy components
 import {
   MarkdownEditor,
-  SearchModal,
   ExportDialog,
   NotebookManager
 } from './components/features/LazyComponents'
+import SearchModal from './components/SearchModal'
 import TagModal from './components/editor/tags/TagModal'
 import SettingsView from './components/SettingsView'
 
 import './App.css'
 
 const AppSimple: React.FC = () => {
+  // Refs for scroll sync
+  const previewRef = useRef<MarkdownPreviewHandle>(null)
+
   // Logic hooks
   const { 
     currentNote, 
@@ -121,7 +125,7 @@ const AppSimple: React.FC = () => {
           window.location.reload()
         }}
       >
-        <div className="app">
+        <div className="app-container">
           <ResizableLayout
             settings={settings}
             sidebar={<SidebarSimple />}
@@ -163,8 +167,16 @@ const AppSimple: React.FC = () => {
                 />
               )
             }
-            previewPanel={null}
-            isPreviewVisible={false}
+            previewPanel={
+              isPreviewVisible && currentNote ? (
+                <MarkdownPreview
+                  ref={previewRef}
+                  note={currentNote}
+                  syncScroll={true}
+                />
+              ) : null
+            }
+            isPreviewVisible={isPreviewVisible}
             isSidebarVisible={true}
             isNotesListVisible={true}
           />
@@ -179,10 +191,7 @@ const AppSimple: React.FC = () => {
           <SearchModal
             isOpen={modals.search}
             onClose={() => setModal('search', false)}
-            onSelectNote={(note) => handleOpenNote(note.id)}
-            notes={filteredNotes}
-            onPinNote={handleTogglePin}
-            onDeleteNote={handleDeleteNote}
+            onSelectNote={handleOpenNote}
           />
         )}
 

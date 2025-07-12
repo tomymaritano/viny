@@ -135,7 +135,7 @@ export const getStats = (notes: Note[]) => {
 
 // Main app logic hook
 export const useAppLogic = () => {
-  const { settings } = useSettings()
+  const { settings } = useSettings() as { settings: { theme?: string } | null }
   const { flatNotebooks } = useNotebooks()
   
   const {
@@ -148,14 +148,12 @@ export const useAppLogic = () => {
     activeSection,
     searchQuery,
     filterTags,
-    theme,
     setNotes,
     setLoading,
     setCurrentNote,
     setSelectedNoteId,
     setIsEditorOpen,
-    setError,
-    setTheme
+    setError
   } = useSimpleStore()
 
   // Initialize data with proper async loading - fix race condition
@@ -206,13 +204,14 @@ export const useAppLogic = () => {
 
   // Apply theme
   useEffect(() => {
-    const finalTheme = settings?.theme || theme || 'dark'
+    const { theme: currentTheme, setTheme } = useSimpleStore.getState()
+    const finalTheme = settings?.theme || currentTheme || 'dark'
     const resolvedTheme = finalTheme === 'system'
       ? window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
       : finalTheme
     document.documentElement.setAttribute('data-theme', resolvedTheme)
     setTheme(resolvedTheme)
-  }, [settings?.theme, theme, setTheme])
+  }, [settings?.theme])
 
   // Computed values with proper memoization
   const filteredNotes = useMemo(() => 
@@ -244,6 +243,7 @@ export const useAppLogic = () => {
 export const useNoteActions = () => {
   const {
     activeSection,
+    notes,
     addNote,
     updateNote,
     removeNote,
@@ -437,13 +437,104 @@ export const useNoteActions = () => {
     return duplicatedNote
   }, [addNote, addToast])
 
+  const handleEmptyTrash = useCallback(() => {
+    const { removeNote: deleteNote } = useSimpleStore.getState()
+    const trashedNotes = notes.filter(note => note.isTrashed)
+    
+    try {
+      // Permanently delete all trashed notes
+      trashedNotes.forEach(note => {
+        deleteNote(note.id)
+        try {
+          storageService.deleteNote(note.id)
+        } catch (error) {
+          console.error(`Error deleting note ${note.id} from storage:`, error)
+        }
+      })
+      
+      addToast({ 
+        type: 'success', 
+        message: `Permanently deleted ${trashedNotes.length} note(s)` 
+      })
+    } catch (error) {
+      console.error('Error emptying trash:', error)
+      addToast({ type: 'error', message: 'Failed to empty trash' })
+    }
+  }, [notes, addToast])
+
+  const handleRestoreNote = useCallback((note: Note) => {
+    const restoredNote = {
+      ...note,
+      isTrashed: false,
+      trashedAt: undefined,
+      updatedAt: new Date().toISOString(),
+    }
+    updateNote(restoredNote)
+    
+    try {
+      storageService.saveNote(restoredNote)
+      addToast({ type: 'success', message: 'Note restored' })
+    } catch (error) {
+      console.error('Error restoring note:', error)
+      addToast({ type: 'error', message: 'Failed to restore note' })
+    }
+  }, [updateNote, addToast])
+
+  const handlePermanentDelete = useCallback((note: Note) => {
+    const { removeNote: deleteNote } = useSimpleStore.getState()
+    
+    try {
+      deleteNote(note.id)
+      storageService.deleteNote(note.id)
+      addToast({ type: 'success', message: 'Note permanently deleted' })
+    } catch (error) {
+      console.error('Error permanently deleting note:', error)
+      addToast({ type: 'error', message: 'Failed to delete note permanently' })
+    }
+  }, [addToast])
+
+  const handleRemoveTag = useCallback((tagName: string) => {
+    const { updateNote: storeUpdateNote } = useSimpleStore.getState()
+    const notesWithTag = notes.filter(note => note.tags?.includes(tagName))
+    
+    try {
+      // Remove tag from all notes that have it
+      notesWithTag.forEach(note => {
+        const updatedNote = {
+          ...note,
+          tags: note.tags?.filter(tag => tag !== tagName) || [],
+          updatedAt: new Date().toISOString(),
+        }
+        storeUpdateNote(updatedNote)
+        
+        try {
+          storageService.saveNote(updatedNote)
+        } catch (error) {
+          console.error(`Error updating note ${note.id}:`, error)
+        }
+      })
+      
+      addToast({ 
+        type: 'success', 
+        message: `Removed tag "${tagName}" from ${notesWithTag.length} note(s)` 
+      })
+    } catch (error) {
+      console.error('Error removing tag:', error)
+      addToast({ type: 'error', message: 'Failed to remove tag' })
+    }
+  }, [notes, addToast])
+
   return {
     createNewNote,
     handleOpenNote,
     handleSaveNote,
     handleDeleteNote,
     handleTogglePin,
-    handleDuplicateNote
+    handleDuplicateNote,
+    handleEmptyTrash,
+    handleRestoreNote,
+    handlePermanentDelete,
+    handleRemoveTag
   }
 }
 

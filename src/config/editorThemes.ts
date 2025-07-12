@@ -7,6 +7,7 @@ import { EditorView } from '@codemirror/view'
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { tags as t } from '@lezer/highlight'
 import { getEditorColor } from './editorColors'
+import { getEditorPadding } from './editorStyles'
 
 /**
  * Creates the main Inkdrop-style editor theme
@@ -22,7 +23,7 @@ export const createInkdropTheme = () => {
       height: '100%',
     },
     '.cm-content': {
-      padding: '16px',
+      padding: getEditorPadding(),
       caretColor: getEditorColor('cursor'),
       minHeight: '100%',
       lineHeight: '1.5',
@@ -174,7 +175,7 @@ export const editorThemeVariants = {
           color: 'var(--color-base1)',
         },
         '.cm-content': {
-          padding: '8px',
+          padding: getEditorPadding(),
         },
         '.cm-focused': {
           outline: 'none',

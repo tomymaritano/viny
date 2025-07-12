@@ -1,6 +1,6 @@
 /* Professional Preview Styles - Integrated with Theme System */
 .markdown-content {
-  padding: 2rem;
+  padding: 16px;
   max-width: none;
   font-family: var(
     --font-family-ui,

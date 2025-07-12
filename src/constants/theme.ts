@@ -16,6 +16,9 @@ export const ANIMATIONS = {
   SLIDE_IN_RIGHT: 'animate-in slide-in-from-right duration-300',
 }
 
+// Import the complete styles system
+export { COMPLETE_STYLES } from '../config/completeStyles'
+
 // Custom tag color palette - elegant and distinct colors
 export const CUSTOM_TAG_COLORS = {
   // Deep Ocean Blue
@@ -136,3 +139,8 @@ export const PREDEFINED_TAG_COLORS = {
 
 // Array of color keys for cycling through
 export const TAG_COLOR_OPTIONS = Object.keys(CUSTOM_TAG_COLORS)
+
+// Export component style configurations
+export { TAG_STYLES, COLOR_PICKER_STYLES, TAG_ANIMATIONS } from '../config/componentStyles'
+export { TYPOGRAPHY, GLOBAL_STYLES, APP_LAYOUT } from '../config/baseStyles'
+export { EDITOR_LAYOUT, TODO_STYLES } from '../config/editorStyles'

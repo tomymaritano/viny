@@ -1,7 +1,10 @@
 import { useState, useMemo } from 'react'
 import { useSimpleStore } from '../../../stores/simpleStore'
+import { storageService } from '../../../lib/storage'
+import { Note } from '../../../types'
 
-export const useEditorState = selectedNote => {
+export const useEditorState = (selectedNote: Note | null) => {
+  const { addNote, removeNote, addToast } = useSimpleStore()
   // Tag modal state
   const [isTagModalOpen, setIsTagModalOpen] = useState(false)
 
@@ -69,16 +72,36 @@ export const useEditorState = selectedNote => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }
-      // TODO: Add note to store/database
-      console.log('Duplicating note:', duplicatedNote)
+      // Add duplicated note to store/database
+      try {
+        addNote(duplicatedNote)
+        storageService.saveNote(duplicatedNote)
+        addToast({ type: 'success', message: 'Note duplicated successfully' })
+      } catch (error) {
+        console.error('Error duplicating note:', error)
+        addToast({ type: 'error', message: 'Failed to duplicate note' })
+      }
       handleCloseOptionsModal()
     }
   }
 
   const handleDeleteNote = () => {
     if (selectedNote) {
-      // TODO: Delete note from store/database
-      console.log('Deleting note:', selectedNote.id)
+      // Delete note from store/database (move to trash)
+      try {
+        const trashedNote = {
+          ...selectedNote,
+          isTrashed: true,
+          trashedAt: new Date().toISOString(),
+        }
+        removeNote(selectedNote.id)
+        addNote(trashedNote) // Add back as trashed
+        storageService.saveNote(trashedNote)
+        addToast({ type: 'success', message: 'Note moved to trash' })
+      } catch (error) {
+        console.error('Error deleting note:', error)
+        addToast({ type: 'error', message: 'Failed to delete note' })
+      }
       handleCloseOptionsModal()
     }
   }

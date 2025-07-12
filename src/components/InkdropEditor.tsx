@@ -104,24 +104,30 @@ const InkdropEditor = forwardRef<InkdropEditorHandle, InkdropEditorProps>(
       }
     }, [placeholder, showLineNumbers, theme, onChange])
 
-    // Update content when value prop changes externally
+    // Update content when value prop changes externally (but avoid cursor jumps)
     useEffect(() => {
-      if (viewRef.current && value !== viewRef.current.state.doc.toString()) {
-        const transaction = viewRef.current.state.update({
-          changes: {
-            from: 0,
-            to: viewRef.current.state.doc.length,
-            insert: value || '',
-          },
-        })
-        viewRef.current.dispatch(transaction)
+      if (viewRef.current) {
+        const currentContent = viewRef.current.state.doc.toString()
+        const newValue = value || ''
+        
+        // Only update if content is significantly different (not just typing)
+        if (newValue !== currentContent && !viewRef.current.hasFocus) {
+          const transaction = viewRef.current.state.update({
+            changes: {
+              from: 0,
+              to: viewRef.current.state.doc.length,
+              insert: newValue,
+            },
+          })
+          viewRef.current.dispatch(transaction)
+        }
       }
     }, [value])
 
     return (
       <div
         ref={editorRef}
-        className="inkdrop-editor-container"
+        className="inkdrop-editor-container custom-scrollbar"
         style={{
           flex: 1,
           display: 'flex',

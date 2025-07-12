@@ -1,7 +1,7 @@
 /**
  * Custom hook for managing page lifecycle events (unload, visibility changes)
  */
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { storageService } from '../lib/storage'
 
 interface Note {
@@ -15,13 +15,21 @@ interface UsePageLifecycleProps {
 }
 
 export const usePageLifecycle = ({ currentNote }: UsePageLifecycleProps) => {
+  // Use ref to access current value without requiring effect re-run
+  const currentNoteRef = useRef(currentNote)
+  
+  // Update ref when currentNote changes
+  useEffect(() => {
+    currentNoteRef.current = currentNote
+  }, [currentNote])
+  
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       console.log('[PageLifecycle] Page unloading, flushing pending saves...')
       storageService.flushPendingSaves()
       
       // If there are unsaved changes, warn the user
-      if (currentNote) {
+      if (currentNoteRef.current) {
         e.preventDefault()
         e.returnValue = 'You have unsaved changes. Are you sure you want to leave?'
         return e.returnValue
@@ -44,5 +52,5 @@ export const usePageLifecycle = ({ currentNote }: UsePageLifecycleProps) => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, []) // Remove currentNote dependency to prevent constant remounting
+  }, []) // Empty dependency array is correct since we use ref for currentNote
 }

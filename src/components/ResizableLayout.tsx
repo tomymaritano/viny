@@ -91,6 +91,7 @@ const ResizableLayout = ({
     previewWidth,
     isSidebarVisible,
     isNotesListVisible,
+    sidebarWidth,
   ])
 
   // Handle NotesList resize

@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import Icons from '../Icons'
 import IconButton from './IconButton'
 import { THEME_COLORS, ANIMATIONS } from '../../constants/theme'
+import { useStyles } from '../../hooks/useStyles'
 
 interface BaseModalProps {
   isOpen: boolean
@@ -13,13 +14,6 @@ interface BaseModalProps {
   closeOnBackdrop?: boolean
   closeOnEscape?: boolean
   icon?: React.ReactNode
-}
-
-const maxWidthClasses = {
-  sm: 'max-w-sm',
-  md: 'max-w-md', 
-  lg: 'max-w-lg',
-  xl: 'max-w-xl'
 }
 
 export const BaseModal: React.FC<BaseModalProps> = ({
@@ -34,6 +28,7 @@ export const BaseModal: React.FC<BaseModalProps> = ({
   icon
 }) => {
   const modalRef = useRef<HTMLDivElement>(null)
+  const styles = useStyles()
 
   // Handle ESC key
   useEffect(() => {
@@ -66,7 +61,7 @@ export const BaseModal: React.FC<BaseModalProps> = ({
 
   return (
     <div
-      className={`fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 ${ANIMATIONS.FADE_IN}`}
+      className={styles.cn(styles.modal.overlay(), ANIMATIONS.FADE_IN)}
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
@@ -74,13 +69,13 @@ export const BaseModal: React.FC<BaseModalProps> = ({
     >
       <div
         ref={modalRef}
-        className={`border border-theme-border-primary rounded-lg shadow-xl w-full ${maxWidthClasses[maxWidth]} mx-4 ${ANIMATIONS.ZOOM_IN}`}
+        className={styles.cn(styles.modal.container(maxWidth), ANIMATIONS.ZOOM_IN)}
         style={{ backgroundColor: THEME_COLORS.MODAL_BG }}
         onClick={e => e.stopPropagation()}
         tabIndex={-1}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-theme-border-primary">
+        <div className={styles.modal.header()}>
           <div className="flex items-center gap-2">
             {icon && <span className="text-theme-accent-primary">{icon}</span>}
             <h3 id="modal-title" className="text-lg font-semibold text-theme-text-primary">

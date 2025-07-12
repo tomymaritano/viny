@@ -1,19 +1,87 @@
-/* Main Application Styles - Modular Structure */
+/* Main Application Styles - Migrated to TypeScript */
 
-/* Import all modular CSS files */
-@import './styles/preview.css';
-@import './styles/scrollbar.css';
-@import './styles/themes.css';
-@import './styles/typography.css';
-@import './styles/editor.css';
-@import './styles/components.css';
-@import './styles/search.css';
-@import './styles/sidebar.css';
-@import './styles/customTags.css';
+/* Legacy CSS imports - MIGRATED TO src/config/completeStyles.ts */
+/* All styling is now handled through TypeScript configurations */
+/* @import './styles/preview.css'; - Migrated */
+/* @import './styles/scrollbar.css'; - Migrated */
+/* @import './styles/themes.css'; - Migrated */
+/* @import './styles/typography.css'; - Migrated */
+/* @import './styles/editor.css'; - Migrated */
+/* @import './styles/components.css'; - Migrated */
+/* @import './styles/search.css'; - Migrated */
+/* @import './styles/sidebar.css'; - Migrated */
+/* @import './styles/customTags.css'; - Migrated */
+
+/* Apply theme variables dynamically through TypeScript */
+@import './styles/themes.css'; /* Keep only for CSS variables */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Prevent app scroll and ensure full height */
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+
+.app-container {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Custom scrollbar styles for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-base03, #002b36);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-base01, #586e75);
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-base0, #839496);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--color-base03, #002b36);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-base01, #586e75) var(--color-base03, #002b36);
+}
+
+/* Specific scrollbar for editor and other components */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-base01, #586e75);
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-base0, #839496);
+}
 
 /* Override preview text color to ensure visibility */
 .preview-white-text {
@@ -22,6 +90,219 @@
 
 .preview-white-text * {
   color: inherit;
+}
+
+/* Markdown content styles */
+.markdown-content {
+  color: #cccccc !important;
+  line-height: 1.6;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  color: #ffffff !important;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.markdown-content h1 {
+  font-size: 2rem;
+  border-bottom: 1px solid #3a3a3a;
+  padding-bottom: 0.5rem;
+}
+
+.markdown-content h2 {
+  font-size: 1.5rem;
+}
+
+.markdown-content h3 {
+  font-size: 1.25rem;
+}
+
+.markdown-content p {
+  color: #cccccc !important;
+  margin-bottom: 1rem;
+}
+
+.markdown-content a {
+  color: #4fc3f7 !important;
+  text-decoration: none;
+}
+
+.markdown-content a:hover {
+  text-decoration: underline;
+}
+
+.markdown-content code {
+  background-color: #2a2a2a !important;
+  color: #ff8a65 !important;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.markdown-content pre {
+  background-color: #2a2a2a !important;
+  border: 1px solid #3a3a3a;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.markdown-content pre code {
+  background-color: transparent !important;
+  color: #cccccc !important;
+  padding: 0;
+}
+
+.markdown-content blockquote {
+  border-left: 4px solid #4fc3f7;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: #888888 !important;
+  font-style: italic;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  color: #cccccc !important;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.markdown-content li {
+  color: #cccccc !important;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+/* Nested lists */
+.markdown-content ul ul,
+.markdown-content ol ol,
+.markdown-content ul ol,
+.markdown-content ol ul {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  padding-left: 1.5rem;
+}
+
+/* List markers */
+.markdown-content ul {
+  list-style-type: disc;
+}
+
+.markdown-content ul ul {
+  list-style-type: circle;
+}
+
+.markdown-content ul ul ul {
+  list-style-type: square;
+}
+
+.markdown-content ol {
+  list-style-type: decimal;
+}
+
+.markdown-content ol ol {
+  list-style-type: lower-alpha;
+}
+
+.markdown-content ol ol ol {
+  list-style-type: lower-roman;
+}
+
+/* Task lists (checkboxes) */
+.markdown-content li input[type='checkbox'] {
+  margin-right: 0.5rem;
+  accent-color: #4fc3f7;
+}
+
+.markdown-content li input[type='checkbox']:checked + * {
+  text-decoration: line-through;
+  color: #888888 !important;
+}
+
+/* Definition lists */
+.markdown-content dl {
+  margin: 1rem 0;
+}
+
+.markdown-content dt {
+  color: #ffffff !important;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.markdown-content dd {
+  color: #cccccc !important;
+  margin-left: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* List spacing improvements */
+.markdown-content li p {
+  margin-bottom: 0.5rem;
+}
+
+.markdown-content li p:last-child {
+  margin-bottom: 0;
+}
+
+/* Compact lists */
+.markdown-content ul li:only-child,
+.markdown-content ol li:only-child {
+  margin-bottom: 0;
+}
+
+/* Multi-paragraph list items */
+.markdown-content li > p + p {
+  margin-top: 0.5rem;
+}
+
+.markdown-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.markdown-content th,
+.markdown-content td {
+  border: 1px solid #3a3a3a;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.markdown-content th {
+  background-color: #2a2a2a;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.markdown-content td {
+  color: #cccccc !important;
+}
+
+.markdown-content hr {
+  border: none;
+  border-top: 1px solid #3a3a3a;
+  margin: 2rem 0;
+}
+
+.markdown-content strong {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.markdown-content em {
+  color: #ffffff !important;
+  font-style: italic;
 }
 
 /* Mobile-specific styles */
@@ -53,23 +334,7 @@
   }
 }
 
-/* Scrollbar styles */
-::-webkit-scrollbar {
-  width: 4px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-base01);
-  border-radius: 2px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-base00);
-}
+/* Scrollbar styles are handled by ./styles/scrollbar.css */
 
 /* Tailwind-style border utility classes */
 .border-theme-border-primary {

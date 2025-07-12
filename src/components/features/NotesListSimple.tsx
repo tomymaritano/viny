@@ -79,15 +79,14 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
   const NoteItem = memo(({ note }: { note: Note }) => (
     <div
       key={note.id}
-      className={`group relative border-b border-theme-border-primary hover:bg-theme-bg-tertiary transition-colors cursor-pointer ${
+      className={`group relative border-b border-theme-border-primary hover:bg-theme-bg-tertiary transition-colors cursor-pointer overflow-hidden ${
         selectedNoteId === note.id ? 'bg-[#323D4B]' : ''
       }`}
       onClick={() => handleNoteClick(note.id)}
-      style={{}}
     >
       <div className="p-3">
         <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center flex-1 mr-2">
+          <div className="flex items-center flex-1 mr-2 min-w-0">
             {/* Status Circle */}
             {note.status && note.status !== 'draft' && (
               <div className={`w-2 h-2 rounded-full mr-2 flex-shrink-0 ${
@@ -122,7 +121,7 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
           </div>
         </div>
         
-        <p className="text-sm text-theme-text-secondary line-clamp-2 mb-2">
+        <p className="text-sm text-theme-text-secondary line-clamp-2 mb-2 overflow-hidden">
           {getPreviewText(note.content)}
         </p>
         
@@ -132,10 +131,10 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
         </div>
         
         <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 min-w-0 flex-1">
             {/* Tags */}
             {note.tags.length > 0 && (
-              <div className="flex items-center gap-1 flex-wrap">
+              <div className="flex items-center gap-1 flex-wrap min-w-0">
                 {note.tags.slice(0, 3).map((tag, index) => (
                   <CustomTag 
                     key={index} 
@@ -154,7 +153,7 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
               </div>
             )}
           </div>
-          <span className="text-theme-text-muted">{formatDate(note.updatedAt)}</span>
+          <span className="text-theme-text-muted flex-shrink-0">{formatDate(note.updatedAt)}</span>
         </div>
       </div>
     </div>
@@ -184,7 +183,7 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
 
   if (isEmpty) {
     return (
-      <div className="h-full flex flex-col" style={{ backgroundColor: '#1D1C1D' }}>
+      <div className="h-full flex flex-col bg-theme-bg-primary">
         {/* Header */}
         <div className="relative flex items-center justify-between p-2 border-b border-theme-border-primary flex-shrink-0">
           {/* Sort by title */}
@@ -276,7 +275,7 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
   }
 
   return (
-    <div className="h-full flex flex-col" style={{ backgroundColor: '#1D1C1D' }}>
+    <div className="h-full flex flex-col bg-theme-bg-primary">
       {/* Header */}
       <div className="relative flex items-center justify-between p-2 border-b border-theme-border-primary flex-shrink-0">
         {/* Sort by title */}
@@ -330,7 +329,7 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
       </div>
 
       {/* Notes List */}
-      <div className="flex-1 overflow-y-auto min-h-0">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 custom-scrollbar">
         {filteredNotes.length === 0 ? (
           <div className="h-full flex items-center justify-center">
             <div className="text-theme-text-muted text-center">
