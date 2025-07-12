@@ -33,23 +33,52 @@ body {
   overflow: hidden;
 }
 
-/* Draggable title bar area for native app feel */
+/* Draggable title bar area for Electron */
 .app::before {
   content: '';
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 28px;
+  height: 30px;
   background: transparent;
-  z-index: 1000;
+  z-index: 9999;
   -webkit-app-region: drag;
   pointer-events: none;
 }
 
-/* Make sidebar buttons not draggable */
-.sidebar-modern button {
-  -webkit-app-region: no-drag;
+/* Ensure all content areas are explicitly not draggable */
+.app-container,
+.app-container *,
+.sidebar-modern,
+.sidebar-modern *,
+.notes-list,
+.notes-list *,
+.editor,
+.editor *,
+.monaco-editor,
+.monaco-editor *,
+.preview,
+.preview *,
+.toolbar,
+.toolbar *,
+.resizable-layout,
+.resizable-layout *,
+main,
+main *,
+button,
+input,
+textarea,
+select,
+[role='button'],
+[tabindex],
+.modal,
+.modal *,
+.dropdown,
+.dropdown *,
+.markdown-content,
+.markdown-content * {
+  -webkit-app-region: no-drag !important;
   pointer-events: auto;
 }
 

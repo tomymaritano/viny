@@ -19,7 +19,12 @@ const createWindow = () => {
       v8CacheOptions: 'code',
       backgroundThrottling: false,
     },
-    titleBarStyle: 'hidden',
+    titleBarStyle: 'hiddenInset',
+    titleBarOverlay: {
+      color: '#1a1a1a',
+      symbolColor: '#ffffff',
+      height: 30,
+    },
     title: 'Nototo v1.1.1 - Note Taking App',
     show: false,
     minWidth: 800,

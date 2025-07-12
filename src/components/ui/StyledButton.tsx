@@ -1,7 +1,4 @@
-/**
- * StyledButton - Example component using the new TypeScript styles system
- */
-
+// Simplified StyledButton for backward compatibility
 import React from 'react'
 import { useStyles, type StyleVariants } from '../../hooks/useStyles'
 

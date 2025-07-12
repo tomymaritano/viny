@@ -1,118 +1,47 @@
-/**
- * useStyles Hook - Easy access to the complete styles system
- */
-
-import { useMemo } from 'react'
-import { COMPLETE_STYLES } from '../config/completeStyles'
+// Simplified useStyles hook for backward compatibility
+export interface StyleVariants {
+  button: 'default' | 'primary' | 'secondary' | 'outline'
+}
 
 export const useStyles = () => {
-  return useMemo(() => ({
-    // Direct access to all style categories
-    theme: COMPLETE_STYLES.theme,
-    components: COMPLETE_STYLES.components,
-    sidebar: COMPLETE_STYLES.sidebar,
-    search: COMPLETE_STYLES.search,
-    scrollbar: COMPLETE_STYLES.scrollbar,
-    typography: COMPLETE_STYLES.typography,
-    editor: COMPLETE_STYLES.editor,
-    utils: COMPLETE_STYLES.utils,
+  const cn = (...classes: (string | undefined | false)[]) => {
+    return classes.filter(Boolean).join(' ')
+  }
+
+  const button = (variant: StyleVariants['button'] = 'default') => {
+    const baseClasses = 'px-4 py-2 rounded-lg font-medium transition-colors focus:outline-none'
     
-    // Helper methods for common operations
-    button: (variant: keyof typeof COMPLETE_STYLES.components.button.variants = 'default') => {
-      return `${COMPLETE_STYLES.components.button.base} ${COMPLETE_STYLES.components.button.variants[variant]}`
-    },
-    
-    modal: {
-      overlay: () => COMPLETE_STYLES.components.modal.overlay,
-      container: (maxWidth: 'sm' | 'md' | 'lg' | 'xl' = 'md') => {
-        const widthClasses = {
-          sm: 'max-w-sm',
-          md: 'max-w-md', 
-          lg: 'max-w-lg',
-          xl: 'max-w-xl'
-        }
-        return `${COMPLETE_STYLES.components.modal.container} ${widthClasses[maxWidth]}`
-      },
-      header: () => COMPLETE_STYLES.components.modal.header,
-      content: () => COMPLETE_STYLES.components.modal.content,
-      footer: () => COMPLETE_STYLES.components.modal.footer
-    },
-    
-    input: (variant: 'default' = 'default') => {
-      return COMPLETE_STYLES.components.input.base
-    },
-    
-    card: () => COMPLETE_STYLES.components.card.base,
-    
-    // Theme utilities
-    applyTheme: COMPLETE_STYLES.utils.applyTheme,
-    cn: COMPLETE_STYLES.utils.cn,
-    getVariant: COMPLETE_STYLES.utils.getVariant,
-    
-    // Typography helpers
-    heading: (level: 'h1' | 'h2' | 'h3') => COMPLETE_STYLES.typography.headings[level],
-    prose: {
-      base: () => COMPLETE_STYLES.typography.prose.base,
-      heading: (level: keyof typeof COMPLETE_STYLES.typography.prose.headings) => 
-        COMPLETE_STYLES.typography.prose.headings[level],
-      paragraph: () => COMPLETE_STYLES.typography.prose.paragraph,
-      links: () => COMPLETE_STYLES.typography.prose.links,
-      strong: () => COMPLETE_STYLES.typography.prose.formatting.strong,
-      em: () => COMPLETE_STYLES.typography.prose.formatting.em,
-      del: () => COMPLETE_STYLES.typography.prose.formatting.del,
-      mark: () => COMPLETE_STYLES.typography.prose.formatting.mark
-    },
-    
-    // Sidebar helpers
-    sidebarItem: (isActive: boolean = false) => {
-      return isActive 
-        ? `${COMPLETE_STYLES.sidebar.item.base} ${COMPLETE_STYLES.sidebar.item.active}`
-        : COMPLETE_STYLES.sidebar.item.base
-    },
-    
-    // Search helpers  
-    searchInput: () => ({
-      wrapper: COMPLETE_STYLES.search.inputWrapper,
-      icon: COMPLETE_STYLES.search.inputIcon,
-      input: COMPLETE_STYLES.search.input
-    }),
-    
-    // Editor helpers
-    todoKeyword: (type: keyof typeof COMPLETE_STYLES.editor.todo.keywords) => {
-      if (type === 'base') return COMPLETE_STYLES.editor.todo.keywords.base
-      return `${COMPLETE_STYLES.editor.todo.keywords.base} ${COMPLETE_STYLES.editor.todo.keywords[type]}`
+    switch (variant) {
+      case 'primary':
+        return `${baseClasses} bg-theme-accent-primary text-white hover:bg-theme-accent-primary/90`
+      case 'secondary':
+        return `${baseClasses} bg-theme-bg-tertiary text-theme-text-primary hover:bg-theme-bg-tertiary/80`
+      case 'outline':
+        return `${baseClasses} border border-theme-border-primary text-theme-text-primary hover:bg-theme-bg-tertiary`
+      default:
+        return `${baseClasses} bg-theme-bg-secondary text-theme-text-primary hover:bg-theme-bg-tertiary`
     }
-    
-  }), [])
-}
+  }
 
-// Theme management hook
-export const useTheme = () => {
-  const { applyTheme } = useStyles()
-  
-  const setTheme = (theme: 'dark' | 'light' | 'solarized') => {
-    applyTheme(theme)
-    // Save to localStorage for persistence
-    localStorage.setItem('theme', theme)
-    document.documentElement.setAttribute('data-theme', theme)
+  const modal = {
+    overlay: () => 'fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm',
+    container: (maxWidth: string = 'md') => {
+      const sizeClasses = {
+        sm: 'max-w-sm',
+        md: 'max-w-md', 
+        lg: 'max-w-lg',
+        xl: 'max-w-xl'
+      }
+      return `bg-theme-bg-primary border border-theme-border-primary rounded-lg shadow-xl max-h-[90vh] overflow-hidden ${sizeClasses[maxWidth as keyof typeof sizeClasses] || sizeClasses.md} w-full mx-4`
+    },
+    header: () => 'flex items-center justify-between p-4 border-b border-theme-border-primary bg-theme-bg-secondary'
   }
-  
-  const getCurrentTheme = (): 'dark' | 'light' | 'solarized' => {
-    return (localStorage.getItem('theme') as 'dark' | 'light' | 'solarized') || 'dark'
-  }
-  
+
   return {
-    setTheme,
-    getCurrentTheme,
-    applyTheme
+    cn,
+    button,
+    modal
   }
 }
 
-// Type exports for better DX
-export type StyleVariants = {
-  button: keyof typeof COMPLETE_STYLES.components.button.variants
-  modalWidth: 'sm' | 'md' | 'lg' | 'xl'
-  theme: keyof typeof COMPLETE_STYLES.theme
-  proseHeading: keyof typeof COMPLETE_STYLES.typography.prose.headings
-  todoKeyword: keyof typeof COMPLETE_STYLES.editor.todo.keywords
-}
+export type { StyleVariants as default }

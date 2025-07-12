@@ -12,13 +12,7 @@ import CreateNotebookModal from '../ui/CreateNotebookModal'
 import DropdownMenu, { DropdownMenuItem } from '../ui/DropdownMenu'
 import { getCustomTagColor } from '../../utils/customTagColors'
 
-// Import modular sidebar components
-import SidebarHeader from './sidebar/SidebarHeader'
-import MainNavigationSection from './sidebar/MainNavigationSection'
-import NotebooksSection from './sidebar/NotebooksSection'
-import StatusSection from './sidebar/StatusSection'
-import TagsSection from './sidebar/TagsSection'
-import SystemSection from './sidebar/SystemSection'
+// Import modular sidebar components (removed unused imports)
 
 const SidebarSimple: React.FC = memo(() => {
   const {

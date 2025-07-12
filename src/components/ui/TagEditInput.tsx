@@ -1,42 +1,38 @@
-import React from 'react'
+// Simplified TagEditInput for backward compatibility
+import React, { forwardRef } from 'react'
 
 interface TagEditInputProps {
   value: string
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void
-  onBlur: (e: React.FocusEvent<HTMLInputElement>) => void
-  inputRef: React.RefObject<HTMLInputElement>
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
+  onBlur?: () => void
   className?: string
-  style?: React.CSSProperties
-  autoFocus?: boolean
+  placeholder?: string
 }
 
-const TagEditInput: React.FC<TagEditInputProps> = ({
+const TagEditInput = forwardRef<HTMLInputElement, TagEditInputProps>(({
   value,
   onChange,
   onKeyDown,
   onBlur,
-  inputRef,
   className = '',
-  style = {},
-  autoFocus = true,
-}) => {
+  placeholder = ''
+}, ref) => {
   return (
-    <>
-      <span>#</span>
-      <input
-        ref={inputRef}
-        type="text"
-        value={value}
-        onChange={onChange}
-        onKeyDown={onKeyDown}
-        onBlur={onBlur}
-        className={`bg-transparent text-xs outline-none ${className}`}
-        style={{ color: 'inherit', ...style }}
-        autoFocus={autoFocus}
-      />
-    </>
+    <input
+      ref={ref}
+      type="text"
+      value={value}
+      onChange={onChange}
+      onKeyDown={onKeyDown}
+      onBlur={onBlur}
+      placeholder={placeholder}
+      className={`bg-transparent outline-none border-none ${className}`}
+      autoFocus
+    />
   )
-}
+})
+
+TagEditInput.displayName = 'TagEditInput'
 
 export default TagEditInput
