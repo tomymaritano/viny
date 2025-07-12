@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import Icons from '../Icons'
-import IconButton from './IconButton'
-import { THEME_COLORS, ANIMATIONS } from '../../constants/theme'
+import BaseModal from './BaseModal'
 import { Notebook, NOTEBOOK_COLORS } from '../../types/notebook'
 
 interface CreateNotebookModalProps {

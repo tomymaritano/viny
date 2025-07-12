@@ -464,7 +464,7 @@ export const useSidebarLogic = () => {
 
   const notebooksWithCounts = useMemo(() => {
     return getNotebookWithCounts(notebooks, notes)
-      .sort((a, b) => b.totalCount - a.totalCount)
+      .sort((a, b) => a.name.localeCompare(b.name))
   }, [notes, notebooks])
 
   const tagsWithCounts = useMemo(() => {

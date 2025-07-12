@@ -9,13 +9,21 @@ import {
   TAG_COLOR_OPTIONS,
 } from '../constants/theme'
 
+interface TagColor {
+  bg: string
+  border: string
+  text: string
+  name: string
+}
+
+interface CustomTagColors {
+  [tagName: string]: string
+}
+
 /**
  * Get custom color for a tag
- * @param {string} tagName - Name of the tag
- * @param {Object} customTagColors - Custom colors stored in localStorage
- * @returns {Object} Color object with bg, border, text, and name properties
  */
-export const getCustomTagColor = (tagName, customTagColors = {}) => {
+export const getCustomTagColor = (tagName: string, customTagColors: CustomTagColors = {}): TagColor => {
   const lowerTagName = tagName.toLowerCase()
 
   // Check if user has set a custom color for this tag
@@ -42,13 +50,16 @@ export const getCustomTagColor = (tagName, customTagColors = {}) => {
   return CUSTOM_TAG_COLORS[colorKey]
 }
 
+interface TagStyle {
+  backgroundColor: string
+  border: string
+  color: string
+}
+
 /**
  * Get CSS style object for a tag
- * @param {string} tagName - Name of the tag
- * @param {Object} customTagColors - Custom colors stored in localStorage
- * @returns {Object} CSS style object
  */
-export const getTagStyle = (tagName, customTagColors = {}) => {
+export const getTagStyle = (tagName: string, customTagColors: CustomTagColors = {}): TagStyle => {
   const color = getCustomTagColor(tagName, customTagColors)
   return {
     backgroundColor: color.bg,
@@ -59,11 +70,8 @@ export const getTagStyle = (tagName, customTagColors = {}) => {
 
 /**
  * Get Tailwind-compatible CSS classes for a tag (fallback for components that need classes)
- * @param {string} tagName - Name of the tag
- * @param {Object} customTagColors - Custom colors stored in localStorage
- * @returns {string} CSS classes string
  */
-export const getTagClasses = (tagName, customTagColors = {}) => {
+export const getTagClasses = (tagName: string, customTagColors: CustomTagColors = {}): string => {
   // Return base classes and use CSS custom properties for colors
   return `tag-custom border rounded-md px-2 py-1 text-xs font-medium transition-colors hover:opacity-80`
 }

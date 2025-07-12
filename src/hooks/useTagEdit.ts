@@ -1,16 +1,28 @@
 import { useState, useEffect, useRef } from 'react'
 import { updateTag } from '../utils/tagValidation'
 
+interface UseTagEditReturn {
+  editingTag: number | null
+  editValue: string
+  editInputRef: React.RefObject<HTMLInputElement>
+  handleEditTag: (tagIndex: number, tagValue: string) => void
+  handleSaveEdit: () => void
+  handleCancelEdit: () => void
+  handleEditKeyDown: (e: React.KeyboardEvent) => void
+  setEditValue: React.Dispatch<React.SetStateAction<string>>
+  isEditing: (tagIndex: number) => boolean
+}
+
 /**
  * Custom hook for managing tag editing functionality
- * @param {string[]} tags - Array of current tags
- * @param {function} onTagsChange - Callback when tags change
- * @returns {object} - Tag editing state and handlers
  */
-export const useTagEdit = (tags, onTagsChange) => {
-  const [editingTag, setEditingTag] = useState(null)
+export const useTagEdit = (
+  tags: string[], 
+  onTagsChange: (tags: string[]) => void
+): UseTagEditReturn => {
+  const [editingTag, setEditingTag] = useState<number | null>(null)
   const [editValue, setEditValue] = useState('')
-  const editInputRef = useRef(null)
+  const editInputRef = useRef<HTMLInputElement>(null)
 
   // Focus and select text when editing starts
   useEffect(() => {
@@ -22,10 +34,8 @@ export const useTagEdit = (tags, onTagsChange) => {
 
   /**
    * Start editing a tag
-   * @param {number} tagIndex - Index of the tag to edit
-   * @param {string} tagValue - Current value of the tag
    */
-  const handleEditTag = (tagIndex, tagValue) => {
+  const handleEditTag = (tagIndex: number, tagValue: string) => {
     setEditingTag(tagIndex)
     setEditValue(tagValue)
   }
@@ -54,9 +64,8 @@ export const useTagEdit = (tags, onTagsChange) => {
 
   /**
    * Handle keyboard events during editing
-   * @param {KeyboardEvent} e - The keyboard event
    */
-  const handleEditKeyDown = e => {
+  const handleEditKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault()
       handleSaveEdit()
@@ -68,10 +77,8 @@ export const useTagEdit = (tags, onTagsChange) => {
 
   /**
    * Check if a specific tag is being edited
-   * @param {number} tagIndex - Index to check
-   * @returns {boolean}
    */
-  const isEditing = tagIndex => editingTag === tagIndex
+  const isEditing = (tagIndex: number): boolean => editingTag === tagIndex
 
   return {
     // State

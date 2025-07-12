@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect, memo } from 'react'
 import Icons from './Icons'
 import ExportDialog from './ExportDialog'
 import NoteMetadata from './editor/metadata/NoteMetadata'
-import AppHeader from './ui/AppHeader'
 import { useSettings } from '../hooks/useSettings'
 import { useSimpleStore } from '../stores/simpleStore'
 import TaskProgress from './ui/TaskProgress'
@@ -73,39 +72,31 @@ const NotePreview: React.FC<NotePreviewProps> = ({
 
   if (!note) {
     return (
-      <div className="flex-1 bg-theme-bg-primary flex flex-col h-full">
-        <AppHeader 
-          title="No Note Selected"
-          showCreateButton={false}
-          showSearchButton={true}
-        />
-        
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center max-w-md">
-            <div className="w-20 h-20 mx-auto mb-6 bg-theme-bg-secondary/30 rounded-full flex items-center justify-center">
-              <Icons.NotebookText size={32} className="text-theme-text-muted/50" />
-            </div>
-            <h3 className="text-xl font-medium text-theme-text-secondary mb-3">
-              No note selected
-            </h3>
-            <p className="text-sm text-theme-text-muted mb-6 leading-relaxed">
-              Select a note from the list to view it here, or create a new one to get started.
-            </p>
+      <div className="flex-1 bg-theme-bg-primary flex items-center justify-center h-full">
+        <div className="text-center max-w-md">
+          <div className="w-20 h-20 mx-auto mb-6 bg-theme-bg-secondary/30 rounded-full flex items-center justify-center">
+            <Icons.NotebookText size={32} className="text-theme-text-muted/50" />
+          </div>
+          <h3 className="text-xl font-medium text-theme-text-secondary mb-3">
+            No note selected
+          </h3>
+          <p className="text-sm text-theme-text-muted mb-6 leading-relaxed">
+            Select a note from the list to view it here, or create a new one to get started.
+          </p>
 
-            <div className="text-xs text-theme-text-muted">
-              <div className="flex items-center justify-center space-x-4">
-                <div className="flex items-center space-x-1">
-                  <kbd className="px-2 py-1 bg-theme-bg-tertiary text-theme-text-muted rounded text-xs">⌘</kbd>
-                  <span>+</span>
-                  <kbd className="px-2 py-1 bg-theme-bg-tertiary text-theme-text-muted rounded text-xs">N</kbd>
-                  <span className="ml-1">to create</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <kbd className="px-2 py-1 bg-theme-bg-tertiary text-theme-text-muted rounded text-xs">⌘</kbd>
-                  <span>+</span>
-                  <kbd className="px-2 py-1 bg-theme-bg-tertiary text-theme-text-muted rounded text-xs">K</kbd>
-                  <span className="ml-1">to search</span>
-                </div>
+          <div className="text-xs text-theme-text-muted">
+            <div className="flex items-center justify-center space-x-4">
+              <div className="flex items-center space-x-1">
+                <kbd className="px-2 py-1 bg-theme-bg-tertiary text-theme-text-muted rounded text-xs">⌘</kbd>
+                <span>+</span>
+                <kbd className="px-2 py-1 bg-theme-bg-tertiary text-theme-text-muted rounded text-xs">N</kbd>
+                <span className="ml-1">to create</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <kbd className="px-2 py-1 bg-theme-bg-tertiary text-theme-text-muted rounded text-xs">⌘</kbd>
+                <span>+</span>
+                <kbd className="px-2 py-1 bg-theme-bg-tertiary text-theme-text-muted rounded text-xs">K</kbd>
+                <span className="ml-1">to search</span>
               </div>
             </div>
           </div>

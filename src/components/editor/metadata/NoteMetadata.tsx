@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import Icons from '../../Icons'
 import TagContextMenu from '../../ui/TagContextMenu'
@@ -6,11 +6,18 @@ import TagEditInput from '../../ui/TagEditInput'
 import DropdownMenu, { DropdownMenuItem } from '../../ui/DropdownMenu'
 import CustomTag from '../../ui/CustomTag'
 import TagSettingsModal from '../tags/TagSettingsModal'
+import BaseModal from '../../ui/BaseModal'
 import { useSimpleStore } from '../../../stores/simpleStore'
 import { useNotebooks } from '../../../hooks/useNotebooks'
 import { useTagEdit } from '../../../hooks/useTagEdit'
-import { addTag, removeTag } from '../../../utils/tagValidation'
+import { addTag, removeTag, updateTag } from '../../../utils/tagValidation'
 import { THEME_COLORS } from '../../../constants/theme'
+
+interface NotebookOption {
+  value: string
+  label: string
+  icon: string
+}
 
 const NoteMetadata = ({
   note,
@@ -20,9 +27,13 @@ const NoteMetadata = ({
   onTagsChange,
   isPreviewMode = false,
 }) => {
-  const [showNotebookDropdown, setShowNotebookDropdown] = useState(false)
+  const [showNotebookModal, setShowNotebookModal] = useState(false)
+  const [notebookSearchInput, setNotebookSearchInput] = useState('')
   const [showStatusDropdown, setShowStatusDropdown] = useState(false)
   const [localTitle, setLocalTitle] = useState(note?.title || '')
+  const [tagInput, setTagInput] = useState('')
+  const [showTagSuggestions, setShowTagSuggestions] = useState(false)
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1)
   const [contextMenu, setContextMenu] = useState({
     show: false,
     x: 0,
@@ -30,9 +41,50 @@ const NoteMetadata = ({
     tag: null,
     index: null,
   })
-  const [tagSettingsModal, setTagSettingsModal] = useState({ show: false, tagName: '' })
-  const { setTagColor, setModal } = useSimpleStore()
+  const [tagSettingsModal, setTagSettingsModal] = useState({ show: false, tagName: '', tagIndex: null })
+  const { setTagColor, setModal, notes } = useSimpleStore()
   const { flatNotebooks } = useNotebooks()
+  
+  // Get all unique tags from all notes for suggestions
+  const allTags = useMemo(() => {
+    const tagsSet = new Set<string>()
+    notes.forEach(note => {
+      note.tags?.forEach(tag => tagsSet.add(tag))
+    })
+    return Array.from(tagsSet).sort()
+  }, [notes])
+
+  // Filter tag suggestions based on input
+  const tagSuggestions = useMemo((): string[] => {
+    if (!tagInput.trim()) return []
+    
+    const currentTags = note?.tags || []
+    const query = tagInput.toLowerCase()
+    
+    return allTags
+      .filter(tag => 
+        tag.toLowerCase().includes(query) && 
+        !currentTags.includes(tag) // Don't suggest tags that are already added
+      )
+      .slice(0, 5) // Limit to 5 suggestions
+  }, [tagInput, allTags, note?.tags])
+
+  // Prepare notebook options for dropdown using data from store
+  const notebookOptions = flatNotebooks.map(notebook => ({
+    value: notebook.name, // Use name for compatibility
+    label: notebook.name.charAt(0).toUpperCase() + notebook.name.slice(1),
+    icon: 'Book'
+  }))
+
+  // Filter notebooks based on search input
+  const filteredNotebooks = useMemo((): NotebookOption[] => {
+    if (!notebookSearchInput.trim()) return notebookOptions
+    
+    const query = notebookSearchInput.toLowerCase()
+    return notebookOptions.filter(notebook => 
+      notebook.label.toLowerCase().includes(query)
+    )
+  }, [notebookSearchInput, notebookOptions])
 
   // Use the custom tag editing hook
   const {
@@ -57,6 +109,18 @@ const NoteMetadata = ({
     setLocalTitle(note?.title || '')
   }, [note?.id, note?.title])
 
+  // Notebook modal handlers
+  const handleNotebookSelect = (notebookValue) => {
+    onNotebookChange({ target: { value: notebookValue } })
+    setShowNotebookModal(false)
+    setNotebookSearchInput('')
+  }
+
+  const handleNotebookModalClose = () => {
+    setShowNotebookModal(false)
+    setNotebookSearchInput('')
+  }
+
   const statusOptions = [
     { value: 'draft', label: 'Draft', color: 'bg-gray-400', icon: 'FileText' },
     { value: 'in-progress', label: 'In Progress', color: 'bg-blue-400', icon: 'Clock' },
@@ -65,28 +129,58 @@ const NoteMetadata = ({
     { value: 'archived', label: 'Archived', color: 'bg-red-400', icon: 'Archive' },
   ]
 
-  // Prepare notebook options for dropdown using data from store
-  const notebookOptions = flatNotebooks.map(notebook => ({
-    value: notebook.name, // Use name for compatibility
-    label: notebook.name.charAt(0).toUpperCase() + notebook.name.slice(1),
-    icon: 'Book'
-  }))
-
   const handleTagsInput = e => {
     if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault()
-      const newTags = e.target.value
-        .split(/[,\n]/)
-        .map(tag => tag.trim())
-        .filter(tag => tag.length > 0)
+      
+      // If there's a selected suggestion, use it
+      if (showTagSuggestions && selectedSuggestionIndex >= 0 && tagSuggestions[selectedSuggestionIndex]) {
+        addTagFromInput(tagSuggestions[selectedSuggestionIndex])
+      } else if (tagInput.trim()) {
+        // Otherwise, add the typed text
+        addTagFromInput(tagInput.trim())
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      if (tagSuggestions.length > 0) {
+        setSelectedSuggestionIndex(prev => 
+          prev < tagSuggestions.length - 1 ? prev + 1 : 0
+        )
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      if (tagSuggestions.length > 0) {
+        setSelectedSuggestionIndex(prev => 
+          prev > 0 ? prev - 1 : tagSuggestions.length - 1
+        )
+      }
+    } else if (e.key === 'Escape') {
+      setShowTagSuggestions(false)
+      setSelectedSuggestionIndex(-1)
+    }
+  }
 
-      let updatedTags = note?.tags || []
-      newTags.forEach(tag => {
-        updatedTags = addTag(tag, updatedTags)
-      })
+  const addTagFromInput = (tagToAdd) => {
+    let updatedTags = note?.tags || []
+    updatedTags = addTag(tagToAdd, updatedTags)
+    onTagsChange(updatedTags)
+    
+    // Clear input and hide suggestions
+    setTagInput('')
+    setShowTagSuggestions(false)
+    setSelectedSuggestionIndex(-1)
+  }
 
-      onTagsChange(updatedTags)
-      e.target.value = ''
+  const handleTagInputChange = (e) => {
+    const value = e.target.value
+    setTagInput(value)
+    
+    if (value.trim()) {
+      setShowTagSuggestions(true)
+      setSelectedSuggestionIndex(-1)
+    } else {
+      setShowTagSuggestions(false)
+      setSelectedSuggestionIndex(-1)
     }
   }
 
@@ -113,8 +207,13 @@ const NoteMetadata = ({
       
       // Close dropdowns if clicking outside
       if (!event.target.closest('.dropdown-container')) {
-        setShowNotebookDropdown(false)
         setShowStatusDropdown(false)
+      }
+      
+      // Close tag suggestions if clicking outside the tag input area
+      if (!event.target.closest('.relative.flex-1.min-w-24')) {
+        setShowTagSuggestions(false)
+        setSelectedSuggestionIndex(-1)
       }
     }
 
@@ -132,22 +231,36 @@ const NoteMetadata = ({
   }
 
   const handleTagSettings = () => {
-    setTagSettingsModal({ show: true, tagName: contextMenu.tag })
+    setTagSettingsModal({ show: true, tagName: contextMenu.tag || '', tagIndex: contextMenu.index })
     closeContextMenu()
   }
 
-  const handleTagNameChange = (oldName, newName) => {
-    if (oldName !== newName && contextMenu.index !== null) {
-      const updatedTags = [...(note?.tags || [])]
-      updatedTags[contextMenu.index] = newName
-      onTagsChange(updatedTags)
+  const handleTagNameChange = (oldName: string, newName: string) => {
+    console.log('[Tag Change] Old:', oldName, 'New:', newName, 'Index:', tagSettingsModal.tagIndex)
+    
+    // Use the saved tagIndex from the modal state
+    if (tagSettingsModal.tagIndex !== null) {
+      const currentTags = note?.tags || []
+      const updatedTags = updateTag(newName, tagSettingsModal.tagIndex, currentTags)
+      
+      console.log('[Tag Change] Current tags:', currentTags, 'Updated tags:', updatedTags)
+      
+      // Only update if the validation passed (updateTag returns a new array)
+      if (updatedTags !== currentTags) {
+        onTagsChange(updatedTags)
+        console.log('[Tag Change] Tags updated successfully')
+      } else {
+        console.log('[Tag Change] No change in tags (validation may have failed)')
+      }
+    } else {
+      console.log('[Tag Change] Warning: tagIndex is null')
     }
   }
 
-  const formatDate = dateString => {
+  const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     const now = new Date()
-    const diffTime = Math.abs(now - date)
+    const diffTime = Math.abs(now.getTime() - date.getTime())
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
     if (diffDays === 1) return 'Today'
@@ -161,7 +274,7 @@ const NoteMetadata = ({
     })
   }
 
-  const formatDatetime = dateString => {
+  const formatDatetime = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
@@ -244,147 +357,143 @@ const NoteMetadata = ({
             />
           </div>
 
-          {/* Metadata Controls - Improved compact layout */}
-          <div className="space-y-2">
-            {/* First row: Notebook and Status - consistent height and spacing */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                {/* Notebook selector */}
-                <div className="relative dropdown-container">
-                  <button
-                    onClick={() => setShowNotebookDropdown(!showNotebookDropdown)}
-                    className="flex items-center space-x-2 px-3 py-2 text-xs bg-theme-bg-secondary/30 text-theme-text-secondary rounded-lg hover:bg-theme-bg-secondary/50 transition-colors border border-theme-border-primary/30"
-                  >
-                    <Icons.Book size={12} className="text-theme-accent-primary" />
-                    <span className="max-w-24 truncate font-medium">
-                      {note?.notebook?.name || note?.notebook || 'Select notebook'}
-                    </span>
-                    <Icons.ChevronDown size={10} className={`transition-transform ${showNotebookDropdown ? 'rotate-180' : ''}`} />
-                  </button>
-                  
-                  <DropdownMenu
-                    isOpen={showNotebookDropdown}
-                    width="w-48"
-                  >
-                    {notebookOptions.map((option) => (
-                      <DropdownMenuItem
-                        key={option.value}
-                        onClick={() => {
-                          onNotebookChange({ target: { value: option.value } })
-                          setShowNotebookDropdown(false)
-                        }}
-                        icon={<Icons.Book size={12} />}
-                      >
-                        {option.label}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenu>
-                </div>
+          {/* Metadata Controls - Ultra compact single-row layout */}
+          <div className="flex items-center gap-2 px-2 py-1.5 bg-theme-bg-secondary/20 rounded-lg">
+            {/* Notebook selector - minimal */}
+            <div className="relative">
+              <button
+                onClick={() => setShowNotebookModal(true)}
+                className="flex items-center gap-1 px-2 py-1 text-xs bg-theme-bg-tertiary/50 text-theme-text-secondary rounded hover:bg-theme-bg-tertiary transition-colors border-none"
+                title={`Notebook: ${note?.notebook?.name || note?.notebook || 'None'}`}
+              >
+                <Icons.Book size={10} className="text-theme-accent-primary" />
+                <span className="max-w-16 truncate font-medium">
+                  {note?.notebook?.name || note?.notebook || 'None'}
+                </span>
+                <Icons.ChevronDown size={12} />
+              </button>
+            </div>
 
-                {/* Status selector */}
-                <div className="relative dropdown-container">
-                  <button
-                    onClick={() => setShowStatusDropdown(!showStatusDropdown)}
-                    className="flex items-center space-x-2 px-3 py-2 text-xs bg-theme-bg-secondary/30 text-theme-text-secondary rounded-lg hover:bg-theme-bg-secondary/50 transition-colors border border-theme-border-primary/30"
+            {/* Status selector - minimal */}
+            <div className="relative dropdown-container">
+              <button
+                onClick={() => setShowStatusDropdown(!showStatusDropdown)}
+                className="flex items-center gap-1 px-2 py-1 text-xs bg-theme-bg-tertiary/50 text-theme-text-secondary rounded hover:bg-theme-bg-tertiary transition-colors border-none"
+                title={`Status: ${statusOptions.find(s => s.value === note?.status)?.label || 'None'}`}
+              >
+                {(() => {
+                  const currentStatus = statusOptions.find(s => s.value === note?.status)
+                  return (
+                    <>
+                      <div className={`w-1.5 h-1.5 rounded-full ${currentStatus?.color || 'bg-gray-400'}`} />
+                      <span className="max-w-12 truncate font-medium">
+                        {currentStatus?.label || 'Status'}
+                      </span>
+                      <Icons.ChevronDown size={12} className={`transition-transform ${showStatusDropdown ? 'rotate-180' : ''}`} />
+                    </>
+                  )
+                })()}
+              </button>
+              
+              <DropdownMenu isOpen={showStatusDropdown} width="w-36">
+                {statusOptions.map((option) => (
+                  <DropdownMenuItem
+                    key={option.value}
+                    onClick={() => {
+                      onStatusChange({ target: { value: option.value } })
+                      setShowStatusDropdown(false)
+                    }}
+                    icon={<div className={`w-1.5 h-1.5 rounded-full ${option.color}`} />}
                   >
-                    {(() => {
-                      const currentStatus = statusOptions.find(s => s.value === note?.status)
-                      return (
-                        <>
-                          <div className={`w-2 h-2 rounded-full ${currentStatus?.color || 'bg-gray-400'}`} />
-                          <span className="font-medium">
-                            {currentStatus?.label || 'Set status'}
-                          </span>
-                          <Icons.ChevronDown size={10} className={`transition-transform ${showStatusDropdown ? 'rotate-180' : ''}`} />
-                        </>
-                      )
-                    })()}
-                  </button>
-                  
-                  <DropdownMenu
-                    isOpen={showStatusDropdown}
-                    width="w-40"
-                  >
-                    {statusOptions.map((option) => (
-                      <DropdownMenuItem
-                        key={option.value}
-                        onClick={() => {
-                          onStatusChange({ target: { value: option.value } })
-                          setShowStatusDropdown(false)
-                        }}
-                        icon={<div className={`w-2 h-2 rounded-full ${option.color}`} />}
-                      >
-                        {option.label}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenu>
-                </div>
-              </div>
+                    {option.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenu>
+            </div>
 
-              {/* Date Information - Compact on right */}
-              <div className="flex items-center space-x-3 text-xs text-theme-text-muted">
-                {note?.createdAt && (
-                  <div className="flex items-center space-x-1">
-                    <Icons.Plus size={11} className="text-theme-accent-green" />
-                    <span>{formatDate(note.createdAt)}</span>
-                  </div>
-                )}
-                {note?.updatedAt && (
-                  <div className="flex items-center space-x-1">
-                    <Icons.Clock size={11} className="text-theme-accent-cyan" />
-                    <span>{formatDate(note.updatedAt)}</span>
+            {/* Tags section - compact inline */}
+            <div className="flex items-center gap-1 flex-1 min-w-0">
+              <Icons.Tag size={10} className="text-theme-accent-secondary flex-shrink-0" />
+              
+              {/* Existing tags - smaller */}
+              {note?.tags && note.tags.length > 0 && note.tags.slice(0, 3).map((tag: string, index: number) => (
+                <div key={`${tag}-${index}`} className="relative">
+                  {isEditing(index) ? (
+                    <div className={`inline-flex items-center px-1.5 py-0.5 text-xs rounded border ${THEME_COLORS.RING_FOCUS}`}>
+                      <TagEditInput
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onKeyDown={handleEditKeyDown}
+                        onBlur={handleSaveEdit}
+                        inputRef={editInputRef}
+                        className="min-w-[30px] max-w-[60px] text-xs"
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      onContextMenu={e => handleTagRightClick(e, tag, index)}
+                      title="Right-click for options, double-click to edit"
+                    >
+                      <CustomTag
+                        tagName={tag}
+                        size="xs"
+                        onClick={() => {
+                          // Single click - could add functionality here if needed
+                        }}
+                        className="cursor-pointer hover:scale-105 transition-transform text-xs"
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+              
+              {/* Show "+N more" if there are more than 3 tags */}
+              {note?.tags && note.tags.length > 3 && (
+                <span className="text-xs text-theme-text-muted px-1 py-0.5 bg-theme-bg-tertiary/30 rounded">
+                  +{note.tags.length - 3}
+                </span>
+              )}
+              
+              {/* Tag input - minimal */}
+              <div className="relative flex-1 min-w-16">
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={handleTagInputChange}
+                  placeholder="Add tag..."
+                  onKeyDown={handleTagsInput}
+                  className="w-full bg-transparent text-xs text-theme-text-secondary border-none outline-none placeholder-theme-text-muted/50"
+                />
+                
+                {/* Tag suggestions dropdown */}
+                {showTagSuggestions && tagSuggestions.length > 0 && (
+                  <div className="absolute top-full left-0 z-50 mt-1 bg-theme-bg-secondary border border-theme-border-primary rounded-md shadow-lg py-1 min-w-40 max-h-28 overflow-y-auto">
+                    {tagSuggestions.map((suggestion: string, index: number) => (
+                      <button
+                        key={suggestion}
+                        onClick={() => addTagFromInput(suggestion)}
+                        className={`w-full text-left px-2 py-1 text-xs transition-colors ${
+                          index === selectedSuggestionIndex
+                            ? 'bg-theme-accent-primary/10 text-theme-accent-primary'
+                            : 'text-theme-text-secondary hover:bg-theme-bg-tertiary hover:text-theme-text-primary'
+                        }`}
+                      >
+                        #{suggestion}
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Second row: Tags - full width for better tag management */}
-            <div className="flex items-center space-x-2 px-3 py-2 bg-theme-bg-secondary/20 rounded-lg border border-theme-border-primary/20 hover:bg-theme-bg-secondary/30 transition-colors">
-              <Icons.Tag size={12} className="text-theme-accent-secondary flex-shrink-0" />
-              
-              {/* Existing tags */}
-              <div className="flex items-center flex-wrap gap-1 flex-1">
-                {note?.tags && note.tags.length > 0 && note.tags.map((tag, index) => (
-                  <div key={`${tag}-${index}`} className="relative">
-                    {isEditing(index) ? (
-                      <div className={`inline-flex items-center px-2 py-1 text-xs rounded-lg border flex-shrink-0 transition-opacity ${THEME_COLORS.RING_FOCUS}`}>
-                        <TagEditInput
-                          value={editValue}
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onKeyDown={handleEditKeyDown}
-                          onBlur={handleSaveEdit}
-                          inputRef={editInputRef}
-                          className="min-w-[40px] max-w-[100px]"
-                        />
-                      </div>
-                    ) : (
-                      <div
-                        onContextMenu={e => handleTagRightClick(e, tag, index)}
-                        title="Right-click for options, double-click to edit"
-                      >
-                        <CustomTag
-                          tagName={tag}
-                          size="sm"
-                          onClick={(e) => {
-                            if (e && e.detail === 2) { // Double click to edit
-                              handleEditTag(index, tag)
-                            }
-                          }}
-                          className="cursor-pointer hover:scale-105 transition-transform"
-                        />
-                      </div>
-                    )}
-                  </div>
-                ))}
-                
-                {/* Tag input */}
-                <input
-                  type="text"
-                  placeholder={note?.tags?.length > 0 ? "Add more tags..." : "Add tags..."}
-                  onKeyDown={handleTagsInput}
-                  className="flex-1 min-w-24 bg-transparent text-xs text-theme-text-secondary border-none outline-none placeholder-theme-text-muted/60"
-                />
-              </div>
+            {/* Date info - ultra compact */}
+            <div className="flex items-center gap-2 text-xs text-theme-text-muted flex-shrink-0">
+              {note?.updatedAt && (
+                <div className="flex items-center gap-1" title={`Updated: ${formatDate(note.updatedAt)}`}>
+                  <Icons.Clock size={9} className="text-theme-accent-cyan" />
+                  <span className="hidden sm:inline">{formatDate(note.updatedAt)}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -403,10 +512,93 @@ const NoteMetadata = ({
       {/* Tag Settings Modal */}
       <TagSettingsModal
         isOpen={tagSettingsModal.show}
-        onClose={() => setTagSettingsModal({ show: false, tagName: '' })}
+        onClose={() => setTagSettingsModal({ show: false, tagName: '', tagIndex: null })}
         tagName={tagSettingsModal.tagName}
         onTagNameChange={handleTagNameChange}
       />
+
+      {/* Notebook Selection Modal */}
+      <BaseModal
+        isOpen={showNotebookModal}
+        onClose={handleNotebookModalClose}
+        title="Move to"
+        icon={<Icons.FolderOpen size={20} />}
+        maxWidth="md"
+      >
+        {/* Search Input */}
+        <div className="p-4 border-b border-theme-border-primary">
+          <div className="relative">
+            <Icons.Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-theme-text-muted" />
+            <input
+              type="text"
+              value={notebookSearchInput}
+              onChange={(e) => setNotebookSearchInput(e.target.value)}
+              placeholder="Search notebooks..."
+              className="w-full pl-10 pr-4 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
+              autoFocus
+            />
+          </div>
+        </div>
+
+        {/* Notebook List */}
+        <div className="max-h-64 overflow-y-auto">
+          {filteredNotebooks.length > 0 ? (
+            filteredNotebooks.map((notebook: NotebookOption) => {
+              // Get notebook details from flatNotebooks to access level/hierarchy info
+              const notebookDetails = flatNotebooks.find(nb => nb.name === notebook.value)
+              const level = notebookDetails?.level || 0
+              const isSelected = note?.notebook === notebook.value
+              
+              return (
+                <button
+                  key={notebook.value}
+                  onClick={() => handleNotebookSelect(notebook.value)}
+                  className={`w-full px-4 py-3 text-left hover:bg-theme-bg-tertiary transition-colors flex items-center gap-3 group ${
+                    isSelected ? 'bg-theme-bg-tertiary/50' : ''
+                  }`}
+                  style={{ paddingLeft: `${16 + (level * 24)}px` }}
+                >
+                  {/* Hierarchy indicator */}
+                  {level > 0 && (
+                    <div className="flex items-center">
+                      {Array.from({ length: level }).map((_, i) => (
+                        <div key={i} className="w-3 h-px bg-theme-border-primary/30 mr-1" />
+                      ))}
+                      <Icons.ChevronRight size={10} className="text-theme-text-muted mr-1" />
+                    </div>
+                  )}
+                  
+                  <Icons.Book 
+                    size={16} 
+                    className={`flex-shrink-0 ${
+                      level > 0 ? 'text-theme-text-muted' : 'text-theme-accent-primary'
+                    }`} 
+                  />
+                  
+                  <span className={`text-sm font-medium ${
+                    isSelected 
+                      ? 'text-theme-accent-primary' 
+                      : level > 0 
+                        ? 'text-theme-text-secondary' 
+                        : 'text-theme-text-primary'
+                  }`}>
+                    {notebook.label}
+                  </span>
+                  
+                  {isSelected && (
+                    <Icons.Check size={16} className="text-theme-accent-primary ml-auto flex-shrink-0" />
+                  )}
+                </button>
+              )
+            })
+          ) : (
+            <div className="p-4 text-center text-theme-text-muted">
+              <Icons.Search size={24} className="mx-auto mb-2 opacity-50" />
+              <p className="text-sm">No notebooks found</p>
+            </div>
+          )}
+        </div>
+      </BaseModal>
     </div>
   )
 }

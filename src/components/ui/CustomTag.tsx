@@ -7,7 +7,7 @@ interface CustomTagProps {
   onClick?: () => void
   onRemove?: () => void
   removable?: boolean
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg'
   className?: string
 }
 
@@ -25,13 +25,14 @@ export const CustomTag: React.FC<CustomTagProps> = ({
   const style = getTagStyle(tagName, tagColors)
   
   const sizeClasses = {
+    xs: 'px-1 py-0.5 text-xs',
     sm: 'px-1.5 py-0.5 text-xs',
     md: 'px-2 py-1 text-xs',
     lg: 'px-3 py-1.5 text-sm'
   }
   
   const baseClasses = `
-    inline-flex items-center gap-1 rounded-md font-medium transition-all duration-200
+    inline-flex items-center gap-1 rounded-lg font-medium transition-all duration-200
     hover:scale-105 hover:shadow-sm cursor-pointer border
     ${sizeClasses[size]}
     ${className}
