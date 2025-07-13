@@ -134,10 +134,10 @@ const SidebarContent: React.FC = () => {
         icon={<Icons.Tag size={16} />}
         titleActions={
           <IconButton
-            icon={Icons.Hash}
+            icon={Icons.Plus}
             size={14}
             onClick={() => setModal('tagModal', true)}
-            title="Manage tags"
+            title="Create new tag"
           />
         }
       >
