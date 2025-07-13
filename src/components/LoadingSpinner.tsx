@@ -1,6 +1,5 @@
 import React from 'react'
 import ModernSpinner from './ui/LoadingSpinner'
-import CenteredLoader from './ui/CenteredLoader'
 
 type SpinnerSize = 'small' | 'medium' | 'large' | 'xlarge'
 type SpinnerColor = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'white'
@@ -54,12 +53,18 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   if (overlay) {
     return (
-      <CenteredLoader 
-        message={text || 'Loading...'}
-        size={sizeMap[size]}
-        variant="spinner"
-        className={className}
-      />
+      <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ${className}`}>
+        <div className="flex flex-col items-center justify-center gap-3 p-6 bg-theme-bg-primary rounded-lg">
+          <ModernSpinner 
+            size={sizeMap[size]} 
+            color={colorMap[color]} 
+            variant="spinner"
+          />
+          <span className="text-sm text-theme-text-secondary">
+            {text || 'Loading...'}
+          </span>
+        </div>
+      </div>
     )
   }
 
