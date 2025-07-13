@@ -45,6 +45,12 @@ export function useInkdropEditor({
 }: UseInkdropEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const viewRef = useRef<EditorView | null>(null)
+  const onChangeRef = useRef(onChange)
+  
+  // Keep onChange ref current
+  useEffect(() => {
+    onChangeRef.current = onChange
+  }, [onChange])
 
   // Initialize editor
   const initializeEditor = useCallback(() => {
@@ -72,9 +78,12 @@ export function useInkdropEditor({
         extensions: [
           ...extensions,
           EditorView.updateListener.of((update) => {
-            if (update.docChanged && onChange) {
+            if (update.docChanged) {
               const newValue = update.state.doc.toString()
-              onChange(newValue)
+              // Use a ref to avoid recreating the editor when onChange changes
+              if (onChangeRef.current) {
+                onChangeRef.current(newValue)
+              }
             }
           })
         ]
@@ -94,7 +103,7 @@ export function useInkdropEditor({
     } catch (error) {
       editorLogger.error('Failed to initialize editor:', error)
     }
-  }, [value, onChange, placeholder, showLineNumbers, theme, preset])
+  }, [placeholder, showLineNumbers, theme, preset])
 
   // Cleanup editor
   const destroyEditor = useCallback(() => {
@@ -182,11 +191,11 @@ export function useInkdropEditor({
     return viewRef.current
   }, [])
 
-  // Initialize editor on mount
+  // Initialize editor on mount (only once)
   useEffect(() => {
     initializeEditor()
     return destroyEditor
-  }, [initializeEditor, destroyEditor])
+  }, [])
 
   // Update content when value prop changes
   useEffect(() => {
@@ -195,11 +204,13 @@ export function useInkdropEditor({
     }
   }, [value, updateEditorContent])
 
-  // Recreate editor when key settings change
+  // Recreate editor when key settings change (but NOT when value changes)
   useEffect(() => {
-    destroyEditor()
-    initializeEditor()
-  }, [theme, showLineNumbers, preset])
+    if (viewRef.current) {
+      destroyEditor()
+      initializeEditor()
+    }
+  }, [theme, showLineNumbers, preset, placeholder])
 
   const methods: InkdropEditorMethods = {
     insertText,
