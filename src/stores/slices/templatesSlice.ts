@@ -1,6 +1,7 @@
 import { StateCreator } from 'zustand'
 import { Note } from '../../types'
 import { storageService } from '../../lib/storage'
+import { logger } from '../../utils/logger'
 
 export interface Template {
   id: string
@@ -203,7 +204,7 @@ export const createTemplatesSlice: StateCreator<TemplatesSlice, [], [], Template
 
       return newNote
     } catch (error) {
-      console.error('Error creating note from template:', error)
+      logger.error('Error creating note from template:', 'Templates', error)
       return null
     }
   }

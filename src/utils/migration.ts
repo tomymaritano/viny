@@ -1,6 +1,8 @@
 // Migration utilities for rebranding from Inkrun to Nototo
 // This handles migrating localStorage data to new keys
 
+import { logger } from './logger'
+
 const MIGRATION_KEY = 'nototo_migration_completed'
 
 export const runMigration = () => {
@@ -39,7 +41,7 @@ export const runMigration = () => {
       details: migratedData,
     }
   } catch (error) {
-    console.error('Migration failed:', error)
+    logger.error('Migration failed:', 'Migration', error)
     return {
       completed: false,
       migrated: false,
@@ -56,7 +58,7 @@ export const cleanupOldData = () => {
     localStorage.removeItem('inkrun_notes')
     return true
   } catch (error) {
-    console.error('Cleanup failed:', error)
+    logger.error('Cleanup failed:', 'Migration', error)
     return false
   }
 }
