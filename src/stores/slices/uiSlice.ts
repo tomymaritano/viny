@@ -1,5 +1,6 @@
 import { StateCreator } from 'zustand'
 
+// Re-export Toast type for backward compatibility
 export interface Toast {
   id: string
   type: 'success' | 'error' | 'warning' | 'info'
@@ -9,100 +10,46 @@ export interface Toast {
 }
 
 export interface UiSlice {
-  // UI state
-  isLoading: boolean
-  error: string | null
-  activeSection: string
-  viewMode: 'edit' | 'preview'
-  searchQuery: string
-  filterTags: string[]
-  isPreviewVisible: boolean
-  expandedSections: {
-    notebooks: boolean
-    status: boolean
-    tags: boolean
-  }
-  modals: {
-    settings: boolean
-    search: boolean
-    export: boolean
-    notebookManager: boolean
-    template: boolean
-    tagModal: boolean
-  }
-  toasts: Toast[]
-
+  // Legacy UI state (kept for backward compatibility)
+  // Most functionality has been moved to specialized slices:
+  // - modals -> modalSlice
+  // - toasts -> toastSlice
+  // - search -> searchSlice
+  // - navigation -> navigationSlice
+  // - editor -> editorSlice
+  // - app state -> appStateSlice
+  
+  // Remaining UI state
+  theme: 'light' | 'dark' | 'system'
+  sidebarWidth: number
+  notesListWidth: number
+  
   // UI actions
-  setLoading: (loading: boolean) => void
-  setError: (error: string | null) => void
-  setActiveSection: (section: string) => void
-  setViewMode: (mode: 'edit' | 'preview') => void
-  setSearchQuery: (query: string) => void
-  setFilterTags: (tags: string[]) => void
-  setIsPreviewVisible: (visible: boolean) => void
-  setExpandedSection: (section: string, expanded: boolean) => void
-  setModal: (modal: string, open: boolean) => void
-  addToast: (toast: Omit<Toast, 'id' | 'timestamp'>) => void
-  removeToast: (id: string) => void
-  clearAllToasts: () => void
+  setTheme: (theme: 'light' | 'dark' | 'system') => void
+  setSidebarWidth: (width: number) => void
+  setNotesListWidth: (width: number) => void
+  resetLayout: () => void
+}
+
+const defaultLayout = {
+  sidebarWidth: 240,
+  notesListWidth: 320
 }
 
 export const createUiSlice: StateCreator<UiSlice> = (set) => ({
   // Initial state
-  isLoading: false,
-  error: null,
-  activeSection: 'all-notes',
-  viewMode: 'edit',
-  searchQuery: '',
-  filterTags: [],
-  isPreviewVisible: false,
-  expandedSections: {
-    notebooks: true,
-    status: false,
-    tags: false
-  },
-  modals: {
-    settings: false,
-    search: false,
-    export: false,
-    notebookManager: false,
-    template: false,
-    tagModal: false
-  },
-  toasts: [],
+  theme: 'system',
+  sidebarWidth: defaultLayout.sidebarWidth,
+  notesListWidth: defaultLayout.notesListWidth,
 
   // Actions
-  setLoading: (isLoading) => set({ isLoading }),
-  setError: (error) => set({ error }),
-  setActiveSection: (activeSection) => set({ activeSection }),
-  setViewMode: (viewMode) => set({ viewMode }),
-  setSearchQuery: (searchQuery) => set({ searchQuery }),
-  setFilterTags: (filterTags) => set({ filterTags }),
-  setIsPreviewVisible: (isPreviewVisible) => set({ isPreviewVisible }),
+  setTheme: (theme) => set({ theme }),
+  setSidebarWidth: (sidebarWidth) => set({ sidebarWidth }),
+  setNotesListWidth: (notesListWidth) => set({ notesListWidth }),
   
-  setExpandedSection: (section, expanded) =>
-    set((state) => ({
-      expandedSections: { ...state.expandedSections, [section]: expanded }
-    })),
-
-  setModal: (modal, open) =>
-    set((state) => ({
-      modals: { ...state.modals, [modal]: open }
-    })),
-
-  addToast: (toast) =>
-    set((state) => ({
-      toasts: [...state.toasts, {
-        id: Date.now().toString(),
-        timestamp: new Date().toISOString(),
-        ...toast
-      }]
-    })),
-
-  removeToast: (toastId) =>
-    set((state) => ({
-      toasts: state.toasts.filter(toast => toast.id !== toastId)
-    })),
-
-  clearAllToasts: () => set({ toasts: [] })
+  resetLayout: () =>
+    set({
+      sidebarWidth: defaultLayout.sidebarWidth,
+      notesListWidth: defaultLayout.notesListWidth
+    })
 })

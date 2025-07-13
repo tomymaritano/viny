@@ -4,9 +4,24 @@ import { NotesSlice, createNotesSlice } from './slices/notesSlice'
 import { UiSlice, createUiSlice } from './slices/uiSlice'
 import { TemplatesSlice, createTemplatesSlice } from './slices/templatesSlice'
 import { ThemeSlice, createThemeSlice } from './slices/themeSlice'
+import { ModalSlice, createModalSlice } from './slices/modalSlice'
+import { ToastSlice, createToastSlice } from './slices/toastSlice'
+import { NavigationSlice, createNavigationSlice } from './slices/navigationSlice'
+import { SearchSlice, createSearchSlice } from './slices/searchSlice'
+import { EditorSlice, createEditorSlice } from './slices/editorSlice'
+import { AppStateSlice, createAppStateSlice } from './slices/appStateSlice'
 
-// Combined store interface
-type AppStore = NotesSlice & UiSlice & TemplatesSlice & ThemeSlice
+// Combined store interface with all specialized slices
+type AppStore = NotesSlice & 
+  UiSlice & 
+  TemplatesSlice & 
+  ThemeSlice & 
+  ModalSlice & 
+  ToastSlice & 
+  NavigationSlice & 
+  SearchSlice & 
+  EditorSlice & 
+  AppStateSlice
 
 // Create the combined store
 export const useAppStore = create<AppStore>()(
@@ -15,7 +30,13 @@ export const useAppStore = create<AppStore>()(
       ...createNotesSlice(...args),
       ...createUiSlice(...args),
       ...createTemplatesSlice(...args),
-      ...createThemeSlice(...args)
+      ...createThemeSlice(...args),
+      ...createModalSlice(...args),
+      ...createToastSlice(...args),
+      ...createNavigationSlice(...args),
+      ...createSearchSlice(...args),
+      ...createEditorSlice(...args),
+      ...createAppStateSlice(...args)
     }),
     { name: 'app-store' }
   )
@@ -27,9 +48,21 @@ if (typeof globalThis !== 'undefined') {
 }
 
 // Re-export types for convenience
-export type { NotesSlice, UiSlice, TemplatesSlice, ThemeSlice, AppStore }
+export type { 
+  NotesSlice, 
+  UiSlice, 
+  TemplatesSlice, 
+  ThemeSlice, 
+  ModalSlice,
+  ToastSlice,
+  NavigationSlice,
+  SearchSlice,
+  EditorSlice,
+  AppStateSlice,
+  AppStore 
+}
 export type { Template } from './slices/templatesSlice'
-export type { Toast } from './slices/uiSlice'
+export type { Toast } from './slices/toastSlice'
 
 // Legacy alias for backward compatibility during migration
 export const useSimpleStore = useAppStore
