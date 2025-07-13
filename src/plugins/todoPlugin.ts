@@ -58,6 +58,10 @@ const createCheckboxWidget = (pos, completed, onToggle) => {
 
         return span
       }
+      
+      destroy() {
+        // Clean up method required by CodeMirror
+      }
     })(),
     side: 1,
   })
