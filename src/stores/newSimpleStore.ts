@@ -10,6 +10,7 @@ import { NavigationSlice, createNavigationSlice } from './slices/navigationSlice
 import { SearchSlice, createSearchSlice } from './slices/searchSlice'
 import { EditorSlice, createEditorSlice } from './slices/editorSlice'
 import { AppStateSlice, createAppStateSlice } from './slices/appStateSlice'
+import { SettingsSlice, createSettingsSlice } from './slices/settingsSlice'
 
 // Combined store interface with all specialized slices
 type AppStore = NotesSlice & 
@@ -21,7 +22,8 @@ type AppStore = NotesSlice &
   NavigationSlice & 
   SearchSlice & 
   EditorSlice & 
-  AppStateSlice
+  AppStateSlice & 
+  SettingsSlice
 
 // Create the combined store
 export const useAppStore = create<AppStore>()(
@@ -36,7 +38,8 @@ export const useAppStore = create<AppStore>()(
       ...createNavigationSlice(...args),
       ...createSearchSlice(...args),
       ...createEditorSlice(...args),
-      ...createAppStateSlice(...args)
+      ...createAppStateSlice(...args),
+      ...createSettingsSlice(...args)
     }),
     { name: 'app-store' }
   )

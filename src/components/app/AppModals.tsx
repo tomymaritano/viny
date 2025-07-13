@@ -5,6 +5,7 @@ import { Note } from '../../types'
 // Modal Components
 import SearchModal from '../SearchModal'
 import TagModal from '../editor/tags/TagModal'
+import SettingsModal from '../settings/SettingsModal'
 
 // Lazy modal components
 import { ExportDialog } from '../features/LazyComponents'
@@ -56,6 +57,14 @@ const AppModals: React.FC<AppModalsProps> = ({
             note={currentNote}
           />
         </Suspense>
+      )}
+
+      {/* Settings Modal */}
+      {modals.settings && (
+        <SettingsModal
+          isOpen={modals.settings}
+          onClose={() => setModal('settings', false)}
+        />
       )}
 
       {/* Tag Modal */}

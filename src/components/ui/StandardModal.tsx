@@ -2,7 +2,7 @@ import React, { useEffect, ReactNode } from 'react'
 import Icons from '../Icons'
 import IconButton from './IconButton'
 
-type ModalSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full'
+type ModalSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'large' | 'full'
 type ModalPosition = 'center' | 'top' | 'bottom'
 
 interface StandardModalProps {
@@ -67,6 +67,7 @@ const StandardModal: React.FC<StandardModalProps> = ({
       case 'md': return 'max-w-md'
       case 'lg': return 'max-w-lg'
       case 'xl': return 'max-w-xl'
+      case 'large': return 'max-w-4xl'
       case 'full': return 'max-w-full mx-4'
       default: return 'max-w-md'
     }
@@ -125,7 +126,7 @@ const StandardModal: React.FC<StandardModalProps> = ({
         )}
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto">
           {children}
         </div>
 
