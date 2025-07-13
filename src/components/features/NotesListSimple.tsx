@@ -6,7 +6,6 @@ import { useAppStore } from '../../stores/newSimpleStore'
 import NotesHeader from '../notes/NotesHeader'
 import EmptyNotesState from '../notes/EmptyNotesState'
 import NotesList from '../notes/NotesList'
-import SearchModal from '../SearchModal'
 
 type SortField = 'title' | 'date' | 'updated' | 'notebook'
 type SortDirection = 'asc' | 'desc'
@@ -37,7 +36,6 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
   const { isEmpty } = useNotesListLogic(notes)
   const { sortBy, sortDirection, setSortBy, setSortDirection } = useAppStore()
   const [searchTerm, setSearchTerm] = useState('')
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
 
   // Filter and sort notes based on search term and sort criteria
   const filteredAndSortedNotes = useMemo(() => {
@@ -143,7 +141,6 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
         onNewNote={onNewNote}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
-        onOpenSearch={() => setIsSearchModalOpen(true)}
       />
 
       {/* Notes List */}
@@ -158,13 +155,6 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
           onMoveToNotebook={onMoveToNotebook}
         />
       </div>
-
-      {/* Search Modal */}
-      <SearchModal
-        isOpen={isSearchModalOpen}
-        onClose={() => setIsSearchModalOpen(false)}
-        onSelectNote={onOpenNote}
-      />
     </div>
   )
 })
