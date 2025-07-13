@@ -57,8 +57,31 @@ button,
 textarea,
 input,
 .cm-editor,
+.cm-content,
+.cm-line,
+.cm-scroller,
+.cm-selectionBackground,
+.inkdrop-editor-container {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+}
+
+/* Ensure CodeMirror editor allows interaction */
+.cm-editor {
+  pointer-events: auto !important;
+}
+
 .cm-content {
-  user-select: text;
+  pointer-events: auto !important;
+  cursor: text !important;
+}
+
+/* Fix for selection visibility */
+.cm-selectionBackground,
+.cm-selectedText {
+  background-color: rgba(79, 195, 247, 0.3) !important;
 }
 
 /* Unified Prose styles for markdown preview with consistent borders */
