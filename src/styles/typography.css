@@ -78,28 +78,6 @@ input,
   cursor: text !important;
 }
 
-/* Fix for selection visibility */
-.cm-selectionBackground,
-.cm-selectedText {
-  background-color: rgba(79, 195, 247, 0.3) !important;
-}
-
-/* CodeMirror selection layers */
-.cm-selectionLayer .cm-selectionBackground {
-  background-color: rgba(79, 195, 247, 0.3) !important;
-}
-
-/* Native selection for CodeMirror content */
-.cm-content ::selection {
-  background-color: rgba(79, 195, 247, 0.4) !important;
-  color: inherit !important;
-}
-
-.cm-content ::-moz-selection {
-  background-color: rgba(79, 195, 247, 0.4) !important;
-  color: inherit !important;
-}
-
 /* Ensure cursor layer doesn't block selection */
 .cm-cursorLayer {
   pointer-events: none !important;
