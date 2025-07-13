@@ -99,15 +99,20 @@ export const useNotebooks = () => {
   }, [notebooks])
 
   const createNotebook = useCallback((data: CreateNotebookData): Notebook | null => {
+    console.log('[DEBUG] createNotebook called with:', data)
+    console.log('[DEBUG] Current notebooks:', notebooks.length)
+    
     const nameValidation = validateNotebookName(data.name, notebooks)
+    console.log('[DEBUG] Name validation:', nameValidation)
     if (!nameValidation.isValid) {
-      console.warn('Invalid notebook name:', nameValidation.error)
+      console.error('[DEBUG] Invalid notebook name:', nameValidation.error)
       return null
     }
 
     const nestingValidation = validateNotebookNesting(data.parentId || null, notebooks)
+    console.log('[DEBUG] Nesting validation:', nestingValidation)
     if (!nestingValidation.isValid) {
-      console.warn('Invalid nesting:', nestingValidation.error)
+      console.error('[DEBUG] Invalid nesting:', nestingValidation.error)
       return null
     }
 
@@ -124,11 +129,16 @@ export const useNotebooks = () => {
       updatedAt: new Date().toISOString(),
     }
 
+    console.log('[DEBUG] Creating new notebook:', newNotebook)
+    
     setNotebooks(prev => {
       const updated = [...prev, newNotebook]
-      return buildNotebookTree(updated)
+      const result = buildNotebookTree(updated)
+      console.log('[DEBUG] Updated notebooks count:', result.length)
+      return result
     })
 
+    console.log('[DEBUG] Notebook creation completed successfully')
     return newNotebook
   }, [notebooks])
 

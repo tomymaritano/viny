@@ -133,12 +133,22 @@ const SidebarSimple: React.FC = memo(() => {
   }
 
   const handleCreateNotebookSubmit = (name: string, color: string, parentId?: string | null) => {
-    createNotebook({
+    console.log('[DEBUG] Creating notebook:', { name, color, parentId })
+    
+    const result = createNotebook({
       name,
       color,
       parentId
     })
-    // Don't navigate to the new notebook, just create it
+    
+    console.log('[DEBUG] Notebook creation result:', result)
+    
+    if (result) {
+      console.log('[DEBUG] Notebook created successfully:', result.id)
+      setCreateNotebookModal(false)
+    } else {
+      console.error('[DEBUG] Failed to create notebook')
+    }
   }
 
   const handleToggleNotebookExpansion = (notebookId: string) => {
