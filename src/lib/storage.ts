@@ -26,8 +26,7 @@ class StorageService {
     // For backward compatibility, we still provide sync access
     // but internally we may be using async Electron storage
     if (electronStorageService.isElectronEnvironment) {
-      // In Electron, return cached notes from memory if available
-      logger.warn('[StorageService] Sync getNotes() is deprecated in Electron, use loadNotes() instead')
+      // TODO: Refactor to use async loadNotes() instead of sync getNotes()
       // Return cached notes from the store instead
       const store = (globalThis as any).__appStore
       if (store && store.getState) {
@@ -265,8 +264,7 @@ class StorageService {
   // Notebooks
   getNotebooks(): Notebook[] {
     if (electronStorageService.isElectronEnvironment) {
-      // In Electron, use async method - this sync method is deprecated
-      logger.warn('[StorageService] Sync getNotebooks() is deprecated in Electron')
+      // TODO: Refactor to use async loadNotebooks() instead of sync getNotebooks()
       return []
     }
 
@@ -311,7 +309,7 @@ class StorageService {
   // Settings
   getSettings(): Partial<Settings> {
     if (electronStorageService.isElectronEnvironment) {
-      logger.warn('[StorageService] Sync getSettings() is deprecated in Electron')
+      // TODO: Refactor to use async loadSettings() instead of sync getSettings()
       return {}
     }
 
@@ -356,7 +354,7 @@ class StorageService {
   // Tag Colors
   getTagColors(): Record<string, string> {
     if (electronStorageService.isElectronEnvironment) {
-      logger.warn('[StorageService] Sync getTagColors() is deprecated in Electron')
+      // TODO: Refactor to use async loadTagColors() instead of sync getTagColors()
       return {}
     }
 
