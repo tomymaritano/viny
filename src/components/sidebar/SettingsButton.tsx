@@ -11,12 +11,13 @@ interface SettingsButtonProps {
  */
 const SettingsButton: React.FC<SettingsButtonProps> = ({ onClick }) => {
   return (
-    <div className="flex justify-end p-3 border-b border-theme-border-primary">
+    <div className="flex justify-end p-2 pr-3">
       <IconButton
         icon={Icons.Settings}
         onClick={onClick}
         size={16}
         title="Settings"
+        className="text-theme-text-muted hover:text-theme-text-primary"
       />
     </div>
   )
