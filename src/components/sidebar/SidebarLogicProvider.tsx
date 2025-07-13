@@ -31,6 +31,9 @@ interface SidebarContextType {
   setModal: (modal: string, state: boolean) => void
   updateNote: any
   getTagColor: (tag: string) => string
+  
+  // Missing notebook actions
+  expandedNotebooks?: Set<string>
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined)

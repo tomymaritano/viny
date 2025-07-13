@@ -24,20 +24,32 @@ const SidebarContent: React.FC = () => {
     createNewNote,
     setModal,
     updateNote,
-    getTagColor
+    getTagColor,
+    getColorClass,
+    updateNotebook,
+    handleEmptyTrash
   } = useSidebarContext()
 
   // State management hook
   const {
-    contextMenu,
+    tagContextMenu,
+    notebookContextMenu,
+    trashContextMenu,
     tagSettingsModal,
     createNotebookModal,
-    handleContextMenuRequest,
-    handleCloseContextMenu,
+    editingNotebook,
+    editValue,
+    expandedNotebooks,
     setTagSettingsModal,
     setCreateNotebookModal,
-    handleTagNameChange,
-    handleCreateNotebookSubmit
+    setEditValue,
+    handleTagRightClick,
+    handleNotebookRightClick,
+    handleTrashRightClick,
+    closeAllContextMenus,
+    toggleNotebookExpansion,
+    startEditingNotebook,
+    cancelEditingNotebook
   } = useSidebarState()
 
   return (
@@ -91,8 +103,21 @@ const SidebarContent: React.FC = () => {
         <NotebookTree
           notebooks={notebooksWithCounts}
           activeSection={activeSection}
+          expandedNotebooks={expandedNotebooks}
+          getColorClass={getColorClass}
           onSectionClick={handleSectionClick}
-          onContextMenu={handleContextMenuRequest}
+          onNotebookRightClick={handleNotebookRightClick}
+          onToggleExpansion={toggleNotebookExpansion}
+          editingNotebook={editingNotebook}
+          editValue={editValue}
+          onEditValueChange={setEditValue}
+          onSaveNotebookName={(notebookId: string) => {
+            if (editValue.trim()) {
+              updateNotebook(notebookId, { name: editValue.trim() })
+              cancelEditingNotebook()
+            }
+          }}
+          onCancelEdit={cancelEditingNotebook}
         />
       </SidebarSection>
 
@@ -115,7 +140,7 @@ const SidebarContent: React.FC = () => {
           tags={tagsWithCounts}
           activeSection={activeSection}
           onSectionClick={handleSectionClick}
-          onContextMenu={handleContextMenuRequest}
+          onContextMenu={handleTagRightClick}
           getTagColor={getTagColor}
         />
       </SidebarSection>
@@ -126,25 +151,56 @@ const SidebarContent: React.FC = () => {
           sections={systemSections}
           activeSection={activeSection}
           onSectionClick={handleSectionClick}
+          onTrashRightClick={handleTrashRightClick}
         />
       </SidebarSection>
 
       {/* Context Menu Manager */}
       <SidebarContextMenuManager
-        contextMenu={contextMenu}
-        onClose={handleCloseContextMenu}
-        onTagSettingsOpen={setTagSettingsModal}
-        updateNote={updateNote}
+        contextMenuState={{
+          tag: tagContextMenu,
+          notebook: notebookContextMenu,
+          trash: trashContextMenu
+        }}
+        onCloseAll={closeAllContextMenus}
+        onTagRemove={() => {
+          // TODO: Implement tag removal
+          closeAllContextMenus()
+        }}
+        onTagSettings={() => {
+          setTagSettingsModal({ show: true, tagName: tagContextMenu.tagName })
+          closeAllContextMenus()
+        }}
+        onNotebookRename={() => {
+          if (notebookContextMenu.notebook) {
+            startEditingNotebook(notebookContextMenu.notebook.id, notebookContextMenu.notebook.name)
+            closeAllContextMenus()
+          }
+        }}
+        onNotebookDelete={() => {
+          // TODO: Implement notebook deletion
+          closeAllContextMenus()
+        }}
+        onEmptyTrash={() => {
+          handleEmptyTrash()
+          closeAllContextMenus()
+        }}
       />
 
       {/* Modals */}
       <SidebarModals
         tagSettingsModal={tagSettingsModal}
         onTagSettingsClose={() => setTagSettingsModal({ show: false, tagName: '' })}
-        onTagNameChange={handleTagNameChange}
+        onTagNameChange={(newName: string) => {
+          // TODO: Implement tag name change
+          updateNote(tagSettingsModal.tagName, { tags: [newName] })
+        }}
         createNotebookModal={createNotebookModal}
         onCreateNotebookClose={() => setCreateNotebookModal(false)}
-        onCreateNotebook={handleCreateNotebookSubmit}
+        onCreateNotebook={(name: string, parentId?: string) => {
+          // TODO: Implement notebook creation
+          setCreateNotebookModal(false)
+        }}
         existingNotebookNames={notebooksWithCounts.map(n => n.name)}
         availableParents={notebooksWithCounts}
       />
