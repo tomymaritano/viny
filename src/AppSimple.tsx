@@ -11,7 +11,7 @@ import { useAppHandlers } from './hooks/useAppHandlers'
 
 // Components
 import { AppLoading } from './components/LoadingStates'
-import ContentLoader from './components/ui/ContentLoader'
+// ContentLoader eliminado - usando LoadingSpinner directamente
 import LoadingSpinner from './components/LoadingSpinner'
 import ErrorBoundary from './components/ErrorBoundary'
 import StorageErrorBoundary from './components/errors/StorageErrorBoundary'
@@ -150,7 +150,7 @@ const AppSimple: React.FC = () => {
             }
             mainContent={
               isEditorOpen && currentNote ? (
-                <Suspense fallback={<ContentLoader message="Loading Editor..." compact={true} />}>
+                <Suspense fallback={<LoadingSpinner text="Loading Editor..." size="medium" />}>
                   <MarkdownEditor
                     key={currentNote.id}  // Force re-mount when note changes
                     value={currentNote.content || ''}
