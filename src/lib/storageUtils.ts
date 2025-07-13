@@ -89,7 +89,6 @@ export async function diagnoseSaveIssues(): Promise<string[]> {
       if (isElectron) {
         // In Electron, skip the synchronous verification test
         // The async file system storage is working correctly
-        console.log('[Diagnostics] Skipping synchronous save test in Electron environment')
       } else {
         // Only test synchronous save for localStorage
         storageService.saveNote(testNote)
@@ -139,7 +138,6 @@ export async function diagnoseSaveIssues(): Promise<string[]> {
 export function clearAllNototoData(): void {
   try {
     storageService.clear()
-    console.log('All Nototo data cleared from localStorage')
   } catch (error) {
     console.error('Failed to clear Nototo data:', error)
     throw error
@@ -158,7 +156,6 @@ export function exportNototoData(): string {
 export function importNototoData(data: string): void {
   try {
     storageService.import(data)
-    console.log('Nototo data imported successfully')
   } catch (error) {
     console.error('Failed to import Nototo data:', error)
     throw error

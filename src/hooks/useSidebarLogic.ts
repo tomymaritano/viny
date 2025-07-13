@@ -4,13 +4,6 @@ import { useNotebooks } from './useNotebooks'
 import { getNotebookWithCounts } from '../utils/notebookTree'
 import { getStats } from './useSimpleLogic' // Import existing stats function
 
-// Development logging utility
-const isDev = process.env.NODE_ENV === 'development'
-const logger = {
-  log: (message: string, ...args: unknown[]) => {
-    if (isDev) console.log(`[Sidebar] ${message}`, ...args)
-  }
-}
 
 /**
  * Hook for sidebar-specific logic
@@ -122,15 +115,12 @@ export const useSidebarLogic = () => {
       if ((window as any).electronAPI?.isElectron) {
         // Open settings in new window
         (window as any).electronAPI.openSettings()
-        logger.log('Opening settings in Electron window')
       } else {
         // Fallback to modal for web version
         setModal('settings', true)
-        logger.log('Opening settings modal')
       }
     } else {
       setActiveSection(sectionId)
-      logger.log('Section changed to:', sectionId)
     }
   }, [setActiveSection, setModal])
 
@@ -140,7 +130,6 @@ export const useSidebarLogic = () => {
   const handleToggleSection = useCallback((section: string) => {
     const newState = !expandedSections[section as keyof typeof expandedSections]
     setExpandedSection(section, newState)
-    logger.log(`Section ${section} ${newState ? 'expanded' : 'collapsed'}`)
   }, [expandedSections, setExpandedSection])
 
   /**

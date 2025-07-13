@@ -21,10 +21,6 @@ import { useAppStore } from '../stores/newSimpleStore'
 // Error Boundary
 import ComponentErrorBoundary from './errors/ComponentErrorBoundary'
 
-interface Notebook {
-  id: string
-  name: string
-}
 
 interface MarkdownItEditorProps {
   value?: string
@@ -32,10 +28,6 @@ interface MarkdownItEditorProps {
   onSave?: (note: Note) => void
   selectedNote?: Note
   onNotebookChange?: (noteId: string, notebookId: string) => void
-  _onExport?: () => void
-  _onTogglePreview?: () => void
-  _isPreviewVisible?: boolean
-  notebooks?: (string | Notebook)[]
 }
 
 const MarkdownItEditor: React.FC<MarkdownItEditorProps> = ({
@@ -44,10 +36,6 @@ const MarkdownItEditor: React.FC<MarkdownItEditorProps> = ({
   onSave,
   selectedNote,
   onNotebookChange,
-  _onExport,
-  _onTogglePreview,
-  _isPreviewVisible = false,
-  notebooks = [],
 }) => {
   // Editor ref for text insertion
   const editorRef = useRef<HTMLTextAreaElement | null>(null)

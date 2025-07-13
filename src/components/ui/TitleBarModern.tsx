@@ -22,17 +22,9 @@ const TitleBarModern: React.FC<TitleBarModernProps> = ({
         body.classList.add('electron-app')
         body.classList.add(`platform-${window.electronAPI.platform}`)
         
-        // Debug info in development
-        if (process.env.NODE_ENV === 'development') {
-          console.log('TitleBar: Electron detected, platform:', window.electronAPI.platform)
-          console.log('TitleBar: Body classes added:', body.className)
-        }
       } else {
         body.classList.add('web-app')
         
-        if (process.env.NODE_ENV === 'development') {
-          console.log('TitleBar: Web mode detected')
-        }
       }
       
       // Cleanup function

@@ -3,12 +3,7 @@
  */
 import { useEffect, useRef } from 'react'
 import { storageService } from '../lib/storage'
-
-interface Note {
-  id: string
-  title?: string
-  content?: string
-}
+import { Note } from '../types'
 
 interface UsePageLifecycleProps {
   currentNote: Note | null
@@ -25,7 +20,6 @@ export const usePageLifecycle = ({ currentNote }: UsePageLifecycleProps) => {
   
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      console.log('[PageLifecycle] Page unloading, flushing pending saves...')
       storageService.flushPendingSaves()
       
       // If there are unsaved changes, warn the user
@@ -38,7 +32,6 @@ export const usePageLifecycle = ({ currentNote }: UsePageLifecycleProps) => {
     
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        console.log('[PageLifecycle] Page hidden, flushing pending saves...')
         storageService.flushPendingSaves()
       }
     }
@@ -47,7 +40,6 @@ export const usePageLifecycle = ({ currentNote }: UsePageLifecycleProps) => {
     document.addEventListener('visibilitychange', handleVisibilityChange)
     
     return () => {
-      console.log('[PageLifecycle] Component unmounting, flushing pending saves...')
       storageService.flushPendingSaves()
       window.removeEventListener('beforeunload', handleBeforeUnload)
       document.removeEventListener('visibilitychange', handleVisibilityChange)

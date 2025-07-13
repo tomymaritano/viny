@@ -17,7 +17,6 @@ class StorageService {
   // Initialize storage service
   initialize(): void {
     if (!this.isLoaded) {
-      console.log('[StorageService] Initializing storage service')
       this.getNotes() // This will set isLoaded = true
     }
   }
@@ -102,8 +101,6 @@ class StorageService {
     }
 
     try {
-      console.log('[StorageService] saveNotes called with', notes.length, 'notes')
-      
       // Validate input
       if (!Array.isArray(notes)) {
         throw new Error('saveNotes requires an array of notes')
@@ -118,10 +115,7 @@ class StorageService {
       })
       
       const serialized = JSON.stringify(notes)
-      console.log('[StorageService] Serialized', notes.length, 'notes to', serialized.length, 'characters')
-      
       localStorage.setItem(this.NOTES_KEY, serialized)
-      console.log('[StorageService] Successfully saved to localStorage key:', this.NOTES_KEY)
     } catch (error) {
       console.error('[StorageService] Error saving notes to localStorage:', error)
       
@@ -145,21 +139,16 @@ class StorageService {
     }
 
     try {
-      console.log('[StorageService] saveNote called for:', note.title, 'ID:', note.id)
-      
       // Cancel any pending save for this note
       if (this.saveQueue.has(note.id)) {
-        console.log('[StorageService] Cancelling previous save for note:', note.id)
         clearTimeout(this.saveQueue.get(note.id)!.timeoutId)
       }
 
       // Debounce saves for this specific note
       const timeoutId = setTimeout(() => {
-        console.log('[StorageService] Executing debounced save for:', note.title)
         try {
           this.saveNoteImmediate(note)
           this.saveQueue.delete(note.id)
-          console.log('[StorageService] Debounced save completed for:', note.title)
         } catch (error) {
           console.error('[StorageService] Error in debounced save:', error)
           this.saveQueue.delete(note.id)
@@ -167,7 +156,6 @@ class StorageService {
       }, 100) // 100ms debounce
 
       this.saveQueue.set(note.id, { timeoutId, note })
-      console.log('[StorageService] Save queued for:', note.title)
     } catch (error) {
       console.error('[StorageService] Error in saveNote:', error)
       throw error
@@ -179,12 +167,10 @@ class StorageService {
     if (electronStorageService.isElectronEnvironment) {
       // In Electron, we've already saved via async API
       // The verification happens in the renderer process
-      console.log('[StorageService] Note save delegated to Electron storage for:', note.title)
       return
     }
 
     try {
-      console.log('[StorageService] saveNoteImmediate starting for:', note.title)
       
       // Validate note structure
       if (!note || !note.id || !note.title) {
@@ -192,12 +178,10 @@ class StorageService {
       }
 
       if (!this.isLoaded) {
-        console.log('[StorageService] Data not loaded yet, initializing storage first')
         this.getNotes() // This will set isLoaded = true
       }
 
       const notes = this.getNotes()
-      console.log('[StorageService] Current notes count before save:', notes.length)
       
       // Double-check that notes is an array
       if (!Array.isArray(notes)) {
@@ -208,14 +192,11 @@ class StorageService {
       const existingIndex = notes.findIndex(n => n.id === note.id)
       
       if (existingIndex >= 0) {
-        console.log('[StorageService] Updating existing note at index:', existingIndex)
         notes[existingIndex] = note
       } else {
-        console.log('[StorageService] Adding new note, new count will be:', notes.length + 1)
         notes.push(note)
       }
       
-      console.log('[StorageService] Calling saveNotes with', notes.length, 'notes')
       this.saveNotes(notes)
       
       // Verify the save by reading back
@@ -225,7 +206,6 @@ class StorageService {
         throw new Error('Save verification failed: note not found after save')
       }
       
-      console.log('[StorageService] saveNoteImmediate completed successfully for:', note.title)
     } catch (error) {
       console.error('[StorageService] Error in saveNoteImmediate:', error)
       throw error
@@ -234,7 +214,6 @@ class StorageService {
 
   // Force save all pending notes immediately
   flushPendingSaves(): Promise<void> {
-    console.log('[StorageService] Flushing', this.saveQueue.size, 'pending saves...')
     
     const promises: Promise<void>[] = []
     
@@ -243,7 +222,6 @@ class StorageService {
       clearTimeout(timeoutId)
       const promise = new Promise<void>((resolve, reject) => {
         try {
-          console.log('[StorageService] Flushing save for:', note.title)
           this.saveNoteImmediate(note)
           resolve()
         } catch (error) {
@@ -256,15 +234,11 @@ class StorageService {
     
     this.saveQueue.clear()
     
-    return Promise.all(promises).then(() => {
-      console.log('[StorageService] All pending saves flushed')
-    })
+    return Promise.all(promises).then(() => {})
   }
   
   // Force save a specific note immediately (bypass debouncing)
   saveNoteImmediately(note: Note): void {
-    console.log('[StorageService] Force saving note immediately:', note.title)
-    
     // Cancel any pending save for this note
     if (this.saveQueue.has(note.id)) {
       clearTimeout(this.saveQueue.get(note.id)!)

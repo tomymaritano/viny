@@ -24,14 +24,10 @@ const TagSettingsModal = ({
 
   const handleSave = () => {
     const trimmedName = localTagName.trim()
-    console.log('[TagSettingsModal] Save - Original:', tagName, 'New:', trimmedName)
     
     if (trimmedName && trimmedName !== tagName) {
       // Allow any change - validation will be handled in the parent component
-      console.log('[TagSettingsModal] Calling onTagNameChange')
       onTagNameChange(tagName, trimmedName)
-    } else {
-      console.log('[TagSettingsModal] No change detected or empty name')
     }
     onClose()
   }
