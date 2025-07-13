@@ -1,6 +1,7 @@
-// Storage utilities for localStorage operations
+// Storage utilities for localStorage operations with Electron file system migration
 import { Note, Notebook, Settings } from '../types'
 import { storageLogger as logger } from '../utils/logger'
+import { electronStorageService } from './electronStorage'
 
 class StorageService {
   private readonly NOTES_KEY = 'nototo_notes'
@@ -23,6 +24,14 @@ class StorageService {
 
   // Notes - synchronous version for backward compatibility
   getNotes(): Note[] {
+    // For backward compatibility, we still provide sync access
+    // but internally we may be using async Electron storage
+    if (electronStorageService.isElectronEnvironment) {
+      // In Electron, we need to use async loading - this method is deprecated
+      logger.warn('[StorageService] Sync getNotes() is deprecated in Electron, use loadNotes() instead')
+      return [] // Return empty array, should use loadNotes() instead
+    }
+
     try {
       const stored = localStorage.getItem(this.NOTES_KEY)
       if (!stored) {
@@ -52,6 +61,17 @@ class StorageService {
 
   // Async version for proper loading
   async loadNotes(): Promise<Note[]> {
+    if (electronStorageService.isElectronEnvironment) {
+      try {
+        const notes = await electronStorageService.getNotes()
+        this.isLoaded = true
+        return notes
+      } catch (error) {
+        logger.error('[StorageService] Failed to load notes from Electron storage:', error)
+        return []
+      }
+    }
+
     if (this.loadPromise) {
       return this.loadPromise
     }
@@ -68,6 +88,14 @@ class StorageService {
   }
 
   saveNotes(notes: Note[]): void {
+    if (electronStorageService.isElectronEnvironment) {
+      // In Electron, delegate to async storage service
+      electronStorageService.saveNotes(notes).catch(error => {
+        logger.error('[StorageService] Failed to save notes via Electron storage:', error)
+      })
+      return
+    }
+
     try {
       console.log('[StorageService] saveNotes called with', notes.length, 'notes')
       
@@ -103,6 +131,14 @@ class StorageService {
 
   // Debounced save to prevent race conditions
   saveNote(note: Note): void {
+    if (electronStorageService.isElectronEnvironment) {
+      // In Electron, we can save immediately as file system handles individual files
+      electronStorageService.saveNote(note).catch(error => {
+        logger.error('[StorageService] Failed to save note via Electron storage:', error)
+      })
+      return
+    }
+
     try {
       console.log('[StorageService] saveNote called for:', note.title, 'ID:', note.id)
       
@@ -228,12 +264,26 @@ class StorageService {
   }
 
   deleteNote(noteId: string): void {
+    if (electronStorageService.isElectronEnvironment) {
+      // In Electron, delete individual file
+      electronStorageService.deleteNote(noteId).catch(error => {
+        logger.error('[StorageService] Failed to delete note via Electron storage:', error)
+      })
+      return
+    }
+
     const notes = this.getNotes().filter(note => note.id !== noteId)
     this.saveNotes(notes)
   }
 
   // Notebooks
   getNotebooks(): Notebook[] {
+    if (electronStorageService.isElectronEnvironment) {
+      // In Electron, use async method - this sync method is deprecated
+      logger.warn('[StorageService] Sync getNotebooks() is deprecated in Electron')
+      return []
+    }
+
     try {
       const stored = localStorage.getItem(this.NOTEBOOKS_KEY)
       return stored ? JSON.parse(stored) : []
@@ -243,7 +293,27 @@ class StorageService {
     }
   }
 
+  async loadNotebooks(): Promise<Notebook[]> {
+    if (electronStorageService.isElectronEnvironment) {
+      try {
+        return await electronStorageService.getNotebooks()
+      } catch (error) {
+        logger.error('[StorageService] Failed to load notebooks from Electron storage:', error)
+        return []
+      }
+    }
+
+    return this.getNotebooks()
+  }
+
   saveNotebooks(notebooks: Notebook[]): void {
+    if (electronStorageService.isElectronEnvironment) {
+      electronStorageService.saveNotebooks(notebooks).catch(error => {
+        logger.error('[StorageService] Failed to save notebooks via Electron storage:', error)
+      })
+      return
+    }
+
     try {
       localStorage.setItem(this.NOTEBOOKS_KEY, JSON.stringify(notebooks))
     } catch (error) {
@@ -254,6 +324,11 @@ class StorageService {
 
   // Settings
   getSettings(): Partial<Settings> {
+    if (electronStorageService.isElectronEnvironment) {
+      logger.warn('[StorageService] Sync getSettings() is deprecated in Electron')
+      return {}
+    }
+
     try {
       const stored = localStorage.getItem(this.SETTINGS_KEY)
       return stored ? JSON.parse(stored) : {}
@@ -263,7 +338,27 @@ class StorageService {
     }
   }
 
+  async loadSettings(): Promise<Partial<Settings>> {
+    if (electronStorageService.isElectronEnvironment) {
+      try {
+        return await electronStorageService.getSettings()
+      } catch (error) {
+        logger.error('[StorageService] Failed to load settings from Electron storage:', error)
+        return {}
+      }
+    }
+
+    return this.getSettings()
+  }
+
   saveSettings(settings: Partial<Settings>): void {
+    if (electronStorageService.isElectronEnvironment) {
+      electronStorageService.saveSettings(settings).catch(error => {
+        logger.error('[StorageService] Failed to save settings via Electron storage:', error)
+      })
+      return
+    }
+
     try {
       localStorage.setItem(this.SETTINGS_KEY, JSON.stringify(settings))
     } catch (error) {
@@ -274,6 +369,11 @@ class StorageService {
 
   // Tag Colors
   getTagColors(): Record<string, string> {
+    if (electronStorageService.isElectronEnvironment) {
+      logger.warn('[StorageService] Sync getTagColors() is deprecated in Electron')
+      return {}
+    }
+
     try {
       const stored = localStorage.getItem(this.TAG_COLORS_KEY)
       return stored ? JSON.parse(stored) : {}
@@ -283,7 +383,27 @@ class StorageService {
     }
   }
 
+  async loadTagColors(): Promise<Record<string, string>> {
+    if (electronStorageService.isElectronEnvironment) {
+      try {
+        return await electronStorageService.getTagColors()
+      } catch (error) {
+        logger.error('[StorageService] Failed to load tag colors from Electron storage:', error)
+        return {}
+      }
+    }
+
+    return this.getTagColors()
+  }
+
   saveTagColors(tagColors: Record<string, string>): void {
+    if (electronStorageService.isElectronEnvironment) {
+      electronStorageService.saveTagColors(tagColors).catch(error => {
+        logger.error('[StorageService] Failed to save tag colors via Electron storage:', error)
+      })
+      return
+    }
+
     try {
       localStorage.setItem(this.TAG_COLORS_KEY, JSON.stringify(tagColors))
     } catch (error) {

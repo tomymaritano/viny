@@ -1,12 +1,13 @@
 {
   "name": "nototo",
   "version": "1.2.4",
-  "main": "electron/main.js",
+  "main": "electron/dist/main.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "electron": "electron .",
-    "electron-dev": "cross-env NODE_ENV=development electron .",
+    "build:electron-src": "tsc --project electron/tsconfig.json",
+    "electron": "npm run build:electron-src && electron .",
+    "electron-dev": "npm run build:electron-src && cross-env NODE_ENV=development electron .",
     "dev:electron": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && npm run electron-dev\"",
     "start": "node start-dev.js",
     "build:electron": "cross-env TARGET=electron npm run build && electron-builder",
@@ -80,7 +81,7 @@
       "node_modules/electron-updater/**/*"
     ],
     "extraMetadata": {
-      "main": "electron/main.js"
+      "main": "electron/dist/main.js"
     },
     "compression": "normal",
     "mac": {

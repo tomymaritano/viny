@@ -1,14 +1,96 @@
-const { app, BrowserWindow, Menu, shell, ipcMain } = require('electron')
-const { autoUpdater } = require('electron-updater')
-const path = require('path')
-const fs = require('fs').promises
-const fsSync = require('fs')
+import { app, BrowserWindow, Menu, shell, ipcMain, MenuItemConstructorOptions } from 'electron'
+import { autoUpdater } from 'electron-updater'
+import * as path from 'path'
+import { promises as fs } from 'fs'
+import * as fsSync from 'fs'
 
-let mainWindow = null
-let settingsWindow = null
+// Type definitions
+interface Note {
+  id: string
+  title: string
+  content: string
+  tags: string[]
+  notebook?: string
+  isPinned?: boolean
+  createdAt: string
+  updatedAt: string
+  isTrashed?: boolean
+}
+
+interface Notebook {
+  id: string
+  name: string
+  color: string
+  level: number
+  parentId?: string | null
+}
+
+interface Settings {
+  theme: string
+  fontSize: number
+  editorMode: string
+  [key: string]: any
+}
+
+interface StorageResult {
+  success: boolean
+  path?: string
+  message?: string
+  backupPath?: string
+  error?: string
+}
+
+interface StorageInfo {
+  dataDirectory: string
+  notesCount: number
+  notebooksCount: number
+  hasSettings: boolean
+  tagColorsCount: number
+  directories: {
+    data: string
+    notes: string
+    backups: string
+  }
+}
+
+interface DragState {
+  isDragging: boolean
+  startPosition: { x: number; y: number } | null
+  windowStartPosition: { x: number; y: number } | null
+}
+
+interface DragData {
+  startX?: number
+  startY?: number
+  currentX?: number
+  currentY?: number
+}
+
+interface MetadataAction {
+  action: string
+  data: any
+  timestamp: string
+}
+
+interface Metadata {
+  created: string
+  actions: MetadataAction[]
+}
+
+// Global variables
+let mainWindow: BrowserWindow | null = null
+let settingsWindow: BrowserWindow | null = null
 
 // File System Storage Service - Inkdrop Style
 class FileSystemStorageService {
+  private readonly dataDir: string
+  private readonly notesDir: string
+  private readonly backupDir: string
+  private readonly metadataFile: string
+  private readonly notebooksFile: string
+  private readonly settingsFile: string
+  private readonly tagColorsFile: string
+
   constructor() {
     this.dataDir = path.join(app.getPath('userData'), 'nototo-data')
     this.notesDir = path.join(this.dataDir, 'notes')
@@ -17,11 +99,11 @@ class FileSystemStorageService {
     this.notebooksFile = path.join(this.dataDir, 'notebooks.json')
     this.settingsFile = path.join(this.dataDir, 'settings.json')
     this.tagColorsFile = path.join(this.dataDir, 'tag-colors.json')
-
+    
     this.initializeDirectories()
   }
 
-  async initializeDirectories() {
+  async initializeDirectories(): Promise<void> {
     try {
       await fs.mkdir(this.dataDir, { recursive: true })
       await fs.mkdir(this.notesDir, { recursive: true })
@@ -33,7 +115,7 @@ class FileSystemStorageService {
   }
 
   // Generate backup filename with timestamp
-  generateBackupPath(filename) {
+  generateBackupPath(filename: string): string {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
     const ext = path.extname(filename)
     const name = path.basename(filename, ext)
@@ -41,7 +123,7 @@ class FileSystemStorageService {
   }
 
   // Create backup before modifying file
-  async createFileBackup(filePath) {
+  async createFileBackup(filePath: string): Promise<string | null> {
     try {
       if (fsSync.existsSync(filePath)) {
         const backupPath = this.generateBackupPath(path.basename(filePath))
@@ -50,52 +132,45 @@ class FileSystemStorageService {
         return backupPath
       }
     } catch (error) {
-      console.warn(
-        '[StorageService] Failed to create backup for:',
-        filePath,
-        error
-      )
+      console.warn('[StorageService] Failed to create backup for:', filePath, error)
     }
     return null
   }
 
   // Save individual note with backup
-  async saveNote(note) {
+  async saveNote(note: Note): Promise<StorageResult> {
     if (!note || !note.id) {
       throw new Error('Invalid note: missing id')
     }
 
     const noteFile = path.join(this.notesDir, `note-${note.id}.json`)
-
+    
     try {
       // Create backup of existing note
       await this.createFileBackup(noteFile)
-
+      
       // Save new note
       await fs.writeFile(noteFile, JSON.stringify(note, null, 2))
       console.log('[StorageService] Saved note:', note.id)
-
+      
       // Update metadata
-      await this.updateMetadata('note_saved', {
-        id: note.id,
-        title: note.title,
-      })
-
+      await this.updateMetadata('note_saved', { id: note.id, title: note.title })
+      
       return { success: true, path: noteFile }
-    } catch (error) {
+    } catch (error: any) {
       console.error('[StorageService] Failed to save note:', note.id, error)
       throw new Error(`Failed to save note: ${error.message}`)
     }
   }
 
   // Load individual note
-  async loadNote(id) {
+  async loadNote(id: string): Promise<Note | null> {
     const noteFile = path.join(this.notesDir, `note-${id}.json`)
-
+    
     try {
       const data = await fs.readFile(noteFile, 'utf-8')
-      return JSON.parse(data)
-    } catch (error) {
+      return JSON.parse(data) as Note
+    } catch (error: any) {
       if (error.code === 'ENOENT') {
         return null // Note not found
       }
@@ -105,30 +180,24 @@ class FileSystemStorageService {
   }
 
   // Load all notes
-  async loadAllNotes() {
+  async loadAllNotes(): Promise<Note[]> {
     try {
       const files = await fs.readdir(this.notesDir)
-      const noteFiles = files.filter(
-        file => file.startsWith('note-') && file.endsWith('.json')
-      )
-
-      const notes = []
+      const noteFiles = files.filter(file => file.startsWith('note-') && file.endsWith('.json'))
+      
+      const notes: Note[] = []
       for (const file of noteFiles) {
         try {
           const filePath = path.join(this.notesDir, file)
           const data = await fs.readFile(filePath, 'utf-8')
-          const note = JSON.parse(data)
+          const note = JSON.parse(data) as Note
           notes.push(note)
         } catch (error) {
-          console.warn(
-            '[StorageService] Failed to load note file:',
-            file,
-            error
-          )
+          console.warn('[StorageService] Failed to load note file:', file, error)
           // Continue loading other notes even if one fails
         }
       }
-
+      
       console.log('[StorageService] Loaded', notes.length, 'notes')
       return notes
     } catch (error) {
@@ -138,109 +207,101 @@ class FileSystemStorageService {
   }
 
   // Delete note with backup
-  async deleteNote(id) {
+  async deleteNote(id: string): Promise<StorageResult> {
     const noteFile = path.join(this.notesDir, `note-${id}.json`)
-
+    
     try {
       if (fsSync.existsSync(noteFile)) {
         // Create backup before deletion
         const backupPath = await this.createFileBackup(noteFile)
-
+        
         // Delete the note
         await fs.unlink(noteFile)
         console.log('[StorageService] Deleted note:', id)
-
+        
         // Update metadata
         await this.updateMetadata('note_deleted', { id, backupPath })
-
-        return { success: true, backupPath }
+        
+        return { success: true, backupPath: backupPath || undefined }
       }
       return { success: false, error: 'Note not found' }
-    } catch (error) {
+    } catch (error: any) {
       console.error('[StorageService] Failed to delete note:', id, error)
       throw new Error(`Failed to delete note: ${error.message}`)
     }
   }
 
   // Save/load other data types with backup
-  async saveDataFile(filePath, data) {
+  async saveDataFile(filePath: string, data: any): Promise<StorageResult> {
     try {
       await this.createFileBackup(filePath)
       await fs.writeFile(filePath, JSON.stringify(data, null, 2))
       return { success: true }
-    } catch (error) {
-      console.error(
-        '[StorageService] Failed to save data file:',
-        filePath,
-        error
-      )
+    } catch (error: any) {
+      console.error('[StorageService] Failed to save data file:', filePath, error)
       throw new Error(`Failed to save data: ${error.message}`)
     }
   }
 
-  async loadDataFile(filePath, defaultValue = null) {
+  async loadDataFile<T>(filePath: string, defaultValue: T): Promise<T> {
     try {
       const data = await fs.readFile(filePath, 'utf-8')
-      return JSON.parse(data)
-    } catch (error) {
+      return JSON.parse(data) as T
+    } catch (error: any) {
       if (error.code === 'ENOENT') {
         return defaultValue
       }
-      console.error(
-        '[StorageService] Failed to load data file:',
-        filePath,
-        error
-      )
+      console.error('[StorageService] Failed to load data file:', filePath, error)
       throw new Error(`Failed to load data: ${error.message}`)
     }
   }
 
   // Notebooks operations
-  async saveNotebooks(notebooks) {
+  async saveNotebooks(notebooks: Notebook[]): Promise<StorageResult> {
     return this.saveDataFile(this.notebooksFile, notebooks)
   }
 
-  async loadNotebooks() {
-    return this.loadDataFile(this.notebooksFile, [])
+  async loadNotebooks(): Promise<Notebook[]> {
+    return this.loadDataFile<Notebook[]>(this.notebooksFile, [])
   }
 
   // Settings operations
-  async saveSettings(settings) {
+  async saveSettings(settings: Partial<Settings>): Promise<StorageResult> {
     return this.saveDataFile(this.settingsFile, settings)
   }
 
-  async loadSettings() {
-    return this.loadDataFile(this.settingsFile, {})
+  async loadSettings(): Promise<Partial<Settings>> {
+    return this.loadDataFile<Partial<Settings>>(this.settingsFile, {})
   }
 
   // Tag colors operations
-  async saveTagColors(tagColors) {
+  async saveTagColors(tagColors: Record<string, string>): Promise<StorageResult> {
     return this.saveDataFile(this.tagColorsFile, tagColors)
   }
 
-  async loadTagColors() {
-    return this.loadDataFile(this.tagColorsFile, {})
+  async loadTagColors(): Promise<Record<string, string>> {
+    return this.loadDataFile<Record<string, string>>(this.tagColorsFile, {})
   }
 
   // Update metadata file
-  async updateMetadata(action, data) {
+  async updateMetadata(action: string, data: any): Promise<void> {
     try {
-      let metadata = await this.loadDataFile(this.metadataFile, {
+      let metadata = await this.loadDataFile<Metadata>(this.metadataFile, {
         created: new Date().toISOString(),
-        actions: [],
+        actions: []
       })
-
+      
       metadata.actions.push({
         action,
         data,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       })
-
+      
       // Keep only last 1000 actions
       if (metadata.actions.length > 1000) {
         metadata.actions = metadata.actions.slice(-1000)
       }
-
+      
       await this.saveDataFile(this.metadataFile, metadata)
     } catch (error) {
       console.warn('[StorageService] Failed to update metadata:', error)
@@ -248,52 +309,52 @@ class FileSystemStorageService {
   }
 
   // Migration from localStorage
-  async migrateFromLocalStorage(data) {
+  async migrateFromLocalStorage(data: any): Promise<StorageResult> {
     try {
       console.log('[StorageService] Starting migration from localStorage')
-
+      
       if (data.notes && Array.isArray(data.notes)) {
         for (const note of data.notes) {
           await this.saveNote(note)
         }
         console.log('[StorageService] Migrated', data.notes.length, 'notes')
       }
-
+      
       if (data.notebooks) {
         await this.saveNotebooks(data.notebooks)
         console.log('[StorageService] Migrated notebooks')
       }
-
+      
       if (data.settings) {
         await this.saveSettings(data.settings)
         console.log('[StorageService] Migrated settings')
       }
-
+      
       if (data.tagColors) {
         await this.saveTagColors(data.tagColors)
         console.log('[StorageService] Migrated tag colors')
       }
-
+      
       await this.updateMetadata('migration_completed', {
         source: 'localStorage',
-        notesCount: data.notes?.length || 0,
+        notesCount: data.notes?.length || 0
       })
-
+      
       return { success: true, message: 'Migration completed successfully' }
-    } catch (error) {
+    } catch (error: any) {
       console.error('[StorageService] Migration failed:', error)
       throw new Error(`Migration failed: ${error.message}`)
     }
   }
 
   // Get storage information
-  async getStorageInfo() {
+  async getStorageInfo(): Promise<StorageInfo> {
     try {
       const notes = await this.loadAllNotes()
       const notebooks = await this.loadNotebooks()
       const settings = await this.loadSettings()
       const tagColors = await this.loadTagColors()
-
+      
       return {
         dataDirectory: this.dataDir,
         notesCount: notes.length,
@@ -303,17 +364,17 @@ class FileSystemStorageService {
         directories: {
           data: this.dataDir,
           notes: this.notesDir,
-          backups: this.backupDir,
-        },
+          backups: this.backupDir
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('[StorageService] Failed to get storage info:', error)
       throw new Error(`Failed to get storage info: ${error.message}`)
     }
   }
 
   // Get data directory path
-  getDataDirectory() {
+  getDataDirectory(): string {
     return this.dataDir
   }
 }
@@ -321,7 +382,7 @@ class FileSystemStorageService {
 // Initialize storage service
 const storageService = new FileSystemStorageService()
 
-const createWindow = () => {
+const createWindow = (): void => {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -330,7 +391,6 @@ const createWindow = () => {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      enableRemoteModule: false,
       preload: path.join(__dirname, 'preload.js'),
       // Performance optimizations
       experimentalFeatures: false,
@@ -341,10 +401,6 @@ const createWindow = () => {
     show: false,
     minWidth: 800,
     minHeight: 600,
-    // Performance optimizations
-    webSecurity: true,
-    nodeIntegrationInWorker: false,
-    nodeIntegrationInSubFrames: false,
   })
 
   const isDev = process.env.NODE_ENV === 'development'
@@ -366,12 +422,12 @@ const createWindow = () => {
   }
 
   mainWindow.once('ready-to-show', () => {
-    mainWindow.show()
+    mainWindow?.show()
   })
 }
 
 // Create settings window
-function createSettingsWindow() {
+function createSettingsWindow(): void {
   if (settingsWindow) {
     settingsWindow.focus()
     return
@@ -380,7 +436,7 @@ function createSettingsWindow() {
   settingsWindow = new BrowserWindow({
     width: 900,
     height: 600,
-    parent: mainWindow,
+    parent: mainWindow!,
     modal: false,
     show: false,
     webPreferences: {
@@ -406,7 +462,7 @@ function createSettingsWindow() {
   }
 
   settingsWindow.once('ready-to-show', () => {
-    settingsWindow.show()
+    settingsWindow?.show()
   })
 
   settingsWindow.on('closed', () => {
@@ -449,28 +505,28 @@ ipcMain.on('window-close', () => {
 })
 
 // Modern window dragging handlers
-let dragState = {
+let dragState: DragState = {
   isDragging: false,
   startPosition: null,
   windowStartPosition: null,
 }
 
-ipcMain.on('window-drag-start', (event, data) => {
+ipcMain.on('window-drag-start', (event, data: DragData) => {
   if (!mainWindow) return
 
   const windowBounds = mainWindow.getBounds()
   dragState = {
     isDragging: true,
-    startPosition: { x: data.startX, y: data.startY },
+    startPosition: { x: data.startX || 0, y: data.startY || 0 },
     windowStartPosition: { x: windowBounds.x, y: windowBounds.y },
   }
 })
 
-ipcMain.on('window-drag-move', (event, data) => {
-  if (!mainWindow || !dragState.isDragging) return
+ipcMain.on('window-drag-move', (event, data: DragData) => {
+  if (!mainWindow || !dragState.isDragging || !dragState.startPosition || !dragState.windowStartPosition) return
 
-  const deltaX = data.currentX - dragState.startPosition.x
-  const deltaY = data.currentY - dragState.startPosition.y
+  const deltaX = (data.currentX || 0) - dragState.startPosition.x
+  const deltaY = (data.currentY || 0) - dragState.startPosition.y
 
   const newX = dragState.windowStartPosition.x + deltaX
   const newY = dragState.windowStartPosition.y + deltaY
@@ -487,7 +543,7 @@ ipcMain.on('window-drag-end', () => {
 })
 
 // Storage IPC Handlers - File System Operations
-ipcMain.handle('storage-save-note', async (event, note) => {
+ipcMain.handle('storage-save-note', async (event, note: Note): Promise<StorageResult> => {
   try {
     return await storageService.saveNote(note)
   } catch (error) {
@@ -496,7 +552,7 @@ ipcMain.handle('storage-save-note', async (event, note) => {
   }
 })
 
-ipcMain.handle('storage-load-note', async (event, id) => {
+ipcMain.handle('storage-load-note', async (event, id: string): Promise<Note | null> => {
   try {
     return await storageService.loadNote(id)
   } catch (error) {
@@ -505,7 +561,7 @@ ipcMain.handle('storage-load-note', async (event, id) => {
   }
 })
 
-ipcMain.handle('storage-load-all-notes', async () => {
+ipcMain.handle('storage-load-all-notes', async (): Promise<Note[]> => {
   try {
     return await storageService.loadAllNotes()
   } catch (error) {
@@ -514,7 +570,7 @@ ipcMain.handle('storage-load-all-notes', async () => {
   }
 })
 
-ipcMain.handle('storage-delete-note', async (event, id) => {
+ipcMain.handle('storage-delete-note', async (event, id: string): Promise<StorageResult> => {
   try {
     return await storageService.deleteNote(id)
   } catch (error) {
@@ -523,7 +579,7 @@ ipcMain.handle('storage-delete-note', async (event, id) => {
   }
 })
 
-ipcMain.handle('storage-save-notebooks', async (event, notebooks) => {
+ipcMain.handle('storage-save-notebooks', async (event, notebooks: Notebook[]): Promise<StorageResult> => {
   try {
     return await storageService.saveNotebooks(notebooks)
   } catch (error) {
@@ -532,7 +588,7 @@ ipcMain.handle('storage-save-notebooks', async (event, notebooks) => {
   }
 })
 
-ipcMain.handle('storage-load-notebooks', async () => {
+ipcMain.handle('storage-load-notebooks', async (): Promise<Notebook[]> => {
   try {
     return await storageService.loadNotebooks()
   } catch (error) {
@@ -541,7 +597,7 @@ ipcMain.handle('storage-load-notebooks', async () => {
   }
 })
 
-ipcMain.handle('storage-save-settings', async (event, settings) => {
+ipcMain.handle('storage-save-settings', async (event, settings: Partial<Settings>): Promise<StorageResult> => {
   try {
     return await storageService.saveSettings(settings)
   } catch (error) {
@@ -550,7 +606,7 @@ ipcMain.handle('storage-save-settings', async (event, settings) => {
   }
 })
 
-ipcMain.handle('storage-load-settings', async () => {
+ipcMain.handle('storage-load-settings', async (): Promise<Partial<Settings>> => {
   try {
     return await storageService.loadSettings()
   } catch (error) {
@@ -559,7 +615,7 @@ ipcMain.handle('storage-load-settings', async () => {
   }
 })
 
-ipcMain.handle('storage-save-tag-colors', async (event, tagColors) => {
+ipcMain.handle('storage-save-tag-colors', async (event, tagColors: Record<string, string>): Promise<StorageResult> => {
   try {
     return await storageService.saveTagColors(tagColors)
   } catch (error) {
@@ -568,7 +624,7 @@ ipcMain.handle('storage-save-tag-colors', async (event, tagColors) => {
   }
 })
 
-ipcMain.handle('storage-load-tag-colors', async () => {
+ipcMain.handle('storage-load-tag-colors', async (): Promise<Record<string, string>> => {
   try {
     return await storageService.loadTagColors()
   } catch (error) {
@@ -577,7 +633,7 @@ ipcMain.handle('storage-load-tag-colors', async () => {
   }
 })
 
-ipcMain.handle('storage-migrate-from-localStorage', async (event, data) => {
+ipcMain.handle('storage-migrate-from-localStorage', async (event, data: any): Promise<StorageResult> => {
   try {
     return await storageService.migrateFromLocalStorage(data)
   } catch (error) {
@@ -586,7 +642,7 @@ ipcMain.handle('storage-migrate-from-localStorage', async (event, data) => {
   }
 })
 
-ipcMain.handle('storage-get-info', async () => {
+ipcMain.handle('storage-get-info', async (): Promise<StorageInfo> => {
   try {
     return await storageService.getStorageInfo()
   } catch (error) {
@@ -595,7 +651,7 @@ ipcMain.handle('storage-get-info', async () => {
   }
 })
 
-ipcMain.handle('storage-get-data-directory', async () => {
+ipcMain.handle('storage-get-data-directory', async (): Promise<string> => {
   try {
     return storageService.getDataDirectory()
   } catch (error) {
@@ -623,7 +679,7 @@ app.on('activate', () => {
 })
 
 // Auto-updater setup
-function setupAutoUpdater() {
+function setupAutoUpdater(): void {
   // Configure auto-updater
   autoUpdater.checkForUpdatesAndNotify()
 
@@ -664,8 +720,8 @@ function setupAutoUpdater() {
 }
 
 // Create application menu with update check
-function createMenu() {
-  const template = [
+function createMenu(): void {
+  const template: MenuItemConstructorOptions[] = [
     {
       label: 'Nototo',
       submenu: [
@@ -694,7 +750,7 @@ function createMenu() {
         {
           label: 'Hide Others',
           accelerator: 'Command+Shift+H',
-          role: 'hideothers',
+          role: 'hideOthers',
         },
         {
           label: 'Show All',
@@ -719,7 +775,7 @@ function createMenu() {
         { label: 'Cut', accelerator: 'CmdOrCtrl+X', role: 'cut' },
         { label: 'Copy', accelerator: 'CmdOrCtrl+C', role: 'copy' },
         { label: 'Paste', accelerator: 'CmdOrCtrl+V', role: 'paste' },
-        { label: 'Select All', accelerator: 'CmdOrCtrl+A', role: 'selectall' },
+        { label: 'Select All', accelerator: 'CmdOrCtrl+A', role: 'selectAll' },
       ],
     },
     {
