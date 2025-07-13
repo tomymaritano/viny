@@ -77,8 +77,7 @@ const SidebarContent: React.FC = () => {
         titleActions={
           <IconButton
             icon={Icons.Plus}
-            size="sm"
-            variant="ghost"
+            size={14}
             onClick={createNewNote}
             title="Create new note"
           />
@@ -100,8 +99,7 @@ const SidebarContent: React.FC = () => {
         titleActions={
           <IconButton
             icon={Icons.Plus}
-            size="sm"
-            variant="ghost"
+            size={14}
             onClick={() => setCreateNotebookModal(true)}
             title="Create new notebook"
           />
@@ -137,8 +135,7 @@ const SidebarContent: React.FC = () => {
         titleActions={
           <IconButton
             icon={Icons.Hash}
-            size="sm"
-            variant="ghost"
+            size={14}
             onClick={() => setModal('tagModal', true)}
             title="Manage tags"
           />

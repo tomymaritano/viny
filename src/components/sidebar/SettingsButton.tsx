@@ -15,8 +15,7 @@ const SettingsButton: React.FC<SettingsButtonProps> = ({ onClick }) => {
       <IconButton
         icon={Icons.Settings}
         onClick={onClick}
-        size="sm"
-        variant="ghost"
+        size={16}
         title="Settings"
       />
     </div>
