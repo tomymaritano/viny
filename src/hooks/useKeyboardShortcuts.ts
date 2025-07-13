@@ -2,12 +2,7 @@
  * Custom hook for keyboard shortcuts
  */
 import { useEffect } from 'react'
-
-interface Note {
-  id: string
-  title?: string
-  content?: string
-}
+import { Note } from '../types'
 
 interface UseKeyboardShortcutsProps {
   currentNote: Note | null

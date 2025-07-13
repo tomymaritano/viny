@@ -1,6 +1,7 @@
 // Container component for AppSimple - handles business logic and state management
-import React, { useRef } from 'react'
+import React, { useRef, useMemo } from 'react'
 import { useAppLogic, useNoteActions } from '../../hooks/useSimpleLogic'
+import { Note } from '../../types'
 import { useAppStore } from '../../stores/newSimpleStore'
 import { useSettings } from '../../hooks/useSettings'
 import { useNotebooks } from '../../hooks/useNotebooks'
@@ -55,7 +56,9 @@ const AppContainer: React.FC = () => {
 
   // Auto-save functionality
   const { debouncedAutoSave } = useAutoSave({ 
-    onSave: handleSaveNote,
+    onSave: async (note: Note) => {
+      await handleSaveNote(note)
+    },
     debounceMs: 1000
   })
 
@@ -67,7 +70,9 @@ const AppContainer: React.FC = () => {
     handleMetadataChange
   } = useAppHandlers({
     filteredNotes,
-    onSaveNote: handleSaveNote,
+    onSaveNote: async (note: Note) => {
+      await handleSaveNote(note)
+    },
     debouncedAutoSave
   })
 
@@ -75,7 +80,9 @@ const AppContainer: React.FC = () => {
   useKeyboardShortcuts({
     currentNote,
     onCreateNew: createNewNote,
-    onSave: handleSaveNote,
+    onSave: async (note: Note) => {
+      await handleSaveNote(note)
+    },
     onSearch: () => setModal('search', true),
     onExport: () => setModal('export', true),
     onSettings: () => setModal('settings', true)
@@ -84,14 +91,14 @@ const AppContainer: React.FC = () => {
   // Page lifecycle management
   usePageLifecycle({ currentNote })
 
-  // Compose all props needed by the presentation component
-  const appProps = {
+  // Memoized props to prevent unnecessary re-renders
+  const appProps = useMemo(() => ({
     // Data
     currentNote,
-    selectedNote,
+    selectedNote: selectedNote || null,
     filteredNotes,
     notebooks,
-    settings,
+    settings: settings || {},
     
     // UI State
     isEditorOpen,
@@ -118,7 +125,33 @@ const AppContainer: React.FC = () => {
     removeToast,
     setIsPreviewVisible,
     sortNotes
-  }
+  }), [
+    currentNote,
+    selectedNote,
+    filteredNotes,
+    notebooks,
+    settings,
+    isEditorOpen,
+    isLoading,
+    isPreviewVisible,
+    activeSection,
+    modals,
+    toasts,
+    previewRef,
+    handleOpenNote,
+    handleContentChange,
+    handleNotebookChange,
+    handleMetadataChange,
+    createNewNote,
+    handleSaveNote,
+    handleDeleteNote,
+    handleTogglePin,
+    handleDuplicateNote,
+    setModal,
+    removeToast,
+    setIsPreviewVisible,
+    sortNotes
+  ])
 
   return <AppPresentation {...appProps} />
 }

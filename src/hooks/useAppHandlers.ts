@@ -4,14 +4,7 @@
 import { useCallback } from 'react'
 import { useAppStore } from '../stores/newSimpleStore'
 import { noteLogger as logger } from '../utils/logger'
-
-interface Note {
-  id: string
-  title?: string
-  content?: string
-  updatedAt?: string
-  notebook?: string
-}
+import { Note } from '../types'
 
 interface UseAppHandlersProps {
   filteredNotes: Note[]

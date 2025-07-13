@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import Icons from '../Icons'
 
 interface MainSection {
@@ -16,7 +16,7 @@ interface MainSectionsProps {
   onTrashRightClick?: (e: React.MouseEvent) => void
 }
 
-const MainSections: React.FC<MainSectionsProps> = ({
+const MainSections: React.FC<MainSectionsProps> = memo(({
   sections,
   activeSection,
   onSectionClick,
@@ -69,6 +69,8 @@ const MainSections: React.FC<MainSectionsProps> = ({
       })}
     </div>
   )
-}
+})
+
+MainSections.displayName = 'MainSections'
 
 export default MainSections

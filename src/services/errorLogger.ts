@@ -15,7 +15,7 @@ export interface ErrorReport {
   url: string
   stack?: string
   severity: 'low' | 'medium' | 'high' | 'critical'
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface ErrorLoggerConfig {
@@ -36,7 +36,7 @@ class ErrorLogger {
       enabled: process.env.NODE_ENV === 'production',
       logToConsole: process.env.NODE_ENV === 'development',
       maxReports: 100,
-      environment: (process.env.NODE_ENV as any) || 'development',
+      environment: (process.env.NODE_ENV as 'development' | 'production' | 'test') || 'development',
       ...config
     }
 
@@ -58,7 +58,7 @@ class ErrorLogger {
       context?: string
       component?: string
       severity?: ErrorReport['severity']
-      metadata?: Record<string, any>
+      metadata?: Record<string, unknown>
     } = {}
   ): void {
     if (!this.config.enabled && !this.config.logToConsole) {
@@ -105,7 +105,7 @@ class ErrorLogger {
     component: string,
     error: Error,
     errorInfo?: React.ErrorInfo,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): void {
     this.logError(error, {
       component,
@@ -122,7 +122,7 @@ class ErrorLogger {
   logStorageError(
     operation: string,
     error: Error,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): void {
     this.logError(error, {
       context: `Storage: ${operation}`,
@@ -141,7 +141,7 @@ class ErrorLogger {
   logSearchError(
     query: string,
     error: Error,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): void {
     this.logError(error, {
       context: `Search: "${query}"`,
@@ -328,7 +328,7 @@ class ErrorLogger {
     }
   }
 
-  private getMemoryUsage(): any {
+  private getMemoryUsage(): { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number } | null {
     try {
       // @ts-ignore - performance.memory is not in all browsers
       return performance.memory ? {

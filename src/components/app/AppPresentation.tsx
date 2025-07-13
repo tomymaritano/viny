@@ -36,7 +36,7 @@ interface AppPresentationProps {
   toasts: Toast[]
   
   // Refs
-  previewRef: React.RefObject<MarkdownPreviewHandle>
+  previewRef: React.RefObject<MarkdownPreviewHandle | null>
   
   // Handlers
   handleOpenNote: (noteId: string) => void
