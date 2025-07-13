@@ -77,6 +77,10 @@ class CheckboxWidget {
   eq(other) {
     return other instanceof CheckboxWidget && other.completed === this.completed
   }
+
+  compare(other) {
+    return this.eq(other)
+  }
 }
 
 const createCheckboxWidget = (pos, completed, onToggle) => {
