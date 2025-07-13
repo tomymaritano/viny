@@ -48,6 +48,7 @@ import {
   Code,
   Quote,
   Table,
+  Command,
   Heading1,
   SquarePen,
   Heading2,
@@ -398,6 +399,10 @@ const Icons = {
 
   NotebookText: ({ size = 16, className = '' }: IconProps) => (
     <NotebookText size={size} className={className} />
+  ),
+
+  Command: ({ size = 16, className = '' }: IconProps) => (
+    <Command size={size} className={className} />
   ),
 }
 
