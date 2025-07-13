@@ -37,32 +37,51 @@ const todoKeywordDecoration = keyword =>
 /**
  * Creates a click widget decoration for todo checkboxes
  */
+class CheckboxWidget {
+  constructor(completed, onToggle) {
+    this.completed = completed
+    this.onToggle = onToggle
+  }
+
+  toDOM() {
+    const span = document.createElement('span')
+    span.className = `todo-checkbox-widget ${this.completed ? 'completed' : 'pending'}`
+    span.innerHTML = this.completed ? '☑' : '☐'
+    span.style.cursor = 'pointer'
+    span.style.userSelect = 'none'
+    span.style.marginRight = '4px'
+    span.style.color = this.completed ? '#66bb6a' : '#888888'
+    span.style.fontSize = '14px'
+
+    span.addEventListener('click', e => {
+      e.preventDefault()
+      e.stopPropagation()
+      this.onToggle()
+    })
+
+    return span
+  }
+
+  destroy() {
+    // Clean up method required by CodeMirror
+  }
+
+  ignoreEvent() {
+    return false
+  }
+
+  coordsAt() {
+    return null
+  }
+
+  eq(other) {
+    return other instanceof CheckboxWidget && other.completed === this.completed
+  }
+}
+
 const createCheckboxWidget = (pos, completed, onToggle) => {
   return Decoration.widget({
-    widget: new (class {
-      toDOM() {
-        const span = document.createElement('span')
-        span.className = `todo-checkbox-widget ${completed ? 'completed' : 'pending'}`
-        span.innerHTML = completed ? '☑' : '☐'
-        span.style.cursor = 'pointer'
-        span.style.userSelect = 'none'
-        span.style.marginRight = '4px'
-        span.style.color = completed ? '#66bb6a' : '#888888'
-        span.style.fontSize = '14px'
-
-        span.addEventListener('click', e => {
-          e.preventDefault()
-          e.stopPropagation()
-          onToggle()
-        })
-
-        return span
-      }
-      
-      destroy() {
-        // Clean up method required by CodeMirror
-      }
-    })(),
+    widget: new CheckboxWidget(completed, onToggle),
     side: 1,
   })
 }
