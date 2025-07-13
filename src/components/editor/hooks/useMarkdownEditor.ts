@@ -39,8 +39,6 @@ export const useMarkdownEditor = ({
   // Auto-save is handled at the app level in AppSimple.tsx
   // No auto-save logic needed here to prevent conflicts
 
-  // Debounce timer for title changes
-  const titleDebounceTimer = useRef(null)
 
   // Note metadata handlers
   const handleTitleChange = useCallback(
@@ -109,14 +107,6 @@ export const useMarkdownEditor = ({
     [selectedNote, onSave]
   )
 
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (titleDebounceTimer.current) {
-        clearTimeout(titleDebounceTimer.current)
-      }
-    }
-  }, [])
 
   // Manual save
   const handleManualSave = useCallback(async () => {

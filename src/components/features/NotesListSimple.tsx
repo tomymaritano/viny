@@ -96,7 +96,7 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
     onOpenNote(noteId)
   }, [onOpenNote])
 
-  const getDynamicTitle = () => {
+  const getDynamicTitle = useCallback(() => {
     if (currentSection === 'all-notes') return 'All Notes'
     if (currentSection === 'recent') return 'Recent'
     if (currentSection === 'pinned') return 'Pinned'
@@ -114,7 +114,7 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
     if (currentSection === 'completed') return 'Completed'
     if (currentSection === 'archived') return 'Archived'
     return 'Notes'
-  }
+  }, [currentSection])
 
   if (isEmpty) {
     return (

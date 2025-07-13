@@ -1,5 +1,6 @@
 import React, { useMemo, useEffect, useRef, useImperativeHandle, forwardRef } from 'react'
 import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 import { Note } from '../types'
 
 interface MarkdownPreviewProps {
@@ -17,7 +18,7 @@ export interface MarkdownPreviewHandle {
 const markedOptions = {
   breaks: true,
   gfm: true,
-  sanitize: false, // We'll handle sanitization separately if needed
+  sanitize: false, // We use DOMPurify for sanitization
   highlight: null, // Could add syntax highlighting later
   silent: false,
   xhtml: false
@@ -31,7 +32,7 @@ const MarkdownPreview = forwardRef<MarkdownPreviewHandle, MarkdownPreviewProps>(
 }, ref) => {
   const previewRef = useRef<HTMLDivElement>(null)
 
-  // Convert markdown to HTML
+  // Convert markdown to HTML with sanitization
   const htmlContent = useMemo(() => {
     if (!note?.content) return ''
 
@@ -40,12 +41,31 @@ const MarkdownPreview = forwardRef<MarkdownPreviewHandle, MarkdownPreviewProps>(
       marked.setOptions(markedOptions)
       
       // Parse markdown to HTML
-      const html = marked(note.content)
+      const rawHtml = marked(note.content)
       
-      return html
+      // Sanitize HTML to prevent XSS attacks
+      const sanitizedHtml = DOMPurify.sanitize(rawHtml, {
+        ALLOWED_TAGS: [
+          'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+          'p', 'br', 'div', 'span',
+          'strong', 'b', 'em', 'i', 'u', 'code',
+          'pre', 'blockquote',
+          'ul', 'ol', 'li',
+          'a', 'img',
+          'table', 'thead', 'tbody', 'tr', 'th', 'td',
+          'hr', 'del', 'ins'
+        ],
+        ALLOWED_ATTR: [
+          'href', 'src', 'alt', 'title', 'class', 'id',
+          'target', 'rel'
+        ],
+        ALLOW_DATA_ATTR: false
+      })
+      
+      return sanitizedHtml
     } catch (error) {
       console.error('Error parsing markdown:', error)
-      return `<pre>${note.content}</pre>` // Fallback to plain text
+      return `<pre>${DOMPurify.sanitize(note.content)}</pre>` // Fallback to sanitized plain text
     }
   }, [note?.content])
 
