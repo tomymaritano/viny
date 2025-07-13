@@ -8,6 +8,10 @@ interface ElectronAPI {
     close: () => void
     unmaximize: () => void
   }
+  // Manual window dragging methods
+  startWindowDrag: (data: { startX?: number; startY?: number }) => void
+  continueWindowDrag: (data: { currentX?: number; currentY?: number; deltaX?: number; deltaY?: number }) => void
+  endWindowDrag: () => void
   storage: {
     saveNote: (note: any) => Promise<any>
     loadNote: (id: string) => Promise<any>

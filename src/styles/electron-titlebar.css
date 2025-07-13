@@ -115,11 +115,16 @@ body:not(.web-app) .app-container {
   margin-top: 0;
 }
 
-/* Web app also needs titlebar spacing */
+/* Compact titlebar spacing */
 body {
-  padding-top: 44px;
+  padding-top: 32px; /* Más pequeño */
 }
 
 body .app-container {
   margin-top: 0;
+}
+
+/* Style for compact titlebar */
+.compact-titlebar:hover {
+  background: rgba(47, 52, 58, 0.98) !important;
 }

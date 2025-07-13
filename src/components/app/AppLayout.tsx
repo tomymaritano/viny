@@ -4,8 +4,8 @@ import { Note, Notebook, Settings } from '../../types'
 import { Toast } from '../../stores/slices/uiSlice'
 import { MarkdownPreviewHandle } from '../MarkdownPreview'
 
-// Layout Components
-import TitleBarModern from '../ui/TitleBarModern'
+// Layout Components  
+import TitleBarCompact from '../ui/TitleBarCompact'
 import ResizableLayout from '../ResizableLayout'
 import SidebarSimple from '../features/SidebarSimple'
 import NotesListSimple from '../features/NotesListSimple'
@@ -86,8 +86,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({
 }) => {
   return (
     <div className="app-container">
-      {/* Modern Electron title bar with CSS-based dragging */}
-      <TitleBarModern title="Nototo" />
+      {/* Compact Electron title bar with manual dragging */}
+      <TitleBarCompact title="Nototo" />
       
       <ResizableLayout
         settings={settings}
