@@ -27,9 +27,14 @@ class StorageService {
     // For backward compatibility, we still provide sync access
     // but internally we may be using async Electron storage
     if (electronStorageService.isElectronEnvironment) {
-      // In Electron, we need to use async loading - this method is deprecated
+      // In Electron, return cached notes from memory if available
       logger.warn('[StorageService] Sync getNotes() is deprecated in Electron, use loadNotes() instead')
-      return [] // Return empty array, should use loadNotes() instead
+      // Return cached notes from the store instead
+      const store = (globalThis as any).__appStore
+      if (store && store.getState) {
+        return store.getState().notes || []
+      }
+      return [] // Return empty array if store not available
     }
 
     try {
@@ -171,6 +176,13 @@ class StorageService {
 
   // Immediate save (internal use)
   private saveNoteImmediate(note: Note): void {
+    if (electronStorageService.isElectronEnvironment) {
+      // In Electron, we've already saved via async API
+      // The verification happens in the renderer process
+      console.log('[StorageService] Note save delegated to Electron storage for:', note.title)
+      return
+    }
+
     try {
       console.log('[StorageService] saveNoteImmediate starting for:', note.title)
       

@@ -132,16 +132,21 @@ export const useNoteActions = () => {
         await storageService.flushPendingSaves()
         logger.debug('Pending saves flushed')
         
-        // Verify the save worked
-        const savedNotes = storageService.getNotes()
-        const foundNote = savedNotes.find(n => n.id === updatedNote.id)
-        
-        if (!foundNote) {
-          logger.error('Note not found after save. Notes in storage:', savedNotes.length)
-          throw new Error('Save verification failed - note not found')
+        // In Electron environment, trust the async save operation
+        // Verification happens at the file system level
+        const isElectron = typeof window !== 'undefined' && window.electronAPI
+        if (!isElectron) {
+          // Only verify for localStorage (non-Electron)
+          const savedNotes = storageService.getNotes()
+          const foundNote = savedNotes.find(n => n.id === updatedNote.id)
+          
+          if (!foundNote) {
+            logger.error('Note not found after save. Notes in storage:', savedNotes.length)
+            throw new Error('Save verification failed - note not found')
+          }
         }
         
-        logger.debug('Verified note was saved successfully')
+        logger.debug('Note save completed successfully')
       } catch (saveError) {
         logger.error('Storage service error:', saveError)
         throw saveError

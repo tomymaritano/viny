@@ -21,6 +21,11 @@ export const useAppStore = create<AppStore>()(
   )
 )
 
+// Store reference for storage service (needed for Electron sync compatibility)
+if (typeof globalThis !== 'undefined') {
+  (globalThis as any).__appStore = useAppStore
+}
+
 // Re-export types for convenience
 export type { NotesSlice, UiSlice, TemplatesSlice, ThemeSlice, AppStore }
 export type { Template } from './slices/templatesSlice'
