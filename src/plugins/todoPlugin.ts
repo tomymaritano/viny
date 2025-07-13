@@ -140,7 +140,14 @@ function getTodoDecorations(view) {
     }
   })
 
-  return Decoration.set(decorations.sort((a, b) => a.from - b.from))
+  // Sort decorations by from position and startSide to avoid errors
+  decorations.sort((a, b) => {
+    if (a.from !== b.from) return a.from - b.from
+    // If positions are equal, sort by startSide
+    return (a.startSide || 0) - (b.startSide || 0)
+  })
+  
+  return Decoration.set(decorations)
 }
 
 /**

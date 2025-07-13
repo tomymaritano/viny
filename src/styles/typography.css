@@ -17,10 +17,7 @@ body {
   font-weight: 400;
   margin: 0;
   padding: 0;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+  /* Allow text selection by default */
 }
 
 /* App container */
@@ -58,7 +55,9 @@ button,
 .monaco-editor,
 .prose,
 textarea,
-input {
+input,
+.cm-editor,
+.cm-content {
   user-select: text;
 }
 
