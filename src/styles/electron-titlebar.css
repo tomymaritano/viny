@@ -115,16 +115,16 @@ body:not(.web-app) .app-container {
   margin-top: 0;
 }
 
-/* Compact titlebar spacing */
+/* No additional spacing needed - titlebar is transparent like original */
 body {
-  padding-top: 32px; /* Más pequeño */
+  padding-top: 0; /* No padding since titlebar is transparent */
 }
 
 body .app-container {
   margin-top: 0;
 }
 
-/* Style for compact titlebar */
-.compact-titlebar:hover {
-  background: rgba(47, 52, 58, 0.98) !important;
+/* Invisible titlebar - no visual styling needed */
+.compact-titlebar {
+  /* Completely invisible like the original */
 }

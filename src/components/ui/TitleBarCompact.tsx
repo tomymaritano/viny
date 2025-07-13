@@ -63,53 +63,34 @@ const TitleBarCompact: React.FC<TitleBarCompactProps> = ({ title = 'Nototo' }) =
         top: 0,
         left: 0,
         right: 0,
-        height: '32px', // Más pequeño - 32px en lugar de 44px
-        backgroundColor: 'rgba(37, 42, 48, 0.95)',
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+        height: '32px', // Más pequeño - 32px en lugar de 40px
+        backgroundColor: 'transparent', // Transparente como el original
         zIndex: 1000,
         userSelect: 'none',
         cursor: 'default',
-        pointerEvents: 'auto',
-        display: 'flex',
-        alignItems: 'center',
+        pointerEvents: 'none', // Importante: none por defecto
       }}
     >
-      {/* Drag area - left side around traffic lights */}
+      {/* Drag area - only around window controls and empty areas */}
       <div
         style={{
           position: 'absolute',
           top: 0,
           left: 0,
-          width: '180px', // Área más pequeña
+          width: '180px', // Área más pequeña que la original (200px)
           height: '100%',
           pointerEvents: 'auto',
           cursor: 'grab',
         }}
         onMouseDown={handleMouseDown}
       />
-      
-      {/* Title */}
-      <div
-        style={{
-          flex: 1,
-          textAlign: 'center',
-          fontSize: '13px', // Texto más pequeño
-          fontWeight: 500,
-          color: 'rgba(255, 255, 255, 0.8)',
-          pointerEvents: 'none',
-        }}
-      >
-        {title}
-      </div>
-      
-      {/* Additional drag area on the right */}
+      {/* Additional drag area in the right side where there's empty space */}
       <div
         style={{
           position: 'absolute',
           top: 0,
           right: 0,
-          width: '180px', // Área más pequeña
+          width: '180px', // Área más pequeña que la original (200px)
           height: '100%',
           pointerEvents: 'auto',
           cursor: 'grab',

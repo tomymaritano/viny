@@ -6,8 +6,8 @@ import ErrorBoundary from './components/ErrorBoundary.tsx'
 import { runMigration } from './utils/migration.js'
 import { logComponentError } from './services/errorLogger'
 
-// Import Electron titlebar CSS for window dragging
-import './styles/electron-titlebar.css'
+// Import simple titlebar CSS for manual dragging
+import './styles/titlebar-simple.css'
 
 // Run migration before app initialization
 runMigration()
