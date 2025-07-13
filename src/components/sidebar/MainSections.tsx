@@ -6,6 +6,7 @@ interface MainSection {
   label: string
   icon: string
   count?: number
+  onRightClick?: (e: React.MouseEvent) => void
 }
 
 interface MainSectionsProps {
@@ -44,7 +45,7 @@ const MainSections: React.FC<MainSectionsProps> = ({
               boxShadow: 'inset 3px 0 0 var(--color-active-border)'
             } : {}}
             onClick={() => onSectionClick(section.key)}
-            onContextMenu={section.key === 'trash' ? onTrashRightClick : undefined}
+            onContextMenu={section.onRightClick || (section.key === 'trash' ? onTrashRightClick : undefined)}
           >
             <div className="flex items-center space-x-3">
               <div className={`w-4 h-4 flex-shrink-0 ${

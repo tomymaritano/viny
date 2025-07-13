@@ -1,47 +1,47 @@
 import { useState, useCallback } from 'react'
-import { sidebarLogger as logger } from '../utils/logger'
+import { NotebookWithCounts } from '../types/notebook'
 
 interface ContextMenuState {
-  show: boolean
-  x: number
-  y: number
-  tagName?: string
-  notebookId?: string
+  isVisible: boolean
+  position: { x: number; y: number }
 }
 
-interface TagSettingsModalState {
-  show: boolean
+interface TagContextMenuState extends ContextMenuState {
   tagName: string
+  showColorPicker: boolean
+}
+
+interface NotebookContextMenuState extends ContextMenuState {
+  notebook: NotebookWithCounts | null
 }
 
 /**
- * Hook to manage all sidebar-related UI state (context menus, modals, editing)
- * Separates state management from presentation logic
+ * Custom hook to manage all sidebar state
  */
-export function useSidebarState() {
+export const useSidebarState = () => {
   // Context menu states
-  const [tagContextMenu, setTagContextMenu] = useState<ContextMenuState>({
-    show: false,
-    x: 0,
-    y: 0
+  const [tagContextMenu, setTagContextMenu] = useState<TagContextMenuState>({
+    isVisible: false,
+    position: { x: 0, y: 0 },
+    tagName: '',
+    showColorPicker: false
+  })
+
+  const [notebookContextMenu, setNotebookContextMenu] = useState<NotebookContextMenuState>({
+    isVisible: false,
+    position: { x: 0, y: 0 },
+    notebook: null
   })
 
   const [trashContextMenu, setTrashContextMenu] = useState<ContextMenuState>({
-    show: false,
-    x: 0,
-    y: 0
-  })
-
-  const [notebookContextMenu, setNotebookContextMenu] = useState<ContextMenuState>({
-    show: false,
-    x: 0,
-    y: 0
+    isVisible: false,
+    position: { x: 0, y: 0 }
   })
 
   // Modal states
-  const [tagSettingsModal, setTagSettingsModal] = useState<TagSettingsModalState>({
-    show: false,
-    tagName: ''
+  const [tagSettingsModal, setTagSettingsModal] = useState({ 
+    show: false, 
+    tagName: '' 
   })
 
   const [createNotebookModal, setCreateNotebookModal] = useState(false)
@@ -49,169 +49,95 @@ export function useSidebarState() {
   // Editing states
   const [editingNotebook, setEditingNotebook] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
+  
+  // Expansion states
   const [expandedNotebooks, setExpandedNotebooks] = useState<Set<string>>(new Set())
 
-  // Tag context menu handlers
-  const showTagContextMenu = useCallback((x: number, y: number, tagName: string) => {
-    setTagContextMenu({ show: true, x, y, tagName })
-    logger.debug('Tag context menu opened', { tagName })
+  // Context menu handlers
+  const handleTagRightClick = useCallback((e: React.MouseEvent, tagName: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setTagContextMenu({
+      isVisible: true,
+      position: { x: e.clientX, y: e.clientY },
+      tagName,
+      showColorPicker: false
+    })
   }, [])
 
-  const closeTagContextMenu = useCallback(() => {
-    setTagContextMenu({ show: false, x: 0, y: 0 })
-    logger.debug('Tag context menu closed')
+  const handleNotebookRightClick = useCallback((e: React.MouseEvent, notebook: NotebookWithCounts) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setNotebookContextMenu({
+      isVisible: true,
+      position: { x: e.clientX, y: e.clientY },
+      notebook
+    })
   }, [])
 
-  // Trash context menu handlers
-  const showTrashContextMenu = useCallback((x: number, y: number) => {
-    setTrashContextMenu({ show: true, x, y })
-    logger.debug('Trash context menu opened')
+  const handleTrashRightClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setTrashContextMenu({
+      isVisible: true,
+      position: { x: e.clientX, y: e.clientY }
+    })
   }, [])
 
-  const closeTrashContextMenu = useCallback(() => {
-    setTrashContextMenu({ show: false, x: 0, y: 0 })
-    logger.debug('Trash context menu closed')
+  // Close handlers
+  const closeAllContextMenus = useCallback(() => {
+    setTagContextMenu(prev => ({ ...prev, isVisible: false, showColorPicker: false }))
+    setNotebookContextMenu(prev => ({ ...prev, isVisible: false }))
+    setTrashContextMenu(prev => ({ ...prev, isVisible: false }))
   }, [])
 
-  // Notebook context menu handlers
-  const showNotebookContextMenu = useCallback((x: number, y: number, notebookId: string) => {
-    setNotebookContextMenu({ show: true, x, y, notebookId })
-    logger.debug('Notebook context menu opened', { notebookId })
-  }, [])
-
-  const closeNotebookContextMenu = useCallback(() => {
-    setNotebookContextMenu({ show: false, x: 0, y: 0 })
-    logger.debug('Notebook context menu closed')
-  }, [])
-
-  // Tag settings modal handlers
-  const showTagSettings = useCallback((tagName: string) => {
-    setTagSettingsModal({ show: true, tagName })
-    closeTagContextMenu() // Close context menu when opening modal
-    logger.debug('Tag settings modal opened', { tagName })
-  }, [closeTagContextMenu])
-
-  const closeTagSettings = useCallback(() => {
-    setTagSettingsModal({ show: false, tagName: '' })
-    logger.debug('Tag settings modal closed')
-  }, [])
-
-  // Create notebook modal handlers
-  const showCreateNotebook = useCallback(() => {
-    setCreateNotebookModal(true)
-    logger.debug('Create notebook modal opened')
-  }, [])
-
-  const closeCreateNotebook = useCallback(() => {
-    setCreateNotebookModal(false)
-    logger.debug('Create notebook modal closed')
-  }, [])
-
-  // Notebook editing handlers
-  const startEditingNotebook = useCallback((notebookId: string, currentName: string) => {
-    setEditingNotebook(notebookId)
-    setEditValue(currentName)
-    closeNotebookContextMenu()
-    logger.debug('Started editing notebook', { notebookId })
-  }, [closeNotebookContextMenu])
-
-  const cancelEditingNotebook = useCallback(() => {
-    setEditingNotebook(null)
-    setEditValue('')
-    logger.debug('Cancelled editing notebook')
-  }, [])
-
-  const finishEditingNotebook = useCallback(() => {
-    const notebookId = editingNotebook
-    const newName = editValue.trim()
-    
-    setEditingNotebook(null)
-    setEditValue('')
-    
-    logger.debug('Finished editing notebook', { notebookId, newName })
-    
-    return { notebookId, newName }
-  }, [editingNotebook, editValue])
-
-  // Notebook expansion handlers
+  // Toggle handlers
   const toggleNotebookExpansion = useCallback((notebookId: string) => {
     setExpandedNotebooks(prev => {
       const newSet = new Set(prev)
       if (newSet.has(notebookId)) {
         newSet.delete(notebookId)
-        logger.debug('Collapsed notebook', { notebookId })
       } else {
         newSet.add(notebookId)
-        logger.debug('Expanded notebook', { notebookId })
       }
       return newSet
     })
   }, [])
 
-  const isNotebookExpanded = useCallback((notebookId: string) => {
-    return expandedNotebooks.has(notebookId)
-  }, [expandedNotebooks])
+  // Edit handlers
+  const startEditingNotebook = useCallback((notebookId: string, currentName: string) => {
+    setEditingNotebook(notebookId)
+    setEditValue(currentName)
+  }, [])
 
-  // Close all menus (useful for cleanup)
-  const closeAllMenus = useCallback(() => {
-    closeTagContextMenu()
-    closeTrashContextMenu()
-    closeNotebookContextMenu()
-    closeTagSettings()
-    closeCreateNotebook()
-    cancelEditingNotebook()
-    logger.debug('All menus and modals closed')
-  }, [
-    closeTagContextMenu,
-    closeTrashContextMenu,
-    closeNotebookContextMenu,
-    closeTagSettings,
-    closeCreateNotebook,
-    cancelEditingNotebook
-  ])
+  const cancelEditingNotebook = useCallback(() => {
+    setEditingNotebook(null)
+    setEditValue('')
+  }, [])
 
   return {
     // States
     tagContextMenu,
-    trashContextMenu,
     notebookContextMenu,
+    trashContextMenu,
     tagSettingsModal,
     createNotebookModal,
     editingNotebook,
     editValue,
     expandedNotebooks,
 
-    // Tag context menu
-    showTagContextMenu,
-    closeTagContextMenu,
-
-    // Trash context menu
-    showTrashContextMenu,
-    closeTrashContextMenu,
-
-    // Notebook context menu
-    showNotebookContextMenu,
-    closeNotebookContextMenu,
-
-    // Tag settings modal
-    showTagSettings,
-    closeTagSettings,
-
-    // Create notebook modal
-    showCreateNotebook,
-    closeCreateNotebook,
-
-    // Notebook editing
-    startEditingNotebook,
-    cancelEditingNotebook,
-    finishEditingNotebook,
+    // Setters
+    setTagSettingsModal,
+    setCreateNotebookModal,
     setEditValue,
 
-    // Notebook expansion
+    // Handlers
+    handleTagRightClick,
+    handleNotebookRightClick,
+    handleTrashRightClick,
+    closeAllContextMenus,
     toggleNotebookExpansion,
-    isNotebookExpanded,
-
-    // Utilities
-    closeAllMenus
+    startEditingNotebook,
+    cancelEditingNotebook
   }
 }
