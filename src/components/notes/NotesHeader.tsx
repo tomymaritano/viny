@@ -40,33 +40,34 @@ const NotesHeader: React.FC<NotesHeaderProps> = ({
   }, [onOpenSearch])
 
   return (
-    <div className="relative flex items-center justify-between p-2 border-b border-theme-border-primary flex-shrink-0">
-      {/* Sort dropdown */}
-      <SortDropdown
-        currentSortBy={currentSortBy}
-        currentSortDirection={currentSortDirection}
-        onSort={onSort}
-      />
+    <div className="flex items-center justify-between p-2 border-b border-theme-border-primary flex-shrink-0">
+      {/* Left: Sort dropdown */}
+      <div className="flex items-center">
+        <SortDropdown
+          currentSortBy={currentSortBy}
+          currentSortDirection={currentSortDirection}
+          onSort={onSort}
+        />
+      </div>
 
-      {/* Centered title */}
-      <div className="absolute left-1/2 transform -translate-x-1/2">
-        <h2 className="text-lg font-semibold text-theme-text-primary m-0">
+      {/* Center: Title */}
+      <div className="flex-1 flex justify-center px-4">
+        <h2 className="text-lg font-semibold text-theme-text-primary m-0 truncate">
           {title} ({notesCount})
         </h2>
       </div>
 
-      {/* Action buttons */}
-      <div className="flex items-center space-x-1">
+      {/* Right: Action buttons */}
+      <div className="flex items-center space-x-2">
         <button
           onClick={onOpenSearch}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm text-theme-text-muted hover:text-theme-text-primary
+          className="flex items-center gap-1.5 px-2 py-1.5 text-sm text-theme-text-muted hover:text-theme-text-primary
             bg-theme-bg-tertiary hover:bg-theme-bg-secondary border border-theme-border-secondary rounded-md
             transition-colors duration-150"
           title="Search notes (Cmd+K)"
         >
           <Icons.Search size={14} />
-          <span className="hidden sm:inline">Search</span>
-          <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-theme-bg-primary px-1.5 font-mono text-[10px] font-medium text-theme-text-muted opacity-100">
+          <kbd className="inline-flex h-5 select-none items-center gap-1 rounded border bg-theme-bg-primary px-1.5 font-mono text-[10px] font-medium text-theme-text-muted opacity-100">
             <span className="text-xs">⌘</span>K
           </kbd>
         </button>
