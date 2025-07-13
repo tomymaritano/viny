@@ -1,5 +1,8 @@
 import React, { useEffect, useRef } from 'react'
 
+// Types
+import { Note } from '../types'
+
 // Components
 import EditorToolbar from './editor/toolbar/EditorToolbar'
 import NoteMetadata from './editor/metadata/NoteMetadata'
@@ -17,17 +20,6 @@ import { useAppStore } from '../stores/newSimpleStore'
 
 // Error Boundary
 import ComponentErrorBoundary from './errors/ComponentErrorBoundary'
-
-interface Note {
-  id: string
-  title: string
-  content: string
-  notebook: string
-  tags?: string[]
-  status?: string
-  createdAt?: string
-  updatedAt?: string
-}
 
 interface Notebook {
   id: string
@@ -75,7 +67,7 @@ const MarkdownItEditor: React.FC<MarkdownItEditorProps> = ({
     handleCloseOptionsModal,
     handleDuplicateNote,
     handleDeleteNote,
-  } = useEditorState(selectedNote)
+  } = useEditorState(selectedNote || null)
 
   // Main editor logic
   const {

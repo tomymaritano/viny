@@ -21,7 +21,7 @@ export const useEditorState = (selectedNote: Note | null) => {
 
   // Calculate available tags from all notes
   const availableTags = useMemo(() => {
-    const tagSet = new Set()
+    const tagSet = new Set<string>()
     notes.forEach(note => {
       if (note.tags && Array.isArray(note.tags)) {
         note.tags.forEach(tag => tagSet.add(tag))

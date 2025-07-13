@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react'
-import PropTypes from 'prop-types'
 import Icons from '../../Icons'
 import IconButton from '../../ui/IconButton'
 import TagManager from './TagManager'
 import { THEME_COLORS, ANIMATIONS } from '../../../constants/theme'
 
-const TagModal = ({
+interface TagModalProps {
+  isOpen: boolean
+  onClose: () => void
+  currentTags?: string[]
+  onTagsChange: (tags: string[]) => void
+  availableTags?: string[]
+}
+
+const TagModal: React.FC<TagModalProps> = ({
   isOpen,
   onClose,
   currentTags = [],
@@ -133,14 +140,6 @@ const TagModal = ({
       </div>
     </div>
   )
-}
-
-TagModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  currentTags: PropTypes.arrayOf(PropTypes.string),
-  onTagsChange: PropTypes.func.isRequired,
-  availableTags: PropTypes.arrayOf(PropTypes.string),
 }
 
 export default TagModal

@@ -5,14 +5,22 @@ import {
   useImperativeHandle,
   forwardRef,
 } from 'react'
-import PropTypes from 'prop-types'
+import { Note } from '../../types'
 import InkdropEditor from '../InkdropEditor'
 import FloatingViewControls from './FloatingViewControls'
 import NoteMetadata from './metadata/NoteMetadata'
 import { useScrollSync } from './hooks/useScrollSync'
 import { renderMarkdownForEditor } from '../../utils/markdownRenderer'
 
-const SplitEditor = forwardRef(
+interface SplitEditorProps {
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+  selectedNote?: Note | null
+  showLineNumbers?: boolean
+}
+
+const SplitEditor = forwardRef<unknown, SplitEditorProps>(
   (
     {
       value,
@@ -177,13 +185,5 @@ const SplitEditor = forwardRef(
 )
 
 SplitEditor.displayName = 'SplitEditor'
-
-SplitEditor.propTypes = {
-  value: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  placeholder: PropTypes.string,
-  selectedNote: PropTypes.object,
-  showLineNumbers: PropTypes.bool,
-}
 
 export default SplitEditor
