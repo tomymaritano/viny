@@ -56,16 +56,16 @@ export const createInkdropTheme = () => {
       color: getEditorColor('lineNumber'),
       border: 'none',
     },
-    // Selection styling - using a more visible color against dark background
+    // Selection styling - using a highly visible white-based color
     '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
-      backgroundColor: 'rgba(238, 201, 81, 0.3)', // Yellow like the cursor/headings
+      backgroundColor: 'rgba(255, 255, 255, 0.15)', // Semi-transparent white
     },
     '.cm-content ::selection': {
-      backgroundColor: 'rgba(238, 201, 81, 0.3)',
+      backgroundColor: 'rgba(255, 255, 255, 0.15)',
       color: 'inherit',
     },
     '.cm-content ::-moz-selection': {
-      backgroundColor: 'rgba(238, 201, 81, 0.3)',
+      backgroundColor: 'rgba(255, 255, 255, 0.15)',
       color: 'inherit',
     },
     '.cm-selectionLayer': {
