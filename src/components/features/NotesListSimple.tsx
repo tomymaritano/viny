@@ -141,6 +141,8 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
         currentSortDirection={sortDirection}
         onSort={handleSort}
         onNewNote={onNewNote}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
         onOpenSearch={() => setIsSearchModalOpen(true)}
       />
 
