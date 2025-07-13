@@ -56,14 +56,17 @@ const SidebarContent: React.FC = () => {
 
   return (
     <SidebarContainer onContextMenuClose={closeAllContextMenus}>
+      {/* Settings button at top */}
+      <SettingsButton onClick={() => setModal('settings', true)} />
+      
       {/* Main Navigation Sections */}
-      <SidebarSection isExpanded={true}>
+      <section className="space-y-0">
         <MainSections
           sections={mainSections}
           activeSection={activeSection}
           onSectionClick={handleSectionClick}
         />
-      </SidebarSection>
+      </section>
 
       {/* Status Sections */}
       <SidebarSection
@@ -148,14 +151,17 @@ const SidebarContent: React.FC = () => {
       </SidebarSection>
 
       {/* System Sections */}
-      <SidebarSection isExpanded={true}>
+      <section className="space-y-0">
         <MainSections
           sections={systemSections}
           activeSection={activeSection}
           onSectionClick={handleSectionClick}
           onTrashRightClick={handleTrashRightClick}
         />
-      </SidebarSection>
+      </section>
+      
+      {/* Footer/Bottom spacer */}
+      <div className="flex-1" />
 
       {/* Context Menu Manager */}
       <SidebarContextMenuManager
@@ -207,8 +213,6 @@ const SidebarContent: React.FC = () => {
         availableParents={notebooksWithCounts}
       />
 
-      {/* Settings button at bottom */}
-      <SettingsButton />
     </SidebarContainer>
   )
 }
