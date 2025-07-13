@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import Fuse from 'fuse.js'
+import { Note } from '../types'
 
 // Search configuration for Fuse.js
 const SEARCH_OPTIONS = {
@@ -42,15 +43,20 @@ const SEARCH_OPTIONS = {
 const SEARCH_HISTORY_KEY = 'nototo_search_history'
 const MAX_SEARCH_HISTORY = 10
 
-export const useSearch = (notes = []) => {
+export const useSearch = (notes: Note[] = []) => {
   // Search state
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState([])
-  const [isSearching, setIsSearching] = useState(false)
-  const [searchHistory, setSearchHistory] = useState([])
+  const [query, setQuery] = useState<string>('')
+  const [results, setResults] = useState<Note[]>([])
+  const [isSearching, setIsSearching] = useState<boolean>(false)
+  const [searchHistory, setSearchHistory] = useState<string[]>([])
 
   // Filters state
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<{
+    notebooks: string[]
+    tags: string[]
+    dateRange: { start: Date; end: Date } | null
+    isPinned: boolean | null
+  }>({
     notebooks: [], // Array of notebook names to filter by
     tags: [], // Array of tags to filter by
     dateRange: null, // { start: Date, end: Date }
@@ -80,7 +86,7 @@ export const useSearch = (notes = []) => {
   }, [])
 
   // Save search history to localStorage
-  const saveSearchHistory = useCallback(history => {
+  const saveSearchHistory = useCallback((history: string[]) => {
     try {
       localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history))
     } catch (error) {
@@ -90,7 +96,7 @@ export const useSearch = (notes = []) => {
 
   // Add query to search history
   const addToHistory = useCallback(
-    searchQuery => {
+    (searchQuery: string) => {
       if (!searchQuery.trim() || searchQuery.length < 2) return
 
       setSearchHistory(prev => {
@@ -115,7 +121,7 @@ export const useSearch = (notes = []) => {
 
   // Apply filters to notes
   const applyFilters = useCallback(
-    notesToFilter => {
+    (notesToFilter: Note[]) => {
       return notesToFilter.filter(note => {
         // Notebook filter
         if (
@@ -196,7 +202,7 @@ export const useSearch = (notes = []) => {
 
   // Search with immediate history update
   const search = useCallback(
-    searchQuery => {
+    (searchQuery: string) => {
       setQuery(searchQuery)
       if (searchQuery.trim().length >= 2) {
         addToHistory(searchQuery)
@@ -213,7 +219,7 @@ export const useSearch = (notes = []) => {
   }, [])
 
   // Update specific filter
-  const updateFilter = useCallback((filterType, value) => {
+  const updateFilter = useCallback((filterType: string, value: any) => {
     setFilters(prev => ({
       ...prev,
       [filterType]: value,
@@ -254,7 +260,7 @@ export const useSearch = (notes = []) => {
   }, [notes])
 
   // Helper function to highlight search matches
-  const highlightMatches = useCallback((text, matches = []) => {
+  const highlightMatches = useCallback((text: string, matches: any[] = []) => {
     if (!matches.length) return text
 
     // Sort matches by position to process from end to start

@@ -1,18 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearch } from '../hooks/useSearch'
 import { useAppStore } from '../stores/newSimpleStore'
-import { SearchLoading } from './LoadingStates'
-import Icons from './Icons'
-import IconButton from './ui/IconButton'
-import { Note } from '../types'
-import { formatDate } from '../utils/dateUtils'
-import { ANIMATIONS, THEME_COLORS } from '../constants/theme'
+import SearchInput from './search/SearchInput'
+import SearchResults from './search/SearchResults'
 import SearchErrorBoundary from './errors/SearchErrorBoundary'
-
-interface SearchMatch {
-  key: string
-  indices: [number, number][]
-}
 
 interface SearchModalProps {
   isOpen: boolean
@@ -33,7 +24,6 @@ const SearchModal: React.FC<SearchModalProps> = ({
     query,
     results,
     isSearching,
-    searchHistory,
     search,
     clearSearch,
     hasResults,
@@ -48,275 +38,80 @@ const SearchModal: React.FC<SearchModalProps> = ({
     }
   }, [isOpen])
 
-  // Reset search when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      clearSearch()
-      setSelectedIndex(0)
-    }
-  }, [isOpen, clearSearch])
-
-  // Reset selected index when results change
+  // Reset selection when results change
   useEffect(() => {
     setSelectedIndex(0)
   }, [results])
 
   // Handle keyboard navigation
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault()
-        setSelectedIndex(prev => Math.min(prev + 1, results.length - 1))
-        break
-      case 'ArrowUp':
-        e.preventDefault()
-        setSelectedIndex(prev => Math.max(prev - 1, 0))
-        break
-      case 'Enter':
-        e.preventDefault()
-        if (results[selectedIndex]) {
-          onSelectNote(results[selectedIndex].id)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return
+
+      switch (e.key) {
+        case 'Escape':
           onClose()
-        }
-        break
-      case 'Escape':
-        onClose()
-        break
+          break
+        case 'ArrowDown':
+          e.preventDefault()
+          setSelectedIndex((prev) => Math.min(prev + 1, results.length - 1))
+          break
+        case 'ArrowUp':
+          e.preventDefault()
+          setSelectedIndex((prev) => Math.max(prev - 1, 0))
+          break
+        case 'Enter':
+          e.preventDefault()
+          if (results[selectedIndex]) {
+            handleNoteSelect(results[selectedIndex].id)
+          }
+          break
+      }
     }
-  }, [results, selectedIndex, onSelectNote, onClose])
 
-  // Handle search history selection
-  const handleHistorySelect = useCallback((historyQuery: string) => {
-    search(historyQuery)
-  }, [search])
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, results, selectedIndex, onClose])
 
-  // Handle note selection
-  const handleNoteSelect = useCallback((note: Note) => {
-    onSelectNote(note.id)
+  const handleNoteSelect = useCallback((noteId: string) => {
+    onSelectNote(noteId)
     onClose()
   }, [onSelectNote, onClose])
 
-  // Get snippet for content matches
-  const getSnippet = useCallback((note: Note, matches: SearchMatch[]) => {
-    const contentMatch = matches.find(match => match.key === 'content')
-    if (!contentMatch) return ''
-
-    const content = note.content
-    const indices = contentMatch.indices[0]
-    if (!indices) return content.slice(0, 100) + '...'
-
-    const [start, end] = indices
-    const snippetStart = Math.max(0, start - 50)
-    const snippetEnd = Math.min(content.length, end + 50)
-    
-    let snippet = content.slice(snippetStart, snippetEnd)
-    if (snippetStart > 0) snippet = '...' + snippet
-    if (snippetEnd < content.length) snippet = snippet + '...'
-    
-    return snippet
-  }, [])
-
-  // Using centralized date utility
-  const formatNoteDate = useCallback((dateString: string) => {
-    return formatDate(dateString, { relative: true })
-  }, [])
+  const handleBackdropClick = useCallback((e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose()
+    }
+  }, [onClose])
 
   if (!isOpen) return null
 
   return (
-    <SearchErrorBoundary
-      onClearSearch={clearSearch}
-      onClose={onClose}
-      fallbackMessage="Search encountered an error. This might be due to complex search terms or filtering."
-    >
-      <div
-        className={`fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 ${ANIMATIONS.FADE_IN}`}
-        onClick={onClose}
+    <SearchErrorBoundary>
+      <div 
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center pt-[10vh]"
+        onClick={handleBackdropClick}
       >
-      <div
-        className={`border border-theme-border-primary rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[80vh] ${ANIMATIONS.ZOOM_IN}`}
-        style={{ backgroundColor: THEME_COLORS.MODAL_BG }}
-        onClick={e => e.stopPropagation()}
-        onKeyDown={handleKeyDown}
-        tabIndex={-1}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-theme-border-primary">
-          <div className="flex items-center gap-3">
-            <Icons.Search size={20} className="text-theme-text-muted" />
-            <input
-              ref={inputRef}
-              type="text"
-              placeholder="Search notes..."
-              value={query}
-              onChange={(e) => search(e.target.value)}
-              className="text-lg font-semibold text-theme-text-primary bg-transparent border-none outline-none placeholder:text-theme-text-muted"
-              style={{ minWidth: '200px' }}
+        <div className="bg-theme-bg-primary border border-theme-border-primary rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[80vh] overflow-hidden">
+          <SearchInput
+            ref={inputRef}
+            query={query}
+            onQueryChange={search}
+            onClear={clearSearch}
+            onClose={onClose}
+          />
+          
+          <div className="max-h-96 overflow-y-auto">
+            <SearchResults
+              results={results}
+              selectedIndex={selectedIndex}
+              highlightMatches={highlightMatches}
+              onSelectNote={handleNoteSelect}
+              hasQuery={hasQuery}
+              isSearching={isSearching}
             />
           </div>
-          <IconButton
-            icon={Icons.X}
-            onClick={onClose}
-            title="Close"
-            size={16}
-            variant="default"
-            aria-label="Close search modal"
-          />
         </div>
-
-        {/* Content */}
-        <div className="max-h-96 overflow-y-auto">
-          {/* Loading State */}
-          {isSearching && (
-            <div className="p-4">
-              <SearchLoading />
-            </div>
-          )}
-
-          {/* Search History */}
-          {!hasQuery && searchHistory.length > 0 && (
-            <div className="p-4">
-              <h3 className="text-sm font-medium text-theme-text-secondary mb-3">
-                Recent Searches
-              </h3>
-              <div className="space-y-1">
-                {searchHistory.map((historyItem, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleHistorySelect(historyItem)}
-                    className="w-full text-left px-3 py-2 text-sm text-theme-text-primary hover:bg-theme-bg-tertiary rounded transition-colors flex items-center gap-2"
-                  >
-                    <Icons.Clock size={14} className="text-theme-text-muted" />
-                    {historyItem}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Search Results */}
-          {hasQuery && !isSearching && (
-            <div>
-              {hasResults ? (
-                <div className="py-2">
-                  {results.map((note, index) => (
-                    <button
-                      key={note.id}
-                      onClick={() => handleNoteSelect(note)}
-                      className={`w-full text-left px-4 py-3 border-b border-theme-border-primary last:border-b-0 transition-colors ${
-                        index === selectedIndex
-                          ? 'bg-theme-bg-tertiary'
-                          : 'hover:bg-theme-bg-tertiary/50'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          {/* Note Title */}
-                          <h4 
-                            className="font-medium text-theme-text-primary mb-1 truncate"
-                            dangerouslySetInnerHTML={{
-                              __html: highlightMatches(note.title, note._searchMatches?.filter(m => m.key === 'title'))
-                            }}
-                          />
-
-                          {/* Content Snippet */}
-                          {note._searchMatches && (
-                            <p 
-                              className="text-sm text-theme-text-secondary line-clamp-2"
-                              dangerouslySetInnerHTML={{
-                                __html: getSnippet(note, note._searchMatches)
-                              }}
-                            />
-                          )}
-
-                          {/* Tags */}
-                          {note.tags.length > 0 && (
-                            <div className="flex items-center gap-1 mt-2">
-                              {note.tags.slice(0, 3).map(tag => (
-                                <span
-                                  key={tag}
-                                  className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-theme-bg-primary text-theme-text-muted"
-                                >
-                                  #{tag}
-                                </span>
-                              ))}
-                              {note.tags.length > 3 && (
-                                <span className="text-xs text-theme-text-muted">
-                                  +{note.tags.length - 3}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Note Metadata */}
-                        <div className="flex flex-col items-end gap-1 text-xs text-theme-text-muted">
-                          <span>{formatNoteDate(note.updatedAt)}</span>
-                          {note.notebook && (
-                            <span className="flex items-center gap-1">
-                              <Icons.Book size={12} />
-                              {note.notebook}
-                            </span>
-                          )}
-                          {note.isPinned && (
-                            <Icons.Pin size={12} className="text-theme-accent-orange" />
-                          )}
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-8 text-center">
-                  <Icons.Search size={48} className="mx-auto mb-4 text-theme-text-muted" />
-                  <h3 className="text-lg font-medium text-theme-text-primary mb-2">
-                    No results found
-                  </h3>
-                  <p className="text-theme-text-secondary">
-                    Try different keywords or check your spelling
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Empty State */}
-          {!hasQuery && searchHistory.length === 0 && (
-            <div className="p-8 text-center">
-              <Icons.Search size={48} className="mx-auto mb-4 text-theme-text-muted" />
-              <h3 className="text-lg font-medium text-theme-text-primary mb-2">
-                Search your notes
-              </h3>
-              <p className="text-theme-text-secondary">
-                Find notes by title, content, tags, or notebook
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between p-4 border-t border-theme-border-primary">
-          <div className="flex items-center gap-4 text-xs text-theme-text-muted">
-            <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 bg-theme-bg-primary rounded text-xs">↑↓</kbd>
-              Navigate
-            </span>
-            <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 bg-theme-bg-primary rounded text-xs">↵</kbd>
-              Select
-            </span>
-            <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 bg-theme-bg-primary rounded text-xs">Esc</kbd>
-              Close
-            </span>
-          </div>
-          {hasResults && (
-            <span className="text-xs text-theme-text-muted">
-              {results.length} result{results.length !== 1 ? 's' : ''}
-            </span>
-          )}
-        </div>
-      </div>
       </div>
     </SearchErrorBoundary>
   )

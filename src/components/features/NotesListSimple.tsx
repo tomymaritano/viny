@@ -1,5 +1,5 @@
 // Simplified NotesList component
-import React, { memo, useState, useCallback, useMemo } from 'react'
+import React, { memo, useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { Note } from '../../types'
 import { useNotesListLogic } from '../../hooks/useNotesListLogic'
 import { useAppStore } from '../../stores/newSimpleStore'
@@ -36,21 +36,71 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
   const { sortBy, sortDirection, setSortBy, setSortDirection, sortNotes, setModal, setActiveSection } = useAppStore()
   const [searchTerm, setSearchTerm] = useState('')
   const [showSortMenu, setShowSortMenu] = useState(false)
+  const sortMenuRef = useRef<HTMLDivElement>(null)
 
-  // Filter notes based on search term
-  const filteredNotes = useMemo(() => {
-    if (!searchTerm.trim()) return notes
+  // Filter and sort notes based on search term and sort criteria
+  const filteredAndSortedNotes = useMemo(() => {
+    // First filter by search term
+    let filtered = notes
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase()
+      filtered = notes.filter(note => 
+        note.title.toLowerCase().includes(searchLower) ||
+        note.content.toLowerCase().includes(searchLower) ||
+        note.tags.some(tag => tag.toLowerCase().includes(searchLower))
+      )
+    }
     
-    const searchLower = searchTerm.toLowerCase()
-    return notes.filter(note => 
-      note.title.toLowerCase().includes(searchLower) ||
-      note.content.toLowerCase().includes(searchLower) ||
-      note.tags.some(tag => tag.toLowerCase().includes(searchLower))
-    )
-  }, [notes, searchTerm])
+    // Then sort the filtered results
+    const sorted = [...filtered].sort((a, b) => {
+      let aValue: string | number | Date
+      let bValue: string | number | Date
+      
+      switch (sortBy) {
+        case 'title':
+          aValue = a.title.toLowerCase()
+          bValue = b.title.toLowerCase()
+          break
+        case 'date':
+          aValue = new Date(a.createdAt)
+          bValue = new Date(b.createdAt)
+          break
+        case 'updated':
+          aValue = new Date(a.updatedAt)
+          bValue = new Date(b.updatedAt)
+          break
+        case 'notebook':
+          aValue = a.notebook?.toLowerCase() || ''
+          bValue = b.notebook?.toLowerCase() || ''
+          break
+        default:
+          aValue = new Date(a.updatedAt)
+          bValue = new Date(b.updatedAt)
+      }
+      
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
+      return 0
+    })
+    
+    return sorted
+  }, [notes, searchTerm, sortBy, sortDirection])
 
-  const notesCount = filteredNotes.length
+  const notesCount = filteredAndSortedNotes.length
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortMenuRef.current && !sortMenuRef.current.contains(event.target as Node)) {
+        setShowSortMenu(false)
+      }
+    }
+
+    if (showSortMenu) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showSortMenu])
 
   const handleSort = useCallback((field: 'title' | 'date' | 'updated' | 'notebook') => {
     if (sortBy === field) {
@@ -59,9 +109,8 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
       setSortBy(field)
       setSortDirection('desc')
     }
-    sortNotes()
     setShowSortMenu(false)
-  }, [sortBy, sortDirection, setSortBy, setSortDirection, sortNotes])
+  }, [sortBy, sortDirection, setSortBy, setSortDirection])
 
 
   const handleNoteClick = useCallback((noteId: string) => {
@@ -122,17 +171,117 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
       <div className="h-full flex flex-col bg-theme-bg-primary">
         {/* Header */}
         <div className="relative flex items-center justify-between p-2 border-b border-theme-border-primary flex-shrink-0">
-          {/* Sort by title */}
-          <IconButton
-            icon={sortDirection === 'asc' ? Icons.ArrowUpAZ : Icons.ArrowDownAZ}
-            onClick={() => handleSort('title')}
-            title={`Sort by title ${sortDirection === 'asc' ? 'A-Z' : 'Z-A'}`}
-            size={16}
-            variant="default"
-            aria-label="Sort by title"
-            aria-pressed={false}
-            aria-keyshortcuts=""
-          />
+          {/* Sort dropdown */}
+          <div className="relative" ref={sortMenuRef}>
+            <IconButton
+              icon={sortBy === 'title' ? (sortDirection === 'asc' ? Icons.ArrowUpAZ : Icons.ArrowDownAZ) : Icons.ArrowDownAZ}
+              onClick={() => setShowSortMenu(!showSortMenu)}
+              title="Sort and filter options"
+              size={16}
+              variant="default"
+              aria-label="Sort and filter options"
+              aria-pressed={showSortMenu}
+              aria-keyshortcuts=""
+            />
+            
+            {showSortMenu && (
+              <div className="absolute left-0 top-8 z-50 bg-theme-bg-primary border border-theme-border-primary rounded-lg shadow-lg min-w-48">
+                <div className="py-1">
+                  <div className="px-3 py-2 text-xs font-medium text-theme-text-muted border-b border-theme-border-primary">
+                    Sort by
+                  </div>
+                  
+                  {/* Title options */}
+                  <button
+                    onClick={() => handleSort('title')}
+                    className={`w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-theme-bg-tertiary ${
+                      sortBy === 'title' && sortDirection === 'asc' ? 'bg-theme-bg-secondary text-theme-accent-primary' : 'text-theme-text-primary'
+                    }`}
+                  >
+                    <span>Title: A → Z</span>
+                    {sortBy === 'title' && sortDirection === 'asc' && <Icons.Check size={12} />}
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setSortBy('title')
+                      setSortDirection('desc')
+                      sortNotes()
+                      setShowSortMenu(false)
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-theme-bg-tertiary ${
+                      sortBy === 'title' && sortDirection === 'desc' ? 'bg-theme-bg-secondary text-theme-accent-primary' : 'text-theme-text-primary'
+                    }`}
+                  >
+                    <span>Title: Z → A</span>
+                    {sortBy === 'title' && sortDirection === 'desc' && <Icons.Check size={12} />}
+                  </button>
+                  
+                  {/* Date Created options */}
+                  <button
+                    onClick={() => {
+                      setSortBy('date')
+                      setSortDirection('desc')
+                      sortNotes()
+                      setShowSortMenu(false)
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-theme-bg-tertiary ${
+                      sortBy === 'date' && sortDirection === 'desc' ? 'bg-theme-bg-secondary text-theme-accent-primary' : 'text-theme-text-primary'
+                    }`}
+                  >
+                    <span>Date Created: New → Old</span>
+                    {sortBy === 'date' && sortDirection === 'desc' && <Icons.Check size={12} />}
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setSortBy('date')
+                      setSortDirection('asc')
+                      sortNotes()
+                      setShowSortMenu(false)
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-theme-bg-tertiary ${
+                      sortBy === 'date' && sortDirection === 'asc' ? 'bg-theme-bg-secondary text-theme-accent-primary' : 'text-theme-text-primary'
+                    }`}
+                  >
+                    <span>Date Created: Old → New</span>
+                    {sortBy === 'date' && sortDirection === 'asc' && <Icons.Check size={12} />}
+                  </button>
+                  
+                  {/* Date Updated options */}
+                  <button
+                    onClick={() => {
+                      setSortBy('updated')
+                      setSortDirection('desc')
+                      sortNotes()
+                      setShowSortMenu(false)
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-theme-bg-tertiary ${
+                      sortBy === 'updated' && sortDirection === 'desc' ? 'bg-theme-bg-secondary text-theme-accent-primary' : 'text-theme-text-primary'
+                    }`}
+                  >
+                    <span>Date Updated: New → Old</span>
+                    {sortBy === 'updated' && sortDirection === 'desc' && <Icons.Check size={12} />}
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setSortBy('updated')
+                      setSortDirection('asc')
+                      sortNotes()
+                      setShowSortMenu(false)
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-theme-bg-tertiary ${
+                      sortBy === 'updated' && sortDirection === 'asc' ? 'bg-theme-bg-secondary text-theme-accent-primary' : 'text-theme-text-primary'
+                    }`}
+                  >
+                    <span>Date Updated: Old → New</span>
+                    {sortBy === 'updated' && sortDirection === 'asc' && <Icons.Check size={12} />}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Centered title */}
           <div className="absolute left-1/2 transform -translate-x-1/2">
@@ -214,17 +363,112 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
     <div className="h-full flex flex-col bg-theme-bg-primary">
       {/* Header */}
       <div className="relative flex items-center justify-between p-2 border-b border-theme-border-primary flex-shrink-0">
-        {/* Sort by title */}
-        <IconButton
-          icon={sortDirection === 'asc' ? Icons.ArrowUpAZ : Icons.ArrowDownAZ}
-          onClick={() => handleSort('title')}
-          title={`Sort by title ${sortDirection === 'asc' ? 'A-Z' : 'Z-A'}`}
-          size={16}
-          variant="default"
-          aria-label="Sort by title"
-          aria-pressed={false}
-          aria-keyshortcuts=""
-        />
+        {/* Sort dropdown */}
+        <div className="relative" ref={sortMenuRef}>
+          <IconButton
+            icon={sortBy === 'title' ? (sortDirection === 'asc' ? Icons.ArrowUpAZ : Icons.ArrowDownAZ) : Icons.ArrowDownAZ}
+            onClick={() => setShowSortMenu(!showSortMenu)}
+            title="Sort and filter options"
+            size={16}
+            variant="default"
+            aria-label="Sort and filter options"
+            aria-pressed={showSortMenu}
+            aria-keyshortcuts=""
+          />
+          
+          {showSortMenu && (
+            <div className="absolute left-0 top-8 z-50 bg-theme-bg-primary border border-theme-border-primary rounded-lg shadow-lg min-w-48">
+              <div className="py-1">
+                <div className="px-3 py-2 text-xs font-medium text-theme-text-muted border-b border-theme-border-primary">
+                  Sort by
+                </div>
+                
+                {/* Title options */}
+                <button
+                  onClick={() => handleSort('title')}
+                  className={`w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-theme-bg-tertiary ${
+                    sortBy === 'title' && sortDirection === 'asc' ? 'bg-theme-bg-secondary text-theme-accent-primary' : 'text-theme-text-primary'
+                  }`}
+                >
+                  <span>Title: A → Z</span>
+                  {sortBy === 'title' && sortDirection === 'asc' && <Icons.Check size={12} />}
+                </button>
+                
+                <button
+                  onClick={() => {
+                    setSortBy('title')
+                    setSortDirection('desc')
+                    setShowSortMenu(false)
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-theme-bg-tertiary ${
+                    sortBy === 'title' && sortDirection === 'desc' ? 'bg-theme-bg-secondary text-theme-accent-primary' : 'text-theme-text-primary'
+                  }`}
+                >
+                  <span>Title: Z → A</span>
+                  {sortBy === 'title' && sortDirection === 'desc' && <Icons.Check size={12} />}
+                </button>
+                
+                {/* Date Created options */}
+                <button
+                  onClick={() => {
+                    setSortBy('date')
+                    setSortDirection('desc')
+                    setShowSortMenu(false)
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-theme-bg-tertiary ${
+                    sortBy === 'date' && sortDirection === 'desc' ? 'bg-theme-bg-secondary text-theme-accent-primary' : 'text-theme-text-primary'
+                  }`}
+                >
+                  <span>Date Created: New → Old</span>
+                  {sortBy === 'date' && sortDirection === 'desc' && <Icons.Check size={12} />}
+                </button>
+                
+                <button
+                  onClick={() => {
+                    setSortBy('date')
+                    setSortDirection('asc')
+                    setShowSortMenu(false)
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-theme-bg-tertiary ${
+                    sortBy === 'date' && sortDirection === 'asc' ? 'bg-theme-bg-secondary text-theme-accent-primary' : 'text-theme-text-primary'
+                  }`}
+                >
+                  <span>Date Created: Old → New</span>
+                  {sortBy === 'date' && sortDirection === 'asc' && <Icons.Check size={12} />}
+                </button>
+                
+                {/* Date Updated options */}
+                <button
+                  onClick={() => {
+                    setSortBy('updated')
+                    setSortDirection('desc')
+                    setShowSortMenu(false)
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-theme-bg-tertiary ${
+                    sortBy === 'updated' && sortDirection === 'desc' ? 'bg-theme-bg-secondary text-theme-accent-primary' : 'text-theme-text-primary'
+                  }`}
+                >
+                  <span>Date Updated: New → Old</span>
+                  {sortBy === 'updated' && sortDirection === 'desc' && <Icons.Check size={12} />}
+                </button>
+                
+                <button
+                  onClick={() => {
+                    setSortBy('updated')
+                    setSortDirection('asc')
+                    setShowSortMenu(false)
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-theme-bg-tertiary ${
+                    sortBy === 'updated' && sortDirection === 'asc' ? 'bg-theme-bg-secondary text-theme-accent-primary' : 'text-theme-text-primary'
+                  }`}
+                >
+                  <span>Date Updated: Old → New</span>
+                  {sortBy === 'updated' && sortDirection === 'asc' && <Icons.Check size={12} />}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Centered title */}
         <div className="absolute left-1/2 transform -translate-x-1/2">
@@ -266,7 +510,7 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
 
       {/* Notes List */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 custom-scrollbar">
-        {filteredNotes.length === 0 ? (
+        {filteredAndSortedNotes.length === 0 ? (
           <div className="h-full flex items-center justify-center">
             <div className="text-theme-text-muted text-center">
               <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -285,7 +529,7 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
             </div>
           </div>
         ) : (
-          filteredNotes.map((note) => (
+          filteredAndSortedNotes.map((note) => (
             <NoteListItem 
               key={note.id} 
               note={note}
