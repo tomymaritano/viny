@@ -39,15 +39,10 @@ const TagsList: React.FC<TagsListProps> = ({
             onContextMenu={(e) => onTagRightClick(e, tag)}
             style={isActive ? { boxShadow: 'inset 3px 0 0 #ED6E3F' } : {}}
           >
-            <div className="flex items-center space-x-2 flex-1 min-w-0 ml-4">
-              <div 
-                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                style={{ 
-                  backgroundColor: tagColor.bg,
-                  outline: `1px solid ${tagColor.border}`,
-                  outlineOffset: '-1px'
-                }}
-              />
+            <div className="flex items-center space-x-3 flex-1 min-w-0">
+              <div className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
+                <div className="w-2 h-2 rounded-full bg-theme-accent-primary/60" />
+              </div>
               <span className="text-sm truncate flex-1 min-w-0">
                 #{tag}
               </span>

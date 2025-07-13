@@ -56,7 +56,7 @@ const NotebookTree: React.FC<NotebookTreeProps> = ({
               ...(isActive ? { boxShadow: 'inset 3px 0 0 #ED6E3F' } : {})
             }}
           >
-            <div className="flex items-center space-x-1.5 flex-1 min-w-0">
+            <div className="flex items-center space-x-3 flex-1 min-w-0">
               {/* Triangle expand/collapse control */}
               {hasChildren ? (
                 <div
@@ -66,7 +66,7 @@ const NotebookTree: React.FC<NotebookTreeProps> = ({
                   }}
                   className={`w-4 h-4 flex-shrink-0 flex items-center justify-center cursor-pointer transition-transform duration-150 ${isExpanded ? 'rotate-90' : 'rotate-0'}`}
                 >
-                  <Icons.ChevronRight size={10} className="text-theme-text-muted hover:text-theme-text-secondary" />
+                  <Icons.ChevronRight size={12} className="text-theme-text-muted hover:text-theme-text-secondary" />
                 </div>
               ) : (
                 <div className="w-4 h-4 flex-shrink-0" />
