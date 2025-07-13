@@ -1,5 +1,6 @@
 import React from 'react'
 import Icons from '../Icons'
+import IconButton from '../ui/IconButton'
 
 interface SettingsButtonProps {
   onClick: () => void
@@ -11,13 +12,13 @@ interface SettingsButtonProps {
 const SettingsButton: React.FC<SettingsButtonProps> = ({ onClick }) => {
   return (
     <div className="flex justify-end p-3 border-b border-theme-border-primary">
-      <button
+      <IconButton
+        icon={Icons.Settings}
         onClick={onClick}
-        className="p-1.5 text-theme-text-secondary hover:text-theme-text-primary hover:bg-theme-bg-tertiary rounded-md transition-colors"
+        size="sm"
+        variant="ghost"
         title="Settings"
-      >
-        <Icons.Settings size={16} />
-      </button>
+      />
     </div>
   )
 }

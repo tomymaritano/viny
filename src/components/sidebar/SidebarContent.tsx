@@ -60,19 +60,20 @@ const SidebarContent: React.FC = () => {
       <SettingsButton onClick={() => setModal('settings', true)} />
       
       {/* Main Navigation Sections */}
-      <section className="space-y-0">
+      <SidebarSection>
         <MainSections
           sections={mainSections}
           activeSection={activeSection}
           onSectionClick={handleSectionClick}
         />
-      </section>
+      </SidebarSection>
 
       {/* Status Sections */}
       <SidebarSection
         title="Status"
         isExpanded={expandedSections.status}
         onToggle={() => handleToggleSection('status')}
+        icon={<Icons.FileChartLine size={16} />}
         titleActions={
           <IconButton
             icon={Icons.Plus}
@@ -95,6 +96,7 @@ const SidebarContent: React.FC = () => {
         title="Notebooks"
         isExpanded={expandedSections.notebooks}
         onToggle={() => handleToggleSection('notebooks')}
+        icon={<Icons.Book size={16} />}
         titleActions={
           <IconButton
             icon={Icons.Plus}
@@ -131,6 +133,7 @@ const SidebarContent: React.FC = () => {
         title="Tags"
         isExpanded={expandedSections.tags}
         onToggle={() => handleToggleSection('tags')}
+        icon={<Icons.Tag size={16} />}
         titleActions={
           <IconButton
             icon={Icons.Hash}
@@ -151,14 +154,14 @@ const SidebarContent: React.FC = () => {
       </SidebarSection>
 
       {/* System Sections */}
-      <section className="space-y-0">
+      <SidebarSection>
         <MainSections
           sections={systemSections}
           activeSection={activeSection}
           onSectionClick={handleSectionClick}
           onTrashRightClick={handleTrashRightClick}
         />
-      </section>
+      </SidebarSection>
       
       {/* Footer/Bottom spacer */}
       <div className="flex-1" />
