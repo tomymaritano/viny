@@ -4,7 +4,7 @@ import ExportDialog from './ExportDialog'
 import NoteMetadata from './editor/metadata/NoteMetadata'
 import { useSettings } from '../hooks/useSettings'
 import { useAppStore } from '../stores/newSimpleStore'
-import TaskProgress from './ui/TaskProgress'
+// TaskProgress eliminado - usando elementos simples
 import { renderMarkdownToHtml } from '../utils/markdownRenderer'
 
 interface Note {
@@ -136,7 +136,7 @@ const NotePreview: React.FC<NotePreviewProps> = ({
 
             {/* Task Progress */}
             <div className="mt-2">
-              <TaskProgress content={note.content} size="sm" />
+              <span className="text-xs text-theme-text-muted">{note.content?.length || 0} chars</span>
             </div>
           </div>
 

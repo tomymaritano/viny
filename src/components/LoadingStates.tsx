@@ -1,8 +1,5 @@
 import React from 'react'
 import LoadingSpinner from './ui/LoadingSpinner'
-import CenteredLoader from './ui/CenteredLoader'
-import ContentLoader from './ui/ContentLoader'
-import { NoteSkeleton, SidebarSkeleton, EditorSkeleton } from './ui/SkeletonLoader'
 
 // Loading overlay for full screen loading
 export const LoadingOverlay: React.FC<{
@@ -31,24 +28,32 @@ export const LoadingOverlay: React.FC<{
 
 // Loading state for the notes list
 export const NotesListLoading: React.FC = () => (
-  <div className="flex-1 overflow-hidden">
+  <div className="flex-1 overflow-hidden p-4 space-y-3">
     {Array.from({ length: 8 }).map((_, i) => (
-      <NoteSkeleton key={i} />
+      <div key={i} className="animate-pulse">
+        <div className="bg-theme-bg-tertiary rounded h-4 mb-2" style={{ width: `${Math.random() * 40 + 60}%` }} />
+      </div>
     ))}
   </div>
 )
 
 // Loading state for the sidebar
 export const SidebarLoading: React.FC = () => (
-  <div className="w-64 h-full bg-theme-bg-secondary border-r border-theme-border-primary">
-    <SidebarSkeleton />
+  <div className="w-64 h-full bg-theme-bg-secondary border-r border-theme-border-primary p-4">
+    <div className="animate-pulse space-y-2">
+      <div className="bg-theme-bg-tertiary rounded h-4" style={{ width: '80%' }} />
+      <div className="bg-theme-bg-tertiary rounded h-4" style={{ width: '60%' }} />
+    </div>
   </div>
 )
 
 // Loading state for the editor
 export const EditorLoading: React.FC = () => (
-  <div className="flex-1 bg-theme-bg-primary">
-    <EditorSkeleton />
+  <div className="flex-1 bg-theme-bg-primary p-4">
+    <div className="animate-pulse space-y-2">
+      <div className="bg-theme-bg-tertiary rounded h-4" style={{ width: '90%' }} />
+      <div className="bg-theme-bg-tertiary rounded h-4" style={{ width: '70%' }} />
+    </div>
   </div>
 )
 
@@ -122,7 +127,12 @@ export const ContentLoading: React.FC<{
 export const AppLoading: React.FC<{
   message?: string
 }> = ({ message = 'Initializing Nototo...' }) => (
-  <CenteredLoader message={message} variant="gradient" showLogo={true} />
+  <div className="fixed inset-0 bg-theme-bg-primary flex items-center justify-center">
+    <div className="flex flex-col items-center gap-4 p-6">
+      <LoadingSpinner size="xl" variant="gradient" />
+      <span className="text-theme-text-primary">{message}</span>
+    </div>
+  </div>
 )
 
 // Empty state with loading option
@@ -135,20 +145,20 @@ export const EmptyStateLoading: React.FC<{
   description = 'Please wait while we load your content.',
   icon 
 }) => (
-  <ContentLoader 
-    message={title} 
-    submessage={description}
-    icon={icon}
-    variant="pulse"
-  />
+  <div className="flex flex-col items-center justify-center p-8 space-y-4">
+    {icon}
+    <LoadingSpinner size="lg" variant="pulse" />
+    <div className="text-center space-y-2">
+      <h3 className="text-theme-text-primary font-medium">{title}</h3>
+      <p className="text-theme-text-secondary text-sm">{description}</p>
+    </div>
+  </div>
 )
 
 // Default export for backwards compatibility
 export default {
   LoadingOverlay,
   AppLoading,
-  CenteredLoader,
-  ContentLoader,
   EmptyStateLoading,
   NotesListLoading,
   SidebarLoading,
