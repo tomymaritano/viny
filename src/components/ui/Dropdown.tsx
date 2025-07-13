@@ -35,7 +35,6 @@ interface DropdownProps {
     placeholder: string 
   }) => React.ReactNode
   maxHeight?: string
-  [key: string]: any
 }
 
 /**

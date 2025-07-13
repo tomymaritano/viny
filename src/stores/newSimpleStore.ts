@@ -43,8 +43,13 @@ export const useAppStore = create<AppStore>()(
 )
 
 // Store reference for storage service (needed for Electron sync compatibility)
-if (typeof globalThis !== 'undefined') {
-  (globalThis as any).__appStore = useAppStore
+// Only expose in development or Electron environment for debugging
+if (typeof globalThis !== 'undefined' && 
+    (process.env.NODE_ENV === 'development' || (typeof window !== 'undefined' && window.electronAPI))) {
+  interface AppGlobal {
+    __appStore?: typeof useAppStore
+  }
+  (globalThis as AppGlobal).__appStore = useAppStore
 }
 
 // Re-export types for convenience

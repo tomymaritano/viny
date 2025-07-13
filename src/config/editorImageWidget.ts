@@ -5,6 +5,7 @@
 
 import { EditorView, WidgetType, Decoration, ViewPlugin, ViewUpdate } from '@codemirror/view'
 import { RangeSetBuilder } from '@codemirror/state'
+import { editorLogger } from '../utils/logger'
 
 class ImageWidget extends WidgetType {
   constructor(public src: string, public alt: string = '') {
@@ -47,7 +48,7 @@ class ImageWidget extends WidgetType {
             resolvedSrc = storedImages[imageId]
           }
         } catch (error) {
-          console.error('Failed to load image from localStorage:', error)
+          editorLogger.error('Failed to load image from localStorage:', error)
         }
       }
     }
@@ -112,7 +113,7 @@ function createImageDecorations(view: EditorView) {
   // Regex to match markdown images: ![alt](src)
   const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g
   
-  console.log('Creating image decorations for', doc.lines, 'lines') // Debug log
+  editorLogger.debug('Creating image decorations for', 'ImageWidget', doc.lines, 'lines')
   
   for (let i = 1; i <= doc.lines; i++) {
     const line = doc.line(i)
@@ -125,7 +126,7 @@ function createImageDecorations(view: EditorView) {
       const from = line.from + match.index
       const to = from + fullMatch.length
 
-      console.log('Found image markdown:', { fullMatch, alt, src, from, to }) // Debug log
+      editorLogger.debug('Found image markdown:', 'ImageWidget', { fullMatch, alt, src, from, to })
 
       // Only show widget if the src looks like a valid image
       if (src && (src.startsWith('data:image/') || 
@@ -135,7 +136,7 @@ function createImageDecorations(view: EditorView) {
                  src.startsWith('nototo://image:') ||
                  src.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i))) {
         
-        console.log('Adding image widget for:', src) // Debug log
+        editorLogger.debug('Adding image widget for:', 'ImageWidget', src)
         
         // Create a decoration that shows the image after the markdown
         builder.add(
@@ -152,7 +153,7 @@ function createImageDecorations(view: EditorView) {
   }
 
   const decorations = builder.finish()
-  console.log('Built decorations:', decorations.size, 'decorations') // Debug log
+  editorLogger.debug('Built decorations:', 'ImageWidget', decorations.size, 'decorations')
   return decorations
 }
 
@@ -161,13 +162,13 @@ export const imageWidgetPlugin = ViewPlugin.fromClass(
     decorations: any
 
     constructor(view: EditorView) {
-      console.log('ImageWidget plugin initialized') // Debug log
+      editorLogger.debug('ImageWidget plugin initialized')
       this.decorations = createImageDecorations(view)
     }
 
     update(update: ViewUpdate) {
       if (update.docChanged || update.viewportChanged) {
-        console.log('ImageWidget plugin updating...') // Debug log
+        editorLogger.debug('ImageWidget plugin updating...')
         this.decorations = createImageDecorations(update.view)
       }
     }

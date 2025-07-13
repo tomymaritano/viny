@@ -10,16 +10,25 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 40px;
+  height: 44px; /* Slightly taller like WhatsApp */
   z-index: 1000;
   user-select: none;
   pointer-events: auto;
-  background: transparent;
+  background: linear-gradient(
+    135deg,
+    rgba(37, 42, 48, 0.95),
+    rgba(42, 47, 54, 0.95)
+  );
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding-left: 80px; /* Space for macOS traffic lights */
   padding-right: 20px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.24);
 }
 
 /* Override drag for interactive elements */
@@ -34,12 +43,13 @@
 /* Title text styling */
 .electron-titlebar .title {
   -webkit-app-region: drag;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-text-secondary, #888);
-  opacity: 0.8;
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
   padding-left: 20px;
   flex: 1;
+  letter-spacing: -0.2px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Window controls area (right side) */
@@ -58,7 +68,7 @@
   top: 0;
   left: 80px; /* After traffic lights */
   right: 0;
-  height: 30px;
+  height: 44px;
   z-index: 999;
   pointer-events: auto;
   cursor: default;
@@ -90,7 +100,7 @@
 
 /* Ensure content doesn't overlap with titlebar */
 .electron-app {
-  padding-top: 40px;
+  padding-top: 44px;
 }
 
 .electron-app .app-container {

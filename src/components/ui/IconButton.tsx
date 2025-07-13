@@ -1,6 +1,6 @@
 import React from 'react'
 
-interface IconButtonProps {
+interface IconButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> {
   icon: React.ComponentType<{ size?: number; 'aria-hidden'?: string }>
   onClick: (e?: React.MouseEvent) => void
   isActive?: boolean
@@ -11,7 +11,6 @@ interface IconButtonProps {
   'aria-pressed'?: boolean
   'aria-keyshortcuts'?: string
   className?: string
-  [key: string]: any
 }
 
 const IconButton: React.FC<IconButtonProps> = ({
