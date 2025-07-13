@@ -202,7 +202,7 @@ const StandardDropdown: React.FC<StandardDropdownProps> = ({
             {/* Render items if provided (for contextual menus) */}
             {hasItems ? (
               <div className="py-1">
-                {items.map((item, index) => (
+                {items?.map((item, index) => (
                   item.type === 'separator' ? (
                     <div key={index} className="h-px bg-theme-border-primary my-1" />
                   ) : (
