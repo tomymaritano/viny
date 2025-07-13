@@ -3,9 +3,10 @@ import { useSearch } from '../hooks/useSearch'
 import { useAppStore } from '../stores/newSimpleStore'
 import { SearchLoading } from './LoadingStates'
 import Icons from './Icons'
-import BaseModal from './ui/BaseModal'
+import IconButton from './ui/IconButton'
 import { Note } from '../types'
 import { formatDate } from '../utils/dateUtils'
+import { ANIMATIONS, THEME_COLORS } from '../constants/theme'
 
 interface SearchMatch {
   key: string
@@ -119,36 +120,51 @@ const SearchModal: React.FC<SearchModalProps> = ({
     return formatDate(dateString, { relative: true })
   }, [])
 
+  if (!isOpen) return null
+
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} className="max-w-2xl">
-      <div className="bg-theme-bg-secondary rounded-lg border border-theme-border-primary overflow-hidden">
-        {/* Search Header */}
-        <div className="flex items-center p-4 border-b border-theme-border-primary">
-          <Icons.Search size={20} className="text-theme-text-muted mr-3" />
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder="Search notes..."
-            value={query}
-            onChange={(e) => search(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="flex-1 bg-transparent text-theme-text-primary placeholder:text-theme-text-muted outline-none"
+    <div
+      className={`fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 ${ANIMATIONS.FADE_IN}`}
+      onClick={onClose}
+    >
+      <div
+        className={`border border-theme-border-primary rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[80vh] ${ANIMATIONS.ZOOM_IN}`}
+        style={{ backgroundColor: THEME_COLORS.MODAL_BG }}
+        onClick={e => e.stopPropagation()}
+        onKeyDown={handleKeyDown}
+        tabIndex={-1}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-theme-border-primary">
+          <div className="flex items-center gap-3">
+            <Icons.Search size={20} className="text-theme-text-muted" />
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Search notes..."
+              value={query}
+              onChange={(e) => search(e.target.value)}
+              className="text-lg font-semibold text-theme-text-primary bg-transparent border-none outline-none placeholder:text-theme-text-muted"
+              style={{ minWidth: '200px' }}
+            />
+          </div>
+          <IconButton
+            icon={Icons.X}
+            onClick={onClose}
+            title="Close"
+            size={16}
+            variant="default"
+            aria-label="Close search modal"
           />
-          {hasQuery && (
-            <button
-              onClick={clearSearch}
-              className="ml-2 p-1 hover:bg-theme-bg-tertiary rounded"
-            >
-              <Icons.X size={16} className="text-theme-text-muted" />
-            </button>
-          )}
         </div>
 
-        {/* Search Content */}
+        {/* Content */}
         <div className="max-h-96 overflow-y-auto">
           {/* Loading State */}
           {isSearching && (
-            <SearchLoading />
+            <div className="p-4">
+              <SearchLoading />
+            </div>
           )}
 
           {/* Search History */}
@@ -162,9 +178,9 @@ const SearchModal: React.FC<SearchModalProps> = ({
                   <button
                     key={index}
                     onClick={() => handleHistorySelect(historyItem)}
-                    className="w-full text-left px-3 py-2 text-sm text-theme-text-primary hover:bg-theme-bg-tertiary rounded transition-colors"
+                    className="w-full text-left px-3 py-2 text-sm text-theme-text-primary hover:bg-theme-bg-tertiary rounded transition-colors flex items-center gap-2"
                   >
-                    <Icons.Clock size={14} className="inline mr-2 text-theme-text-muted" />
+                    <Icons.Clock size={14} className="text-theme-text-muted" />
                     {historyItem}
                   </button>
                 ))}
@@ -215,7 +231,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
                                   key={tag}
                                   className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-theme-bg-primary text-theme-text-muted"
                                 >
-                                  {tag}
+                                  #{tag}
                                 </span>
                               ))}
                               {note.tags.length > 3 && (
@@ -272,30 +288,30 @@ const SearchModal: React.FC<SearchModalProps> = ({
           )}
         </div>
 
-        {/* Search Footer */}
-        <div className="px-4 py-3 border-t border-theme-border-primary bg-theme-bg-tertiary/30">
-          <div className="flex items-center justify-between text-xs text-theme-text-muted">
-            <div className="flex items-center gap-4">
-              <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 bg-theme-bg-primary rounded text-xs">↑↓</kbd>
-                Navigate
-              </span>
-              <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 bg-theme-bg-primary rounded text-xs">↵</kbd>
-                Select
-              </span>
-              <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 bg-theme-bg-primary rounded text-xs">Esc</kbd>
-                Close
-              </span>
-            </div>
-            {hasResults && (
-              <span>{results.length} result{results.length !== 1 ? 's' : ''}</span>
-            )}
+        {/* Footer */}
+        <div className="flex items-center justify-between p-4 border-t border-theme-border-primary">
+          <div className="flex items-center gap-4 text-xs text-theme-text-muted">
+            <span className="flex items-center gap-1">
+              <kbd className="px-1.5 py-0.5 bg-theme-bg-primary rounded text-xs">↑↓</kbd>
+              Navigate
+            </span>
+            <span className="flex items-center gap-1">
+              <kbd className="px-1.5 py-0.5 bg-theme-bg-primary rounded text-xs">↵</kbd>
+              Select
+            </span>
+            <span className="flex items-center gap-1">
+              <kbd className="px-1.5 py-0.5 bg-theme-bg-primary rounded text-xs">Esc</kbd>
+              Close
+            </span>
           </div>
+          {hasResults && (
+            <span className="text-xs text-theme-text-muted">
+              {results.length} result{results.length !== 1 ? 's' : ''}
+            </span>
+          )}
         </div>
       </div>
-    </BaseModal>
+    </div>
   )
 }
 

@@ -98,7 +98,7 @@ Quick access buttons for common markdown:
 - **Ctrl+S**: Save note
 - **Ctrl+B**: Bold formatting
 - **Ctrl+I**: Italic formatting
-- **Ctrl+K**: Link formatting
+- **Ctrl+L**: Link formatting
 - **Ctrl+E**: Code formatting
 
 ### Saving and Auto-Save

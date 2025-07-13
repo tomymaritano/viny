@@ -87,8 +87,8 @@ const EditorToolbar = ({
         {
           icon: Icons.Link,
           onClick: onLink,
-          title: 'Link (Ctrl+K)',
-          shortcut: 'Ctrl+K',
+          title: 'Link (Ctrl+L)',
+          shortcut: 'Ctrl+L',
         },
         {
           icon: Icons.Image,

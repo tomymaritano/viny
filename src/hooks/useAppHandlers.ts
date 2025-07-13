@@ -25,19 +25,22 @@ export const useAppHandlers = ({
   debouncedAutoSave
 }: UseAppHandlersProps) => {
   const {
+    notes,
     setCurrentNote,
     setSelectedNoteId,
     setIsEditorOpen
   } = useAppStore()
 
   const handleOpenNote = useCallback((noteId: string) => {
-    const note = filteredNotes.find(n => n.id === noteId)
+    const note = notes.find(n => n.id === noteId)
     if (note) {
       setCurrentNote(note)
       setSelectedNoteId(noteId)
       setIsEditorOpen(true)
+    } else {
+      console.error('Note not found:', noteId)
     }
-  }, [filteredNotes, setCurrentNote, setSelectedNoteId, setIsEditorOpen])
+  }, [notes, setCurrentNote, setSelectedNoteId, setIsEditorOpen])
 
   const handleContentChange = useCallback((newContent: string) => {
     // Get the latest currentNote from the store to avoid stale closure issues
