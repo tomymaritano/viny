@@ -63,8 +63,8 @@ const TitleBarCompact: React.FC<TitleBarCompactProps> = ({ title = 'Nototo' }) =
         top: 0,
         left: 0,
         right: 0,
-        height: '32px', // Más pequeño - 32px en lugar de 40px
-        backgroundColor: 'transparent', // Transparente como el original
+        height: '22px', // Más pequeño - 32px en lugar de 40px
+        backgroundColor: 'rgba(255, 0, 0, 0.3)', // TEMPORAL: Rojo semi-transparente para testing
         zIndex: 1000,
         userSelect: 'none',
         cursor: 'default',
@@ -81,8 +81,11 @@ const TitleBarCompact: React.FC<TitleBarCompactProps> = ({ title = 'Nototo' }) =
           height: '100%',
           pointerEvents: 'auto',
           cursor: 'grab',
+          backgroundColor: 'rgba(0, 255, 0, 0.2)', // TEMPORAL: Verde para área de drag izquierda
+          border: '1px solid green',
         }}
         onMouseDown={handleMouseDown}
+        title="DRAG AREA LEFT - 180px"
       />
       {/* Additional drag area in the right side where there's empty space */}
       <div
@@ -94,9 +97,32 @@ const TitleBarCompact: React.FC<TitleBarCompactProps> = ({ title = 'Nototo' }) =
           height: '100%',
           pointerEvents: 'auto',
           cursor: 'grab',
+          backgroundColor: 'rgba(0, 0, 255, 0.2)', // TEMPORAL: Azul para área de drag derecha
+          border: '1px solid blue',
         }}
         onMouseDown={handleMouseDown}
+        title="DRAG AREA RIGHT - 180px"
       />
+      
+      {/* TEMPORAL: Info label */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          color: 'white',
+          textShadow: '1px 1px 2px black',
+          pointerEvents: 'none',
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          padding: '2px 8px',
+          borderRadius: '4px',
+        }}
+      >
+        TITLEBAR: 32px height | DRAG: 180px left + 180px right
+      </div>
     </div>
   )
 }
