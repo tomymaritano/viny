@@ -5,6 +5,9 @@ import SettingsStandalone from './SettingsStandalone.tsx'
 import ErrorBoundary from './components/ErrorBoundary.tsx'
 import { runMigration } from './utils/migration.js'
 
+// Import Electron titlebar CSS for window dragging
+import './styles/electron-titlebar.css'
+
 // Run migration before app initialization
 runMigration()
 // Migration completed

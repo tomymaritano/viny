@@ -53,18 +53,6 @@ interface StorageInfo {
   }
 }
 
-interface DragState {
-  isDragging: boolean
-  startPosition: { x: number; y: number } | null
-  windowStartPosition: { x: number; y: number } | null
-}
-
-interface DragData {
-  startX?: number
-  startY?: number
-  currentX?: number
-  currentY?: number
-}
 
 interface MetadataAction {
   action: string
@@ -504,43 +492,8 @@ ipcMain.on('window-close', () => {
   }
 })
 
-// Modern window dragging handlers
-let dragState: DragState = {
-  isDragging: false,
-  startPosition: null,
-  windowStartPosition: null,
-}
-
-ipcMain.on('window-drag-start', (event, data: DragData) => {
-  if (!mainWindow) return
-
-  const windowBounds = mainWindow.getBounds()
-  dragState = {
-    isDragging: true,
-    startPosition: { x: data.startX || 0, y: data.startY || 0 },
-    windowStartPosition: { x: windowBounds.x, y: windowBounds.y },
-  }
-})
-
-ipcMain.on('window-drag-move', (event, data: DragData) => {
-  if (!mainWindow || !dragState.isDragging || !dragState.startPosition || !dragState.windowStartPosition) return
-
-  const deltaX = (data.currentX || 0) - dragState.startPosition.x
-  const deltaY = (data.currentY || 0) - dragState.startPosition.y
-
-  const newX = dragState.windowStartPosition.x + deltaX
-  const newY = dragState.windowStartPosition.y + deltaY
-
-  mainWindow.setPosition(newX, newY)
-})
-
-ipcMain.on('window-drag-end', () => {
-  dragState = {
-    isDragging: false,
-    startPosition: null,
-    windowStartPosition: null,
-  }
-})
+// Window dragging is now handled by CSS -webkit-app-region
+// No IPC handlers needed for modern dragging approach
 
 // Storage IPC Handlers - File System Operations
 ipcMain.handle('storage-save-note', async (event, note: Note): Promise<StorageResult> => {

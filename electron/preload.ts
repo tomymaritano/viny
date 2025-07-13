@@ -8,12 +8,6 @@ interface WindowControls {
   unmaximize: () => void
 }
 
-interface DragData {
-  startX: number
-  startY: number
-  currentX: number
-  currentY: number
-}
 
 interface StorageResult {
   success: boolean
@@ -105,11 +99,6 @@ interface ElectronAPI {
   platform: string
   windowControls: WindowControls
   
-  // Modern window dragging methods
-  startWindowDrag: (data: Partial<DragData>) => void
-  continueWindowDrag: (data: Partial<DragData>) => void
-  endWindowDrag: () => void
-  
   // File System Storage APIs - Inkdrop Style
   storage: StorageAPI
 }
@@ -125,13 +114,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     close: (): void => ipcRenderer.send('window-close'),
     unmaximize: (): void => ipcRenderer.send('window-unmaximize'),
   },
-  // Modern window dragging methods
-  startWindowDrag: (data: Partial<DragData>): void => 
-    ipcRenderer.send('window-drag-start', data),
-  continueWindowDrag: (data: Partial<DragData>): void => 
-    ipcRenderer.send('window-drag-move', data),
-  endWindowDrag: (): void => 
-    ipcRenderer.send('window-drag-end'),
   
   // File System Storage APIs - Inkdrop Style
   storage: {
