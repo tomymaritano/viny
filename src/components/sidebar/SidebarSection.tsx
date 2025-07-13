@@ -22,9 +22,9 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
 }) => {
   return (
     <div className="pb-1">
-      <div className="w-full flex items-center justify-between px-2 py-2 text-xs font-medium text-theme-text-secondary uppercase tracking-wider">
+      <div className="w-full flex items-center justify-between px-3 py-2 text-sm text-theme-text-tertiary">
         <button
-          className="flex items-center space-x-2 hover:text-theme-text-primary transition-colors"
+          className="flex items-center space-x-3 hover:text-theme-text-primary transition-colors"
           onClick={onToggle}
           onContextMenu={onHeaderRightClick}
         >
