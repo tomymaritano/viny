@@ -1,6 +1,7 @@
 import React, { ErrorInfo, ReactNode } from 'react'
 import Icons from './Icons'
 import StyledButton from './ui/StyledButton'
+import { logComponentError } from '../services/errorLogger'
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -37,6 +38,12 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
     this.setState({
       error: error,
       errorInfo: errorInfo,
+    })
+
+    // Log to centralized error service
+    logComponentError('ErrorBoundary', error, errorInfo, {
+      props: Object.keys(this.props),
+      hasCustomFallback: !!this.props.fallback
     })
 
     // You can also log the error to an error reporting service here

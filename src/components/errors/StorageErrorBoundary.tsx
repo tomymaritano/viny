@@ -1,9 +1,22 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import Icons from '../Icons'
+import { logStorageError } from '../../services/errorLogger'
 
-class StorageErrorBoundary extends React.Component {
-  constructor(props) {
+interface StorageErrorBoundaryProps {
+  children: React.ReactNode
+  clearStorageOnRetry?: boolean
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void
+  onRetry?: () => void
+}
+
+interface StorageErrorBoundaryState {
+  hasError: boolean
+  error: Error | null
+  isRetrying: boolean
+}
+
+class StorageErrorBoundary extends React.Component<StorageErrorBoundaryProps, StorageErrorBoundaryState> {
+  constructor(props: StorageErrorBoundaryProps) {
     super(props)
     this.state = {
       hasError: false,
@@ -12,15 +25,21 @@ class StorageErrorBoundary extends React.Component {
     }
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: Error): Partial<StorageErrorBoundaryState> {
     return { hasError: true }
   }
 
-  componentDidCatch(error, errorInfo) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Storage Error:', error, errorInfo)
 
     this.setState({
       error: error,
+    })
+
+    // Log to centralized error service
+    logStorageError('boundary_catch', error, {
+      clearStorageOnRetry: this.props.clearStorageOnRetry,
+      componentStack: errorInfo.componentStack
     })
 
     if (this.props.onError) {
@@ -131,13 +150,7 @@ class StorageErrorBoundary extends React.Component {
   }
 }
 
-StorageErrorBoundary.propTypes = {
-  children: PropTypes.node.isRequired,
-  clearStorageOnRetry: PropTypes.bool,
-  onError: PropTypes.func,
-  onRetry: PropTypes.func,
-}
-
+// Default props
 StorageErrorBoundary.defaultProps = {
   clearStorageOnRetry: false,
 }

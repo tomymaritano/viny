@@ -1,5 +1,6 @@
 import React from 'react'
 import Icons from '../Icons'
+import { logComponentError } from '../../services/errorLogger'
 
 interface ComponentErrorBoundaryProps {
   children: React.ReactNode
@@ -40,6 +41,14 @@ class ComponentErrorBoundary extends React.Component<ComponentErrorBoundaryProps
     this.setState({
       error: error,
       errorInfo: errorInfo,
+    })
+
+    // Log to centralized error service
+    logComponentError(this.props.componentName, error, errorInfo, {
+      title: this.props.title,
+      message: this.props.message,
+      allowReload: this.props.allowReload,
+      showDetails: this.props.showDetails
     })
 
     if (this.props.onError) {

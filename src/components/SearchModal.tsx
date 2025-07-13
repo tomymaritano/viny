@@ -7,6 +7,7 @@ import IconButton from './ui/IconButton'
 import { Note } from '../types'
 import { formatDate } from '../utils/dateUtils'
 import { ANIMATIONS, THEME_COLORS } from '../constants/theme'
+import SearchErrorBoundary from './errors/SearchErrorBoundary'
 
 interface SearchMatch {
   key: string
@@ -123,10 +124,15 @@ const SearchModal: React.FC<SearchModalProps> = ({
   if (!isOpen) return null
 
   return (
-    <div
-      className={`fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 ${ANIMATIONS.FADE_IN}`}
-      onClick={onClose}
+    <SearchErrorBoundary
+      onClearSearch={clearSearch}
+      onClose={onClose}
+      fallbackMessage="Search encountered an error. This might be due to complex search terms or filtering."
     >
+      <div
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 ${ANIMATIONS.FADE_IN}`}
+        onClick={onClose}
+      >
       <div
         className={`border border-theme-border-primary rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[80vh] ${ANIMATIONS.ZOOM_IN}`}
         style={{ backgroundColor: THEME_COLORS.MODAL_BG }}
@@ -311,7 +317,8 @@ const SearchModal: React.FC<SearchModalProps> = ({
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </SearchErrorBoundary>
   )
 }
 

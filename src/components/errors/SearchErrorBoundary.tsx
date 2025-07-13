@@ -1,9 +1,23 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import Icons from '../Icons'
+import { logSearchError } from '../../services/errorLogger'
 
-class SearchErrorBoundary extends React.Component {
-  constructor(props) {
+interface SearchErrorBoundaryProps {
+  children: React.ReactNode
+  fallbackMessage?: string
+  showDetails?: boolean
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void
+  onClearSearch?: () => void
+  onClose?: () => void
+}
+
+interface SearchErrorBoundaryState {
+  hasError: boolean
+  error: Error | null
+}
+
+class SearchErrorBoundary extends React.Component<SearchErrorBoundaryProps, SearchErrorBoundaryState> {
+  constructor(props: SearchErrorBoundaryProps) {
     super(props)
     this.state = {
       hasError: false,
@@ -11,15 +25,22 @@ class SearchErrorBoundary extends React.Component {
     }
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: Error): Partial<SearchErrorBoundaryState> {
     return { hasError: true }
   }
 
-  componentDidCatch(error, errorInfo) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Search Error:', error, errorInfo)
 
     this.setState({
       error: error,
+    })
+
+    // Log to centralized error service
+    logSearchError('unknown_query', error, {
+      fallbackMessage: this.props.fallbackMessage,
+      showDetails: this.props.showDetails,
+      componentStack: errorInfo.componentStack
     })
 
     if (this.props.onError) {
@@ -90,15 +111,7 @@ class SearchErrorBoundary extends React.Component {
   }
 }
 
-SearchErrorBoundary.propTypes = {
-  children: PropTypes.node.isRequired,
-  fallbackMessage: PropTypes.string,
-  showDetails: PropTypes.bool,
-  onError: PropTypes.func,
-  onClearSearch: PropTypes.func,
-  onClose: PropTypes.func,
-}
-
+// Default props
 SearchErrorBoundary.defaultProps = {
   showDetails: process.env.NODE_ENV === 'development',
 }
