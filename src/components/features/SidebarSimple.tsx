@@ -2,7 +2,7 @@
 import React, { memo } from 'react'
 import SidebarContainer from '../sidebar/SidebarContainer'
 import SettingsButton from '../sidebar/SettingsButton'
-import SidebarLogicProvider from '../sidebar/SidebarLogicProvider'
+import SidebarLogicProvider, { useSidebarContext } from '../sidebar/SidebarLogicProvider'
 import SidebarContent from '../sidebar/SidebarContent'
 
 /**
@@ -15,16 +15,18 @@ import SidebarContent from '../sidebar/SidebarContent'
 const SidebarSimple: React.FC = memo(() => {
   return (
     <SidebarLogicProvider>
-      <SidebarContainer>
-        {/* Main sidebar content */}
-        <SidebarContent />
-        
-        {/* Settings button at bottom */}
-        <SettingsButton />
-      </SidebarContainer>
+      {/* We need to access the context here, so let's create a wrapper */}
+      <SidebarWrapper />
     </SidebarLogicProvider>
   )
 })
+
+// Internal wrapper to access context
+const SidebarWrapper: React.FC = () => {
+  return (
+    <SidebarContent />
+  )
+}
 
 SidebarSimple.displayName = 'SidebarSimple'
 

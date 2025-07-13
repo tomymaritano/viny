@@ -9,6 +9,8 @@ import NotebookTree from './NotebookTree'
 import TagsList from './TagsList'
 import SidebarModals from './SidebarModals'
 import SidebarContextMenuManager from './SidebarContextMenuManager'
+import SidebarContainer from './SidebarContainer'
+import SettingsButton from './SettingsButton'
 
 const SidebarContent: React.FC = () => {
   const {
@@ -53,7 +55,7 @@ const SidebarContent: React.FC = () => {
   } = useSidebarState()
 
   return (
-    <>
+    <SidebarContainer onContextMenuClose={closeAllContextMenus}>
       {/* Main Navigation Sections */}
       <SidebarSection isExpanded={true}>
         <MainSections
@@ -204,7 +206,10 @@ const SidebarContent: React.FC = () => {
         existingNotebookNames={notebooksWithCounts.map(n => n.name)}
         availableParents={notebooksWithCounts}
       />
-    </>
+
+      {/* Settings button at bottom */}
+      <SettingsButton />
+    </SidebarContainer>
   )
 }
 

@@ -2,7 +2,7 @@ import React, { memo } from 'react'
 import Icons from '../Icons'
 
 interface MainSection {
-  key: string
+  id: string
   label: string
   icon: string
   count?: number
@@ -30,11 +30,11 @@ const MainSections: React.FC<MainSectionsProps> = memo(({
   return (
     <div className="space-y-0.5">
       {sections.map((section) => {
-        const isActive = activeSection === section.key
+        const isActive = activeSection === section.id
 
         return (
           <button
-            key={section.key}
+            key={section.id}
             className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left transition-all duration-200 ${
               isActive
                 ? 'text-theme-text-primary relative'
@@ -44,8 +44,8 @@ const MainSections: React.FC<MainSectionsProps> = memo(({
               backgroundColor: 'var(--color-active-bg)',
               boxShadow: 'inset 3px 0 0 var(--color-active-border)'
             } : {}}
-            onClick={() => onSectionClick(section.key)}
-            onContextMenu={section.onRightClick || (section.key === 'trash' ? onTrashRightClick : undefined)}
+            onClick={() => onSectionClick(section.id)}
+            onContextMenu={section.onRightClick || (section.id === 'trash' ? onTrashRightClick : undefined)}
           >
             <div className="flex items-center space-x-3">
               <div className={`w-4 h-4 flex-shrink-0 ${
