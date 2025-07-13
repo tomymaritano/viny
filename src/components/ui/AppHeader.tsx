@@ -83,7 +83,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({
               onClick={onCreateNote}
               title="Create new note (⌘+N)"
               size={16}
-              variant="primary"
               className="bg-theme-accent-primary text-white hover:bg-theme-accent-primary/90"
             />
           )}
@@ -93,7 +92,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
             onClick={() => setModal('settings', true)}
             title="Settings"
             size={16}
-            variant="ghost"
+
             className="text-theme-text-muted hover:text-theme-text-primary"
           />
         </div>

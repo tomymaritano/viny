@@ -4,6 +4,7 @@ import { useAppStore } from '../stores/newSimpleStore'
 import SearchInput from './search/SearchInput'
 import SearchResults from './search/SearchResults'
 import SearchErrorBoundary from './errors/SearchErrorBoundary'
+import StandardModal from './ui/StandardModal'
 
 interface SearchModalProps {
   isOpen: boolean
@@ -78,21 +79,18 @@ const SearchModal: React.FC<SearchModalProps> = ({
     onClose()
   }, [onSelectNote, onClose])
 
-  const handleBackdropClick = useCallback((e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose()
-    }
-  }, [onClose])
-
-  if (!isOpen) return null
-
   return (
     <SearchErrorBoundary>
-      <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center pt-[10vh]"
-        onClick={handleBackdropClick}
+      <StandardModal
+        isOpen={isOpen}
+        onClose={onClose}
+        size="xl"
+        position="top"
+        showCloseButton={false}
+        className="max-h-[80vh]"
+        overlayClassName="pt-[10vh]"
       >
-        <div className="bg-theme-bg-primary border border-theme-border-primary rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[80vh] overflow-hidden">
+        <div className="flex flex-col h-full -m-4">
           <SearchInput
             ref={inputRef}
             query={query}
@@ -112,7 +110,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
             />
           </div>
         </div>
-      </div>
+      </StandardModal>
     </SearchErrorBoundary>
   )
 }
