@@ -1,5 +1,5 @@
 import React from 'react'
-import { extractTaskProgress, getProgressColor } from '../../lib/taskProgress'
+import { extractTaskProgress } from '../../lib/taskProgress'
 
 interface TaskProgressProps {
   content: string
@@ -27,18 +27,35 @@ const TaskProgress: React.FC<TaskProgressProps> = ({ content, size = 'sm' }) => 
     )
   }
 
+  // Get progress color without 'text-' prefix for both bar and text
+  const getBarColor = (progress: number): string => {
+    if (progress === 100) return 'bg-green-500'
+    if (progress >= 75) return 'bg-blue-500'
+    if (progress >= 50) return 'bg-yellow-500'
+    if (progress >= 25) return 'bg-orange-500'
+    return 'bg-red-500'
+  }
+
+  const getTextColor = (progress: number): string => {
+    if (progress === 100) return 'text-green-500'
+    if (progress >= 75) return 'text-blue-500'
+    if (progress >= 50) return 'text-yellow-500'
+    if (progress >= 25) return 'text-orange-500'
+    return 'text-red-500'
+  }
+
   return (
     <div className="flex items-center gap-2">
       {/* Progress bar */}
       <div className={`${config.width} ${config.height} bg-theme-bg-tertiary rounded-full overflow-hidden flex-shrink-0`}>
         <div 
-          className={`${config.height} bg-theme-accent-primary rounded-full transition-all duration-300 ease-out`}
+          className={`${config.height} ${getBarColor(progress)} rounded-full transition-all duration-300 ease-out`}
           style={{ width: `${progress}%` }}
         />
       </div>
       
       {/* Progress text */}
-      <span className={`${config.text} ${getProgressColor(progress)} font-medium flex-shrink-0`}>
+      <span className={`${config.text} ${getTextColor(progress)} font-medium flex-shrink-0`}>
         {completed}/{total}
       </span>
     </div>
