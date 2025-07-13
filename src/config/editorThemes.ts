@@ -56,6 +56,21 @@ export const createInkdropTheme = () => {
       color: getEditorColor('lineNumber'),
       border: 'none',
     },
+    // Selection styling
+    '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
+      backgroundColor: 'rgba(79, 195, 247, 0.3)',
+    },
+    '.cm-content ::selection': {
+      backgroundColor: 'rgba(79, 195, 247, 0.3)',
+      color: 'inherit',
+    },
+    '.cm-content ::-moz-selection': {
+      backgroundColor: 'rgba(79, 195, 247, 0.3)',
+      color: 'inherit',
+    },
+    '.cm-selectionLayer': {
+      zIndex: -1,
+    },
   })
 }
 
