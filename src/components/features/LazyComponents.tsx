@@ -13,9 +13,7 @@ export const LazySearchModal = lazy(() =>
   import('../SearchModal').then(module => ({ default: module.default }))
 )
 
-export const LazyNotebookManager = lazy(() => 
-  import('../NotebookManager').then(module => ({ default: module.default }))
-)
+// LazyNotebookManager eliminado - componente NotebookManager no existe
 
 export const LazyExportDialog = lazy(() => 
   import('../ExportDialog').then(module => ({ default: module.default }))
@@ -52,6 +50,6 @@ export function withSuspense<P extends object>(
 // Pre-wrapped components ready to use
 export const MarkdownEditor = withSuspense(LazyMarkdownEditor, undefined, 'MarkdownEditor')
 export const SearchModal = withSuspense(LazySearchModal, undefined, 'SearchModal')
-export const NotebookManager = withSuspense(LazyNotebookManager, undefined, 'NotebookManager')
+// NotebookManager eliminado
 export const ExportDialog = withSuspense(LazyExportDialog, undefined, 'ExportDialog')
 export const TemplateModal = withSuspense(LazyTemplateModal, undefined, 'TemplateModal')

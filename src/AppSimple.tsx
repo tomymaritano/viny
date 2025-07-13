@@ -26,8 +26,7 @@ import TitleBar from './components/ui/TitleBar'
 // Lazy components
 import {
   MarkdownEditor,
-  ExportDialog,
-  NotebookManager
+  ExportDialog
 } from './components/features/LazyComponents'
 import SearchModal from './components/SearchModal'
 import TagModal from './components/editor/tags/TagModal'
@@ -211,14 +210,14 @@ const AppSimple: React.FC = () => {
           />
         )}
 
-        {/* Notebook Manager */}
-        {modals.notebookManager && (
+        {/* Notebook Manager - Temporalmente deshabilitado (componente eliminado) */}
+        {/* {modals.notebookManager && (
           <NotebookManager
             isVisible={modals.notebookManager}
             onClose={() => setModal('notebookManager', false)}
             onNotebookChange={handleNotebookChange}
           />
-        )}
+        )} */}
 
         {/* Tag Modal */}
         {modals.tagModal && (
