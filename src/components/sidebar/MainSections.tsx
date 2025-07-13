@@ -28,7 +28,7 @@ const MainSections: React.FC<MainSectionsProps> = memo(({
   }
 
   return (
-    <div className="space-y-0.5">
+    <>
       {sections.map((section) => {
         const isActive = activeSection === section.id
 
@@ -67,7 +67,7 @@ const MainSections: React.FC<MainSectionsProps> = memo(({
           </button>
         )
       })}
-    </div>
+    </>
   )
 })
 
