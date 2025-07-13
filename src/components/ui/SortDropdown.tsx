@@ -21,6 +21,12 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
     if (currentSortBy === 'title') {
       return currentSortDirection === 'asc' ? Icons.ArrowUpAZ : Icons.ArrowDownAZ
     }
+    if (currentSortBy === 'date') {
+      return Icons.FileText
+    }
+    if (currentSortBy === 'updated') {
+      return Icons.Clock
+    }
     return Icons.ArrowDownAZ
   }
 
@@ -50,12 +56,12 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
         {
           value: 'date-desc',
           label: 'Date Created: New → Old',
-          icon: <Icons.Calendar size={14} />
+          icon: <Icons.FileText size={14} />
         },
         {
           value: 'date-asc',
           label: 'Date Created: Old → New',
-          icon: <Icons.Calendar size={14} />
+          icon: <Icons.FileText size={14} />
         },
         {
           value: 'updated-desc',
