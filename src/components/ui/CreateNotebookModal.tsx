@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Icons from '../Icons'
 import BaseModal from './BaseModal'
 import { Notebook, NOTEBOOK_COLORS } from '../../types/notebook'
-import { ANIMATIONS } from '../../constants/theme'
+import { ANIMATIONS, THEME_COLORS } from '../../constants/theme'
 
 interface CreateNotebookModalProps {
   isOpen: boolean
