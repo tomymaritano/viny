@@ -10,7 +10,7 @@ import {
   placeholder as placeholderExtension,
   lineNumbers,
 } from '@codemirror/view'
-import { history, defaultKeymap, historyKeymap } from '@codemirror/commands'
+import { history, defaultKeymap, historyKeymap, insertNewlineAndIndent } from '@codemirror/commands'
 import { searchKeymap, search } from '@codemirror/search'
 import { markdown } from '@codemirror/lang-markdown'
 import { getThemeExtensions } from './editorThemes'
@@ -37,9 +37,9 @@ export const createEditorExtensions = ({
     minimalSetup,
     history(),
 
-    // Keyboard shortcuts
-    keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap]),
+    // Keyboard shortcuts (custom keybindings first to have priority)
     markdownKeybindings, // Custom markdown formatting shortcuts
+    keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap]),
 
     // Features
     search(),

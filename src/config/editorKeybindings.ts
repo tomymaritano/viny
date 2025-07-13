@@ -5,6 +5,7 @@
 
 import { keymap } from '@codemirror/view'
 import { EditorView } from '@codemirror/view'
+import { insertNewlineAndIndent } from '@codemirror/commands'
 
 // Create a command that calls formatSelection if available
 const createFormatCommand = (prefix: string, suffix: string = '') => {
@@ -40,6 +41,9 @@ const createFormatCommand = (prefix: string, suffix: string = '') => {
 
 // Define the keybindings
 export const markdownKeybindings = keymap.of([
+  // Basic editing
+  { key: 'Enter', run: insertNewlineAndIndent },
+  
   // Text formatting
   { key: 'Mod-b', run: createFormatCommand('**', '**') }, // Bold
   { key: 'Mod-i', run: createFormatCommand('*', '*') },   // Italic
@@ -47,7 +51,7 @@ export const markdownKeybindings = keymap.of([
   { key: 'Mod-u', run: createFormatCommand('~~', '~~') }, // Strikethrough
   
   // Links and other formats
-  { key: 'Mod-k', run: createFormatCommand('[', '](https://example.com)') }, // Link
+  { key: 'Mod-l', run: createFormatCommand('[', '](https://example.com)') }, // Link (changed from Mod-k)
   { key: 'Mod-Shift-c', run: (view: EditorView) => {
     const selection = view.state.selection.main
     const transaction = view.state.update({
