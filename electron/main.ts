@@ -252,6 +252,24 @@ class FileSystemStorageService {
       if (error.code === 'ENOENT') {
         return defaultValue
       }
+      
+      // If JSON parsing fails, try to recover or use default value
+      if (error instanceof SyntaxError) {
+        console.warn('[StorageService] Invalid JSON in file:', filePath, error.message)
+        
+        // For metadata.json, we can safely recreate it
+        if (filePath === this.metadataFile) {
+          console.log('[StorageService] Recreating metadata file with default value')
+          await this.saveDataFile(filePath, defaultValue)
+          return defaultValue
+        }
+        
+        // For other files, create a backup and use default value
+        const backupPath = await this.createFileBackup(filePath)
+        console.log('[StorageService] Created backup of corrupted file:', backupPath)
+        return defaultValue
+      }
+      
       console.error('[StorageService] Failed to load data file:', filePath, error)
       throw new Error(`Failed to load data: ${error.message}`)
     }
