@@ -11,7 +11,7 @@ interface SettingsButtonProps {
  */
 const SettingsButton: React.FC<SettingsButtonProps> = ({ onClick }) => {
   return (
-    <div className="flex justify-end p-1 pr-2">
+    <div className="flex justify-end p-1 pr-3">
       <IconButton
         icon={Icons.Settings}
         onClick={onClick}
