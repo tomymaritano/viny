@@ -49,8 +49,22 @@ export const useEditorToolbar = (value, onChange, editorRef) => {
     [value, onChange, editorRef]
   )
 
-  // Create formatter functions
-  const formatter = createMarkdownFormatter(insertText)
+  const formatSelection = useCallback(
+    (prefix, suffix = '') => {
+      // If we have an editor ref, use its formatSelection method
+      if (editorRef?.current) {
+        editorRef.current.formatSelection(prefix, suffix)
+        return
+      }
+      
+      // Fallback: just insert the formatted text
+      insertText(prefix + 'text' + suffix)
+    },
+    [editorRef, insertText]
+  )
+
+  // Create formatter functions with both insertText and formatSelection
+  const formatter = createMarkdownFormatter(insertText, formatSelection)
 
   // Keyboard shortcut handler
   const handleKeyDown = useCallback(

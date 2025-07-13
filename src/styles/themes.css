@@ -38,9 +38,9 @@
 
   /* Consistent interaction colors */
   --color-hover-bg: #2d354d;
-  --color-active-bg: #2d354d;
+  --color-active-bg: #323d4b;
+  --color-active-border: #ed6e3f;
   --color-active-text: #ffffff;
-  --color-active-border: #fb6514;
 }
 
 /* Light theme - Inkdrop-inspired */
@@ -68,10 +68,10 @@
   --color-sidebar: #221f21;
 
   /* Light theme interaction colors */
-  --color-hover-bg: #2d354d;
-  --color-active-bg: #2d354d;
+  --color-hover-bg: #e3f2fd;
+  --color-active-bg: #1976d2;
+  --color-active-border: #ff5722;
   --color-active-text: #ffffff;
-  --color-active-border: #fb6514;
 }
 
 /* Solarized Dark theme - complete original color palette */
@@ -99,8 +99,8 @@
   --color-violet: #6c71c4;
 
   /* Solarized theme interaction colors */
-  --color-hover-bg: #2d354d;
-  --color-active-bg: #2d354d;
-  --color-active-text: #ffffff;
-  --color-active-border: #fb6514;
+  --color-hover-bg: #103b3d;
+  --color-active-bg: #073642;
+  --color-active-border: #cb4b16;
+  --color-active-text: #eee8d5;
 }

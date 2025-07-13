@@ -4,7 +4,7 @@ import Icons from '../../Icons'
 import CustomTag from '../../ui/CustomTag'
 import TaskProgress from '../../ui/TaskProgress'
 import NoteActionsDropdown from '../../ui/NoteActionsDropdown'
-import { STATUS_BG_COLORS, THEME_CLASSES } from '../../../theme/themeConstants'
+import { STATUS_BG_COLORS, THEME_CLASSES, CSS_THEME_VARS } from '../../../theme/themeConstants'
 
 interface NoteListItemProps {
   note: Note
@@ -66,9 +66,11 @@ const NoteListItem: React.FC<NoteListItemProps> = memo(({
       onMoveToNotebook={onMoveToNotebook}
     >
       <div
-        className={`group relative ${THEME_CLASSES.BORDER.PRIMARY} border-b hover:${THEME_CLASSES.BG.TERTIARY} transition-colors cursor-pointer overflow-hidden ${
-          isSelected ? THEME_CLASSES.BG.ACTIVE : ''
-        }`}
+        className={`group relative ${THEME_CLASSES.BORDER.PRIMARY} border-b hover:${THEME_CLASSES.BG.TERTIARY} transition-colors cursor-pointer overflow-hidden`}
+        style={isSelected ? {
+          backgroundColor: CSS_THEME_VARS.ACTIVE_BG,
+          boxShadow: `inset 3px 0 0 ${CSS_THEME_VARS.ACTIVE_BORDER}`
+        } : {}}
         onClick={handleClick}
       >
       <div className="p-3">

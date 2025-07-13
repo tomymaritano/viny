@@ -32,12 +32,15 @@ const TagsList: React.FC<TagsListProps> = ({
             key={tag}
             className={`w-full flex items-center justify-between px-3 py-1.5 text-sm text-left transition-all duration-200 ${
               isActive
-                ? 'text-theme-text-primary bg-[#323D4B] relative'
+                ? 'text-theme-text-primary relative'
                 : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary'
             }`}
+            style={isActive ? {
+              backgroundColor: 'var(--color-active-bg)',
+              boxShadow: 'inset 3px 0 0 var(--color-active-border)'
+            } : {}}
             onClick={() => onSectionClick(sectionKey)}
             onContextMenu={(e) => onTagRightClick(e, tag)}
-            style={isActive ? { boxShadow: 'inset 3px 0 0 #ED6E3F' } : {}}
           >
             <div className="flex items-center space-x-3 flex-1 min-w-0">
               <div className="w-4 h-4 flex-shrink-0 flex items-center justify-center">

@@ -36,12 +36,15 @@ const MainSections: React.FC<MainSectionsProps> = ({
             key={section.key}
             className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left transition-all duration-200 ${
               isActive
-                ? 'text-theme-text-primary bg-[#323D4B] relative'
+                ? 'text-theme-text-primary relative'
                 : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary'
             }`}
+            style={isActive ? {
+              backgroundColor: 'var(--color-active-bg)',
+              boxShadow: 'inset 3px 0 0 var(--color-active-border)'
+            } : {}}
             onClick={() => onSectionClick(section.key)}
             onContextMenu={section.key === 'trash' ? onTrashRightClick : undefined}
-            style={isActive ? { boxShadow: 'inset 3px 0 0 #ED6E3F' } : {}}
           >
             <div className="flex items-center space-x-3">
               <div className={`w-4 h-4 flex-shrink-0 ${

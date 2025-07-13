@@ -37,6 +37,11 @@ const SplitEditor = forwardRef(
             editorRef.current.insertText(text)
           }
         },
+        formatSelection: (prefix, suffix) => {
+          if (editorRef.current) {
+            editorRef.current.formatSelection(prefix, suffix)
+          }
+        },
         getView: () => {
           if (editorRef.current) {
             return editorRef.current.getView()

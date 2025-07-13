@@ -56,20 +56,29 @@ export const createInkdropTheme = () => {
       color: getEditorColor('lineNumber'),
       border: 'none',
     },
-    // Selection styling - using a highly visible white-based color
+    // Selection styling - using a highly visible selection color with maximum specificity
     '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
-      backgroundColor: 'rgba(255, 255, 255, 0.15)', // Semi-transparent white
+      backgroundColor: '#4a90e2 !important', // Solid blue color
+      opacity: '0.6 !important',
+    },
+    '&.cm-editor .cm-selectionBackground': {
+      backgroundColor: '#4a90e2 !important',
+      opacity: '0.6 !important',
     },
     '.cm-content ::selection': {
-      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-      color: 'inherit',
+      backgroundColor: '#4a90e2 !important',
+      color: 'inherit !important',
     },
     '.cm-content ::-moz-selection': {
-      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-      color: 'inherit',
+      backgroundColor: '#4a90e2 !important',
+      color: 'inherit !important',
     },
     '.cm-selectionLayer': {
-      zIndex: -1,
+      zIndex: '100 !important', // Very high z-index to ensure visibility
+      pointerEvents: 'none !important',
+    },
+    '&.cm-focused': {
+      outline: 'none !important',
     },
   })
 }

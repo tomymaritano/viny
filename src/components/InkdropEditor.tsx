@@ -23,6 +23,7 @@ interface InkdropEditorProps {
 
 export interface InkdropEditorHandle {
   insertText: (text: string) => void
+  formatSelection: (prefix: string, suffix?: string) => void
   getView: () => EditorView | null
   focus: () => void
 }
@@ -62,6 +63,51 @@ const InkdropEditor = forwardRef<InkdropEditorHandle, InkdropEditorProps>(
               },
             })
             view.dispatch(transaction)
+          }
+        },
+        formatSelection: (prefix: string, suffix: string = '') => {
+          if (viewRef.current) {
+            const view = viewRef.current
+            const selection = view.state.selection.main
+            const selectedText = view.state.doc.sliceString(selection.from, selection.to)
+            
+            // Check if the selected text already has the formatting
+            const hasPrefix = selectedText.startsWith(prefix)
+            const hasSuffix = selectedText.endsWith(suffix)
+            
+            if (hasPrefix && hasSuffix && selectedText.length > prefix.length + suffix.length) {
+              // Remove formatting if it already exists
+              const unformattedText = selectedText.slice(prefix.length, -suffix.length || undefined)
+              const transaction = view.state.update({
+                changes: {
+                  from: selection.from,
+                  to: selection.to,
+                  insert: unformattedText,
+                },
+                selection: {
+                  anchor: selection.from,
+                  head: selection.from + unformattedText.length,
+                },
+              })
+              view.dispatch(transaction)
+            } else {
+              // Add formatting if it doesn't exist
+              const textToFormat = selectedText || 'text'
+              const formattedText = prefix + textToFormat + suffix
+              
+              const transaction = view.state.update({
+                changes: {
+                  from: selection.from,
+                  to: selection.to,
+                  insert: formattedText,
+                },
+                selection: {
+                  anchor: selection.from + prefix.length,
+                  head: selection.from + prefix.length + textToFormat.length,
+                },
+              })
+              view.dispatch(transaction)
+            }
           }
         },
         getView: () => viewRef.current,

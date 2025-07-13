@@ -61,6 +61,7 @@ export const THEME_CLASSES = {
     PRIMARY: 'border-theme-border-primary',
     SECONDARY: 'border-theme-border-secondary',
     ACCENT: 'border-theme-accent-primary',
+    ACTIVE: 'border-theme-border-active',
   },
 
   // Accent color classes

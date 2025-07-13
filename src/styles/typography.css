@@ -83,6 +83,35 @@ input,
   pointer-events: none !important;
 }
 
+/* Force selection visibility with maximum specificity */
+.cm-editor .cm-selectionBackground,
+.cm-focused .cm-selectionBackground,
+.cm-selectionBackground {
+  background-color: #4a90e2 !important;
+  opacity: 0.6 !important;
+  z-index: 100 !important;
+  display: block !important;
+  visibility: visible !important;
+}
+
+.cm-editor .cm-content ::selection {
+  background-color: #4a90e2 !important;
+  color: inherit !important;
+}
+
+.cm-editor .cm-content ::-moz-selection {
+  background-color: #4a90e2 !important;
+  color: inherit !important;
+}
+
+/* Ensure selection layer is visible */
+.cm-selectionLayer {
+  z-index: 100 !important;
+  pointer-events: none !important;
+  display: block !important;
+  visibility: visible !important;
+}
+
 /* Unified Prose styles for markdown preview with consistent borders */
 .prose h1,
 .prose-theme h1,

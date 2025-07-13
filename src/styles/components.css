@@ -104,6 +104,84 @@ code {
   background-color: var(--color-base00);
 }
 
+/* Tailwind-style background classes for theme consistency */
+.bg-theme-bg-primary {
+  background-color: var(--color-base03);
+}
+
+.bg-theme-bg-secondary {
+  background-color: var(--color-base02);
+}
+
+.bg-theme-bg-tertiary {
+  background-color: var(--color-base01);
+}
+
+.bg-theme-bg-quaternary {
+  background-color: var(--color-base00);
+}
+
+.bg-theme-bg-active {
+  background-color: var(--color-active-bg);
+}
+
+.bg-theme-bg-hover {
+  background-color: var(--color-hover-bg);
+}
+
+/* Active state styling for consistency */
+.theme-active-bg {
+  background-color: var(--color-active-bg) !important;
+}
+
+.theme-active-border {
+  box-shadow: inset 3px 0 0 var(--color-active-border) !important;
+}
+
+/* Combined active state class */
+.theme-active-state {
+  background-color: var(--color-active-bg) !important;
+  box-shadow: inset 3px 0 0 var(--color-active-border) !important;
+}
+
+/* CodeMirror Selection Override - Force visibility */
+* .cm-selectionBackground,
+* .cm-focused .cm-selectionBackground {
+  background-color: #4a90e2 !important;
+  opacity: 0.7 !important;
+  z-index: 1000 !important;
+  position: absolute !important;
+  display: block !important;
+  visibility: visible !important;
+  height: 100% !important;
+  width: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+/* Global text selection for CodeMirror */
+* .cm-content,
+* .cm-content *,
+* .cm-line,
+* .cm-line * {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+}
+
+* .cm-content ::selection,
+* .cm-content *::selection {
+  background-color: #4a90e2 !important;
+  color: inherit !important;
+}
+
+* .cm-content ::-moz-selection,
+* .cm-content *::-moz-selection {
+  background-color: #4a90e2 !important;
+  color: inherit !important;
+}
+
 .theme-border-primary {
   border-color: var(--color-base01);
 }

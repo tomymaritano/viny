@@ -7,13 +7,13 @@
 // - Blob URLs: blob:... (for uploaded files)
 // External URLs (http/https) are blocked by Content Security Policy
 
-export const createMarkdownFormatter = insertText => {
+export const createMarkdownFormatter = (insertText, formatSelection) => {
   return {
-    // Text formatting
-    insertBold: () => insertText('**bold text**'),
-    insertItalic: () => insertText('*italic text*'),
-    insertStrikethrough: () => insertText('~~strikethrough text~~'),
-    insertCode: () => insertText('`inline code`'),
+    // Text formatting - use formatSelection for better UX
+    insertBold: () => formatSelection ? formatSelection('**', '**') : insertText('**bold text**'),
+    insertItalic: () => formatSelection ? formatSelection('*', '*') : insertText('*italic text*'),
+    insertStrikethrough: () => formatSelection ? formatSelection('~~', '~~') : insertText('~~strikethrough text~~'),
+    insertCode: () => formatSelection ? formatSelection('`', '`') : insertText('`inline code`'),
 
     // Headings
     insertHeading: (level = 1) => {

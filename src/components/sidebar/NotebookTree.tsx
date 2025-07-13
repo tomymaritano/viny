@@ -45,7 +45,7 @@ const NotebookTree: React.FC<NotebookTreeProps> = ({
           <button
             className={`w-full flex items-center justify-between py-1.5 text-sm text-left transition-all duration-200 ${
               isActive
-                ? 'text-theme-text-primary bg-[#323D4B] relative'
+                ? 'text-theme-text-primary relative'
                 : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary'
             }`}
             onClick={() => onSectionClick(`notebook-${notebook.name.toLowerCase()}`)}
@@ -53,7 +53,10 @@ const NotebookTree: React.FC<NotebookTreeProps> = ({
             style={{
               paddingLeft: `${paddingLeft}px`,
               paddingRight: '8px',
-              ...(isActive ? { boxShadow: 'inset 3px 0 0 #ED6E3F' } : {})
+              ...(isActive ? {
+                backgroundColor: 'var(--color-active-bg)',
+                boxShadow: 'inset 3px 0 0 var(--color-active-border)'
+              } : {})
             }}
           >
             <div className="flex items-center space-x-3 flex-1 min-w-0">
