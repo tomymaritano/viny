@@ -1,0 +1,184 @@
+name: Settings Enhancement
+description: Suggest improvements to the Settings system
+title: "[SETTINGS] "
+labels: ["type:enhancement", "comp:settings", "status:needs-design"]
+projects: ["tomymaritano/1"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a settings enhancement! This template is specifically for improvements to Nototo's settings and configuration system.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Enhancement Summary
+      description: A clear description of the settings enhancement you'd like to see
+      placeholder: "I would like the settings to..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: settings_category
+    attributes:
+      label: Settings Category
+      description: Which settings category does this enhancement relate to?
+      options:
+        - General Settings
+        - Editor Settings
+        - Theme Settings
+        - Preview Settings
+        - Export Settings
+        - Sync & Backup Settings
+        - Privacy Settings
+        - Keybinding Settings
+        - Plugin Settings
+        - Advanced Settings
+        - New Category
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_limitation
+    attributes:
+      label: Current Limitation
+      description: What can't you currently do in the settings that you need?
+      placeholder: "Currently, the settings don't allow me to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Proposed Solution
+      description: Describe how you think this should work in the settings UI
+      placeholder: "The settings should have..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: ui_complexity
+    attributes:
+      label: UI Complexity
+      description: How complex should the UI for this setting be?
+      options:
+        - Simple - Basic toggle/dropdown
+        - Medium - Multiple related options
+        - Advanced - Complex configuration panel
+        - Expert - Developer-level configuration
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: setting_type
+    attributes:
+      label: Setting Type
+      description: What type of setting is this?
+      options:
+        - label: Boolean toggle (on/off)
+        - label: Dropdown/select options
+        - label: Text input field
+        - label: Number input/slider
+        - label: Color picker
+        - label: File/folder picker
+        - label: Key combination picker
+        - label: Multi-select options
+        - label: Complex configuration object
+
+  - type: textarea
+    id: default_value
+    attributes:
+      label: Default Value & Validation
+      description: What should be the default value and any validation rules?
+      placeholder: |
+        Default: 
+        Validation rules:
+        Min/Max values:
+    validations:
+      required: false
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Setting Scope
+      description: Should this setting apply globally, per-note, per-notebook, or per-device?
+      placeholder: "This setting should apply to..."
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: persistence
+    attributes:
+      label: Data Persistence
+      description: How should this setting be stored and synced?
+      options:
+        - label: Local storage only
+        - label: Sync across devices
+        - label: Export/import with settings backup
+        - label: Reset to default option needed
+        - label: Requires migration for existing users
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples from Other Apps
+      description: Are there similar settings in other applications that work well?
+      placeholder: "App X has a similar feature that works by..."
+
+  - type: textarea
+    id: mockup
+    attributes:
+      label: UI Mockup
+      description: If you have ideas for how this should look, describe or attach mockups
+      placeholder: "The UI could look like... (attach images if you have them)"
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this enhancement?
+      options:
+        - Low - Nice to have for future versions
+        - Medium - Would improve my daily workflow
+        - High - Essential for my use case
+        - Critical - Blocking feature adoption
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: User Impact
+      description: Who would benefit from this settings enhancement?
+      options:
+        - label: New users (easier onboarding)
+        - label: Casual users (simplified experience)
+        - label: Power users (advanced configuration)
+        - label: Developers/technical users
+        - label: Enterprise users (admin controls)
+        - label: All users
+
+  - type: textarea
+    id: technical_considerations
+    attributes:
+      label: Technical Considerations
+      description: Any technical aspects we should consider for this setting?
+      placeholder: |
+        - Performance impact:
+        - Security considerations:
+        - Compatibility requirements:
+        - Dependencies:
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution Interest
+      description: Would you be interested in contributing to this enhancement?
+      options:
+        - label: I would like to implement this enhancement
+        - label: I can help with UI/UX design
+        - label: I can help with testing
+        - label: I can help with documentation
+        - label: I prefer to just provide feedback

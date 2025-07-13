@@ -3,13 +3,22 @@ import { EditorView } from 'codemirror'
 import { EditorState } from '@codemirror/state'
 import { createEditorExtensions } from '../config/editorExtensions'
 
+interface EditorPreset {
+  includeCore: boolean
+  includeKeyboard: boolean
+  includeFeatures: boolean
+  includeBehavior: boolean
+  lineNumbers?: boolean
+  theme: string
+}
+
 interface InkdropEditorProps {
   value?: string
   onChange?: (value: string) => void
   placeholder?: string
   showLineNumbers?: boolean
   theme?: string
-  preset?: any
+  preset?: EditorPreset | null
 }
 
 export interface InkdropEditorHandle {

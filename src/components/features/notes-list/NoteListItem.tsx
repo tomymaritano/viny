@@ -1,9 +1,9 @@
 import React, { memo } from 'react'
 import { Note } from '../../../types'
 import Icons from '../../Icons'
-import IconButton from '../../ui/IconButton'
 import CustomTag from '../../ui/CustomTag'
 import TaskProgress from '../../ui/TaskProgress'
+import NoteActionsDropdown from '../../ui/NoteActionsDropdown'
 import { STATUS_BG_COLORS, THEME_CLASSES } from '../../../theme/themeConstants'
 
 interface NoteListItemProps {
@@ -12,6 +12,8 @@ interface NoteListItemProps {
   onNoteClick: (noteId: string) => void
   onPinToggle: (e: React.MouseEvent, note: Note) => void
   onDelete: (e: React.MouseEvent, note: Note) => void
+  onDuplicate?: (e: React.MouseEvent, note: Note) => void
+  onMoveToNotebook?: (e: React.MouseEvent, note: Note) => void
   formatDate: (date: string) => string
   getPreviewText: (content: string) => string
   onTagClick?: (tag: string) => void
@@ -39,22 +41,14 @@ const NoteListItem: React.FC<NoteListItemProps> = memo(({
   onNoteClick,
   onPinToggle,
   onDelete,
+  onDuplicate,
+  onMoveToNotebook,
   formatDate,
   getPreviewText,
   onTagClick
 }) => {
   const handleClick = () => {
     onNoteClick(note.id)
-  }
-
-  const handlePinClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    onPinToggle(e, note)
-  }
-
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    onDelete(e, note)
   }
 
   const handleTagClick = (tag: string) => {
@@ -64,12 +58,19 @@ const NoteListItem: React.FC<NoteListItemProps> = memo(({
   }
 
   return (
-    <div
-      className={`group relative ${THEME_CLASSES.BORDER.PRIMARY} border-b hover:${THEME_CLASSES.BG.TERTIARY} transition-colors cursor-pointer overflow-hidden ${
-        isSelected ? THEME_CLASSES.BG.ACTIVE : ''
-      }`}
-      onClick={handleClick}
+    <NoteActionsDropdown
+      note={note}
+      onPinToggle={onPinToggle}
+      onDelete={onDelete}
+      onDuplicate={onDuplicate}
+      onMoveToNotebook={onMoveToNotebook}
     >
+      <div
+        className={`group relative ${THEME_CLASSES.BORDER.PRIMARY} border-b hover:${THEME_CLASSES.BG.TERTIARY} transition-colors cursor-pointer overflow-hidden ${
+          isSelected ? THEME_CLASSES.BG.ACTIVE : ''
+        }`}
+        onClick={handleClick}
+      >
       <div className="p-3">
         {/* Header with title and actions */}
         <div className="flex items-center justify-between mb-2">
@@ -82,30 +83,21 @@ const NoteListItem: React.FC<NoteListItemProps> = memo(({
               />
             )}
             
+            {/* Pin indicator (always visible for pinned notes) */}
+            {note.isPinned && (
+              <Icons.Pin 
+                size={14} 
+                className="mr-2 flex-shrink-0 text-theme-accent-primary" 
+                title="Pinned note"
+              />
+            )}
+            
             {/* Note title */}
             <h3 className="text-sm font-medium text-theme-text-primary truncate flex-1">
               {note.title}
             </h3>
           </div>
           
-          {/* Action buttons */}
-          <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <IconButton
-              icon={Icons.Star}
-              onClick={handlePinClick}
-              isActive={note.isPinned}
-              title={note.isPinned ? "Unpin note" : "Pin to top"}
-              size={16}
-              variant="default"
-            />
-            <IconButton
-              icon={Icons.Trash}
-              onClick={handleDeleteClick}
-              title="Delete note"
-              size={16}
-              variant="default"
-            />
-          </div>
         </div>
         
         {/* Preview text */}
@@ -147,7 +139,8 @@ const NoteListItem: React.FC<NoteListItemProps> = memo(({
           </span>
         </div>
       </div>
-    </div>
+      </div>
+    </NoteActionsDropdown>
   )
 })
 

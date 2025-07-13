@@ -2,13 +2,19 @@
  * Date utility functions for note metadata
  */
 
+interface FormatDateOptions {
+  includeTime?: boolean
+  relative?: boolean
+  longFormat?: boolean
+}
+
 /**
  * Format date for display in note metadata
- * @param {string|Date} date - Date to format
- * @param {Object} options - Formatting options
- * @returns {string} Formatted date string
  */
-export const formatDate = (date, options = {}) => {
+export const formatDate = (
+  date: string | Date | null | undefined,
+  options: FormatDateOptions = {}
+): string => {
   if (!date) return ''
 
   const { includeTime = true, relative = false, longFormat = false } = options
@@ -52,12 +58,10 @@ export const formatDate = (date, options = {}) => {
 
 /**
  * Format date relative to now (e.g., "2 hours ago", "Yesterday")
- * @param {Date} date - Date to format
- * @returns {string} Relative date string
  */
-export const formatRelativeDate = date => {
+export const formatRelativeDate = (date: Date): string => {
   const now = new Date()
-  const diffMs = now - date
+  const diffMs = now.getTime() - date.getTime()
   const diffSecs = Math.floor(diffMs / 1000)
   const diffMins = Math.floor(diffSecs / 60)
   const diffHours = Math.floor(diffMins / 60)
@@ -93,10 +97,8 @@ export const formatRelativeDate = date => {
 
 /**
  * Get time of day greeting
- * @param {Date} date - Date to get greeting for (defaults to now)
- * @returns {string} Time-based greeting
  */
-export const getTimeGreeting = (date = new Date()) => {
+export const getTimeGreeting = (date: Date = new Date()): string => {
   const hour = date.getHours()
 
   if (hour < 6) return 'Good night'
@@ -108,10 +110,8 @@ export const getTimeGreeting = (date = new Date()) => {
 
 /**
  * Check if date is today
- * @param {Date|string} date - Date to check
- * @returns {boolean} True if date is today
  */
-export const isToday = date => {
+export const isToday = (date: Date | string): boolean => {
   const dateObj = typeof date === 'string' ? new Date(date) : date
   const today = new Date()
 
@@ -120,10 +120,8 @@ export const isToday = date => {
 
 /**
  * Check if date is yesterday
- * @param {Date|string} date - Date to check
- * @returns {boolean} True if date is yesterday
  */
-export const isYesterday = date => {
+export const isYesterday = (date: Date | string): boolean => {
   const dateObj = typeof date === 'string' ? new Date(date) : date
   const yesterday = new Date()
   yesterday.setDate(yesterday.getDate() - 1)
@@ -133,10 +131,8 @@ export const isYesterday = date => {
 
 /**
  * Get human-readable file size
- * @param {number} bytes - Size in bytes
- * @returns {string} Human-readable size
  */
-export const formatFileSize = bytes => {
+export const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 Bytes'
 
   const k = 1024
@@ -148,11 +144,8 @@ export const formatFileSize = bytes => {
 
 /**
  * Calculate reading time based on word count
- * @param {string} content - Text content
- * @param {number} wordsPerMinute - Reading speed (default: 250)
- * @returns {string} Reading time estimate
  */
-export const calculateReadingTime = (content, wordsPerMinute = 250) => {
+export const calculateReadingTime = (content: string, wordsPerMinute: number = 250): string => {
   if (!content) return '0 min read'
 
   const words = content.trim().split(/\s+/).length

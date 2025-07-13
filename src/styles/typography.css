@@ -34,30 +34,16 @@ body {
   border-radius: 12px;
 }
 
-/* Add top padding for macOS traffic lights */
+/* Modern Electron title bar and dragging */
 .app-container {
-  padding-top: 40px;
+  padding-top: 40px; /* Space for title bar */
 }
 
-/* Electron window dragging - simple approach */
-.drag-region {
-  position: fixed;
-  top: 0;
-  left: 70px;
-  right: 0;
-  height: 40px;
-  z-index: 9999;
-  background: transparent;
-}
-
-/* Ensure all interactive content is not draggable */
-* {
-  -webkit-app-region: no-drag;
-}
-
-/* Only the drag region should be draggable */
-.drag-region {
-  -webkit-app-region: drag !important;
+/* Modern titlebar - no webkit-app-region conflicts */
+.modern-titlebar {
+  -webkit-user-select: none;
+  user-select: none;
+  /* Using JavaScript-based dragging, no CSS conflicts */
 }
 
 /* Text selection control */

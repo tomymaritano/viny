@@ -2,6 +2,7 @@
  * Editor Style Configurations
  * Additional editor styles to complement editorThemes.ts
  */
+import { CSS_THEME_VARS } from '../theme/themeConstants'
 
 // Typography configurations
 export const TYPOGRAPHY_CONFIG = {
@@ -80,11 +81,11 @@ export const MARKDOWN_EDITOR_CONFIG = {
 export const TODO_STYLES = {
   checkbox: {
     pending: {
-      color: '#888888',
+      color: CSS_THEME_VARS.BASE_01,
       fontWeight: 'bold' as const,
     },
     completed: {
-      color: '#66bb6a',
+      color: CSS_THEME_VARS.GREEN,
       fontWeight: 'bold' as const,
     },
   },
@@ -110,31 +111,31 @@ export const TODO_STYLES = {
     
     variants: {
       todo: {
-        color: '#4fc3f7',
+        color: CSS_THEME_VARS.CYAN,
         backgroundColor: 'rgba(79, 195, 247, 0.1)',
       },
       fixme: {
-        color: '#ef5350',
+        color: CSS_THEME_VARS.RED,
         backgroundColor: 'rgba(239, 83, 80, 0.1)',
       },
       hack: {
-        color: '#ff8a65',
+        color: CSS_THEME_VARS.ORANGE,
         backgroundColor: 'rgba(255, 138, 101, 0.1)',
       },
       note: {
-        color: '#ffca28',
+        color: CSS_THEME_VARS.YELLOW,
         backgroundColor: 'rgba(255, 202, 40, 0.1)',
       },
       bug: {
-        color: '#ef5350',
+        color: CSS_THEME_VARS.RED,
         backgroundColor: 'rgba(239, 83, 80, 0.1)',
       },
       optimize: {
-        color: '#66bb6a',
+        color: CSS_THEME_VARS.GREEN,
         backgroundColor: 'rgba(102, 187, 106, 0.1)',
       },
       review: {
-        color: '#ba68c8',
+        color: CSS_THEME_VARS.VIOLET,
         backgroundColor: 'rgba(186, 104, 200, 0.1)',
       },
     },
@@ -146,10 +147,10 @@ export const TODO_STYLES = {
       transition: 'transform 0.1s ease',
     },
     completedHover: {
-      color: '#4caf50 !important',
+      color: `${CSS_THEME_VARS.GREEN} !important`,
     },
     pendingHover: {
-      color: '#aaaaaa !important',
+      color: `${CSS_THEME_VARS.BASE_01} !important`,
     },
   },
 }

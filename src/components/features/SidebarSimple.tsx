@@ -12,7 +12,15 @@ import CreateNotebookModal from '../ui/CreateNotebookModal'
 import DropdownMenu, { DropdownMenuItem } from '../ui/DropdownMenu'
 import { getCustomTagColor } from '../../utils/customTagColors'
 
-// Import modular sidebar components (removed unused imports)
+// Import modular sidebar components
+import SidebarSection from '../sidebar/SidebarSection'
+import MainSections from '../sidebar/MainSections'
+import NotebookTree from '../sidebar/NotebookTree'
+import TagsList from '../sidebar/TagsList'
+
+// Import types
+import { NotebookWithCounts } from '../../types/notebook'
+import { noteLogger as logger } from '../../utils/logger'
 
 const SidebarSimple: React.FC = memo(() => {
   const {
@@ -36,7 +44,7 @@ const SidebarSimple: React.FC = memo(() => {
     getNotebookChildren
   } = useSidebarLogic()
 
-  const { createNewNote } = useNoteActions()
+  const { createNewNote, handleEmptyTrash } = useNoteActions()
   const { setModal, updateNote, getTagColor } = useAppStore()
 
   // Context menu state
@@ -62,7 +70,7 @@ const SidebarSimple: React.FC = memo(() => {
   const [notebookContextMenu, setNotebookContextMenu] = useState({
     isVisible: false,
     position: { x: 0, y: 0 },
-    notebook: null as any
+    notebook: null as NotebookWithCounts | null
   })
   
   // Editing notebook state
@@ -117,7 +125,7 @@ const SidebarSimple: React.FC = memo(() => {
   const handleTagNameChange = (oldName: string, newName: string) => {
     // This would need to be implemented based on how tags are managed in the store
     // For now, we'll just close the modal
-    console.log('Tag name change:', oldName, '->', newName)
+    logger.info('Tag name change requested', { oldName, newName })
   }
 
   const handleCreateNotebook = () => {
@@ -146,7 +154,7 @@ const SidebarSimple: React.FC = memo(() => {
   }
 
   // Notebook context menu handlers
-  const handleNotebookRightClick = (e: React.MouseEvent, notebook: any) => {
+  const handleNotebookRightClick = (e: React.MouseEvent, notebook: NotebookWithCounts) => {
     e.preventDefault()
     e.stopPropagation()
     setNotebookContextMenu({
@@ -236,9 +244,10 @@ const SidebarSimple: React.FC = memo(() => {
     })
   }
 
-  const handleEmptyTrash = () => {
-    // TODO: Implement empty trash functionality
-    console.log('Empty trash clicked')
+  const handleEmptyTrashClick = () => {
+    if (window.confirm('Are you sure you want to permanently delete all notes in trash? This action cannot be undone.')) {
+      handleEmptyTrash()
+    }
     closeTrashContextMenu()
   }
 
@@ -274,101 +283,10 @@ const SidebarSimple: React.FC = memo(() => {
     return (tag: string) => getTagColor(tag)
   }, [getTagColor])
 
-  // Render notebook tree with simple, clean navigation
-  const renderNotebookTree = (notebooks: any[], parentId: string | null = null, level = 0): React.ReactNode[] => {
-    const childNotebooks = notebooks.filter(n => n.parentId === parentId)
-    
-    return childNotebooks.map(notebook => {
-      const isExpanded = expandedNotebooks.has(notebook.id)
-      const hasChildren = notebooks.some(n => n.parentId === notebook.id)
-      const isActive = activeSection === `notebook-${notebook.name.toLowerCase()}`
-      const paddingLeft = 12 + (level * 16)
-
-      return (
-        <div key={notebook.id} className="relative">
-            <button
-              className={`w-full flex items-center justify-between py-1.5 text-sm text-left transition-all duration-200 ${
-                isActive
-                  ? 'text-theme-text-primary bg-[#323D4B] relative'
-                  : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary'
-              }`}
-              onClick={() => handleSectionClick(`notebook-${notebook.name.toLowerCase()}`)}
-              onContextMenu={(e) => handleNotebookRightClick(e, notebook)}
-              style={{
-                paddingLeft: `${paddingLeft}px`,
-                paddingRight: '8px',
-                ...(isActive ? { boxShadow: 'inset 3px 0 0 #ED6E3F' } : {})
-              }}
-            >
-              <div className="flex items-center space-x-1.5 flex-1 min-w-0">
-                {/* Triangle expand/collapse control */}
-                {hasChildren ? (
-                  <div
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleToggleNotebookExpansion(notebook.id)
-                    }}
-                    className={`w-4 h-4 flex-shrink-0 flex items-center justify-center cursor-pointer transition-transform duration-150 ${isExpanded ? 'rotate-90' : 'rotate-0'}`}
-                  >
-                    <Icons.ChevronRight size={10} className="text-theme-text-muted hover:text-theme-text-secondary" />
-                  </div>
-                ) : (
-                  <div className="w-4 h-4 flex-shrink-0" />
-                )}
-                
-                {/* Color indicator */}
-                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getColorClass(notebook.color).replace('text-', 'bg-')}`} />
-                
-                {/* Name (editable) */}
-                {editingNotebook === notebook.id ? (
-                  <input
-                    type="text"
-                    value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    onBlur={() => handleSaveNotebookName(notebook.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        handleSaveNotebookName(notebook.id)
-                      } else if (e.key === 'Escape') {
-                        setEditingNotebook(null)
-                        setEditValue('')
-                      }
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                    className="bg-transparent outline-none text-sm w-full border-b border-theme-accent-primary"
-                    autoFocus
-                  />
-                ) : (
-                  <span 
-                    className="text-sm truncate flex-1 min-w-0"
-                    title={notebook.path || notebook.name}
-                  >
-                    {notebook.name.charAt(0).toUpperCase() + notebook.name.slice(1)}
-                  </span>
-                )}
-              </div>
-              
-              {/* Count badge */}
-              <div className="flex items-center space-x-1 flex-shrink-0">
-                {notebook.directCount > 0 && (
-                  <span 
-                    className="text-xs px-1.5 py-0.5 bg-theme-accent-primary/20 text-theme-accent-primary rounded-full min-w-[20px] text-center"
-                    title={`${notebook.directCount} notes in this category`}
-                  >
-                    {notebook.directCount}
-                  </span>
-                )}
-              </div>
-            </button>
-          {/* Children (recursive) */}
-          {hasChildren && isExpanded && (
-            <div className="relative">
-              {renderNotebookTree(notebooks, notebook.id, level + 1)}
-            </div>
-          )}
-        </div>
-      )
-    })
+  // Helper function to cancel notebook editing
+  const handleCancelNotebookEdit = () => {
+    setEditingNotebook(null)
+    setEditValue('')
   }
 
 
@@ -403,80 +321,34 @@ const SidebarSimple: React.FC = memo(() => {
 
       {/* Main Sections */}
       <section className="space-y-0">
-        {mainSections.map(section => (
-          <button
-            key={section.id}
-            className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left transition-all duration-200 ${
-              activeSection === section.id
-                ? 'text-theme-text-primary bg-[#323D4B] relative'
-                : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary'
-            }`}
-            onClick={() => handleSectionClick(section.id)}
-            style={activeSection === section.id ? {
-              boxShadow: 'inset 4px 0 0 #ED6E3F'
-            } : {}}
-          >
-            <div className="flex items-center space-x-2">
-              <span className="opacity-75">
-                {renderIcon(section.icon)}
-              </span>
-              <span>{section.label}</span>
-            </div>
-            <span className="text-sm opacity-75">{section.count}</span>
-          </button>
-        ))}
+        <MainSections
+          sections={mainSections.map(s => ({ key: s.id, label: s.label, icon: s.icon, count: s.count }))}
+          activeSection={activeSection}
+          onSectionClick={handleSectionClick}
+        />
       </section>
 
       {/* Status Section */}
-      <section>
-        <button
-          onClick={() => handleToggleSection('status')}
-          className="w-full flex items-center justify-between px-3 py-2 text-sm text-theme-text-muted font-medium hover:text-theme-text-tertiary transition-colors"
-        >
-          <div className="flex items-center space-x-2">
-            {renderIcon('FileChartLine', 16)}
-            <span>Status</span>
-          </div>
-          <div className={`transition-transform duration-200 ${expandedSections.status ? 'rotate-90' : ''}`}>
-            {renderIcon('ChevronRight', 16)}
-          </div>
-        </button>
-        
-        {expandedSections.status && (
-          <div className="space-y-0 mt-1">
-            {statusSections.map(status => (
-              <button
-                key={status.id}
-                className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left transition-all duration-200 ${
-                  activeSection === status.id
-                    ? 'text-theme-text-primary bg-theme-bg-tertiary'
-                    : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary'
-                }`}
-                onClick={() => handleSectionClick(status.id)}
-              >
-                <div className="flex items-center space-x-2 ml-4">
-                  <span className={`opacity-75 ${status.color || 'text-theme-text-secondary'}`}>
-                    {renderIcon(status.icon, 16)}
-                  </span>
-                  <span className="text-sm">{status.label}</span>
-                </div>
-                <span className="text-sm opacity-75">{status.count}</span>
-              </button>
-            ))}
-          </div>
-        )}
-      </section>
+      <SidebarSection
+        title="Status"
+        isExpanded={expandedSections.status}
+        onToggle={() => handleToggleSection('status')}
+        icon={renderIcon('FileChartLine', 16)}
+      >
+        <MainSections
+          sections={statusSections.map(s => ({ key: s.id, label: s.label, icon: s.icon, count: s.count }))}
+          activeSection={activeSection}
+          onSectionClick={handleSectionClick}
+        />
+      </SidebarSection>
 
       {/* Notebooks Section */}
-      <section>
-        <div className="w-full flex items-center justify-between px-3 py-2 text-sm text-theme-text-muted font-medium">
-          <button
-            onClick={() => handleToggleSection('notebooks')}
-            className="flex items-center space-x-2 hover:text-theme-text-tertiary transition-colors"
-          >
-            {renderIcon('Book', 16)}
-            <span>Notebooks</span>
-          </button>
+      <SidebarSection
+        title="Notebooks"
+        isExpanded={expandedSections.notebooks}
+        onToggle={() => handleToggleSection('notebooks')}
+        icon={renderIcon('Book', 16)}
+        actions={
           <IconButton
             icon={Icons.Plus}
             onClick={handleCreateNotebook}
@@ -485,106 +357,61 @@ const SidebarSimple: React.FC = memo(() => {
             variant="default"
             className="text-theme-text-muted hover:text-theme-text-tertiary"
           />
-        </div>
-        
-        {expandedSections.notebooks && (
-          <div className="space-y-0 mt-1">
-            {notebooksWithCounts.length > 0 ? (
-              renderNotebookTree(notebooksWithCounts)
-            ) : (
-              <div className="px-7 py-4 text-sm text-theme-text-muted italic text-center">
-                No notebooks yet
-              </div>
-            )}
+        }
+      >
+        {notebooksWithCounts.length > 0 ? (
+          <NotebookTree
+            notebooks={notebooksWithCounts}
+            activeSection={activeSection}
+            expandedNotebooks={expandedNotebooks}
+            getColorClass={getColorClass}
+            onSectionClick={handleSectionClick}
+            onNotebookRightClick={handleNotebookRightClick}
+            onToggleExpansion={handleToggleNotebookExpansion}
+            editingNotebook={editingNotebook}
+            editValue={editValue}
+            onEditValueChange={setEditValue}
+            onSaveNotebookName={handleSaveNotebookName}
+            onCancelEdit={handleCancelNotebookEdit}
+          />
+        ) : (
+          <div className="px-7 py-4 text-sm text-theme-text-muted italic text-center">
+            No notebooks yet
           </div>
         )}
-      </section>
+      </SidebarSection>
 
       {/* Tags Section */}
-      <section>
-        <button
-          onClick={() => handleToggleSection('tags')}
-          onContextMenu={handleTagsHeaderRightClick}
-          className="w-full flex items-center justify-between px-3 py-2 text-sm text-theme-text-muted font-medium hover:text-theme-text-tertiary transition-colors"
-        >
-          <div className="flex items-center space-x-2">
-            {renderIcon('Tag', 16)}
-            <span>Tags</span>
-          </div>
-          <div className={`transition-transform duration-200 ${expandedSections.tags ? 'rotate-90' : ''}`}>
-            {renderIcon('ChevronRight', 16)}
-          </div>
-        </button>
-        
-        {expandedSections.tags && (
-          <div className="space-y-0 mt-1">
-            {tagsWithCounts.length > 0 ? (
-              tagsWithCounts.map((tag) => {
-                const tagColor = getTagColorMemo(tag.tag)
-                const isActive = activeSection === `tag-${tag.tag.toLowerCase()}`
-                
-                return (
-                  <div key={tag.tag} className="relative dropdown-container">
-                    <button
-                      className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left transition-all duration-200 ${
-                        isActive
-                          ? 'text-theme-text-primary bg-[#323D4B] relative'
-                          : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary'
-                      }`}
-                      onClick={() => handleSectionClick(`tag-${tag.tag.toLowerCase()}`)}
-                      onContextMenu={(e) => handleTagRightClick(e, tag.tag)}
-                      style={isActive ? {
-                        boxShadow: 'inset 4px 0 0 #ED6E3F'
-                      } : {}}
-                    >
-                      <div className="flex items-center space-x-2 ml-4">
-                        <div 
-                          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                          style={{ 
-                            backgroundColor: tagColor.bg,
-                            outline: `1px solid ${tagColor.border}`,
-                            outlineOffset: '-1px'
-                          }}
-                        />
-                        <span className="text-sm">#{tag.tag}</span>
-                      </div>
-                    <span className="text-sm opacity-75">{tag.count}</span>
-                  </button>
-                </div>
-              )
-            })
-            ) : (
-              <div className="px-7 py-4 text-sm text-theme-text-muted italic text-center">
-                No tags yet
-              </div>
-            )}
+      <SidebarSection
+        title="Tags"
+        isExpanded={expandedSections.tags}
+        onToggle={() => handleToggleSection('tags')}
+        onHeaderRightClick={handleTagsHeaderRightClick}
+        icon={renderIcon('Tag', 16)}
+      >
+        {tagsWithCounts.length > 0 ? (
+          <TagsList
+            tags={tagsWithCounts}
+            activeSection={activeSection}
+            getTagColor={getTagColorMemo}
+            onSectionClick={handleSectionClick}
+            onTagRightClick={handleTagRightClick}
+          />
+        ) : (
+          <div className="px-7 py-4 text-sm text-theme-text-muted italic text-center">
+            No tags yet
           </div>
         )}
-      </section>
+      </SidebarSection>
 
       {/* System Sections */}
       <section className="space-y-0">
-        {systemSections.map(section => (
-          <button
-            key={section.id}
-            className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left transition-all duration-200 ${
-              activeSection === section.id
-                ? 'text-theme-text-primary bg-[#323D4B] relative'
-                : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary'
-            }`}
-            onClick={() => handleSectionClick(section.id)}
-            onContextMenu={section.id === 'trash' ? handleTrashRightClick : undefined}
-            style={activeSection === section.id ? {
-              boxShadow: 'inset 4px 0 0 #ED6E3F'
-            } : {}}
-          >
-            <div className="flex items-center space-x-2">
-              <span className="opacity-75">{renderIcon(section.icon)}</span>
-              <span>{section.label}</span>
-            </div>
-            <span className="text-sm opacity-75">{section.count}</span>
-          </button>
-        ))}
+        <MainSections
+          sections={systemSections.map(s => ({ key: s.id, label: s.label, icon: s.icon, count: s.count }))}
+          activeSection={activeSection}
+          onSectionClick={handleSectionClick}
+          onTrashRightClick={handleTrashRightClick}
+        />
       </section>
 
       {/* Footer/Bottom spacer */}
@@ -643,7 +470,7 @@ const SidebarSimple: React.FC = memo(() => {
           onClick={(e) => e.stopPropagation()}
         >
           <DropdownMenuItem
-            onClick={handleEmptyTrash}
+            onClick={handleEmptyTrashClick}
             icon={<Icons.Trash size={10} />}
             className="text-theme-accent-red hover:text-theme-accent-red"
           >

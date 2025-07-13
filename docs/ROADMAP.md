@@ -1,245 +1,304 @@
 # Nototo Development Roadmap 🗺️
 
-This document outlines the planned features and improvements for Nototo, organized by priority and category.
+> **Current Focus**: Settings System Development for Feature Parity with Leading Note-Taking Applications
 
-## 🔍 Search Enhancements ![Low Priority](https://img.shields.io/badge/Priority-Low-lightgrey)
+This document outlines our development priorities, organized by milestones and focused on achieving comprehensive settings functionality.
 
-### Advanced Search Filters UI
+## 🎯 Current Development Focus
 
-- **Description**: Visual filter panel in search modal with date pickers and multi-select options
-- **Features**:
-  - Date range picker for created/modified dates
-  - Multi-select dropdowns for notebooks and tags
-  - Toggle switches for pinned/archived status
-  - Filter presets and saved filters
-- **Estimated Timeline**: 2-3 weeks
-- **Dependencies**: None
+We are prioritizing the implementation of a comprehensive settings system to achieve feature parity with industry leaders like Inkdrop, Obsidian, and Notion. This strategic focus will establish Nototo as a competitive note-taking solution.
 
-### Search Analytics & Insights
+## 📊 Development Milestones
 
-- **Description**: Popular searches statistics and intelligent suggestions based on usage patterns
-- **Features**:
-  - Search frequency analytics
-  - Most searched terms dashboard
-  - Trending searches by time period
-  - Search result click-through rates
-- **Estimated Timeline**: 3-4 weeks
-- **Dependencies**: Backend analytics infrastructure
+### 🔧 Settings Core v2.0 ![High Priority](https://img.shields.io/badge/Priority-High-red) _Due: August 1, 2025_
 
-### Enhanced Search Experience
+**Objective**: Implement core settings functionality with complete UI system.
 
-- **Description**: Additional shortcuts and improved navigation within search results
-- **Features**:
-  - Additional shortcuts (Cmd+Shift+F for advanced search)
-  - Expanded previews with more context
-  - Result navigation with arrow keys
-  - Quick actions on search results (pin, archive, delete)
-- **Estimated Timeline**: 1-2 weeks
-- **Dependencies**: Enhanced keyboard handling
+#### UI Settings Framework
 
-### Search Context Features
+- **Complete Settings Architecture** - Modular, extensible settings system
+- **Visual Settings Editor** - Intuitive interface for all configuration options
+- **Settings Categories** - Organized tabs: General, Editor, Themes, Export, etc.
+- **Real-time Preview** - Live preview of changes before applying
+- **Settings Validation** - Comprehensive validation and error handling
 
-- **Description**: Context highlighting and bookmark functionality for searches
-- **Features**:
-  - Context highlighting in search result snippets
-  - Bookmark and save frequent searches
-  - Search collections and workspaces
-  - Share search results and filters
-- **Estimated Timeline**: 2-3 weeks
-- **Dependencies**: User preferences storage
+#### Privacy & Security Settings
 
-## 🎨 UX/UI Improvements ![Low Priority](https://img.shields.io/badge/Priority-Low-lightgrey)
+- **Data Privacy Controls** - Granular control over data collection and usage
+- **Local Storage Management** - Configure local data retention policies
+- **Export Control** - Privacy settings for export and sharing features
+- **Security Options** - Authentication preferences and security settings
 
-### Performance Optimizations
+#### Backup & Data Management
 
-- **Description**: Virtual scrolling and caching for large datasets
-- **Features**:
-  - Virtual scrolling for large result sets (>100 results)
-  - Search result caching with intelligent invalidation
-  - Lazy loading of search suggestions
-  - Debounced search with configurable delay
-- **Estimated Timeline**: 2-3 weeks
-- **Dependencies**: Virtual scrolling library integration
+- **Automatic Backup Settings** - Configure backup frequency and retention
+- **Import/Export Settings** - Complete settings backup and restore
+- **Data Migration Tools** - Seamless migration from other note-taking apps
+- **Sync Preferences** - Control what data syncs across devices
 
-### Advanced Navigation
-
-- **Description**: Enhanced navigation patterns and keyboard shortcuts
-- **Features**:
-  - Navigate between search matches within notes
-  - Jump to next/previous occurrence in editor
-  - Improved keyboard shortcuts for power users
-  - Breadcrumb navigation in search results
-- **Estimated Timeline**: 2 weeks
-- **Dependencies**: Editor integration improvements
-
-### Smart Suggestions
-
-- **Description**: AI-powered search suggestions and related content discovery
-- **Features**:
-  - AI-powered search term suggestions
-  - Related notes recommendations based on content similarity
-  - Smart auto-complete based on note content
-  - Contextual search suggestions while typing
-- **Estimated Timeline**: 4-6 weeks
-- **Dependencies**: AI/ML infrastructure, content analysis
-
-## 🚀 Advanced Features ![Low Priority](https://img.shields.io/badge/Priority-Low-lightgrey)
-
-### RAG-powered Search
-
-- **Description**: Semantic search capabilities using embeddings and LLM integration
-- **Features**:
-  - Semantic search using vector embeddings
-  - Natural language query processing
-  - Question-answering over note collections
-  - Intelligent content summarization
-- **Estimated Timeline**: 6-8 weeks
-- **Dependencies**: LLM API integration, vector database
-
-### Cross-note Linking
-
-- **Description**: Automatic detection and suggestion of related notes
-- **Features**:
-  - Automatic detection of related notes
-  - Bi-directional linking between notes
-  - Visual graph of note relationships
-  - Suggestion engine for potential links
-- **Estimated Timeline**: 4-5 weeks
-- **Dependencies**: Content analysis algorithms
-
-### Search Workspaces
-
-- **Description**: Save and organize complex search queries and filters
-- **Features**:
-  - Save complex search queries and filters
-  - Organize searches into workspaces/collections
-  - Share search workspaces with others
-  - Search templates for common patterns
-- **Estimated Timeline**: 3-4 weeks
-- **Dependencies**: User workspace management system
-
-## 🤖 AI & Writing Assistance ![Low Priority](https://img.shields.io/badge/Priority-Low-lightgrey)
-
-### Intelligent Auto-completion
-
-- **Description**: Context-aware writing suggestions and auto-completion
-- **Features**:
-  - Smart auto-completion based on note content and context
-  - Writing style suggestions and improvements
-  - Grammar and spell checking with context awareness
-  - Markdown syntax auto-completion and formatting
-- **Estimated Timeline**: 3-4 weeks
-- **Dependencies**: Language model API, text analysis algorithms
-
-### Content Generation & Enhancement
-
-- **Description**: AI-powered content creation and improvement tools
-- **Features**:
-  - Generate outlines and summaries from bullet points
-  - Expand short notes into detailed content
-  - Rewrite content for different tones or audiences
-  - Generate titles and tags based on content
-- **Estimated Timeline**: 4-5 weeks
-- **Dependencies**: LLM API integration, prompt engineering
-
-### Smart Note Organization
-
-- **Description**: AI-driven organization and categorization of notes
-- **Features**:
-  - Automatic tagging based on content analysis
-  - Smart notebook suggestions for new notes
-  - Duplicate detection and merge suggestions
-  - Content-based note clustering and organization
-- **Estimated Timeline**: 3-4 weeks
-- **Dependencies**: Content analysis algorithms, clustering models
-
-### Writing Analytics & Insights
-
-- **Description**: AI-powered writing analysis and productivity insights
-- **Features**:
-  - Writing style analysis and suggestions
-  - Reading time estimates and complexity scoring
-  - Topic modeling and content themes identification
-  - Writing pattern analysis and productivity insights
-- **Estimated Timeline**: 2-3 weeks
-- **Dependencies**: Text analytics APIs, statistical analysis tools
-
-## 📊 Implementation Timeline
-
-### Phase 1: Foundation (Completed)
-
-- ✅ Basic fuzzy search with Fuse.js
-- ✅ Search modal with keyboard shortcuts
-- ✅ Filter system for notebooks, tags, and status
-- ✅ Search history and persistence
-
-### Phase 2: Enhanced UX (Low Priority)
-
-- Enhanced Search Experience (1-2 weeks)
-- Advanced Navigation (2 weeks)
-- Performance Optimizations (2-3 weeks)
-
-### Phase 3: Advanced Filtering (Low Priority)
-
-- Advanced Search Filters UI (2-3 weeks)
-- Search Context Features (2-3 weeks)
-
-### Phase 4: Intelligence Layer (Low Priority)
-
-- Search Analytics & Insights (3-4 weeks)
-- Smart Suggestions (4-6 weeks)
-
-### Phase 5: AI Integration (Low Priority)
-
-- Intelligent Auto-completion (3-4 weeks)
-- Writing Analytics & Insights (2-3 weeks)
-- Smart Note Organization (3-4 weeks)
-
-### Phase 6: Next Generation (Low Priority)
-
-- Cross-note Linking (4-5 weeks)
-- Search Workspaces (3-4 weeks)
-- Content Generation & Enhancement (4-5 weeks)
-- RAG-powered Search (6-8 weeks)
-
-## 🔧 Technical Considerations
-
-### Dependencies
-
-- **Vector Database**: For semantic search capabilities (Pinecone, Weaviate, or Chroma)
-- **LLM API**: For natural language processing (OpenAI, Anthropic, or local models)
-- **Analytics Storage**: For search analytics and user behavior tracking
-- **Virtual Scrolling**: Library for performance optimization (react-window or react-virtualized)
-- **Text Analytics**: For writing analysis and insights (spaCy, NLTK, or cloud APIs)
-- **Grammar/Spell Check**: Language processing APIs (LanguageTool, Grammarly API)
-- **Content Classification**: Machine learning models for auto-tagging and organization
-
-### Performance Targets
-
-- **Search Response Time**: < 200ms for fuzzy search, < 500ms for semantic search
-- **AI Response Time**: < 2s for auto-completion, < 5s for content generation
-- **UI Responsiveness**: Search results should appear incrementally
-- **Memory Usage**: Efficient handling of large note collections (10,000+ notes)
-- **Caching Strategy**: Intelligent cache invalidation and prefetching
-- **AI Processing**: Background processing for non-critical AI features
-
-### Architecture Considerations
-
-- **Modular Design**: Search and AI features should be pluggable and configurable
-- **Offline Support**: Core functionality should work offline, AI features gracefully degrade
-- **Scalability**: Architecture should support both local and cloud-based processing
-- **Extensibility**: Plugin system for custom search providers and AI models
-- **Privacy**: Option for local AI processing vs cloud APIs
-- **Cost Management**: Intelligent API usage and caching to minimize costs
-
-## 📝 Notes
-
-- All features marked as "Low Priority" to align with current project focus
-- Timeline estimates are for full-time development and may vary based on available resources
-- Dependencies should be evaluated for licensing, cost, and maintenance implications
-- User feedback should drive prioritization of specific features within each category
+**GitHub Issues**: [#11](https://github.com/tomymaritano/nototo/issues/11), [#12](https://github.com/tomymaritano/nototo/issues/12), [#13](https://github.com/tomymaritano/nototo/issues/13)
 
 ---
+
+### 🎨 Advanced Features v2.1 ![Medium Priority](https://img.shields.io/badge/Priority-Medium-yellow) _Due: August 15, 2025_
+
+**Objective**: Advanced settings features and preview system enhancements.
+
+#### Preview Settings System
+
+- **Markdown Rendering Options** - Configure markdown parser and extensions
+- **Theme Customization** - Advanced theme editor with live preview
+- **Typography Controls** - Font selection, sizing, and spacing options
+- **Export Templates** - Customizable templates for different export formats
+
+#### Enhanced Export System
+
+- **Export Format Settings** - PDF, HTML, DOCX configuration options
+- **Template Management** - Create and manage export templates
+- **Batch Export Settings** - Bulk operation preferences
+- **Cloud Export Integration** - Direct export to cloud services
+
+#### Initial Keybinding Support
+
+- **Basic Keyboard Shortcuts** - Essential keybinding configuration
+- **Preset Keymap Selection** - Choose from popular keymaps (Vim, Emacs)
+- **Custom Shortcut Editor** - Simple interface for custom shortcuts
+
+**GitHub Issues**: [#14](https://github.com/tomymaritano/nototo/issues/14), [#15](https://github.com/tomymaritano/nototo/issues/15), [#16](https://github.com/tomymaritano/nototo/issues/16)
+
+---
+
+### ⌨️ Keybinding System v2.2 ![Medium Priority](https://img.shields.io/badge/Priority-Medium-yellow) _Due: September 1, 2025_
+
+**Objective**: Comprehensive keybinding system with advanced customization.
+
+#### Visual Keybinding Editor
+
+- **Graphical Key Mapping** - Visual interface for creating keybindings
+- **Conflict Detection** - Automatic detection and resolution of key conflicts
+- **Context-Aware Bindings** - Different shortcuts for different contexts
+- **Multi-Stroke Support** - Support for complex key combinations
+
+#### Command Palette System
+
+- **Universal Command Search** - Fuzzy search for all application commands
+- **Custom Commands** - User-defined commands and macros
+- **Command History** - Recently used commands for quick access
+- **Plugin Command Integration** - Commands from installed plugins
+
+#### Preset Keymaps
+
+- **Popular Editor Emulation** - Full Vim, Emacs, and Sublime Text keymaps
+- **IDE Integration** - VS Code and IntelliJ-style shortcuts
+- **Custom Keymap Creation** - Tools for creating and sharing keymaps
+- **Keymap Marketplace** - Community-shared keybinding configurations
+
+**GitHub Issues**: [#17](https://github.com/tomymaritano/nototo/issues/17), [#18](https://github.com/tomymaritano/nototo/issues/18)
+
+---
+
+### 🔌 Plugin Foundation v2.3 ![Low Priority](https://img.shields.io/badge/Priority-Low-lightgrey) _Due: September 15, 2025_
+
+**Objective**: Establish plugin system foundation with comprehensive developer tools.
+
+#### Plugin API Architecture
+
+- **Extensible Plugin System** - Robust API for third-party extensions
+- **Settings Integration** - Plugin settings seamlessly integrated into main settings
+- **Lifecycle Management** - Plugin installation, activation, and updates
+- **Security Sandbox** - Safe execution environment for plugins
+
+#### Plugin Manager Interface
+
+- **Plugin Discovery** - Browse and search available plugins
+- **One-Click Installation** - Simple plugin installation process
+- **Plugin Settings** - Dedicated settings panels for each plugin
+- **Performance Monitoring** - Track plugin impact on application performance
+
+#### Developer Tools
+
+- **Plugin Development Kit** - Tools and templates for plugin creators
+- **API Documentation** - Comprehensive documentation for plugin developers
+- **Testing Framework** - Tools for testing plugin functionality
+- **Community Marketplace** - Platform for sharing and discovering plugins
+
+**GitHub Issues**: [#19](https://github.com/tomymaritano/nototo/issues/19), [#20](https://github.com/tomymaritano/nototo/issues/20), [#21](https://github.com/tomymaritano/nototo/issues/21)
+
+---
+
+### ☁️ Cloud & Collaboration v3.0 ![Low Priority](https://img.shields.io/badge/Priority-Low-lightgrey) _Due: October 1, 2025_
+
+**Objective**: Cloud synchronization and collaboration features.
+
+#### Cloud Sync Integration
+
+- **End-to-End Encryption** - Secure cloud synchronization with zero-knowledge architecture
+- **Multi-Device Support** - Seamless sync across desktop, mobile, and web
+- **Conflict Resolution** - Intelligent handling of simultaneous edits
+- **Selective Sync** - Choose which notebooks and settings to sync
+
+#### Real-time Collaboration
+
+- **Live Editing** - Google Docs-style real-time collaboration
+- **Presence Indicators** - See who else is editing notes
+- **Comment System** - Collaborative commenting and feedback
+- **Version History** - Track changes and collaborate effectively
+
+#### Multi-Device Management
+
+- **Device Registration** - Secure device management and authentication
+- **Cross-Device Handoff** - Continue editing on different devices
+- **Device-Specific Settings** - Per-device configuration options
+- **Push Notifications** - Stay updated across all devices
+
+**GitHub Issues**: [#22](https://github.com/tomymaritano/nototo/issues/22), [#23](https://github.com/tomymaritano/nototo/issues/23), [#24](https://github.com/tomymaritano/nototo/issues/24)
+
+---
+
+## 🔍 Future Enhancements (Post v3.0)
+
+### Search System Improvements ![Future](https://img.shields.io/badge/Timeline-Future-lightgrey)
+
+- Advanced search filters with date ranges and multi-select options
+- Search analytics and intelligent suggestions
+- Context highlighting and bookmark functionality
+- RAG-powered semantic search capabilities
+
+### AI & Writing Assistance ![Future](https://img.shields.io/badge/Timeline-Future-lightgrey)
+
+- Intelligent auto-completion based on context
+- Content generation and enhancement tools
+- Smart note organization and automatic tagging
+- Writing analytics and productivity insights
+
+### Advanced UX Features ![Future](https://img.shields.io/badge/Timeline-Future-lightgrey)
+
+- Performance optimizations with virtual scrolling
+- Advanced navigation and keyboard shortcuts
+- Cross-note linking and relationship graphs
+- Search workspaces and saved queries
+
+## 📊 Implementation Strategy
+
+### Development Approach
+
+1. **Settings-First Development** - Prioritize settings system for immediate user value
+2. **Incremental Delivery** - Release functional milestones regularly
+3. **User Feedback Integration** - Continuous improvement based on user input
+4. **Quality Assurance** - Comprehensive testing for each milestone
+
+### Technical Considerations
+
+- **Performance**: All settings changes should apply instantly with minimal overhead
+- **Accessibility**: Settings interface must be fully accessible and keyboard-navigable
+- **Extensibility**: Architecture should support future enhancements without breaking changes
+- **Data Migration**: Seamless migration between settings versions
+
+### Success Metrics
+
+- **Feature Parity**: Match or exceed capabilities of leading note-taking apps
+- **User Adoption**: Increased user engagement with settings features
+- **Performance**: Settings interface responds within 100ms
+- **Accessibility**: WCAG 2.1 AA compliance for all settings interfaces
+
+## 🚀 Getting Involved
+
+### For Contributors
+
+- Check our [Issues](https://github.com/tomymaritano/nototo/issues) for current tasks
+- Review the [Contributing Guide](../CONTRIBUTING.md) for development setup
+- Join discussions in [GitHub Discussions](https://github.com/tomymaritano/nototo/discussions)
+
+### For Users
+
+- Try the latest features and provide feedback
+- Report bugs using our structured issue templates
+- Suggest new settings enhancements
+- Share your workflow requirements
+
+## 🧪 Testing Strategy
+
+### Pre-Release Testing Phase ![High Priority](https://img.shields.io/badge/Priority-High-red) _Current Focus_
+
+**Objective**: Implement essential testing before first stable release to ensure production readiness.
+
+#### Core Testing Implementation _(1-2 weeks)_
+
+- **Unit Tests for Critical Functions**
+  - CRUD operations for notes and notebooks
+  - Auto-save functionality and data persistence
+  - Search and filtering mechanisms
+  - Settings persistence and validation
+
+- **Integration Tests for Key Workflows**
+  - Application initialization and state management
+  - Component interactions (Sidebar, Editor, Preview)
+  - Settings import/export functionality
+  - Error boundary and error handling
+
+- **CI/CD Pipeline Setup**
+  - Automated testing on pull requests
+  - Code coverage reporting (target: 60%+ coverage)
+  - Pre-commit hooks with lint and format checks
+  - Build verification for multiple environments
+
+#### Testing Architecture
+
+```bash
+src/
+├── __tests__/
+│   ├── setup.js                 # Test configuration
+│   └── utils/                   # Test utilities
+├── hooks/__tests__/
+│   ├── useSettings.test.js      # Settings hook tests
+│   └── useNotes.test.js         # Notes management tests
+├── stores/__tests__/
+│   └── newSimpleStore.test.js   # State management tests
+└── components/__tests__/
+    ├── SettingsView.test.jsx    # Settings UI tests
+    └── Editor.test.jsx          # Editor component tests
+```
+
+### Post-Release Testing Expansion _(Ongoing)_
+
+#### Advanced Testing Suite
+
+- **End-to-End Testing** - User workflow automation with Playwright
+- **Cross-Platform Testing** - Electron app testing on macOS, Windows, Linux
+- **Performance Testing** - Load testing for large note collections
+- **Accessibility Testing** - WCAG 2.1 compliance verification
+- **Mobile Responsive Testing** - Touch interface and mobile browsers
+
+#### Quality Gates
+
+- **Code Coverage**: Minimum 60% for core functions, 80% for settings system
+- **Performance**: Page load under 2s, auto-save response under 100ms
+- **Accessibility**: Full keyboard navigation, screen reader compatibility
+- **Cross-Browser**: Support for Chrome, Firefox, Safari, Edge
+
+## 📅 Timeline Summary
+
+| Milestone                  | Timeline             | Focus Area                              |
+| -------------------------- | -------------------- | --------------------------------------- |
+| **Testing Foundation**     | **July 15-30, 2025** | **Essential tests before v2.0 release** |
+| Settings Core v2.0         | Aug 1, 2025          | Foundation settings system              |
+| Advanced Features v2.1     | Aug 15, 2025         | Preview and export enhancements         |
+| Keybinding System v2.2     | Sep 1, 2025          | Comprehensive keyboard customization    |
+| Plugin Foundation v2.3     | Sep 15, 2025         | Extensibility and developer tools       |
+| Cloud & Collaboration v3.0 | Oct 1, 2025          | Sync and collaboration features         |
+
+### Testing Milestones Integration
+
+Each development milestone now includes:
+
+- **Pre-Development**: Test setup for new features
+- **During Development**: Test-driven development approach
+- **Post-Development**: Integration and regression testing
+- **Pre-Release**: Comprehensive testing suite execution
+
+---
+
+**Note**: This roadmap prioritizes settings development to establish Nototo as a competitive note-taking solution. Timeline estimates are based on focused development effort and may be adjusted based on community feedback and resource availability.
 
 _Last updated: July 2025_  
 _For questions or suggestions, please open an issue or discussion in the repository._

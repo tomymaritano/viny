@@ -1,4 +1,6 @@
 import React from 'react'
+import ModernSpinner from './ui/LoadingSpinner'
+import CenteredLoader from './ui/CenteredLoader'
 
 type SpinnerSize = 'small' | 'medium' | 'large' | 'xlarge'
 type SpinnerColor = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'white'
@@ -32,63 +34,59 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   className = '',
   overlay = false,
 }) => {
-  const sizeClasses: Record<SpinnerSize, string> = {
-    small: 'w-4 h-4',
-    medium: 'w-6 h-6',
-    large: 'w-8 h-8',
-    xlarge: 'w-12 h-12',
+  // Map legacy sizes to new sizes
+  const sizeMap = {
+    small: 'sm' as const,
+    medium: 'md' as const,
+    large: 'lg' as const,
+    xlarge: 'xl' as const
   }
 
-  const colorClasses: Record<SpinnerColor, string> = {
-    primary: 'text-blue-500',
-    secondary: 'text-gray-500',
-    success: 'text-green-500',
-    warning: 'text-yellow-500',
-    error: 'text-red-500',
-    white: 'text-white',
+  // Map legacy colors to new colors
+  const colorMap = {
+    primary: 'primary' as const,
+    secondary: 'secondary' as const,
+    success: 'primary' as const,
+    warning: 'primary' as const,
+    error: 'primary' as const,
+    white: 'white' as const
   }
-
-  const spinner = (
-    <div className={`flex items-center justify-center ${className}`}>
-      <div className="flex flex-col items-center space-y-2">
-        <svg
-          className={`animate-spin ${sizeClasses[size]} ${colorClasses[color]}`}
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          ></circle>
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          ></path>
-        </svg>
-        {text && (
-          <span className={`text-sm ${colorClasses[color]} animate-pulse`}>
-            {text}
-          </span>
-        )}
-      </div>
-    </div>
-  )
 
   if (overlay) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-theme-bg-secondary rounded-lg p-6">{spinner}</div>
+      <CenteredLoader 
+        message={text || 'Loading...'}
+        size={sizeMap[size]}
+        variant="spinner"
+        className={className}
+      />
+    )
+  }
+
+  if (text) {
+    return (
+      <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
+        <ModernSpinner 
+          size={sizeMap[size]} 
+          color={colorMap[color]} 
+          variant="spinner"
+        />
+        <span className="text-sm text-theme-text-secondary animate-pulse">
+          {text}
+        </span>
       </div>
     )
   }
 
-  return spinner
+  return (
+    <div className={`flex items-center justify-center ${className}`}>
+      <ModernSpinner 
+        size={sizeMap[size]} 
+        color={colorMap[color]} 
+        variant="spinner"
+      />
+    </div>
+  )
 }
 
 export default LoadingSpinner
@@ -128,20 +126,21 @@ export const LoadingButton: React.FC<LoadingButtonProps> = ({
       onClick={onClick}
       disabled={loading || disabled}
       className={`
-        relative inline-flex items-center justify-center
-        ${loading || disabled ? 'opacity-50 cursor-not-allowed' : ''}
+        relative inline-flex items-center justify-center gap-2 px-4 py-2
+        transition-all duration-200
+        ${loading || disabled ? 'opacity-60 cursor-not-allowed' : 'hover:opacity-90'}
         ${className}
       `}
       {...props}
     >
       {loading && (
-        <LoadingSpinner
-          size="small"
+        <ModernSpinner
+          size="sm"
           color="white"
-          className="absolute inset-0"
+          variant="dots"
         />
       )}
-      <span className={loading ? 'invisible' : ''}>{children}</span>
+      <span className={loading ? 'opacity-75' : ''}>{children}</span>
     </button>
   )
 }

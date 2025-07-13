@@ -10,6 +10,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     close: () => ipcRenderer.send('window-close'),
     unmaximize: () => ipcRenderer.send('window-unmaximize'),
   },
+  // Modern window dragging methods
+  startWindowDrag: data => ipcRenderer.send('window-drag-start', data),
+  continueWindowDrag: data => ipcRenderer.send('window-drag-move', data),
+  endWindowDrag: () => ipcRenderer.send('window-drag-end'),
 })
 
 // For backward compatibility

@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Nototo Discussions
+    url: https://github.com/tomymaritano/nototo/discussions
+    about: Ask questions, share ideas, and discuss Nototo with the community
+  - name: Documentation
+    url: https://github.com/tomymaritano/nototo/tree/main/docs
+    about: Read the documentation for setup, usage, and development guides
+  - name: Roadmap
+    url: https://github.com/tomymaritano/nototo/blob/main/docs/ROADMAP.md
+    about: View our development roadmap and planned features

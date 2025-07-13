@@ -10,6 +10,8 @@ import { usePageLifecycle } from './hooks/usePageLifecycle'
 import { useAppHandlers } from './hooks/useAppHandlers'
 
 // Components
+import { AppLoading } from './components/LoadingStates'
+import ContentLoader from './components/ui/ContentLoader'
 import LoadingSpinner from './components/LoadingSpinner'
 import ErrorBoundary from './components/ErrorBoundary'
 import StorageErrorBoundary from './components/errors/StorageErrorBoundary'
@@ -19,6 +21,7 @@ import NotesListSimple from './components/features/NotesListSimple'
 import NotePreview from './components/NotePreview'
 import MarkdownPreview, { MarkdownPreviewHandle } from './components/MarkdownPreview'
 import ToastContainer from './components/ToastContainer'
+import TitleBar from './components/ui/TitleBar'
 
 // Lazy components
 import {
@@ -100,7 +103,7 @@ const AppSimple: React.FC = () => {
 
   // Loading state
   if (isLoading) {
-    return <LoadingSpinner text="Loading Nototo..." />
+    return <AppLoading message="Loading Nototo..." />
   }
 
   // Settings view
@@ -127,20 +130,8 @@ const AppSimple: React.FC = () => {
         }}
       >
         <div className="app-container">
-          {/* Electron drag region - debug version */}
-          <div 
-            className="drag-region" 
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: '70px',
-              right: 0,
-              height: '40px',
-              backgroundColor: 'transparent',
-              zIndex: 9999,
-              WebkitAppRegion: 'drag'
-            }}
-          />
+          {/* Modern Electron title bar with robust dragging */}
+          <TitleBar title="Nototo" />
           <ResizableLayout
             settings={settings}
             sidebar={<SidebarSimple />}
@@ -152,13 +143,14 @@ const AppSimple: React.FC = () => {
                 selectedNoteId={currentNote?.id || null}
                 onDeleteNote={handleDeleteNote}
                 onTogglePin={handleTogglePin}
+                onDuplicateNote={handleDuplicateNote}
                 currentSection={activeSection}
                 onSortNotes={sortNotes}
               />
             }
             mainContent={
               isEditorOpen && currentNote ? (
-                <Suspense fallback={<LoadingSpinner text="Loading Editor..." />}>
+                <Suspense fallback={<ContentLoader message="Loading Editor..." compact={true} />}>
                   <MarkdownEditor
                     key={currentNote.id}  // Force re-mount when note changes
                     value={currentNote.content || ''}

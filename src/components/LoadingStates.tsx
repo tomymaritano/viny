@@ -1,21 +1,30 @@
 import React from 'react'
 import LoadingSpinner from './ui/LoadingSpinner'
+import CenteredLoader from './ui/CenteredLoader'
+import ContentLoader from './ui/ContentLoader'
 import { NoteSkeleton, SidebarSkeleton, EditorSkeleton } from './ui/SkeletonLoader'
 
 // Loading overlay for full screen loading
 export const LoadingOverlay: React.FC<{
   message?: string
   transparent?: boolean
+  variant?: 'spinner' | 'dots' | 'pulse' | 'gradient'
 }> = ({ 
   message = 'Loading...', 
-  transparent = false 
+  transparent = false,
+  variant = 'spinner'
 }) => (
   <div className={`fixed inset-0 z-50 flex items-center justify-center ${
-    transparent ? 'bg-black/20' : 'bg-theme-bg-primary'
+    transparent ? 'bg-black/20 backdrop-blur-sm' : 'bg-theme-bg-primary'
   }`}>
-    <div className="flex flex-col items-center gap-4">
-      <LoadingSpinner size="lg" />
-      <p className="text-theme-text-secondary text-sm">{message}</p>
+    <div className="flex flex-col items-center gap-6 px-8 py-6 rounded-2xl bg-theme-bg-secondary/90 backdrop-blur-md border border-theme-border-primary/50 shadow-2xl">
+      <LoadingSpinner size="xl" variant={variant} />
+      <div className="text-center space-y-2">
+        <p className="text-theme-text-primary font-medium">{message}</p>
+        <div className="flex justify-center">
+          <LoadingSpinner size="sm" variant="dots" color="muted" />
+        </div>
+      </div>
     </div>
   </div>
 )
@@ -46,13 +55,15 @@ export const EditorLoading: React.FC = () => (
 // Inline loading for buttons
 export const ButtonLoading: React.FC<{
   text?: string
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg'
+  variant?: 'spinner' | 'dots'
 }> = ({ 
   text = 'Loading...', 
-  size = 'sm' 
+  size = 'sm',
+  variant = 'spinner'
 }) => (
   <div className="flex items-center gap-2">
-    <LoadingSpinner size={size} />
+    <LoadingSpinner size={size} variant={variant} />
     <span className="text-theme-text-secondary">{text}</span>
   </div>
 )
@@ -60,14 +71,15 @@ export const ButtonLoading: React.FC<{
 // Loading state for saving notes
 export const SavingIndicator: React.FC<{
   visible: boolean
-}> = ({ visible }) => {
+  variant?: 'spinner' | 'dots' | 'pulse'
+}> = ({ visible, variant = 'dots' }) => {
   if (!visible) return null
 
   return (
-    <div className="fixed top-4 right-4 z-40 bg-theme-bg-secondary border border-theme-border-primary rounded-lg px-3 py-2 shadow-lg">
-      <div className="flex items-center gap-2">
-        <LoadingSpinner size="sm" />
-        <span className="text-sm text-theme-text-secondary">Saving...</span>
+    <div className="fixed top-4 right-4 z-40 bg-theme-bg-secondary/95 backdrop-blur-sm border border-theme-border-primary/50 rounded-xl px-4 py-3 shadow-xl animate-in slide-in-from-right duration-300">
+      <div className="flex items-center gap-3">
+        <LoadingSpinner size="sm" variant={variant} />
+        <span className="text-sm text-theme-text-primary font-medium">Saving...</span>
       </div>
     </div>
   )
@@ -106,8 +118,38 @@ export const ContentLoading: React.FC<{
   </div>
 )
 
+// App initialization loading
+export const AppLoading: React.FC<{
+  message?: string
+}> = ({ message = 'Initializing Nototo...' }) => (
+  <CenteredLoader message={message} variant="gradient" showLogo={true} />
+)
+
+// Empty state with loading option
+export const EmptyStateLoading: React.FC<{
+  title?: string
+  description?: string
+  icon?: React.ReactNode
+}> = ({ 
+  title = 'Getting things ready', 
+  description = 'Please wait while we load your content.',
+  icon 
+}) => (
+  <ContentLoader 
+    message={title} 
+    submessage={description}
+    icon={icon}
+    variant="pulse"
+  />
+)
+
+// Default export for backwards compatibility
 export default {
   LoadingOverlay,
+  AppLoading,
+  CenteredLoader,
+  ContentLoader,
+  EmptyStateLoading,
   NotesListLoading,
   SidebarLoading,
   EditorLoading,

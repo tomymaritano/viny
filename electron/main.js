@@ -9,8 +9,8 @@ const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    titleBarStyle: 'hiddenInset',
-    trafficLightPosition: { x: 12, y: 10 },
+    titleBarStyle: 'hidden',
+    trafficLightPosition: { x: 15, y: 10 },
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -129,6 +129,44 @@ ipcMain.on('window-unmaximize', () => {
 ipcMain.on('window-close', () => {
   if (mainWindow) {
     mainWindow.close()
+  }
+})
+
+// Modern window dragging handlers
+let dragState = {
+  isDragging: false,
+  startPosition: null,
+  windowStartPosition: null,
+}
+
+ipcMain.on('window-drag-start', (event, data) => {
+  if (!mainWindow) return
+
+  const windowBounds = mainWindow.getBounds()
+  dragState = {
+    isDragging: true,
+    startPosition: { x: data.startX, y: data.startY },
+    windowStartPosition: { x: windowBounds.x, y: windowBounds.y },
+  }
+})
+
+ipcMain.on('window-drag-move', (event, data) => {
+  if (!mainWindow || !dragState.isDragging) return
+
+  const deltaX = data.currentX - dragState.startPosition.x
+  const deltaY = data.currentY - dragState.startPosition.y
+
+  const newX = dragState.windowStartPosition.x + deltaX
+  const newY = dragState.windowStartPosition.y + deltaY
+
+  mainWindow.setPosition(newX, newY)
+})
+
+ipcMain.on('window-drag-end', () => {
+  dragState = {
+    isDragging: false,
+    startPosition: null,
+    windowStartPosition: null,
   }
 })
 

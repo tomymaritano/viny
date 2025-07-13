@@ -14,6 +14,8 @@ interface NotesListSimpleProps {
   selectedNoteId: string | null
   onDeleteNote: (note: Note) => void
   onTogglePin: (note: Note) => void
+  onDuplicateNote?: (note: Note) => void
+  onMoveToNotebook?: (note: Note) => void
   currentSection?: string
   onSortNotes?: () => void
 }
@@ -25,11 +27,13 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
   selectedNoteId,
   onDeleteNote,
   onTogglePin,
+  onDuplicateNote,
+  onMoveToNotebook,
   currentSection = 'notes',
   onSortNotes
 }) => {
   const { isEmpty, formatDate, getPreviewText } = useNotesListLogic(notes)
-  const { sortBy, sortDirection, setSortBy, setSortDirection, sortNotes, setModal } = useAppStore()
+  const { sortBy, sortDirection, setSortBy, setSortDirection, sortNotes, setModal, setActiveSection } = useAppStore()
   const [searchTerm, setSearchTerm] = useState('')
   const [showSortMenu, setShowSortMenu] = useState(false)
 
@@ -76,9 +80,22 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
 
   const handleTagClick = useCallback((tag: string) => {
     // Filter by tag when clicking on a tag
-    setModal('search', true)
-    // TODO: Implement tag filtering logic
-  }, [setModal])
+    setActiveSection(`tag-${tag.toLowerCase()}`)
+  }, [setActiveSection])
+
+  const handleDuplicate = useCallback((e: React.MouseEvent, note: Note) => {
+    e.stopPropagation()
+    if (onDuplicateNote) {
+      onDuplicateNote(note)
+    }
+  }, [onDuplicateNote])
+
+  const handleMoveToNotebook = useCallback((e: React.MouseEvent, note: Note) => {
+    e.stopPropagation()
+    if (onMoveToNotebook) {
+      onMoveToNotebook(note)
+    }
+  }, [onMoveToNotebook])
 
   const getDynamicTitle = () => {
     if (currentSection === 'all-notes') return 'All Notes'
@@ -276,6 +293,8 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
               onNoteClick={handleNoteClick}
               onPinToggle={handlePinToggle}
               onDelete={handleDelete}
+              onDuplicate={onDuplicateNote ? handleDuplicate : undefined}
+              onMoveToNotebook={onMoveToNotebook ? handleMoveToNotebook : undefined}
               formatDate={formatDate}
               getPreviewText={getPreviewText}
               onTagClick={handleTagClick}

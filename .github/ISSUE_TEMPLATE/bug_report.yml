@@ -1,0 +1,164 @@
+name: Bug Report
+description: Report a bug or issue with Nototo
+title: "[BUG] "
+labels: ["bug", "status:needs-design"]
+projects: ["tomymaritano/1"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out this form to help us understand and reproduce the issue.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Bug Summary
+      description: A clear and concise description of what the bug is
+      placeholder: "Describe what went wrong..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Tell us how to reproduce this bug
+      placeholder: |
+        1. Go to...
+        2. Click on...
+        3. Scroll down to...
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: "I expected..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened instead?
+      placeholder: "Instead, what happened was..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this bug?
+      options:
+        - Critical - App crashes or data loss
+        - High - Major functionality broken
+        - Medium - Minor functionality issue
+        - Low - Cosmetic or minor inconvenience
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which part of Nototo is affected?
+      options:
+        - Editor
+        - Search
+        - Settings
+        - Export/Import
+        - Sync
+        - Sidebar/Navigation
+        - UI/Interface
+        - Performance
+        - Plugins
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      description: What platform are you using?
+      options:
+        - macOS (Electron app)
+        - Windows (Electron app)
+        - Linux (Electron app)
+        - Web Browser (Chrome)
+        - Web Browser (Firefox)
+        - Web Browser (Safari)
+        - Web Browser (Edge)
+        - Web Browser (Other)
+        - Mobile (iOS)
+        - Mobile (Android)
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Nototo Version
+      description: What version of Nototo are you using?
+      placeholder: "e.g., 1.2.4"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Details
+      description: Additional details about your environment
+      placeholder: |
+        - OS Version: 
+        - Browser Version (if web):
+        - Electron Version (if desktop):
+        - Node.js Version (if applicable):
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs
+      description: If applicable, paste any error messages or console logs
+      placeholder: "Paste error logs here..."
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain the problem
+      placeholder: "You can attach images by dragging & dropping, selecting, or pasting them."
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here
+      placeholder: "Any other relevant information..."
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      description: Please verify the following before submitting
+      options:
+        - label: I have searched existing issues to make sure this bug hasn't been reported
+          required: true
+        - label: I have provided steps to reproduce the issue
+          required: true
+        - label: I have included my environment details
+          required: true
+        - label: I have attached screenshots/logs if applicable
+          required: false

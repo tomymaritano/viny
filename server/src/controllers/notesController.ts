@@ -162,28 +162,39 @@ export const createNote = async (req: Request, res: Response, next: NextFunction
       }
     })
 
-    // Handle tags
+    // Handle tags - optimized with parallel operations
     if (validatedData.tags.length > 0) {
-      for (const tagName of validatedData.tags) {
-        // Find or create tag
-        let tag = await prisma.tag.findUnique({
-          where: { name: tagName }
-        })
-
-        if (!tag) {
-          tag = await prisma.tag.create({
-            data: { name: tagName }
+      // Find existing tags in parallel
+      const existingTags = await prisma.tag.findMany({
+        where: { name: { in: validatedData.tags } }
+      })
+      
+      const existingTagNames = new Set(existingTags.map(tag => tag.name))
+      const newTagNames = validatedData.tags.filter(name => !existingTagNames.has(name))
+      
+      // Create new tags in parallel
+      const newTags = newTagNames.length > 0 
+        ? await Promise.all(
+            newTagNames.map(name => 
+              prisma.tag.create({ data: { name } })
+            )
+          )
+        : []
+      
+      // Combine all tags
+      const allTags = [...existingTags, ...newTags]
+      
+      // Create note-tag relationships in parallel
+      await Promise.all(
+        allTags.map(tag =>
+          prisma.noteTags.create({
+            data: {
+              noteId: note.id,
+              tagId: tag.id
+            }
           })
-        }
-
-        // Link tag to note
-        await prisma.noteTags.create({
-          data: {
-            noteId: note.id,
-            tagId: tag.id
-          }
-        })
-      }
+        )
+      )
     }
 
     // Fetch the complete note with tags
@@ -267,31 +278,45 @@ export const updateNote = async (req: Request, res: Response, next: NextFunction
       data: updateData
     })
 
-    // Handle tags update
+    // Handle tags update - optimized with parallel operations
     if (validatedData.tags !== undefined) {
       // Remove existing tags
       await prisma.noteTags.deleteMany({
         where: { noteId }
       })
 
-      // Add new tags
-      for (const tagName of validatedData.tags) {
-        let tag = await prisma.tag.findUnique({
-          where: { name: tagName }
+      if (validatedData.tags.length > 0) {
+        // Find existing tags in parallel
+        const existingTags = await prisma.tag.findMany({
+          where: { name: { in: validatedData.tags } }
         })
-
-        if (!tag) {
-          tag = await prisma.tag.create({
-            data: { name: tagName }
-          })
-        }
-
-        await prisma.noteTags.create({
-          data: {
-            noteId,
-            tagId: tag.id
-          }
-        })
+        
+        const existingTagNames = new Set(existingTags.map(tag => tag.name))
+        const newTagNames = validatedData.tags.filter(name => !existingTagNames.has(name))
+        
+        // Create new tags in parallel
+        const newTags = newTagNames.length > 0 
+          ? await Promise.all(
+              newTagNames.map(name => 
+                prisma.tag.create({ data: { name } })
+              )
+            )
+          : []
+        
+        // Combine all tags
+        const allTags = [...existingTags, ...newTags]
+        
+        // Create note-tag relationships in parallel
+        await Promise.all(
+          allTags.map(tag =>
+            prisma.noteTags.create({
+              data: {
+                noteId,
+                tagId: tag.id
+              }
+            })
+          )
+        )
       }
     }
 

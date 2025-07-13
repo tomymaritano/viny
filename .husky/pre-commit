@@ -1,1 +1,23 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+
+# Run lint-staged for formatting
 npm run lint-staged
+
+# Run linter
+echo "📝 Running ESLint..."
+npm run lint
+
+# Run tests
+echo "🧪 Running tests..."
+npm run test:run
+
+# Check if tests passed
+if [ $? -ne 0 ]; then
+  echo "❌ Tests failed! Commit aborted."
+  exit 1
+fi
+
+echo "✅ All checks passed! Proceeding with commit..."

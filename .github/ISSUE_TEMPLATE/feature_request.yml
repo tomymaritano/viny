@@ -1,0 +1,122 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for Nototo
+title: "[FEATURE] "
+labels: ["type:feature", "status:needs-design"]
+projects: ["tomymaritano/1"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to suggest a new feature! Please fill out this form to help us understand your request.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Feature Summary
+      description: A clear and concise description of the feature you'd like to see
+      placeholder: "I would like to see..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve? What user need does it address?
+      placeholder: "Currently, users cannot..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe your ideal solution and how you envision it working
+      placeholder: "The feature should work by..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: Have you considered any alternative approaches?
+      placeholder: "Other options might include..."
+    validations:
+      required: false
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      description: Which area of Nototo does this feature relate to?
+      options:
+        - Settings & Configuration
+        - Editor & Writing
+        - Search & Navigation
+        - Export & Import
+        - Sync & Collaboration
+        - Plugins & Extensions
+        - UI/UX Improvements
+        - Security & Privacy
+        - Performance
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority Level
+      description: How important is this feature to you?
+      options:
+        - Low - Nice to have
+        - Medium - Would improve my workflow
+        - High - Essential for my use case
+        - Critical - Blocking my adoption
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: User Impact
+      description: Who would benefit from this feature?
+      options:
+        - label: New users
+        - label: Casual users
+        - label: Power users
+        - label: Enterprise users
+        - label: Plugin developers
+        - label: All users
+
+  - type: textarea
+    id: mockup
+    attributes:
+      label: Mockup or Examples
+      description: If you have mockups, screenshots, or examples from other apps, please share them
+      placeholder: "You can attach images by dragging & dropping, selecting, or pasting them."
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: How would you know this feature is complete and working correctly?
+      placeholder: |
+        - [ ] Users can do X
+        - [ ] The feature works on Y platforms
+        - [ ] Performance meets Z requirements
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Contribution
+      description: Would you be interested in contributing to this feature?
+      options:
+        - label: I would like to work on this feature
+        - label: I can help with design/mockups
+        - label: I can help with testing
+        - label: I can help with documentation
+        - label: I prefer to just provide feedback

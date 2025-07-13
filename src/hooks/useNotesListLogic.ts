@@ -1,24 +1,12 @@
 // Hook for notes list logic and utilities
 import { useMemo, useCallback } from 'react'
 import { Note } from '../types'
+import { formatDate as utilFormatDate } from '../utils/dateUtils'
 
 export const useNotesListLogic = (notes: Note[]) => {
-  // Format date utility
+  // Format date utility - using centralized utility
   const formatDate = useCallback((dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffTime = Math.abs(now.getTime() - date.getTime())
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
-    
-    if (diffDays === 0) {
-      return 'Today'
-    } else if (diffDays === 1) {
-      return 'Yesterday'
-    } else if (diffDays < 7) {
-      return `${diffDays} days ago`
-    } else {
-      return date.toLocaleDateString()
-    }
+    return utilFormatDate(dateString, { relative: true })
   }, [])
 
   // Extract preview text from note content

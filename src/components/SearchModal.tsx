@@ -5,6 +5,12 @@ import { SearchLoading } from './LoadingStates'
 import Icons from './Icons'
 import BaseModal from './ui/BaseModal'
 import { Note } from '../types'
+import { formatDate } from '../utils/dateUtils'
+
+interface SearchMatch {
+  key: string
+  indices: [number, number][]
+}
 
 interface SearchModalProps {
   isOpen: boolean
@@ -89,7 +95,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
   }, [onSelectNote, onClose])
 
   // Get snippet for content matches
-  const getSnippet = useCallback((note: Note, matches: any[]) => {
+  const getSnippet = useCallback((note: Note, matches: SearchMatch[]) => {
     const contentMatch = matches.find(match => match.key === 'content')
     if (!contentMatch) return ''
 
@@ -108,17 +114,9 @@ const SearchModal: React.FC<SearchModalProps> = ({
     return snippet
   }, [])
 
-  // Format date for display
-  const formatDate = useCallback((dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60)
-
-    if (diffInHours < 1) return 'Just now'
-    if (diffInHours < 24) return `${Math.floor(diffInHours)}h ago`
-    if (diffInHours < 24 * 7) return `${Math.floor(diffInHours / 24)}d ago`
-    
-    return date.toLocaleDateString()
+  // Using centralized date utility
+  const formatNoteDate = useCallback((dateString: string) => {
+    return formatDate(dateString, { relative: true })
   }, [])
 
   return (
@@ -231,7 +229,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
 
                         {/* Note Metadata */}
                         <div className="flex flex-col items-end gap-1 text-xs text-theme-text-muted">
-                          <span>{formatDate(note.updatedAt)}</span>
+                          <span>{formatNoteDate(note.updatedAt)}</span>
                           {note.notebook && (
                             <span className="flex items-center gap-1">
                               <Icons.Book size={12} />

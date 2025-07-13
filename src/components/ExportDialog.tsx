@@ -8,7 +8,11 @@ interface Note {
   id: string
   title: string
   content?: string
-  [key: string]: any
+  notebook?: string
+  tags?: string[]
+  status?: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 interface ExportDialogProps {

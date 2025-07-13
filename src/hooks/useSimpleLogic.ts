@@ -3,19 +3,20 @@ import { useMemo } from 'react'
 import { useAppStore } from '../stores/newSimpleStore'
 import { useNotebooks } from './useNotebooks'
 import { Note } from '../types'
+import { NotebookWithCounts } from '../types/notebook'
 import { useAppInit } from './useAppInit'
 import { useNoteActions } from './useNoteActions'
 import { useSidebarLogic } from './useSidebarLogic'
 
 // Helper function to get all child notebook names recursively
-const getAllChildNotebooks = (notebooks: unknown[], parentName: string): string[] => {
+const getAllChildNotebooks = (notebooks: NotebookWithCounts[], parentName: string): string[] => {
   const children: string[] = []
   // Case-insensitive search for parent notebook
-  const parentNotebook = notebooks.find((nb: any) => nb.name.toLowerCase() === parentName.toLowerCase())
+  const parentNotebook = notebooks.find((nb) => nb.name.toLowerCase() === parentName.toLowerCase())
   
   if (parentNotebook && parentNotebook.children?.length > 0) {
     parentNotebook.children.forEach((childId: string) => {
-      const childNotebook = notebooks.find((nb: any) => nb.id === childId)
+      const childNotebook = notebooks.find((nb) => nb.id === childId)
       if (childNotebook) {
         children.push(childNotebook.name)
         // Recursively get children of children
@@ -66,7 +67,7 @@ export const getFilteredNotes = (
         const notebookFromSection = activeSection.replace('notebook-', '')
         
         // Find the actual notebook object to get its real name (preserving case)
-        const actualNotebook = notebooks.find((nb: any) => nb.name.toLowerCase() === notebookFromSection.toLowerCase())
+        const actualNotebook = notebooks.find((nb) => nb.name.toLowerCase() === notebookFromSection.toLowerCase())
         const notebookName = actualNotebook ? actualNotebook.name : notebookFromSection
         
         // Get all child notebooks recursively

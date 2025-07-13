@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import PropTypes from 'prop-types'
 import Icons from './Icons'
 import GeneralSettings from './settings/sections/GeneralSettings'
 import EditorSettings from './settings/sections/EditorSettings'
@@ -7,7 +6,11 @@ import TypographySettings from './settings/sections/TypographySettings'
 import { useSettings } from '../hooks/useSettings'
 import useAppStore from '../stores/newSimpleStore'
 
-const SettingsView = ({ onClose }) => {
+interface SettingsViewProps {
+  onClose: () => void
+}
+
+const SettingsView: React.FC<SettingsViewProps> = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState('general')
   const {
     settings,
@@ -166,10 +169,6 @@ const SettingsView = ({ onClose }) => {
       </div>
     </div>
   )
-}
-
-SettingsView.propTypes = {
-  onClose: PropTypes.func.isRequired,
 }
 
 export default SettingsView

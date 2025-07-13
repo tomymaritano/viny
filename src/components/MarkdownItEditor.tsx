@@ -24,7 +24,9 @@ interface Note {
   content: string
   notebook: string
   tags?: string[]
-  [key: string]: any
+  status?: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 interface Notebook {
@@ -56,7 +58,7 @@ const MarkdownItEditor: React.FC<MarkdownItEditorProps> = ({
   notebooks = [],
 }) => {
   // Editor ref for text insertion
-  const editorRef = useRef<any>(null)
+  const editorRef = useRef<HTMLTextAreaElement | null>(null)
 
   // Modal management
   const { modals, setModal } = useAppStore()
