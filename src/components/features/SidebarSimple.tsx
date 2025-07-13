@@ -180,7 +180,7 @@ const SidebarSimple: React.FC = memo(() => {
     if (notebookContextMenu.notebook) {
       // Check if there are notes in this notebook
       const { notes } = useAppStore.getState()
-      const notesInNotebook = notes.filter(note => note.notebook === notebookContextMenu.notebook.name)
+      const notesInNotebook = notes.filter(note => note.notebook === notebookContextMenu.notebook?.name)
       
       if (notesInNotebook.length > 0) {
         // Show warning or move notes to another notebook
@@ -280,7 +280,14 @@ const SidebarSimple: React.FC = memo(() => {
 
   // Memoize tag colors to avoid recalculating on every render
   const getTagColorMemo = React.useMemo(() => {
-    return (tag: string) => getTagColor(tag)
+    return (tag: string) => {
+      const color = getTagColor(tag)
+      // Convert string color to object format expected by TagsList
+      return {
+        bg: `bg-${color}-100`,
+        border: `border-${color}-300`
+      }
+    }
   }, [getTagColor])
 
   // Helper function to cancel notebook editing

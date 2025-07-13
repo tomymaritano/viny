@@ -1,22 +1,14 @@
 import React, { useState } from 'react'
 import Icons from '../Icons'
-
-interface Notebook {
-  id: string
-  name: string
-  color: string
-  parentId: string | null
-  directCount: number
-  path?: string
-}
+import { NotebookWithCounts } from '../../types/notebook'
 
 interface NotebookTreeProps {
-  notebooks: Notebook[]
+  notebooks: NotebookWithCounts[]
   activeSection: string
   expandedNotebooks: Set<string>
   getColorClass: (color: string) => string
   onSectionClick: (section: string) => void
-  onNotebookRightClick: (e: React.MouseEvent, notebook: Notebook) => void
+  onNotebookRightClick: (e: React.MouseEvent, notebook: NotebookWithCounts) => void
   onToggleExpansion: (notebookId: string) => void
   editingNotebook: string | null
   editValue: string

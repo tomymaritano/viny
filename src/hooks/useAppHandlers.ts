@@ -3,6 +3,7 @@
  */
 import { useCallback } from 'react'
 import { useAppStore } from '../stores/newSimpleStore'
+import { noteLogger as logger } from '../utils/logger'
 
 interface Note {
   id: string
@@ -48,12 +49,12 @@ export const useAppHandlers = ({
         content: newContent,
         updatedAt: new Date().toISOString()
       }
-      console.log('[ContentChange] Updating note:', updatedNote.title, 'ID:', updatedNote.id)
+      logger.debug('Content change - updating note', { title: updatedNote.title, id: updatedNote.id })
       setCurrentNote(updatedNote)
       // Trigger debounced auto-save
       debouncedAutoSave(updatedNote)
     } else {
-      console.warn('[ContentChange] No current note found in store!')
+      logger.warn('Content change failed - no current note found in store')
     }
   }, [setCurrentNote, debouncedAutoSave])
 
@@ -63,22 +64,22 @@ export const useAppHandlers = ({
     
     if (latestCurrentNote) {
       const updatedNote = { ...latestCurrentNote, notebook }
-      console.log('[NotebookChange] Updating note:', updatedNote.title, 'ID:', updatedNote.id)
+      logger.debug('Notebook change - updating note', { title: updatedNote.title, id: updatedNote.id })
       setCurrentNote(updatedNote)
       onSaveNote(updatedNote)
     } else {
-      console.warn('[NotebookChange] No current note found in store!')
+      logger.warn('Notebook change failed - no current note found in store')
     }
   }, [setCurrentNote, onSaveNote])
 
   // Handler for metadata changes (immediate save, no auto-save)
   const handleMetadataChange = useCallback(async (updatedNote: Note) => {
     try {
-      console.log('[MetadataChange] Saving metadata for:', updatedNote.title)
+      logger.debug('Metadata change - saving metadata', { title: updatedNote.title })
       setCurrentNote(updatedNote)
       await onSaveNote(updatedNote)
     } catch (error) {
-      console.error('[MetadataChange] Failed to save metadata:', error)
+      logger.error('Failed to save metadata', { error })
     }
   }, [onSaveNote, setCurrentNote])
 

@@ -1,5 +1,6 @@
 // Storage utilities for localStorage operations
 import { Note, Notebook, Settings } from '../types'
+import { storageLogger as logger } from '../utils/logger'
 
 class StorageService {
   private readonly NOTES_KEY = 'nototo_notes'

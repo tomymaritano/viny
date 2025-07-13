@@ -160,14 +160,6 @@ export const useSidebarLogic = () => {
   /**
    * Handle notebook-related actions
    */
-  const notebookActions = useMemo(() => ({
-    create: createNotebook,
-    update: updateNotebook,
-    delete: deleteNotebook,
-    move: moveNotebook,
-    getRoots: getRootNotebooks,
-    getChildren: getNotebookChildren
-  }), [createNotebook, updateNotebook, deleteNotebook, moveNotebook, getRootNotebooks, getNotebookChildren])
 
   return {
     // State
@@ -191,7 +183,12 @@ export const useSidebarLogic = () => {
     handleSettingsClick,
 
     // Notebook actions
-    ...notebookActions,
+    createNotebook,
+    updateNotebook,
+    deleteNotebook,
+    moveNotebook,
+    getRootNotebooks,
+    getNotebookChildren,
 
     // Stats for external use
     stats
