@@ -46,7 +46,6 @@ export interface UIState {
   showSearch: boolean
   showExportDialog: boolean
   showNotebookManager: boolean
-  showPreviewPanel: boolean
   isPreviewVisible: boolean
   isFullscreen: boolean
   layoutMode: 'normal' | 'markdown' | 'preview' | 'focus'

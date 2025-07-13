@@ -42,7 +42,7 @@ export const formatDate = (
   }
 
   // Default format
-  const dateOptions = {
+  const dateOptions: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -93,63 +93,4 @@ export const formatRelativeDate = (date: Date): string => {
   } else {
     return `${diffYears} years ago`
   }
-}
-
-/**
- * Get time of day greeting
- */
-export const getTimeGreeting = (date: Date = new Date()): string => {
-  const hour = date.getHours()
-
-  if (hour < 6) return 'Good night'
-  if (hour < 12) return 'Good morning'
-  if (hour < 17) return 'Good afternoon'
-  if (hour < 22) return 'Good evening'
-  return 'Good night'
-}
-
-/**
- * Check if date is today
- */
-export const isToday = (date: Date | string): boolean => {
-  const dateObj = typeof date === 'string' ? new Date(date) : date
-  const today = new Date()
-
-  return dateObj.toDateString() === today.toDateString()
-}
-
-/**
- * Check if date is yesterday
- */
-export const isYesterday = (date: Date | string): boolean => {
-  const dateObj = typeof date === 'string' ? new Date(date) : date
-  const yesterday = new Date()
-  yesterday.setDate(yesterday.getDate() - 1)
-
-  return dateObj.toDateString() === yesterday.toDateString()
-}
-
-/**
- * Get human-readable file size
- */
-export const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 Bytes'
-
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
-
-/**
- * Calculate reading time based on word count
- */
-export const calculateReadingTime = (content: string, wordsPerMinute: number = 250): string => {
-  if (!content) return '0 min read'
-
-  const words = content.trim().split(/\s+/).length
-  const minutes = Math.ceil(words / wordsPerMinute)
-
-  return `${minutes} min read`
 }

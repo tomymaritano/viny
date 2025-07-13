@@ -128,7 +128,7 @@ export const renderMarkdownToHtml = (content, options = {}) => {
       /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|nototo):|[^a-z]|[a-z+.-]+(?:[^a-z+.-:]|$))/i,
   })
 
-  // Styles are now handled by CSS in PreviewPanel component
+  // Styles are now handled by CSS in MarkdownPreview component
 
   // Process blocked images and replace with informative placeholders
   styledHtml = processBlockedImages(styledHtml)

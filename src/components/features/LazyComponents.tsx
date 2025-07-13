@@ -19,9 +19,6 @@ export const LazyExportDialog = lazy(() =>
   import('../ExportDialog').then(module => ({ default: module.default }))
 )
 
-export const LazyTemplateModal = lazy(() => 
-  import('../TemplateModal').then(module => ({ default: module.default }))
-)
 
 // HOC for wrapping lazy components with Suspense and ErrorBoundary
 export function withSuspense<P extends object>(
@@ -52,4 +49,3 @@ export const MarkdownEditor = withSuspense(LazyMarkdownEditor, undefined, 'Markd
 export const SearchModal = withSuspense(LazySearchModal, undefined, 'SearchModal')
 // NotebookManager eliminado
 export const ExportDialog = withSuspense(LazyExportDialog, undefined, 'ExportDialog')
-export const TemplateModal = withSuspense(LazyTemplateModal, undefined, 'TemplateModal')
