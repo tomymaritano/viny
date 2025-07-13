@@ -42,7 +42,7 @@ export const createEditorExtensions = ({
     // Features
     search(),
     markdown(),
-    todoPlugin, // Custom TODO plugin for clickable TODOs
+    // todoPlugin, // Custom TODO plugin for clickable TODOs - temporarily disabled due to widget issues
 
     // Theme and appearance
     ...getThemeExtensions(theme),
@@ -80,7 +80,7 @@ export const extensionCategories = {
 
   keyboard: [keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap])],
 
-  features: [search(), markdown(), todoPlugin],
+  features: [search(), markdown()], // todoPlugin temporarily disabled
 
   behavior: [EditorView.lineWrapping],
 
