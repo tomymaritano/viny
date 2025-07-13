@@ -60,7 +60,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
       </div>
       
       {isExpanded && (
-        <div className="px-1 space-y-0.5">
+        <div className="px-0 space-y-0.5">
           {children}
         </div>
       )}
