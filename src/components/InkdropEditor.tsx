@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useImperativeHandle, forwardRef } from 'react
 import { EditorView } from 'codemirror'
 import { EditorState } from '@codemirror/state'
 import { createEditorExtensions } from '../config/editorExtensions'
+import { attachFormatSelection } from '../config/editorKeybindings'
 
 interface EditorPreset {
   includeCore: boolean
@@ -71,27 +72,57 @@ const InkdropEditor = forwardRef<InkdropEditorHandle, InkdropEditorProps>(
             const selection = view.state.selection.main
             const selectedText = view.state.doc.sliceString(selection.from, selection.to)
             
-            // Check if the selected text already has the formatting
-            const hasPrefix = selectedText.startsWith(prefix)
-            const hasSuffix = selectedText.endsWith(suffix)
+            // Expand selection to include formatting markers if they exist
+            const lineStart = view.state.doc.lineAt(selection.from).from
+            const lineEnd = view.state.doc.lineAt(selection.to).to
+            const lineText = view.state.doc.sliceString(lineStart, lineEnd)
             
-            if (hasPrefix && hasSuffix && selectedText.length > prefix.length + suffix.length) {
-              // Remove formatting if it already exists
-              const unformattedText = selectedText.slice(prefix.length, -suffix.length || undefined)
+            // Find the start and end of the current word/phrase with potential formatting
+            let expandedFrom = selection.from
+            let expandedTo = selection.to
+            
+            // Look backward for prefix
+            while (expandedFrom > lineStart) {
+              const checkText = view.state.doc.sliceString(expandedFrom - prefix.length, expandedFrom)
+              if (checkText === prefix) {
+                expandedFrom -= prefix.length
+                break
+              }
+              if (view.state.doc.sliceString(expandedFrom - 1, expandedFrom) === ' ') break
+              expandedFrom--
+            }
+            
+            // Look forward for suffix
+            while (expandedTo < lineEnd) {
+              const checkText = view.state.doc.sliceString(expandedTo, expandedTo + suffix.length)
+              if (checkText === suffix) {
+                expandedTo += suffix.length
+                break
+              }
+              if (view.state.doc.sliceString(expandedTo, expandedTo + 1) === ' ') break
+              expandedTo++
+            }
+            
+            const expandedText = view.state.doc.sliceString(expandedFrom, expandedTo)
+            const hasFormatting = expandedText.startsWith(prefix) && expandedText.endsWith(suffix) && expandedText.length > prefix.length + suffix.length
+            
+            if (hasFormatting) {
+              // Remove formatting
+              const unformattedText = expandedText.slice(prefix.length, -suffix.length || undefined)
               const transaction = view.state.update({
                 changes: {
-                  from: selection.from,
-                  to: selection.to,
+                  from: expandedFrom,
+                  to: expandedTo,
                   insert: unformattedText,
                 },
                 selection: {
-                  anchor: selection.from,
-                  head: selection.from + unformattedText.length,
+                  anchor: expandedFrom,
+                  head: expandedFrom + unformattedText.length,
                 },
               })
               view.dispatch(transaction)
             } else {
-              // Add formatting if it doesn't exist
+              // Add formatting to selected text or current word
               const textToFormat = selectedText || 'text'
               const formattedText = prefix + textToFormat + suffix
               
@@ -147,6 +178,83 @@ const InkdropEditor = forwardRef<InkdropEditorHandle, InkdropEditorProps>(
       })
 
       viewRef.current = view
+
+      // Attach formatSelection function to the editor DOM for keybindings
+      if (editorRef.current) {
+        attachFormatSelection(editorRef.current, (prefix: string, suffix: string = '') => {
+          // Delegate to the formatSelection method from the imperative handle
+          if (viewRef.current) {
+            const selection = viewRef.current.state.selection.main
+            const selectedText = viewRef.current.state.doc.sliceString(selection.from, selection.to)
+            
+            // Use the same logic as in formatSelection
+            const lineStart = viewRef.current.state.doc.lineAt(selection.from).from
+            const lineEnd = viewRef.current.state.doc.lineAt(selection.to).to
+            
+            let expandedFrom = selection.from
+            let expandedTo = selection.to
+            
+            // Look backward for prefix
+            while (expandedFrom > lineStart) {
+              const checkText = viewRef.current.state.doc.sliceString(expandedFrom - prefix.length, expandedFrom)
+              if (checkText === prefix) {
+                expandedFrom -= prefix.length
+                break
+              }
+              if (viewRef.current.state.doc.sliceString(expandedFrom - 1, expandedFrom) === ' ') break
+              expandedFrom--
+            }
+            
+            // Look forward for suffix
+            while (expandedTo < lineEnd) {
+              const checkText = viewRef.current.state.doc.sliceString(expandedTo, expandedTo + suffix.length)
+              if (checkText === suffix) {
+                expandedTo += suffix.length
+                break
+              }
+              if (viewRef.current.state.doc.sliceString(expandedTo, expandedTo + 1) === ' ') break
+              expandedTo++
+            }
+            
+            const expandedText = viewRef.current.state.doc.sliceString(expandedFrom, expandedTo)
+            const hasFormatting = expandedText.startsWith(prefix) && expandedText.endsWith(suffix) && expandedText.length > prefix.length + suffix.length
+            
+            if (hasFormatting) {
+              // Remove formatting
+              const unformattedText = expandedText.slice(prefix.length, -suffix.length || undefined)
+              const transaction = viewRef.current.state.update({
+                changes: {
+                  from: expandedFrom,
+                  to: expandedTo,
+                  insert: unformattedText,
+                },
+                selection: {
+                  anchor: expandedFrom,
+                  head: expandedFrom + unformattedText.length,
+                },
+              })
+              viewRef.current.dispatch(transaction)
+            } else {
+              // Add formatting
+              const textToFormat = selectedText || 'text'
+              const formattedText = prefix + textToFormat + suffix
+              
+              const transaction = viewRef.current.state.update({
+                changes: {
+                  from: selection.from,
+                  to: selection.to,
+                  insert: formattedText,
+                },
+                selection: {
+                  anchor: selection.from + prefix.length,
+                  head: selection.from + prefix.length + textToFormat.length,
+                },
+              })
+              viewRef.current.dispatch(transaction)
+            }
+          }
+        })
+      }
 
       // Focus the editor
       view.focus()

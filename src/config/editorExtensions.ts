@@ -14,6 +14,8 @@ import { history, defaultKeymap, historyKeymap } from '@codemirror/commands'
 import { searchKeymap, search } from '@codemirror/search'
 import { markdown } from '@codemirror/lang-markdown'
 import { getThemeExtensions } from './editorThemes'
+import { imageWidgetPlugin } from './editorImageWidget'
+import { markdownKeybindings } from './editorKeybindings'
 
 /**
  * Creates the core set of editor extensions
@@ -37,10 +39,12 @@ export const createEditorExtensions = ({
 
     // Keyboard shortcuts
     keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap]),
+    markdownKeybindings, // Custom markdown formatting shortcuts
 
     // Features
     search(),
     markdown(),
+    imageWidgetPlugin, // Display images inline
 
     // Theme and appearance
     ...getThemeExtensions(theme),
@@ -78,7 +82,7 @@ export const extensionCategories = {
 
   keyboard: [keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap])],
 
-  features: [search(), markdown()],
+  features: [search(), markdown(), imageWidgetPlugin],
 
   behavior: [EditorView.lineWrapping],
 
