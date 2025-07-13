@@ -35,7 +35,7 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
 }) => {
   const { isEmpty } = useNotesListLogic(notes)
   const { sortBy, sortDirection, setSortBy, setSortDirection } = useAppStore()
-  const [searchTerm] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
 
   // Filter and sort notes based on search term and sort criteria
   const filteredAndSortedNotes = useMemo(() => {
@@ -139,6 +139,8 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
         currentSortDirection={sortDirection}
         onSort={handleSort}
         onNewNote={onNewNote}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
       />
 
       {/* Notes List */}

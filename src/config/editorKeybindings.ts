@@ -42,7 +42,12 @@ const createFormatCommand = (prefix: string, suffix: string = '') => {
 // Define the keybindings
 export const markdownKeybindings = keymap.of([
   // Basic editing
-  { key: 'Enter', run: insertNewlineAndIndent },
+  { key: 'Enter', run: (view: EditorView) => {
+    const result = insertNewlineAndIndent(view)
+    // Ensure the view stays focused after Enter
+    setTimeout(() => view.focus(), 0)
+    return result
+  }},
   
   // Text formatting
   { key: 'Mod-b', run: createFormatCommand('**', '**') }, // Bold
