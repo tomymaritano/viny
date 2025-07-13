@@ -3,17 +3,18 @@
  * Uses -webkit-app-region for efficient window dragging
  */
 
-/* Base draggable region */
+/* Base draggable region - higher specificity */
 .electron-titlebar {
-  -webkit-app-region: drag;
-  position: fixed;
+  -webkit-app-region: drag !important;
+  position: fixed !important;
   top: 0;
   left: 0;
   right: 0;
-  height: 44px; /* Slightly taller like WhatsApp */
-  z-index: 1000;
-  user-select: none;
-  pointer-events: auto;
+  width: 100% !important;
+  height: 44px !important; /* Slightly taller like WhatsApp */
+  z-index: 1000 !important;
+  user-select: none !important;
+  pointer-events: auto !important;
   background: linear-gradient(
     135deg,
     rgba(37, 42, 48, 0.95),
@@ -21,7 +22,7 @@
   );
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: space-between;
   padding-left: 80px; /* Space for macOS traffic lights */
@@ -29,6 +30,8 @@
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.12),
     0 1px 2px rgba(0, 0, 0, 0.24);
+  cursor: grab;
+  transition: background 0.2s ease;
 }
 
 /* Override drag for interactive elements */
@@ -42,7 +45,7 @@
 
 /* Title text styling */
 .electron-titlebar .title {
-  -webkit-app-region: drag;
+  -webkit-app-region: drag !important;
   font-size: 15px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
@@ -50,6 +53,8 @@
   flex: 1;
   letter-spacing: -0.2px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  cursor: grab;
+  user-select: none !important;
 }
 
 /* Window controls area (right side) */
@@ -63,16 +68,17 @@
 
 /* Invisible full-width drag area for better UX */
 .electron-titlebar-overlay {
-  -webkit-app-region: drag;
-  position: fixed;
+  -webkit-app-region: drag !important;
+  position: fixed !important;
   top: 0;
   left: 80px; /* After traffic lights */
   right: 0;
-  height: 44px;
+  height: 44px !important;
   z-index: 999;
-  pointer-events: auto;
-  cursor: default;
+  pointer-events: auto !important;
+  cursor: grab !important;
   background: transparent;
+  user-select: none !important;
 }
 
 /* Hide titlebar when not in Electron */
@@ -99,10 +105,21 @@
 }
 
 /* Ensure content doesn't overlap with titlebar */
-.electron-app {
+.electron-app,
+body:not(.web-app) {
   padding-top: 44px;
 }
 
-.electron-app .app-container {
+.electron-app .app-container,
+body:not(.web-app) .app-container {
+  margin-top: 0;
+}
+
+/* Web app also needs titlebar spacing */
+body {
+  padding-top: 44px;
+}
+
+body .app-container {
   margin-top: 0;
 }
