@@ -13,7 +13,6 @@ import {
 import { history, defaultKeymap, historyKeymap } from '@codemirror/commands'
 import { searchKeymap, search } from '@codemirror/search'
 import { markdown } from '@codemirror/lang-markdown'
-import { todoPlugin } from '../plugins/todoPlugin'
 import { getThemeExtensions } from './editorThemes'
 
 /**
@@ -42,7 +41,6 @@ export const createEditorExtensions = ({
     // Features
     search(),
     markdown(),
-    // todoPlugin, // Custom TODO plugin for clickable TODOs - temporarily disabled due to widget issues
 
     // Theme and appearance
     ...getThemeExtensions(theme),
@@ -80,7 +78,7 @@ export const extensionCategories = {
 
   keyboard: [keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap])],
 
-  features: [search(), markdown()], // todoPlugin temporarily disabled
+  features: [search(), markdown()],
 
   behavior: [EditorView.lineWrapping],
 
