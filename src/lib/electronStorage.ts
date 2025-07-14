@@ -152,6 +152,11 @@ class ElectronStorageService {
     }
   }
 
+  // Public method to access tag colors synchronously (for fallback)
+  getTagColorsSync(): Record<string, string> {
+    return this.getLegacyTagColors()
+  }
+
   // Notes operations
   async getNotes(): Promise<Note[]> {
     if (this.isElectron) {

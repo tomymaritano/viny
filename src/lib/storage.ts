@@ -354,8 +354,9 @@ class StorageService {
   // Tag Colors
   getTagColors(): Record<string, string> {
     if (electronStorageService.isElectronEnvironment) {
-      // TODO: Refactor to use async loadTagColors() instead of sync getTagColors()
-      return {}
+      // Use legacy localStorage as fallback for synchronous access
+      // This will read any migrated tag colors from localStorage
+      return electronStorageService.getTagColorsSync()
     }
 
     try {
@@ -382,9 +383,17 @@ class StorageService {
 
   saveTagColors(tagColors: Record<string, string>): void {
     if (electronStorageService.isElectronEnvironment) {
+      // Save to both Electron storage and localStorage (for sync access)
       electronStorageService.saveTagColors(tagColors).catch(error => {
         logger.error('[StorageService] Failed to save tag colors via Electron storage:', error)
       })
+      
+      // Also save to localStorage as backup for synchronous access
+      try {
+        localStorage.setItem('nototo_tag_colors', JSON.stringify(tagColors))
+      } catch (error) {
+        console.error('Error saving tag colors to localStorage backup:', error)
+      }
       return
     }
 
