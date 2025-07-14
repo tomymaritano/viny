@@ -47,7 +47,7 @@ const TagsList: React.FC<TagsListProps> = ({
                 <div 
                   className="w-3 h-3 rounded-full border-2"
                   style={{ 
-                    backgroundColor: tagColor.bg,
+                    backgroundColor: tagColor.text + '40', // Use text color with opacity
                     borderColor: tagColor.text
                   }}
                 />
