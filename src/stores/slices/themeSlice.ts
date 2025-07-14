@@ -11,6 +11,7 @@ export interface ThemeSlice {
   setTagColor: (tag: string, color: string) => void
   getTagColor: (tag: string) => string
   resetTagColors: () => void
+  loadTagColors: () => Promise<void>
 }
 
 // Predefined tag color mappings
@@ -81,5 +82,14 @@ export const createThemeSlice: StateCreator<ThemeSlice, [], [], ThemeSlice> = (s
   resetTagColors: () => {
     set({ tagColors: {} })
     storageService.saveTagColors({})
+  },
+
+  loadTagColors: async () => {
+    try {
+      const loadedTagColors = await storageService.loadTagColors()
+      set({ tagColors: loadedTagColors })
+    } catch (error) {
+      console.error('Failed to load tag colors:', error)
+    }
   }
 })

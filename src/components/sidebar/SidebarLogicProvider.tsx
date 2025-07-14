@@ -3,6 +3,7 @@ import { useSidebarLogic } from '../../hooks/useSidebarLogic'
 import { useSidebarState } from '../../hooks/useSidebarState'
 import { useNoteActions } from '../../hooks/useNoteActions'
 import { useAppStore } from '../../stores/newSimpleStore'
+import { getCustomTagColor } from '../../utils/customTagColors'
 
 interface SidebarContextType {
   // Logic from useSidebarLogic
@@ -30,7 +31,7 @@ interface SidebarContextType {
   handleEmptyTrash: () => void
   setModal: (modal: string, state: boolean) => void
   updateNote: any
-  getTagColor: (tag: string) => string
+  getTagColor: (tag: string) => { bg: string; border: string; text: string; name: string }
   
   // Missing notebook actions
   expandedNotebooks?: Set<string>
@@ -54,7 +55,12 @@ const SidebarLogicProvider: React.FC<SidebarLogicProviderProps> = ({ children })
   // All the logic hooks
   const sidebarLogic = useSidebarLogic()
   const { createNewNote, handleEmptyTrash } = useNoteActions()
-  const { setModal, updateNote, getTagColor } = useAppStore()
+  const { setModal, updateNote, getTagColor: getTagColorKey, tagColors } = useAppStore()
+  
+  // Wrapper function to convert tag color key to full color object
+  const getTagColor = (tag: string) => {
+    return getCustomTagColor(tag, tagColors)
+  }
 
   const contextValue: SidebarContextType = {
     ...sidebarLogic,

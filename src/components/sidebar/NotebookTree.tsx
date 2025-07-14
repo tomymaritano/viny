@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import Icons from '../Icons'
 import { NotebookWithCounts } from '../../types/notebook'
 
@@ -6,7 +6,6 @@ interface NotebookTreeProps {
   notebooks: NotebookWithCounts[]
   activeSection: string
   expandedNotebooks: Set<string>
-  getColorClass: (color: string) => string
   onSectionClick: (section: string) => void
   onNotebookRightClick: (e: React.MouseEvent, notebook: NotebookWithCounts) => void
   onToggleExpansion: (notebookId: string) => void
@@ -21,7 +20,6 @@ const NotebookTree: React.FC<NotebookTreeProps> = ({
   notebooks,
   activeSection,
   expandedNotebooks,
-  getColorClass,
   onSectionClick,
   onNotebookRightClick,
   onToggleExpansion,
@@ -43,7 +41,7 @@ const NotebookTree: React.FC<NotebookTreeProps> = ({
       return (
         <div key={notebook.id} className="relative">
           <button
-            className={`w-full flex items-center justify-between py-1.5 text-sm text-left transition-all duration-200 ${
+            className={`w-full flex items-center justify-between py-2 text-sm text-left transition-all duration-200 ${
               isActive
                 ? 'text-theme-text-primary relative'
                 : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary'
@@ -52,7 +50,7 @@ const NotebookTree: React.FC<NotebookTreeProps> = ({
             onContextMenu={(e) => onNotebookRightClick(e, notebook)}
             style={{
               paddingLeft: `${paddingLeft}px`,
-              paddingRight: '8px',
+              paddingRight: '12px',
               ...(isActive ? {
                 backgroundColor: 'var(--color-active-bg)',
                 boxShadow: 'inset 3px 0 0 var(--color-active-border)'
@@ -75,8 +73,12 @@ const NotebookTree: React.FC<NotebookTreeProps> = ({
                 <div className="w-4 h-4 flex-shrink-0" />
               )}
               
-              {/* Color indicator */}
-              <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getColorClass(notebook.color).replace('text-', 'bg-')}`} />
+              {/* Notebook icon */}
+              <div className={`w-4 h-4 flex-shrink-0 flex items-center justify-center ${
+                isActive ? 'text-theme-accent-primary' : 'text-theme-text-muted'
+              }`}>
+                <Icons.Book size={14} />
+              </div>
               
               {/* Name (editable) */}
               {editingNotebook === notebook.id ? (

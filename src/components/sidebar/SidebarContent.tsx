@@ -109,7 +109,6 @@ const SidebarContent: React.FC = () => {
           notebooks={notebooksWithCounts}
           activeSection={activeSection}
           expandedNotebooks={expandedNotebooks}
-          getColorClass={getColorClass}
           onSectionClick={handleSectionClick}
           onNotebookRightClick={handleNotebookRightClick}
           onToggleExpansion={toggleNotebookExpansion}

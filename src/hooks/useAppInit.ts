@@ -17,7 +17,8 @@ export const useAppInit = () => {
     setLoading, 
     setError, 
     theme: currentTheme, 
-    setTheme 
+    setTheme,
+    loadTagColors 
   } = useAppStore()
 
   // Initialize data with proper async loading
@@ -51,6 +52,9 @@ export const useAppInit = () => {
         logger.debug('Loading notes from storage...')
         const storedNotes = await storageService.loadNotes()
         
+        logger.debug('Loading tag colors from storage...')
+        await loadTagColors()
+        
         logger.debug('Loaded notes count:', storedNotes.length)
         if (storedNotes.length >= 0) { // Always set notes, even if empty array
           setNotes(storedNotes)
@@ -66,7 +70,7 @@ export const useAppInit = () => {
     }
     
     initializeApp()
-  }, [setNotes, setLoading, setError])
+  }, [setNotes, setLoading, setError, loadTagColors])
 
   // Apply theme settings
   useEffect(() => {
