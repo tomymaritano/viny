@@ -53,15 +53,12 @@ export const createThemeSlice: StateCreator<ThemeSlice, [], [], ThemeSlice> = (s
   setTheme: (theme) => set({ theme }),
 
   setTagColor: (tag, color) => {
-    console.log('🎨 setTagColor called:', { tag, color })
+    console.log('🎨 setTagColor:', tag, '→', color)
     set((state) => {
-      console.log('🎨 Current tagColors state:', state.tagColors)
       const newTagColors = { ...state.tagColors, [tag]: color }
-      console.log('🎨 New tagColors to save:', newTagColors)
       // Persist to localStorage
-      console.log('🎨 Calling storageService.saveTagColors...')
       storageService.saveTagColors(newTagColors)
-      console.log('🎨 saveTagColors completed')
+      console.log('✅ Tag color saved and state updated')
       return { tagColors: newTagColors }
     })
   },
@@ -91,11 +88,9 @@ export const createThemeSlice: StateCreator<ThemeSlice, [], [], ThemeSlice> = (s
 
   loadTagColors: async () => {
     try {
-      console.log('🔄 loadTagColors: Starting async load...')
       const loadedTagColors = await storageService.loadTagColors()
-      console.log('🔄 loadTagColors: Loaded from storage:', JSON.stringify(loadedTagColors, null, 2))
+      console.log('✅ loadTagColors: Successfully loaded:', JSON.stringify(loadedTagColors, null, 2))
       set({ tagColors: loadedTagColors })
-      console.log('🔄 loadTagColors: State updated with:', JSON.stringify(loadedTagColors, null, 2))
     } catch (error) {
       console.error('Failed to load tag colors:', error)
     }

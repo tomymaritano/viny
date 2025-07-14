@@ -75,6 +75,13 @@ class ElectronStorageService {
 
       if (hasLegacyData) {
         logger.info('[ElectronStorage] Legacy localStorage data found, starting migration...')
+        console.log('🔧 Migration: Before migration, localStorage contents:')
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i)
+          if (key) {
+            console.log(`🔧   ${key}: ${localStorage.getItem(key)?.substring(0, 100)}...`)
+          }
+        }
         await this.migrateLegacyData()
       }
     } catch (error) {
@@ -103,6 +110,14 @@ class ElectronStorageService {
           localStorage.removeItem(this.LEGACY_NOTEBOOKS_KEY)
           localStorage.removeItem(this.LEGACY_SETTINGS_KEY)
           localStorage.removeItem(this.LEGACY_TAG_COLORS_KEY)
+          
+          console.log('🔧 Migration: After migration, localStorage contents:')
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i)
+            if (key) {
+              console.log(`🔧   ${key}: ${localStorage.getItem(key)?.substring(0, 100)}...`)
+            }
+          }
           
           this.migrationCompleted = true
         } else {
@@ -340,12 +355,25 @@ class ElectronStorageService {
 
   // Tag colors operations
   async getTagColors(): Promise<Record<string, string>> {
+    console.log('🔄 electronStorage.getTagColors: Starting async load...')
     if (this.isElectron) {
       try {
-        return await window.electronAPI!.storage.loadTagColors()
+        console.log('🔄 electronStorage.getTagColors: Trying Electron API first...')
+        const electronResult = await window.electronAPI!.storage.loadTagColors()
+        console.log('🔄 electronStorage.getTagColors: Electron API result:', JSON.stringify(electronResult, null, 2))
+        
+        // If Electron storage has data, use it
+        if (electronResult && Object.keys(electronResult).length > 0) {
+          return electronResult
+        }
+        
+        // Otherwise, fallback to localStorage (our current reliable source)
+        console.log('🔄 electronStorage.getTagColors: Electron storage empty, falling back to localStorage...')
+        return this.getTagColorsSync()
       } catch (error) {
         logger.error('[ElectronStorage] Failed to load tag colors:', error)
-        return {}
+        console.log('🔄 electronStorage.getTagColors: Error occurred, falling back to localStorage...')
+        return this.getTagColorsSync()
       }
     } else {
       return this.getLegacyTagColors()

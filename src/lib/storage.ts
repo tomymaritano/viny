@@ -376,9 +376,13 @@ class StorageService {
   }
 
   async loadTagColors(): Promise<Record<string, string>> {
+    console.log('🔄 StorageService.loadTagColors: Starting async load...')
     if (electronStorageService.isElectronEnvironment) {
       try {
-        return await electronStorageService.getTagColors()
+        console.log('🔄 StorageService.loadTagColors: Using Electron environment')
+        const result = await electronStorageService.getTagColors()
+        console.log('🔄 StorageService.loadTagColors: Result from electronStorage.getTagColors:', JSON.stringify(result, null, 2))
+        return result
       } catch (error) {
         logger.error('[StorageService] Failed to load tag colors from Electron storage:', error)
         return {}
