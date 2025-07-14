@@ -5,10 +5,12 @@
 
 import { useEffect, useRef, useCallback } from 'react'
 import { EditorView } from 'codemirror'
-import { EditorState } from '@codemirror/state'
+import { EditorState, Compartment } from '@codemirror/state'
 import { createEditorExtensions } from '../config/editorExtensions'
+import { getThemeExtensions } from '../config/editorThemes'
 import { attachFormatSelection } from '../config/editorKeybindings'
 import { editorLogger } from '../utils/logger'
+import { useAppStore } from '../stores/newSimpleStore'
 
 interface EditorPreset {
   includeCore: boolean
@@ -46,6 +48,10 @@ export function useInkdropEditor({
   const editorRef = useRef<HTMLDivElement>(null)
   const viewRef = useRef<EditorView | null>(null)
   const onChangeRef = useRef(onChange)
+  const themeCompartmentRef = useRef(new Compartment())
+  
+  // Get current theme from store
+  const { theme: currentTheme } = useAppStore()
   
   // Keep onChange ref current
   useEffect(() => {
@@ -62,14 +68,14 @@ export function useInkdropEditor({
       const extensions = createEditorExtensions({
         placeholder,
         showLineNumbers,
-        theme,
+        theme: currentTheme,
         preset: preset || {
           includeCore: true,
           includeKeyboard: true,
           includeFeatures: true,
           includeBehavior: true,
           lineNumbers: showLineNumbers,
-          theme
+          theme: currentTheme
         }
       })
 
@@ -77,6 +83,8 @@ export function useInkdropEditor({
         doc: value,
         extensions: [
           ...extensions,
+          // Theme compartment for dynamic theme updates
+          themeCompartmentRef.current.of(getThemeExtensions(currentTheme)),
           EditorView.updateListener.of((update) => {
             if (update.docChanged) {
               const newValue = update.state.doc.toString()
@@ -103,7 +111,23 @@ export function useInkdropEditor({
     } catch (error) {
       editorLogger.error('Failed to initialize editor:', error)
     }
-  }, [placeholder, showLineNumbers, theme, preset])
+  }, [placeholder, showLineNumbers, currentTheme, preset])
+
+  // Update theme when it changes
+  useEffect(() => {
+    if (!viewRef.current) return
+
+    editorLogger.debug('Updating editor theme to:', currentTheme)
+    
+    try {
+      const newThemeExtensions = getThemeExtensions(currentTheme)
+      viewRef.current.dispatch({
+        effects: themeCompartmentRef.current.reconfigure(newThemeExtensions)
+      })
+    } catch (error) {
+      editorLogger.error('Failed to update editor theme:', error)
+    }
+  }, [currentTheme])
 
   // Cleanup editor
   const destroyEditor = useCallback(() => {

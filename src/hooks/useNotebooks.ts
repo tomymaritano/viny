@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { logger } from '../utils/logger'
 import { 
   Notebook, 
   NotebookWithCounts, 
@@ -84,7 +85,7 @@ export const useNotebooks = () => {
       
       return buildNotebookTree(migrated)
     } catch (error) {
-      console.warn('Failed to load notebooks:', error)
+      logger.warn('Failed to load notebooks:', error)
       return buildNotebookTree(defaultNotebooks)
     }
   })
@@ -94,7 +95,7 @@ export const useNotebooks = () => {
     try {
       localStorage.setItem('nototo_notebooks', JSON.stringify(notebooks))
     } catch (error) {
-      console.warn('Failed to save notebooks:', error)
+      logger.warn('Failed to save notebooks:', error)
     }
   }, [notebooks])
 
@@ -134,7 +135,7 @@ export const useNotebooks = () => {
   const updateNotebook = useCallback((notebookId: string, updates: UpdateNotebookData): boolean => {
     const notebook = notebooks.find(n => n.id === notebookId)
     if (!notebook) {
-      console.warn('Notebook not found:', notebookId)
+      logger.warn('Notebook not found:', notebookId)
       return false
     }
 
@@ -142,7 +143,7 @@ export const useNotebooks = () => {
     if (updates.name !== undefined) {
       const nameValidation = validateNotebookName(updates.name, notebooks, notebookId)
       if (!nameValidation.isValid) {
-        console.warn('Invalid notebook name:', nameValidation.error)
+        logger.warn('Invalid notebook name:', nameValidation.error)
         return false
       }
     }
@@ -151,7 +152,7 @@ export const useNotebooks = () => {
     if (updates.parentId !== undefined) {
       const moveValidation = validateNotebookMove(notebookId, updates.parentId, notebooks)
       if (!moveValidation.isValid) {
-        console.warn('Invalid move:', moveValidation.error)
+        logger.warn('Invalid move:', moveValidation.error)
         return false
       }
     }
@@ -184,7 +185,7 @@ export const useNotebooks = () => {
     const notebookToDelete = notebooks.find(n => n.id === notebookId)
     
     if (rootNotebooks.length <= 1 && notebookToDelete?.parentId === null) {
-      console.warn('Cannot delete the last root notebook')
+      logger.warn('Cannot delete the last root notebook')
       return false
     }
 

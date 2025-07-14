@@ -1,6 +1,8 @@
 import React from 'react'
 import { useAppStore } from '../../../stores/newSimpleStore'
 import Icons from '../../Icons'
+import { ElectronAPI, isElectronAPI } from '../../../types/settings'
+import { logger } from '../../../utils/logger'
 
 const GeneralSettings: React.FC = () => {
   const { settings, updateSettings, notebooks = [] } = useAppStore()
@@ -40,7 +42,7 @@ const GeneralSettings: React.FC = () => {
           // Validate and update settings
           updateSettings(importedSettings)
         } catch (error) {
-          console.error('Failed to import settings:', error)
+          logger.error('Failed to import settings:', error)
           // TODO: Show error toast
         }
       }
@@ -49,9 +51,11 @@ const GeneralSettings: React.FC = () => {
   }
 
   const openConfigFolder = () => {
-    if ((window as any).electronAPI?.isElectron) {
-      // TODO: Implement open config folder
-      console.log('Opening config folder...')
+    const electronAPI = (window as any).electronAPI as ElectronAPI | undefined
+    if (electronAPI && isElectronAPI(electronAPI) && electronAPI.openConfigFolder) {
+      electronAPI.openConfigFolder().catch(logger.error)
+    } else {
+      logger.info('Config folder access not available in web version')
     }
   }
 
@@ -188,7 +192,10 @@ const GeneralSettings: React.FC = () => {
             <Icons.ArrowRight size={14} className="text-theme-text-muted" />
           </button>
           
-          {(window as any).electronAPI?.isElectron && (
+          {(() => {
+            const electronAPI = (window as any).electronAPI as ElectronAPI | undefined
+            return electronAPI && isElectronAPI(electronAPI)
+          })() && (
             <button
               onClick={openConfigFolder}
               className="flex items-center justify-between px-4 py-3 bg-theme-bg-secondary border border-theme-border-primary rounded-md hover:bg-theme-bg-tertiary transition-colors"

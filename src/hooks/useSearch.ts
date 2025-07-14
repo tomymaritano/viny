@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import Fuse from 'fuse.js'
 import { Note } from '../types'
+import { logger } from '../utils/logger'
 
 // Search configuration for Fuse.js
 const SEARCH_OPTIONS = {
@@ -81,7 +82,7 @@ export const useSearch = (notes: Note[] = []) => {
         setSearchHistory(JSON.parse(stored))
       }
     } catch (error) {
-      console.warn('Failed to load search history:', error)
+      logger.warn('Failed to load search history:', error)
     }
   }, [])
 
@@ -90,7 +91,7 @@ export const useSearch = (notes: Note[] = []) => {
     try {
       localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history))
     } catch (error) {
-      console.warn('Failed to save search history:', error)
+      logger.warn('Failed to save search history:', error)
     }
   }, [])
 
@@ -190,7 +191,7 @@ export const useSearch = (notes: Note[] = []) => {
 
         setResults(filteredResults)
       } catch (error) {
-        console.error('Search error:', error)
+        logger.error('Search error:', error)
         setResults([])
       } finally {
         setIsSearching(false)

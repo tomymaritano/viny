@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { Note } from '../types'
+import { logger } from '../utils/logger'
 
 interface AutoSaveOptions {
   onSave: (note: Note) => Promise<void>
@@ -55,7 +56,7 @@ export const useAutoSave = (options: AutoSaveOptions) => {
         onSaveComplete()
       }
     } catch (error) {
-      console.error('Auto-save failed:', error)
+      logger.error('Auto-save failed:', error)
       hasUnsavedChangesRef.current = true
 
       if (onSaveError) {

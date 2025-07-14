@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { useSettings } from '../../../hooks/useSettings'
 import { calculateStats } from '../utils/markdownFormatter'
 import { useAppStore } from '../../../stores/newSimpleStore'
+import { logger } from '../../../utils/logger'
 
 export const useMarkdownEditor = ({
   value = '',
@@ -125,7 +126,7 @@ export const useMarkdownEditor = ({
         setLastSaved(new Date().toISOString())
       } catch (error) {
         setSaveError(error.message || 'Failed to save')
-        console.error('Manual save failed:', error)
+        logger.error('Manual save failed:', error)
       } finally {
         setIsSaving(false)
       }

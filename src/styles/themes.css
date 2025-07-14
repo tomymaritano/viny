@@ -38,7 +38,7 @@
 
   /* Consistent interaction colors */
   --color-hover-bg: #2d354d;
-  --color-active-bg: #a4b3cf;
+  --color-active-bg: #323d4b;
   --color-active-border: #ed6e3f;
   --color-active-text: #ffffff;
 }
@@ -46,30 +46,30 @@
 /* Light theme - Inkdrop-inspired */
 [data-theme='light'] {
   --color-base03: #ffffff;
-  --color-base02: #f5f5f5;
-  --color-base01: #e0e0e0;
-  --color-base00: #cccccc;
-  --color-base0: #888888;
-  --color-base1: #666666;
-  --color-base2: #333333;
-  --color-base3: #222222;
+  --color-base02: #f8f9fa;
+  --color-base01: #e9ecef;
+  --color-base00: #dee2e6;
+  --color-base0: #6c757d;
+  --color-base1: #495057;
+  --color-base2: #343a40;
+  --color-base3: #212529;
   --color-base4: #111111;
   --color-base5: #000000;
-  --color-blue: #1976d2;
-  --color-cyan: #00838f;
-  --color-green: #388e3c;
-  --color-yellow: #f57c00;
-  --color-orange: #e64a19;
-  --color-red: #d32f2f;
-  --color-magenta: #7b1fa2;
-  --color-violet: #3949ab;
+  --color-blue: #0066cc;
+  --color-cyan: #0891b2;
+  --color-green: #059669;
+  --color-yellow: #d97706;
+  --color-orange: #ea580c;
+  --color-red: #dc2626;
+  --color-magenta: #c026d3;
+  --color-violet: #7c3aed;
 
   /* Modern sidebar color for light theme */
-  --color-sidebar: #221f21;
+  --color-sidebar: #f8f9fa;
 
   /* Light theme interaction colors */
   --color-hover-bg: #e3f2fd;
-  --color-active-bg: #1976d2;
+  --color-active-bg: #a4b3cf;
   --color-active-border: #ff5722;
   --color-active-text: #ffffff;
 }

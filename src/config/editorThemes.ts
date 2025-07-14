@@ -89,7 +89,7 @@ export const createInkdropTheme = () => {
 export const createPlaceholderTheme = () => {
   return EditorView.theme({
     '.cm-placeholder': {
-      color: getEditorColor('placeholder'),
+      color: 'var(--color-base0)',
       fontStyle: 'italic',
     },
   })
@@ -211,11 +211,89 @@ export const editorThemeVariants = {
 }
 
 /**
+ * Create dynamic theme extensions that use CSS variables
+ * @returns {Array} CodeMirror extensions
+ */
+export const createDynamicThemeExtensions = () => {
+  return [
+    EditorView.theme({
+      '&': {
+        color: 'var(--color-base3)',
+        backgroundColor: 'var(--color-base03)',
+        fontSize: '12px',
+        fontFamily:
+          '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+        height: '100%',
+      },
+      '.cm-content': {
+        padding: getEditorPadding(),
+        caretColor: getEditorColor('cursor'),
+        minHeight: '100%',
+        lineHeight: '1.5',
+        backgroundColor: 'var(--color-base03)',
+        color: 'var(--color-base3)',
+        fontSize: '12px',
+      },
+      '.cm-cursor, .cm-dropCursor': {
+        borderLeft: `2px solid ${getEditorColor('cursor')}`,
+      },
+      '.cm-focused': {
+        outline: 'none',
+        backgroundColor: 'var(--color-base03)',
+      },
+      '.cm-editor': {
+        border: 'none',
+        backgroundColor: 'var(--color-base03)',
+      },
+      '.cm-scroller': {
+        overflow: 'auto',
+        height: '100%',
+        backgroundColor: 'var(--color-base03)',
+      },
+      '.cm-lineNumbers': {
+        paddingRight: '4px',
+        minWidth: '20px',
+        color: 'var(--color-base0)',
+        backgroundColor: 'var(--color-base03)',
+      },
+      '.cm-gutters': {
+        backgroundColor: 'var(--color-base03)',
+        color: 'var(--color-base0)',
+        border: 'none',
+      },
+      // Selection styling
+      '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
+        backgroundColor: '#4a90e2 !important',
+        opacity: '0.6 !important',
+      },
+      '&.cm-editor .cm-selectionBackground': {
+        backgroundColor: '#4a90e2 !important',
+        opacity: '0.6 !important',
+      },
+      '.cm-content ::selection': {
+        backgroundColor: '#4a90e2 !important',
+        color: 'inherit !important',
+      },
+      '.cm-content ::-moz-selection': {
+        backgroundColor: '#4a90e2 !important',
+        color: 'inherit !important',
+      },
+      '.cm-selectionLayer': {
+        zIndex: '100 !important',
+        pointerEvents: 'none !important',
+      },
+    }),
+    createPlaceholderTheme(),
+    createSyntaxHighlighting(),
+  ]
+}
+
+/**
  * Get theme extensions by name
  * @param {string} themeName - Theme variant name
  * @returns {Array} CodeMirror extensions
  */
 export const getThemeExtensions = (themeName = 'default') => {
-  const theme = editorThemeVariants[themeName] || editorThemeVariants.default
-  return theme.createExtensions()
+  // Always use dynamic theme that responds to CSS variables
+  return createDynamicThemeExtensions()
 }

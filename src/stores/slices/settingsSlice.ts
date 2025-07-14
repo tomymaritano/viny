@@ -1,4 +1,5 @@
 import { StateCreator } from 'zustand'
+import { PluginSettings } from '../../types/settings'
 
 export interface Settings {
   // General
@@ -45,7 +46,7 @@ export interface Settings {
   
   // Plugins
   enabledPlugins?: string[]
-  pluginSettings?: Record<string, any>
+  pluginSettings?: PluginSettings
   
   // Sync
   syncProvider?: 'none' | 'nototo-sync' | 'custom'

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useAppStore } from '../../../stores/newSimpleStore'
 import Icons from '../../Icons'
+import { StorageInfo, ElectronAPI, isElectronAPI } from '../../../types/settings'
 
 const StorageSettings: React.FC = () => {
   const { settings, updateSettings } = useAppStore()
-  const [storageInfo, setStorageInfo] = useState<any>(null)
+  const [storageInfo, setStorageInfo] = useState<StorageInfo | null>(null)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {

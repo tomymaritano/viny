@@ -19,49 +19,7 @@
   line-height: var(--line-height);
 }
 
-/* CodeMirror Theme Override - Dynamic theme support */
-.cm-editor,
-.cm-editor .cm-editor,
-.inkdrop-editor .cm-editor {
-  background-color: var(--color-base03) !important;
-  color: var(--color-base3) !important;
-}
-
-.cm-content,
-.cm-editor .cm-content,
-.inkdrop-editor .cm-content {
-  background-color: var(--color-base03) !important;
-  color: var(--color-base3) !important;
-}
-
-.cm-scroller,
-.cm-editor .cm-scroller,
-.inkdrop-editor .cm-scroller {
-  background-color: var(--color-base03) !important;
-}
-
-.cm-focused,
-.cm-editor.cm-focused,
-.inkdrop-editor .cm-focused {
-  background-color: var(--color-base03) !important;
-}
-
-/* Force theme variables to override any inline styles */
-[data-theme='light'] .cm-editor,
-[data-theme='light'] .cm-content,
-[data-theme='light'] .cm-scroller,
-[data-theme='light'] .cm-focused {
-  background-color: #ffffff !important;
-  color: #222222 !important;
-}
-
-[data-theme='solarized'] .cm-editor,
-[data-theme='solarized'] .cm-content,
-[data-theme='solarized'] .cm-scroller,
-[data-theme='solarized'] .cm-focused {
-  background-color: #00141a !important;
-  color: #fdf6e3 !important;
-}
+/* CodeMirror Theme Override - Dynamic theme support via CSS variables */
 
 /* CodeMirror placeholder text */
 .cm-placeholder {
