@@ -119,8 +119,7 @@ const MarkdownItEditor: React.FC<MarkdownItEditorProps> = ({
       <div
         className={`${
           isFullscreen ? 'fixed inset-0 z-50' : 'w-full h-full'
-        } flex flex-col`}
-        style={{ backgroundColor: '#171617' }}
+        } flex flex-col bg-theme-bg-primary`}
       >
         {/* Note Metadata */}
         <ComponentErrorBoundary

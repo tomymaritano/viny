@@ -265,8 +265,7 @@ const EditorToolbar = ({
 
   return (
     <div
-      className="flex items-center justify-between px-2 sm:px-4 py-2 border-b border-theme-border-primary overflow-x-auto custom-scrollbar-thin"
-      style={{ backgroundColor: '#171617' }}
+      className="flex items-center justify-between px-2 sm:px-4 py-2 border-b border-theme-border-primary overflow-x-auto custom-scrollbar-thin bg-theme-bg-primary"
     >
       {/* Toolbar buttons - responsive layout */}
       <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-1">

@@ -77,6 +77,15 @@ import {
   FileChartLine,
   NotebookText,
   Archive,
+  Cloud,
+  Edit2,
+  RotateCcw,
+  HardDrive,
+  Sun,
+  Moon,
+  Monitor,
+  Palette,
+  Eye as EyeIcon,
 } from 'lucide-react'
 
 interface IconProps {
@@ -403,6 +412,43 @@ const Icons = {
 
   Command: ({ size = 16, className = '' }: IconProps) => (
     <Command size={size} className={className} />
+  ),
+
+  // Settings icons
+  Cloud: ({ size = 16, className = '' }: IconProps) => (
+    <Cloud size={size} className={className} />
+  ),
+
+  Edit2: ({ size = 16, className = '' }: IconProps) => (
+    <Edit2 size={size} className={className} />
+  ),
+
+  RotateCcw: ({ size = 16, className = '' }: IconProps) => (
+    <RotateCcw size={size} className={className} />
+  ),
+
+  HardDrive: ({ size = 16, className = '' }: IconProps) => (
+    <HardDrive size={size} className={className} />
+  ),
+
+  Sun: ({ size = 16, className = '' }: IconProps) => (
+    <Sun size={size} className={className} />
+  ),
+
+  Moon: ({ size = 16, className = '' }: IconProps) => (
+    <Moon size={size} className={className} />
+  ),
+
+  Monitor: ({ size = 16, className = '' }: IconProps) => (
+    <Monitor size={size} className={className} />
+  ),
+
+  Palette: ({ size = 16, className = '' }: IconProps) => (
+    <Palette size={size} className={className} />
+  ),
+
+  Eye: ({ size = 16, className = '' }: IconProps) => (
+    <EyeIcon size={size} className={className} />
   ),
 }
 

@@ -27,8 +27,8 @@ const SettingsTabs: React.FC<SettingsTabsProps> = ({
     <div className="py-2">
       {tabs.map((tab, index) => (
         <div key={tab.id}>
-          {/* Add separator before About section */}
-          {tab.id === 'about' && (
+          {/* Add separators for logical groupings */}
+          {(tab.id === 'plugins' || tab.id === 'tags' || tab.id === 'about') && (
             <div className="my-2 mx-4 border-t border-theme-border-primary" />
           )}
           <button

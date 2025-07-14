@@ -9,6 +9,17 @@ import KeyboardSettings from './tabs/KeyboardSettings'
 import TagsSettingsSimple from './tabs/TagsSettingsSimple'
 import AboutSettings from './tabs/AboutSettings'
 
+// New advanced tabs (to be created)
+import ThemesSettings from './tabs/ThemesSettings'
+import EditingSettings from './tabs/EditingSettings'
+import PreviewSettings from './tabs/PreviewSettings'
+import KeybindingsSettings from './tabs/KeybindingsSettings'
+import PluginsSettings from './tabs/PluginsSettings'
+import InstallSettings from './tabs/InstallSettings'
+import UpdatesSettings from './tabs/UpdatesSettings'
+import SyncSettings from './tabs/SyncSettings'
+import BackupSettings from './tabs/BackupSettings'
+
 interface SettingsModalProps {
   isOpen: boolean
   onClose: () => void
@@ -22,11 +33,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
   const tabs = [
     { id: 'general', label: 'General', icon: 'Settings' },
-    { id: 'editor', label: 'Editor', icon: 'FileEdit' },
-    { id: 'storage', label: 'Storage', icon: 'Database' },
-    { id: 'keyboard', label: 'Keyboard', icon: 'Command' },
-    { id: 'tags', label: 'Tags', icon: 'Tag' },
+    { id: 'themes', label: 'Themes', icon: 'Palette' },
+    { id: 'editing', label: 'Editing', icon: 'FileEdit' },
+    { id: 'preview', label: 'Preview', icon: 'Eye' },
+    { id: 'keybindings', label: 'Keybindings', icon: 'Command' },
     { id: 'plugins', label: 'Plugins', icon: 'Package' },
+    { id: 'install', label: 'Install', icon: 'Download' },
+    { id: 'updates', label: 'Updates', icon: 'RefreshCw' },
+    { id: 'sync', label: 'Sync', icon: 'Cloud' },
+    { id: 'backup', label: 'Backup', icon: 'HardDrive' },
+    { id: 'tags', label: 'Tags', icon: 'Tag' },
     { id: 'about', label: 'About', icon: 'Info' },
   ]
 
@@ -34,39 +50,26 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
     switch (activeTab) {
       case 'general':
         return <GeneralSettings />
-      case 'editor':
-        return <EditorSettings />
-      case 'storage':
-        return <StorageSettings />
-      case 'keyboard':
-        return <KeyboardSettings />
+      case 'themes':
+        return <ThemesSettings />
+      case 'editing':
+        return <EditingSettings />
+      case 'preview':
+        return <PreviewSettings />
+      case 'keybindings':
+        return <KeybindingsSettings />
+      case 'plugins':
+        return <PluginsSettings />
+      case 'install':
+        return <InstallSettings />
+      case 'updates':
+        return <UpdatesSettings />
+      case 'sync':
+        return <SyncSettings />
+      case 'backup':
+        return <BackupSettings />
       case 'tags':
         return <TagsSettingsSimple />
-      case 'plugins':
-        return <div className="space-y-6">
-          <div>
-            <h3 className="text-lg font-medium text-theme-text-primary mb-4">
-              Plugins
-            </h3>
-            <p className="text-sm text-theme-text-secondary mb-4">
-              Extend Nototo with community plugins and integrations.
-            </p>
-          </div>
-          <div className="bg-theme-bg-secondary rounded-lg p-6 border border-theme-border-primary">
-            <div className="text-center">
-              <Icons.Package size={48} className="mx-auto mb-4 text-theme-text-muted opacity-50" />
-              <h4 className="text-lg font-medium text-theme-text-primary mb-2">
-                Plugin System
-              </h4>
-              <p className="text-sm text-theme-text-secondary mb-4">
-                The plugin system is currently in development. Soon you'll be able to install and manage plugins to extend Nototo's functionality.
-              </p>
-              <p className="text-xs text-theme-text-muted">
-                Coming in version 2.0
-              </p>
-            </div>
-          </div>
-        </div>
       case 'about':
         return <AboutSettings />
       default:

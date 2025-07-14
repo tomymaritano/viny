@@ -11,12 +11,12 @@ export const defaultEditorColors = {
   link: '#488076', // Links (teal)
   quote: '#488076', // Blockquotes (teal)
 
-  // Editor theme colors
-  background: '#171617', // Editor background
-  text: '#ffffff', // Main text color
+  // Editor theme colors - using CSS variables for theme support
+  background: 'var(--color-base03)', // Editor background - uses theme variable
+  text: 'var(--color-base3)', // Main text color - uses theme variable
   cursor: '#EEC951', // Cursor color (matches heading)
-  placeholder: '#546E7A', // Placeholder text
-  lineNumber: '#666666', // Line numbers
+  placeholder: 'var(--color-base0)', // Placeholder text - uses theme variable
+  lineNumber: 'var(--color-base0)', // Line numbers - uses theme variable
 
   // UI colors
   border: 'rgba(255, 255, 255, 0.1)', // Default borders

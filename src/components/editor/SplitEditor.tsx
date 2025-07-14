@@ -171,8 +171,7 @@ const SplitEditor = forwardRef<unknown, SplitEditorProps>(
 
     return (
       <div
-        className="flex-1 flex flex-col overflow-hidden relative"
-        style={{ backgroundColor: '#171617' }}
+        className="flex-1 flex flex-col overflow-hidden relative bg-theme-bg-primary"
       >
         {renderContent()}
         <FloatingViewControls

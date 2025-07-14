@@ -9,6 +9,8 @@ import { useAutoSave } from '../../hooks/useAutoSave'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { usePageLifecycle } from '../../hooks/usePageLifecycle'
 import { useAppHandlers } from '../../hooks/useAppHandlers'
+import { useSettingsEffects } from '../../hooks/useSettingsEffects'
+import { i18nService } from '../../services/i18nService'
 import { MarkdownPreviewHandle } from '../MarkdownPreview'
 
 // Import presentation component
@@ -53,6 +55,14 @@ const AppContainer: React.FC = () => {
 
   const { settings } = useSettings()
   const { notebooks } = useNotebooks()
+
+  // Apply settings effects
+  useSettingsEffects()
+
+  // Initialize i18n service on mount
+  React.useEffect(() => {
+    i18nService.initialize()
+  }, [])
 
   // Auto-save functionality
   const { debouncedAutoSave } = useAutoSave({ 
