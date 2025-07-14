@@ -154,7 +154,29 @@ class ElectronStorageService {
 
   // Public method to access tag colors synchronously (for fallback)
   getTagColorsSync(): Record<string, string> {
-    return this.getLegacyTagColors()
+    // First try the current/persistent key (not affected by migration)
+    const currentKey = 'nototo_tag_colors_current'
+    console.log('🔍 getTagColorsSync: Checking localStorage key:', currentKey)
+    const currentData = localStorage.getItem(currentKey)
+    console.log('🔍 getTagColorsSync: Raw localStorage data from current key:', currentData)
+    
+    if (currentData) {
+      try {
+        const parsed = JSON.parse(currentData)
+        console.log('🔍 getTagColorsSync: Parsed result from current key:', JSON.stringify(parsed, null, 2))
+        return parsed
+      } catch (error) {
+        console.error('🔍 getTagColorsSync: Error parsing current data:', error)
+      }
+    }
+    
+    // Fallback to legacy key (will be empty after migration)
+    console.log('🔍 getTagColorsSync: Falling back to legacy key:', this.LEGACY_TAG_COLORS_KEY)
+    const legacyData = localStorage.getItem(this.LEGACY_TAG_COLORS_KEY)
+    console.log('🔍 getTagColorsSync: Raw localStorage data from legacy key:', legacyData)
+    const result = this.getLegacyTagColors()
+    console.log('🔍 getTagColorsSync: Parsed result from legacy key:', JSON.stringify(result, null, 2))
+    return result
   }
 
   // Notes operations

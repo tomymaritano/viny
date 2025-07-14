@@ -353,15 +353,22 @@ class StorageService {
 
   // Tag Colors
   getTagColors(): Record<string, string> {
+    console.log('📖 StorageService.getTagColors called')
     if (electronStorageService.isElectronEnvironment) {
       // Use legacy localStorage as fallback for synchronous access
       // This will read any migrated tag colors from localStorage
-      return electronStorageService.getTagColorsSync()
+      console.log('📖 Using Electron environment - reading from localStorage sync')
+      const result = electronStorageService.getTagColorsSync()
+      console.log('📖 Retrieved tag colors from Electron sync:', JSON.stringify(result, null, 2))
+      return result
     }
 
+    console.log('📖 Using browser environment - reading from localStorage')
     try {
       const stored = localStorage.getItem(this.TAG_COLORS_KEY)
-      return stored ? JSON.parse(stored) : {}
+      const result = stored ? JSON.parse(stored) : {}
+      console.log('📖 Retrieved tag colors from localStorage:', result)
+      return result
     } catch (error) {
       console.error('Error loading tag colors from localStorage:', error)
       return {}
@@ -382,7 +389,9 @@ class StorageService {
   }
 
   saveTagColors(tagColors: Record<string, string>): void {
+    console.log('💾 StorageService.saveTagColors called with:', tagColors)
     if (electronStorageService.isElectronEnvironment) {
+      console.log('💾 Using Electron environment - saving to both Electron and localStorage')
       // Save to both Electron storage and localStorage (for sync access)
       electronStorageService.saveTagColors(tagColors).catch(error => {
         logger.error('[StorageService] Failed to save tag colors via Electron storage:', error)
@@ -390,15 +399,23 @@ class StorageService {
       
       // Also save to localStorage as backup for synchronous access
       try {
-        localStorage.setItem('nototo_tag_colors', JSON.stringify(tagColors))
+        console.log('💾 Saving to localStorage with key: nototo_tag_colors_current')
+        localStorage.setItem('nototo_tag_colors_current', JSON.stringify(tagColors))
+        console.log('💾 Successfully saved to localStorage backup:', tagColors)
+        
+        // Verify it was saved
+        const verification = localStorage.getItem('nototo_tag_colors_current')
+        console.log('💾 Verification read from localStorage:', verification)
       } catch (error) {
         console.error('Error saving tag colors to localStorage backup:', error)
       }
       return
     }
 
+    console.log('💾 Using browser environment - saving to localStorage only')
     try {
       localStorage.setItem(this.TAG_COLORS_KEY, JSON.stringify(tagColors))
+      console.log('💾 Successfully saved to localStorage:', tagColors)
     } catch (error) {
       console.error('Error saving tag colors to localStorage:', error)
       throw new Error('Failed to save tag colors')
