@@ -111,14 +111,8 @@ export const useSidebarLogic = () => {
    */
   const handleSectionClick = useCallback((sectionId: string) => {
     if (sectionId === 'settings') {
-      // Check if we're in Electron
-      if ((window as any).electronAPI?.isElectron) {
-        // Open settings in new window
-        (window as any).electronAPI.openSettings()
-      } else {
-        // Fallback to modal for web version
-        setModal('settings', true)
-      }
+      // Always open settings as modal
+      setModal('settings', true)
     } else {
       setActiveSection(sectionId)
     }

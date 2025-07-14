@@ -1,18 +1,28 @@
 import React, { useState, useRef, useEffect } from 'react'
-import PropTypes from 'prop-types'
 import Icons from '../../Icons'
 import TagContextMenu from '../../ui/TagContextMenu'
 import TagEditInput from '../../ui/TagEditInput'
 import DropdownMenu, { DropdownMenuItem } from '../../ui/DropdownMenu'
 import CustomTag from '../../ui/CustomTag'
-import TagColorPicker from '../../ui/TagColorPicker'
 import TagSettingsModal from './TagSettingsModal'
 import { useAppStore } from '../../../stores/newSimpleStore'
 import { useTagEdit } from '../../../hooks/useTagEdit'
 import { addTag, removeTag } from '../../../utils/tagValidation'
 import { Z_INDEX, THEME_COLORS } from '../../../constants/theme'
 
-const TagManager = ({
+// Constants
+const MAX_SUGGESTIONS = 5
+const SUGGESTIONS_MAX_HEIGHT = "max-h-32"
+
+interface TagManagerProps {
+  tags?: string[]
+  availableTags?: string[]
+  onTagsChange: (tags: string[]) => void
+  disabled?: boolean
+  placeholder?: string
+}
+
+const TagManager: React.FC<TagManagerProps> = ({
   tags = [],
   availableTags = [],
   onTagsChange,
@@ -24,7 +34,6 @@ const TagManager = ({
   const [suggestions, setSuggestions] = useState([])
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1)
   const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0, tag: null, index: null })
-  const [showColorPicker, setShowColorPicker] = useState(false)
   const [tagSettingsModal, setTagSettingsModal] = useState({ show: false, tagName: '' })
   const inputRef = useRef(null)
   const { setTagColor } = useAppStore()
@@ -51,7 +60,7 @@ const TagManager = ({
             tag.toLowerCase().includes(inputValue.toLowerCase()) &&
             !tags.map(t => t.toLowerCase()).includes(tag.toLowerCase())
         )
-        .slice(0, 5) // Limit to 5 suggestions
+        .slice(0, MAX_SUGGESTIONS)
       setSuggestions(filtered)
       setSelectedSuggestionIndex(-1)
     } else {
@@ -128,7 +137,6 @@ const TagManager = ({
   useEffect(() => {
     const handleClickOutside = () => {
       setContextMenu({ show: false, x: 0, y: 0, tag: null, index: null })
-      setShowColorPicker(false)
     }
 
     if (contextMenu.show) {
@@ -145,17 +153,6 @@ const TagManager = ({
     }
   }
 
-  const handleToggleColorPicker = () => {
-    setShowColorPicker(!showColorPicker)
-  }
-
-  const handleSelectColor = colorClass => {
-    if (contextMenu.tag) {
-      setTagColor(contextMenu.tag, colorClass)
-    }
-    setShowColorPicker(false)
-    setContextMenu({ show: false, x: 0, y: 0, tag: null, index: null })
-  }
 
   const handleContextRemove = () => {
     if (contextMenu.index !== null) {
@@ -164,15 +161,18 @@ const TagManager = ({
   }
 
   const handleTagSettings = () => {
-    setTagSettingsModal({ show: true, tagName: contextMenu.tag })
+    setTagSettingsModal({ show: true, tagName: contextMenu.tag || '' })
     setContextMenu({ show: false, x: 0, y: 0, tag: null, index: null })
   }
 
-  const handleTagNameChange = (oldName, newName) => {
-    if (oldName !== newName && contextMenu.index !== null) {
-      const updatedTags = [...tags]
-      updatedTags[contextMenu.index] = newName
-      onTagsChange(updatedTags)
+  const handleTagNameChange = (oldName: string, newName: string) => {
+    if (oldName !== newName) {
+      const tagIndex = tags.findIndex(tag => tag === oldName)
+      if (tagIndex !== -1) {
+        const updatedTags = [...tags]
+        updatedTags[tagIndex] = newName
+        onTagsChange(updatedTags)
+      }
     }
   }
 
@@ -255,7 +255,7 @@ const TagManager = ({
       <DropdownMenu
         isOpen={suggestions.length > 0 && isInputVisible}
         width="w-full"
-        maxHeight="max-h-32"
+        maxHeight={SUGGESTIONS_MAX_HEIGHT}
       >
         {suggestions.map((suggestion, index) => (
           <DropdownMenuItem
@@ -277,16 +277,16 @@ const TagManager = ({
         onClose={() => setContextMenu({ show: false, x: 0, y: 0, tag: null, index: null })}
         onTagSettings={handleTagSettings}
       />
+
+      {/* Tag Settings Modal */}
+      <TagSettingsModal
+        isOpen={tagSettingsModal.show}
+        onClose={() => setTagSettingsModal({ show: false, tagName: '' })}
+        tagName={tagSettingsModal.tagName}
+        onTagNameChange={handleTagNameChange}
+      />
     </div>
   )
-}
-
-TagManager.propTypes = {
-  tags: PropTypes.arrayOf(PropTypes.string),
-  availableTags: PropTypes.arrayOf(PropTypes.string),
-  onTagsChange: PropTypes.func.isRequired,
-  disabled: PropTypes.bool,
-  placeholder: PropTypes.string,
 }
 
 export default TagManager

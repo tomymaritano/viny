@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react'
-import PropTypes from 'prop-types'
 import Icons from '../../Icons'
 import BaseModal from '../../ui/BaseModal'
 import CustomTag from '../../ui/CustomTag'
 import { getAvailableTagColors } from '../../../utils/customTagColors'
 import { useAppStore } from '../../../stores/newSimpleStore'
 
-const TagSettingsModal = ({
+interface TagSettingsModalProps {
+  isOpen: boolean
+  onClose: () => void
+  tagName: string
+  onTagNameChange: (oldName: string, newName: string) => void
+}
+
+const TagSettingsModal: React.FC<TagSettingsModalProps> = ({
   isOpen,
   onClose,
   tagName,
@@ -116,13 +122,6 @@ const TagSettingsModal = ({
       </div>
     </BaseModal>
   )
-}
-
-TagSettingsModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  tagName: PropTypes.string,
-  onTagNameChange: PropTypes.func.isRequired,
 }
 
 export default TagSettingsModal

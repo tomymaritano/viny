@@ -9,7 +9,6 @@ import { AppLoading } from '../LoadingStates'
 import LoadingSpinner from '../LoadingSpinner'
 import ErrorBoundary from '../ErrorBoundary'
 import StorageErrorBoundary from '../errors/StorageErrorBoundary'
-import SettingsView from '../SettingsView'
 import AppLayout from './AppLayout'
 import AppModals from './AppModals'
 
@@ -97,16 +96,6 @@ const AppPresentation: React.FC<AppPresentationProps> = ({
     return <AppLoading message="Loading Nototo..." />
   }
 
-  // Settings view
-  if (modals.settings) {
-    return (
-      <ErrorBoundary>
-        <div className="app">
-          <SettingsView onClose={() => setModal('settings', false)} />
-        </div>
-      </ErrorBoundary>
-    )
-  }
 
   return (
     <ErrorBoundary>
@@ -158,6 +147,7 @@ const AppPresentation: React.FC<AppPresentationProps> = ({
           handleOpenNote={handleOpenNote}
           handleSaveNote={handleSaveNote}
           setModal={setModal}
+          createNewNote={createNewNote}
         />
       </StorageErrorBoundary>
     </ErrorBoundary>

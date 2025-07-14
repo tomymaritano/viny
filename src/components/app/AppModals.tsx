@@ -1,6 +1,7 @@
 // Modals component - handles all modal dialogs in the app
 import React, { Suspense } from 'react'
 import { Note } from '../../types'
+import { useAppStore } from '../../stores/newSimpleStore'
 
 // Modal Components
 import SearchModal from '../SearchModal'
@@ -23,6 +24,7 @@ interface AppModalsProps {
   handleOpenNote: (noteId: string) => void
   handleSaveNote: (note: Note) => Promise<Note>
   setModal: (modalName: string, isOpen: boolean) => void
+  createNewNote: () => void
 }
 
 /**
@@ -35,8 +37,32 @@ const AppModals: React.FC<AppModalsProps> = ({
   filteredNotes,
   handleOpenNote,
   handleSaveNote,
-  setModal
+  setModal,
+  createNewNote
 }) => {
+  // Get store functions for creating notes with tags
+  const { addNote, setCurrentNote, setSelectedNoteId, setIsEditorOpen } = useAppStore()
+  
+  // Helper function to create a new note with specific tags
+  const createNewNoteWithTags = (tags: string[]) => {
+    const newNote: Note = {
+      id: Date.now().toString(),
+      title: 'Untitled Note',
+      content: '',
+      notebook: 'personal',
+      tags: tags, // Set the tags directly
+      status: 'draft',
+      isPinned: false,
+      isTrashed: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+    
+    addNote(newNote)
+    setCurrentNote(newNote)
+    setSelectedNoteId(newNote.id)
+    setIsEditorOpen(true)
+  }
   return (
     <>
       {/* Search Modal */}
@@ -73,9 +99,15 @@ const AppModals: React.FC<AppModalsProps> = ({
           isOpen={modals.tagModal}
           onClose={() => setModal('tagModal', false)}
           currentTags={currentNote?.tags || []}
+          mode={currentNote ? 'note' : 'global'}
+          filteredNotes={filteredNotes}
           onTagsChange={(newTags) => {
             if (currentNote) {
+              // Edit existing note
               handleSaveNote({ ...currentNote, tags: newTags })
+            } else {
+              // Global mode - just close modal (tags are managed via individual actions)
+              setModal('tagModal', false)
             }
           }}
           availableTags={[...new Set(filteredNotes.flatMap(note => note.tags))]}

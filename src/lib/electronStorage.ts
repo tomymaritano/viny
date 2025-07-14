@@ -75,13 +75,6 @@ class ElectronStorageService {
 
       if (hasLegacyData) {
         logger.info('[ElectronStorage] Legacy localStorage data found, starting migration...')
-        console.log('🔧 Migration: Before migration, localStorage contents:')
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i)
-          if (key) {
-            console.log(`🔧   ${key}: ${localStorage.getItem(key)?.substring(0, 100)}...`)
-          }
-        }
         await this.migrateLegacyData()
       }
     } catch (error) {
@@ -111,13 +104,6 @@ class ElectronStorageService {
           localStorage.removeItem(this.LEGACY_SETTINGS_KEY)
           localStorage.removeItem(this.LEGACY_TAG_COLORS_KEY)
           
-          console.log('🔧 Migration: After migration, localStorage contents:')
-          for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i)
-            if (key) {
-              console.log(`🔧   ${key}: ${localStorage.getItem(key)?.substring(0, 100)}...`)
-            }
-          }
           
           this.migrationCompleted = true
         } else {
@@ -171,27 +157,18 @@ class ElectronStorageService {
   getTagColorsSync(): Record<string, string> {
     // First try the current/persistent key (not affected by migration)
     const currentKey = 'nototo_tag_colors_current'
-    console.log('🔍 getTagColorsSync: Checking localStorage key:', currentKey)
     const currentData = localStorage.getItem(currentKey)
-    console.log('🔍 getTagColorsSync: Raw localStorage data from current key:', currentData)
     
     if (currentData) {
       try {
-        const parsed = JSON.parse(currentData)
-        console.log('🔍 getTagColorsSync: Parsed result from current key:', JSON.stringify(parsed, null, 2))
-        return parsed
+        return JSON.parse(currentData)
       } catch (error) {
-        console.error('🔍 getTagColorsSync: Error parsing current data:', error)
+        logger.error('Error parsing current tag colors data:', error)
       }
     }
     
     // Fallback to legacy key (will be empty after migration)
-    console.log('🔍 getTagColorsSync: Falling back to legacy key:', this.LEGACY_TAG_COLORS_KEY)
-    const legacyData = localStorage.getItem(this.LEGACY_TAG_COLORS_KEY)
-    console.log('🔍 getTagColorsSync: Raw localStorage data from legacy key:', legacyData)
-    const result = this.getLegacyTagColors()
-    console.log('🔍 getTagColorsSync: Parsed result from legacy key:', JSON.stringify(result, null, 2))
-    return result
+    return this.getLegacyTagColors()
   }
 
   // Notes operations
@@ -355,12 +332,9 @@ class ElectronStorageService {
 
   // Tag colors operations
   async getTagColors(): Promise<Record<string, string>> {
-    console.log('🔄 electronStorage.getTagColors: Starting async load...')
     if (this.isElectron) {
       try {
-        console.log('🔄 electronStorage.getTagColors: Trying Electron API first...')
         const electronResult = await window.electronAPI!.storage.loadTagColors()
-        console.log('🔄 electronStorage.getTagColors: Electron API result:', JSON.stringify(electronResult, null, 2))
         
         // If Electron storage has data, use it
         if (electronResult && Object.keys(electronResult).length > 0) {
@@ -368,11 +342,9 @@ class ElectronStorageService {
         }
         
         // Otherwise, fallback to localStorage (our current reliable source)
-        console.log('🔄 electronStorage.getTagColors: Electron storage empty, falling back to localStorage...')
         return this.getTagColorsSync()
       } catch (error) {
         logger.error('[ElectronStorage] Failed to load tag colors:', error)
-        console.log('🔄 electronStorage.getTagColors: Error occurred, falling back to localStorage...')
         return this.getTagColorsSync()
       }
     } else {

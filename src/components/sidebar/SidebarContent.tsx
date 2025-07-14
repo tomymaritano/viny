@@ -29,6 +29,7 @@ const SidebarContent: React.FC = () => {
     getTagColor,
     getColorClass,
     updateNotebook,
+    createNotebook,
     handleEmptyTrash
   } = useSidebarContext()
 
@@ -57,7 +58,7 @@ const SidebarContent: React.FC = () => {
   return (
     <SidebarContainer onContextMenuClose={closeAllContextMenus}>
       {/* Settings button at top */}
-      <SettingsButton onClick={() => setModal('settings', true)} />
+      <SettingsButton onClick={() => handleSectionClick('settings')} />
       
       {/* Main Navigation Sections */}
       <SidebarSection>
@@ -204,8 +205,8 @@ const SidebarContent: React.FC = () => {
         }}
         createNotebookModal={createNotebookModal}
         onCreateNotebookClose={() => setCreateNotebookModal(false)}
-        onCreateNotebook={(name: string, parentId?: string) => {
-          // TODO: Implement notebook creation
+        onCreateNotebook={(name: string, color: string, parentId?: string | null) => {
+          createNotebook({ name, color, parentId })
           setCreateNotebookModal(false)
         }}
         existingNotebookNames={notebooksWithCounts.map(n => n.name)}

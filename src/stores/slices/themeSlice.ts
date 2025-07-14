@@ -1,5 +1,6 @@
 import { StateCreator } from 'zustand'
 import { storageService } from '../../lib/storage'
+import { storageLogger as logger } from '../../utils/logger'
 
 export interface ThemeSlice {
   // Theme state
@@ -53,12 +54,10 @@ export const createThemeSlice: StateCreator<ThemeSlice, [], [], ThemeSlice> = (s
   setTheme: (theme) => set({ theme }),
 
   setTagColor: (tag, color) => {
-    console.log('🎨 setTagColor:', tag, '→', color)
     set((state) => {
       const newTagColors = { ...state.tagColors, [tag]: color }
       // Persist to localStorage
       storageService.saveTagColors(newTagColors)
-      console.log('✅ Tag color saved and state updated')
       return { tagColors: newTagColors }
     })
   },
@@ -88,11 +87,23 @@ export const createThemeSlice: StateCreator<ThemeSlice, [], [], ThemeSlice> = (s
 
   loadTagColors: async () => {
     try {
+      const currentState = get()
+      const currentTagColors = currentState.tagColors
+      
       const loadedTagColors = await storageService.loadTagColors()
-      console.log('✅ loadTagColors: Successfully loaded:', JSON.stringify(loadedTagColors, null, 2))
-      set({ tagColors: loadedTagColors })
+      
+      // Only update if async data has more recent/complete data
+      // If current state already has data, keep it (it was loaded synchronously)
+      if (Object.keys(currentTagColors).length > 0) {
+        return
+      }
+      
+      // Only set if we got data from async load
+      if (Object.keys(loadedTagColors).length > 0) {
+        set({ tagColors: loadedTagColors })
+      }
     } catch (error) {
-      console.error('Failed to load tag colors:', error)
+      logger.error('Failed to load tag colors:', error)
     }
   }
 })
