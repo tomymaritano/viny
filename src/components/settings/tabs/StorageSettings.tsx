@@ -4,7 +4,7 @@ import Icons from '../../Icons'
 import { StorageInfo, ElectronAPI, isElectronAPI } from '../../../types/settings'
 
 const StorageSettings: React.FC = () => {
-  const { settings, updateSettings } = useAppStore()
+  const { settings, updateSettings, showSuccess, showError } = useAppStore()
   const [storageInfo, setStorageInfo] = useState<StorageInfo | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -30,10 +30,10 @@ const StorageSettings: React.FC = () => {
     try {
       await window.electronAPI.createBackup()
       await loadStorageInfo()
-      // TODO: Show success notification
+      showSuccess('Backup created successfully')
     } catch (error) {
       console.error('Backup failed:', error)
-      // TODO: Show error notification
+      showError('Failed to create backup. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -44,10 +44,10 @@ const StorageSettings: React.FC = () => {
     
     try {
       await window.electronAPI.exportData()
-      // TODO: Show success notification
+      showSuccess('Data exported successfully')
     } catch (error) {
       console.error('Export failed:', error)
-      // TODO: Show error notification
+      showError('Failed to export data. Please try again.')
     }
   }
 
@@ -57,10 +57,10 @@ const StorageSettings: React.FC = () => {
     try {
       await window.electronAPI.importData()
       await loadStorageInfo()
-      // TODO: Show success notification
+      showSuccess('Data imported successfully')
     } catch (error) {
       console.error('Import failed:', error)
-      // TODO: Show error notification
+      showError('Failed to import data. Please check the file format and try again.')
     }
   }
 

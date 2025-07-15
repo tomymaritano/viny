@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { logger } from '../utils/logger'
 import { electronStorageService } from '../lib/electronStorage'
+import { useAppStore } from '../stores/newSimpleStore'
 import { 
   Notebook, 
   NotebookWithCounts, 
@@ -99,6 +100,9 @@ export const useNotebooks = () => {
     console.log('🚀 Initializing notebooks with defaults during SSR/initial render')
     return buildNotebookTree(defaultNotebooks)
   })
+  
+  // Get notes and updateNote from store for moving notes to trash
+  const { notes, updateNote } = useAppStore()
 
   // Load notebooks from storage (async)
   useEffect(() => {
@@ -288,14 +292,27 @@ export const useNotebooks = () => {
       return false
     }
 
+    // Get all notebook IDs to delete (including children)
+    const idsToDelete = deleteNotebookAndChildren(notebookId, notebooks)
+    
+    // Move all notes from these notebooks to trash
+    const notesToTrash = notes.filter(note => 
+      note.notebookId && idsToDelete.includes(note.notebookId)
+    )
+    
+    notesToTrash.forEach(note => {
+      updateNote(note.id, { deletedAt: new Date().toISOString() })
+    })
+    
+    // Delete the notebooks
     setNotebooks(prev => {
-      const idsToDelete = deleteNotebookAndChildren(notebookId, prev)
       const updated = prev.filter(notebook => !idsToDelete.includes(notebook.id))
       return buildNotebookTree(updated)
     })
 
+    logger.info(`Deleted notebook ${notebookId} and moved ${notesToTrash.length} notes to trash`)
     return true
-  }, [notebooks])
+  }, [notebooks, notes, updateNote])
 
   const moveNotebook = useCallback((notebookId: string, newParentId: string | null): boolean => {
     const moveValidation = validateNotebookMove(notebookId, newParentId, notebooks)

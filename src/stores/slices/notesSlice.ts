@@ -22,6 +22,10 @@ export interface NotesSlice {
   addNote: (note: Note) => void
   updateNote: (note: Note) => void
   removeNote: (id: string) => void
+  
+  // Tag management actions
+  removeTagFromAllNotes: (tagName: string) => number
+  renameTagInAllNotes: (oldTagName: string, newTagName: string) => number
 }
 
 export const createNotesSlice: StateCreator<NotesSlice> = (set) => ({
@@ -86,5 +90,73 @@ export const createNotesSlice: StateCreator<NotesSlice> = (set) => ({
       currentNote: state.currentNote?.id === noteId ? null : state.currentNote,
       selectedNoteId: state.selectedNoteId === noteId ? null : state.selectedNoteId,
       isEditorOpen: state.currentNote?.id === noteId ? false : state.isEditorOpen
-    }))
+    })),
+
+  removeTagFromAllNotes: (tagName) =>
+    set((state) => {
+      let modifiedCount = 0
+      
+      const updatedNotes = state.notes.map(note => {
+        if (note.tags && note.tags.includes(tagName)) {
+          modifiedCount++
+          return {
+            ...note,
+            tags: note.tags.filter(tag => tag !== tagName),
+            updatedAt: new Date().toISOString()
+          }
+        }
+        return note
+      })
+      
+      // Update current note if it was affected
+      const updatedCurrentNote = state.currentNote && state.currentNote.tags?.includes(tagName)
+        ? {
+            ...state.currentNote,
+            tags: state.currentNote.tags.filter(tag => tag !== tagName),
+            updatedAt: new Date().toISOString()
+          }
+        : state.currentNote
+      
+      // Save to storage
+      storageService.saveNotes(updatedNotes)
+      
+      return { 
+        notes: updatedNotes,
+        currentNote: updatedCurrentNote
+      }
+    }),
+
+  renameTagInAllNotes: (oldTagName, newTagName) =>
+    set((state) => {
+      let modifiedCount = 0
+      
+      const updatedNotes = state.notes.map(note => {
+        if (note.tags && note.tags.includes(oldTagName)) {
+          modifiedCount++
+          return {
+            ...note,
+            tags: note.tags.map(tag => tag === oldTagName ? newTagName : tag),
+            updatedAt: new Date().toISOString()
+          }
+        }
+        return note
+      })
+      
+      // Update current note if it was affected
+      const updatedCurrentNote = state.currentNote && state.currentNote.tags?.includes(oldTagName)
+        ? {
+            ...state.currentNote,
+            tags: state.currentNote.tags.map(tag => tag === oldTagName ? newTagName : tag),
+            updatedAt: new Date().toISOString()
+          }
+        : state.currentNote
+      
+      // Save to storage
+      storageService.saveNotes(updatedNotes)
+      
+      return { 
+        notes: updatedNotes,
+        currentNote: updatedCurrentNote
+      }
+    })
 })

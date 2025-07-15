@@ -1,6 +1,7 @@
 import React from 'react'
 import { useSidebarContext } from './SidebarLogicProvider'
 import { useSidebarState } from '../../hooks/useSidebarState'
+import { useAppStore } from '../../stores/newSimpleStore'
 import Icons from '../Icons'
 import IconButton from '../ui/IconButton'
 import SidebarSection from './SidebarSection'
@@ -25,13 +26,14 @@ const SidebarContent: React.FC = () => {
     handleToggleSection,
     createNewNote,
     setModal,
-    updateNote,
     getTagColor,
-    getColorClass,
     updateNotebook,
     createNotebook,
+    deleteNotebook,
     handleEmptyTrash
   } = useSidebarContext()
+  
+  const { showSuccess, showError, removeTagFromAllNotes, renameTagInAllNotes } = useAppStore()
 
   // State management hook
   const {
@@ -175,7 +177,14 @@ const SidebarContent: React.FC = () => {
         }}
         onCloseAll={closeAllContextMenus}
         onTagRemove={() => {
-          // TODO: Implement tag removal
+          if (tagContextMenu.tagName) {
+            const confirmMessage = `Are you sure you want to remove the tag "${tagContextMenu.tagName}" from all notes?`
+            
+            if (window.confirm(confirmMessage)) {
+              removeTagFromAllNotes(tagContextMenu.tagName)
+              showSuccess(`Tag "${tagContextMenu.tagName}" removed from all notes`)
+            }
+          }
           closeAllContextMenus()
         }}
         onTagSettings={() => {
@@ -189,8 +198,27 @@ const SidebarContent: React.FC = () => {
           }
         }}
         onNotebookDelete={() => {
-          // TODO: Implement notebook deletion
-          closeAllContextMenus()
+          if (notebookContextMenu.notebook) {
+            const notebookName = notebookContextMenu.notebook.name
+            const hasNotes = notebookContextMenu.notebook.count > 0
+            
+            // Confirm deletion
+            const confirmMessage = hasNotes 
+              ? `Are you sure you want to delete "${notebookName}" and move all its notes to the trash?`
+              : `Are you sure you want to delete "${notebookName}"?`
+            
+            if (window.confirm(confirmMessage)) {
+              const success = deleteNotebook(notebookContextMenu.notebook.id)
+              if (success) {
+                // Show success toast
+                showSuccess(`Notebook "${notebookName}" deleted successfully`)
+              } else {
+                // Show error toast
+                showError('Cannot delete the last root notebook')
+              }
+            }
+            closeAllContextMenus()
+          }
         }}
         onEmptyTrash={() => {
           handleEmptyTrash()
@@ -203,8 +231,10 @@ const SidebarContent: React.FC = () => {
         tagSettingsModal={tagSettingsModal}
         onTagSettingsClose={() => setTagSettingsModal({ show: false, tagName: '' })}
         onTagNameChange={(newName: string) => {
-          // TODO: Implement tag name change
-          updateNote(tagSettingsModal.tagName, { tags: [newName] })
+          if (tagSettingsModal.tagName && newName && tagSettingsModal.tagName !== newName) {
+            renameTagInAllNotes(tagSettingsModal.tagName, newName)
+            showSuccess(`Tag renamed from "${tagSettingsModal.tagName}" to "${newName}" in all notes`)
+          }
         }}
         createNotebookModal={createNotebookModal}
         onCreateNotebookClose={() => setCreateNotebookModal(false)}
