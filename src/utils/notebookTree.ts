@@ -25,8 +25,11 @@ export const calculateNotebookLevel = (
 }
 
 export const buildNotebookTree = (notebooks: Notebook[]): Notebook[] => {
+  console.log('🌳 buildNotebookTree input:', notebooks.length, 'notebooks')
+  
   // Create a map for quick lookup
   const notebookMap = new Map(notebooks.map(n => [n.id, { ...n }]))
+  console.log('🌳 Created notebook map with', notebookMap.size, 'entries')
   
   // Calculate paths and levels
   notebooks.forEach(notebook => {
@@ -45,7 +48,10 @@ export const buildNotebookTree = (notebooks: Notebook[]): Notebook[] => {
     }
   })
   
-  return Array.from(notebookMap.values())
+  const result = Array.from(notebookMap.values())
+  console.log('🌳 buildNotebookTree output:', result.length, 'notebooks')
+  
+  return result
 }
 
 export const flattenNotebookTree = (

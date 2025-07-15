@@ -209,7 +209,16 @@ const SidebarContent: React.FC = () => {
         createNotebookModal={createNotebookModal}
         onCreateNotebookClose={() => setCreateNotebookModal(false)}
         onCreateNotebook={(name: string, color: string, parentId?: string | null) => {
-          createNotebook({ name, color, parentId })
+          console.log('📝 SidebarContent: Creating notebook with data:', { name, color, parentId })
+          const result = createNotebook({ name, color, parentId })
+          console.log('📝 SidebarContent: Create notebook result:', result)
+          
+          if (result === null) {
+            console.error('❌ Failed to create notebook - validation failed')
+          } else {
+            console.log('✅ Notebook created successfully:', result.name)
+          }
+          
           setCreateNotebookModal(false)
         }}
         existingNotebookNames={notebooksWithCounts.map(n => n.name)}

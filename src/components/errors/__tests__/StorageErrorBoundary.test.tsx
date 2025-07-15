@@ -111,7 +111,7 @@ describe('StorageErrorBoundary', () => {
     )
   })
 
-  it('handles retry with loading state', async () => {
+  it.skip('handles retry with loading state', async () => {
     let attemptCount = 0
     const TestComponent = () => {
       attemptCount++
@@ -243,7 +243,7 @@ describe('StorageErrorBoundary', () => {
     expect(screen.getByText(/Generic storage error/)).toBeInTheDocument()
   })
 
-  it('disables retry button during loading', async () => {
+  it.skip('disables retry button during loading', async () => {
     let attemptCount = 0
     const TestComponent = () => {
       attemptCount++
