@@ -8,7 +8,7 @@ const path = require('path')
 require('dotenv').config()
 
 const GH_TOKEN = process.env.GH_TOKEN
-const REPO = 'tomymaritano/markdown'
+const REPO = 'tomymaritano/nototo'
 
 if (!GH_TOKEN) {
   console.error('❌ Error: GH_TOKEN not found in .env file')

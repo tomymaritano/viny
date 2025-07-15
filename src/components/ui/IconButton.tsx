@@ -6,7 +6,7 @@ interface IconButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElem
   isActive?: boolean
   title?: string
   size?: number
-  variant?: 'default' | 'floating'
+  variant?: 'default' | 'floating' | 'ghost'
   'aria-label'?: string
   'aria-pressed'?: boolean
   'aria-keyshortcuts'?: string
@@ -51,6 +51,27 @@ const IconButton: React.FC<IconButtonProps> = ({
             (e.target as HTMLButtonElement).style.backgroundColor = 'rgba(50, 61, 75, 0.15)'
           }
         }}
+        title={title}
+        aria-label={ariaLabel || title}
+        aria-pressed={ariaPressed}
+        aria-keyshortcuts={ariaKeyshortcuts}
+        {...restProps}
+      >
+        <Icon size={size} aria-hidden="true" />
+      </button>
+    )
+  }
+
+  // Ghost variant (minimal padding for sidebars)
+  if (variant === 'ghost') {
+    return (
+      <button
+        onClick={onClick}
+        className={`p-0.5 rounded transition-all duration-200 ${
+          isActive
+            ? 'text-theme-accent-primary'
+            : 'text-theme-text-muted hover:text-theme-text-primary'
+        } ${className || ''}`}
         title={title}
         aria-label={ariaLabel || title}
         aria-pressed={ariaPressed}

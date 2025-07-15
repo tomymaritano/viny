@@ -14,6 +14,7 @@ export const InstallSettings = lazy(() => import('./tabs/InstallSettings'))
 export const UpdatesSettings = lazy(() => import('./tabs/UpdatesSettings'))
 export const SyncSettings = lazy(() => import('./tabs/SyncSettings'))
 export const BackupSettings = lazy(() => import('./tabs/BackupSettings'))
+export const PrivacySettings = lazy(() => import('./tabs/PrivacySettings'))
 export const TagsSettingsSimple = lazy(() => import('./tabs/TagsSettingsSimple'))
 export const AboutSettings = lazy(() => import('./tabs/AboutSettings'))
 

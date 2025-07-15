@@ -706,7 +706,7 @@ function setupAutoUpdater(): void {
     autoUpdater.setFeedURL({
       provider: 'github',
       owner: 'tomymaritano',
-      repo: 'markdown',
+      repo: 'nototo',
       private: true,
       token: token
     })
@@ -855,7 +855,7 @@ function createMenu(): void {
           label: 'Report Issue',
           click: () => {
             shell.openExternal(
-              'https://github.com/tomymaritano/markdown/issues'
+              'https://github.com/tomymaritano/nototo/issues'
             )
           },
         },

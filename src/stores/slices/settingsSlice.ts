@@ -65,11 +65,31 @@ export interface Settings {
   spellCheck?: boolean
   defaultEditorMode?: 'markdown' | 'monaco'
   vimMode?: boolean
+  
+  // Privacy & Security
+  analyticsEnabled?: boolean
+  crashReporting?: boolean
+  usageStatistics?: boolean
+  improveDataSharing?: boolean
+  localDataOnly?: boolean
+  encryptLocalStorage?: boolean
+  clearDataOnExit?: boolean
+  anonymousMode?: boolean
+  trackingProtection?: boolean
+  exportIncludeMetadata?: boolean
+  exportIncludeHistory?: boolean
+  dataRetentionDays?: number
+  autoDeleteOldData?: boolean
+  secureNoteDeletion?: boolean
+  lockAfterInactivity?: boolean
+  inactivityTimeoutMinutes?: number
+  requirePasswordOnStart?: boolean
+  biometricUnlock?: boolean
 }
 
 export interface SettingsSlice {
   settings: Settings
-  updateSettings: (updates: Partial<Settings>) => void
+  updateSettings: (updates: Partial<Settings>, skipPersist?: boolean) => void
   resetSettings: () => void
   exportSettings: () => string
   importSettings: (settingsJson: string) => boolean
@@ -77,7 +97,7 @@ export interface SettingsSlice {
 
 const defaultSettings: Settings = {
   // General
-  defaultNotebook: 'personal',
+  defaultNotebook: 'inbox',
   autoUpdates: true,
   developmentMode: false,
   language: 'en',
@@ -139,22 +159,55 @@ const defaultSettings: Settings = {
   spellCheck: true,
   defaultEditorMode: 'markdown',
   vimMode: false,
+  
+  // Privacy & Security
+  analyticsEnabled: false,
+  crashReporting: true,
+  usageStatistics: false,
+  improveDataSharing: false,
+  localDataOnly: true,
+  encryptLocalStorage: false,
+  clearDataOnExit: false,
+  anonymousMode: false,
+  trackingProtection: true,
+  exportIncludeMetadata: true,
+  exportIncludeHistory: false,
+  dataRetentionDays: 365,
+  autoDeleteOldData: false,
+  secureNoteDeletion: true,
+  lockAfterInactivity: false,
+  inactivityTimeoutMinutes: 15,
+  requirePasswordOnStart: false,
+  biometricUnlock: false,
 }
 
 export const createSettingsSlice: StateCreator<SettingsSlice> = (set, get) => ({
   settings: { ...defaultSettings },
   
-  updateSettings: (updates) => {
+  updateSettings: (updates, skipPersist = false) => {
     set((state) => ({
       settings: { ...state.settings, ...updates }
     }))
     
+    // Skip persistence during initialization or when explicitly requested
+    if (skipPersist) return
+    
     // Persist settings to storage
     const newSettings = { ...get().settings, ...updates }
-    if (window.electronAPI?.isElectron) {
-      window.electronAPI.saveSettings(newSettings)
-    } else {
-      localStorage.setItem('viny-settings', JSON.stringify(newSettings))
+    try {
+      if (window.electronAPI?.isElectron && window.electronAPI?.saveSettings) {
+        window.electronAPI.saveSettings(newSettings)
+      } else {
+        localStorage.setItem('viny-settings', JSON.stringify(newSettings))
+      }
+    } catch (error) {
+      console.warn('Failed to save settings:', error)
+      // Fallback to localStorage
+      try {
+        localStorage.setItem('viny-settings', JSON.stringify(newSettings))
+      } catch (fallbackError) {
+        console.error('Failed to save settings to localStorage:', fallbackError)
+      }
     }
   },
   
@@ -162,10 +215,20 @@ export const createSettingsSlice: StateCreator<SettingsSlice> = (set, get) => ({
     set({ settings: { ...defaultSettings } })
     
     // Clear persisted settings
-    if (window.electronAPI?.isElectron) {
-      window.electronAPI.saveSettings(defaultSettings)
-    } else {
-      localStorage.removeItem('viny-settings')
+    try {
+      if (window.electronAPI?.isElectron && window.electronAPI?.saveSettings) {
+        window.electronAPI.saveSettings(defaultSettings)
+      } else {
+        localStorage.removeItem('viny-settings')
+      }
+    } catch (error) {
+      console.warn('Failed to reset settings:', error)
+      // Fallback to localStorage
+      try {
+        localStorage.removeItem('viny-settings')
+      } catch (fallbackError) {
+        console.error('Failed to clear settings from localStorage:', fallbackError)
+      }
     }
   },
 
@@ -190,10 +253,20 @@ export const createSettingsSlice: StateCreator<SettingsSlice> = (set, get) => ({
       
       // Persist imported settings
       const finalSettings = { ...defaultSettings, ...validSettings }
-      if (window.electronAPI?.isElectron) {
-        window.electronAPI.saveSettings(finalSettings)
-      } else {
-        localStorage.setItem('viny-settings', JSON.stringify(finalSettings))
+      try {
+        if (window.electronAPI?.isElectron && window.electronAPI?.saveSettings) {
+          window.electronAPI.saveSettings(finalSettings)
+        } else {
+          localStorage.setItem('viny-settings', JSON.stringify(finalSettings))
+        }
+      } catch (error) {
+        console.warn('Failed to save imported settings:', error)
+        // Fallback to localStorage
+        try {
+          localStorage.setItem('viny-settings', JSON.stringify(finalSettings))
+        } catch (fallbackError) {
+          console.error('Failed to save imported settings to localStorage:', fallbackError)
+        }
       }
       
       return true

@@ -77,18 +77,31 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
+      include: [
+        'src/**/*.{js,jsx,ts,tsx}'
+      ],
       exclude: [
         'node_modules/',
         'src/test/',
+        'src/__tests__/',
+        'src/**/__tests__/',
+        'src/**/*.test.{js,jsx,ts,tsx}',
+        'src/**/*.spec.{js,jsx,ts,tsx}',
         '**/*.d.ts',
-        'vite.config.js',
-        'tailwind.config.js',
-        'postcss.config.js',
+        'src/main.tsx',
+        'src/AppSimple.tsx',
+        'src/SettingsStandalone.tsx',
+        'src/components/LazyComponents.tsx',
+        'src/types/',
+        'src/constants/',
         'dist/',
         'dist-electron/',
         'electron/',
         'scripts/',
         'server/',
+        'public/',
+        'docs/',
+        '*.config.js',
         'start-dev*.js'
       ],
       thresholds: {

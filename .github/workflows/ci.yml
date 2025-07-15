@@ -7,7 +7,7 @@ on:
     branches: [ main, develop ]
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
 
 jobs:
   test:
@@ -98,3 +98,65 @@ jobs:
       - name: Run security audit
         run: npm audit --audit-level=moderate
         continue-on-error: true
+
+  build-electron:
+    name: Electron Build Test
+    runs-on: ${{ matrix.os }}
+    needs: test
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build Electron app (unsigned)
+        run: npm run build:electron:test
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+        
+      - name: Verify Electron build output
+        shell: bash
+        run: |
+          echo "✅ Electron build completed for ${{ matrix.os }}"
+          if [ -d "dist-electron" ]; then
+            echo "📦 Build artifacts:"
+            ls -la dist-electron/
+            du -sh dist-electron/ || echo "No size info available"
+          else
+            echo "⚠️ No dist-electron directory found"
+          fi
+
+  type-check:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run TypeScript check
+        run: npm run build:electron-src
+        
+      - name: Check Electron TypeScript
+        run: echo "✅ TypeScript compilation successful"

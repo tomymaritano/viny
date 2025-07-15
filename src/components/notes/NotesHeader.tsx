@@ -69,11 +69,12 @@ const NotesHeader: React.FC<NotesHeaderProps> = ({
             icon={Icons.NotebookPen}
             onClick={onNewNote}
             title="Create new note"
-            size={16}
+            size={14}
             variant="default"
             aria-label="Create new note"
             aria-pressed={false}
             aria-keyshortcuts=""
+            className="p-1"
           />
         </div>
       </div>

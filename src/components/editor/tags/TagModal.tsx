@@ -263,7 +263,7 @@ const TagModal: React.FC<TagModalProps> = ({
                   <button
                     key={tag}
                     onClick={() => setLocalTags(prev => [...prev, tag])}
-                    className="px-2 py-1 text-xs border border-theme-border-primary hover:border-theme-accent-primary hover:text-theme-accent-primary rounded-md transition-colors"
+                    className="px-2 py-1 text-xs text-theme-text-secondary border border-theme-border-primary hover:border-theme-accent-primary hover:text-theme-accent-primary rounded-md transition-colors"
                   >
                     <span>#</span>
                     <span>{tag}</span>

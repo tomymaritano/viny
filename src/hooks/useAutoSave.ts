@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 import { Note } from '../types'
 import { logger } from '../utils/logger'
 
@@ -27,8 +27,8 @@ export const useAutoSave = (options: AutoSaveOptions) => {
   } = options
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const isSavingRef = useRef(false)
-  const hasUnsavedChangesRef = useRef(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
   // Clear timeout on unmount
   useEffect(() => {
@@ -40,11 +40,11 @@ export const useAutoSave = (options: AutoSaveOptions) => {
   }, [])
 
   const performSave = useCallback(async (note: Note) => {
-    if (!onSave || isSavingRef.current) return
+    if (!onSave || isSaving) return
 
     try {
-      isSavingRef.current = true
-      hasUnsavedChangesRef.current = false
+      setIsSaving(true)
+      setHasUnsavedChanges(false)
 
       if (onSaveStart) {
         onSaveStart()
@@ -57,19 +57,21 @@ export const useAutoSave = (options: AutoSaveOptions) => {
       }
     } catch (error) {
       logger.error('Auto-save failed:', error)
-      hasUnsavedChangesRef.current = true
+      setHasUnsavedChanges(true)
 
       if (onSaveError) {
         onSaveError(error as Error)
       }
     } finally {
-      isSavingRef.current = false
+      setIsSaving(false)
     }
-  }, [onSave, onSaveStart, onSaveComplete, onSaveError])
+  }, [onSave, onSaveStart, onSaveComplete, onSaveError, isSaving])
 
   // Debounced auto-save function that can be called with a note
   const debouncedAutoSave = useCallback((note: Note) => {
-    hasUnsavedChangesRef.current = true
+    if (!enabled) return
+    
+    setHasUnsavedChanges(true)
 
     // Clear existing timeout
     if (timeoutRef.current) {
@@ -86,7 +88,7 @@ export const useAutoSave = (options: AutoSaveOptions) => {
     timeoutRef.current = setTimeout(() => {
       performSave(note)
     }, debounceMs)
-  }, [performSave, immediate, debounceMs])
+  }, [performSave, immediate, debounceMs, enabled])
 
   // Manual save function
   const saveNow = useCallback((note: Note) => {
@@ -99,7 +101,7 @@ export const useAutoSave = (options: AutoSaveOptions) => {
   // Force save on page unload
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (hasUnsavedChangesRef.current && enabled) {
+      if (hasUnsavedChanges && enabled) {
         // Show warning
         event.preventDefault()
         event.returnValue =
@@ -113,13 +115,13 @@ export const useAutoSave = (options: AutoSaveOptions) => {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
     }
-  }, [enabled])
+  }, [enabled, hasUnsavedChanges])
 
   return {
     debouncedAutoSave,
     saveNow,
-    isSaving: isSavingRef.current,
-    hasUnsavedChanges: hasUnsavedChangesRef.current,
+    isSaving,
+    hasUnsavedChanges,
   }
 }
 

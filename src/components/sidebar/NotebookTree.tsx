@@ -36,12 +36,12 @@ const NotebookTree: React.FC<NotebookTreeProps> = ({
       const isExpanded = expandedNotebooks.has(notebook.id)
       const hasChildren = notebooks.some(n => n.parentId === notebook.id)
       const isActive = activeSection === `notebook-${notebook.name.toLowerCase()}`
-      const paddingLeft = 12 + (level * 16)
+      const paddingLeft = 12 + (level * 20)
 
       return (
         <div key={notebook.id} className="relative">
           <button
-            className={`w-full flex items-center justify-between py-2 text-sm text-left transition-all duration-200 ${
+            className={`group w-full flex items-center justify-between py-2 text-sm text-left transition-all duration-200 ${
               isActive
                 ? 'text-theme-text-primary relative'
                 : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary'
@@ -57,31 +57,29 @@ const NotebookTree: React.FC<NotebookTreeProps> = ({
               } : {})
             }}
           >
-            <div className="flex items-center space-x-3 flex-1 min-w-0">
-              {/* Triangle expand/collapse control */}
-              {hasChildren ? (
+            <div className="flex items-center flex-1 min-w-0 space-x-3">
+              {/* Name container with chevron */}
+              <div className="flex items-center flex-1 min-w-0 space-x-1">
+                {/* Triangle expand/collapse control */}
                 <div
                   onClick={(e) => {
-                    e.stopPropagation()
-                    onToggleExpansion(notebook.id)
+                    if (hasChildren) {
+                      e.stopPropagation()
+                      onToggleExpansion(notebook.id)
+                    }
                   }}
-                  className={`w-4 h-4 flex-shrink-0 flex items-center justify-center cursor-pointer transition-transform duration-150 ${isExpanded ? 'rotate-90' : 'rotate-0'}`}
+                  className={`w-4 h-4 flex-shrink-0 flex items-center justify-center ${hasChildren ? 'cursor-pointer' : ''}`}
                 >
-                  <Icons.ChevronRight size={12} className="text-theme-text-muted hover:text-theme-text-secondary" />
+                  {hasChildren && (
+                    <Icons.ChevronRight 
+                      size={12} 
+                      className={`text-theme-text-muted hover:text-theme-text-secondary transition-all duration-150 ${isExpanded ? 'rotate-90' : 'rotate-0'}`} 
+                    />
+                  )}
                 </div>
-              ) : (
-                <div className="w-4 h-4 flex-shrink-0" />
-              )}
-              
-              {/* Notebook icon */}
-              <div className={`w-4 h-4 flex-shrink-0 flex items-center justify-center ${
-                isActive ? 'text-theme-accent-primary' : 'text-theme-text-muted'
-              }`}>
-                <Icons.Book size={14} />
-              </div>
-              
-              {/* Name (editable) */}
-              {editingNotebook === notebook.id ? (
+                
+                {/* Name (editable) */}
+                {editingNotebook === notebook.id ? (
                 <input
                   type="text"
                   value={editValue}
@@ -106,6 +104,7 @@ const NotebookTree: React.FC<NotebookTreeProps> = ({
                   {notebook.name.charAt(0).toUpperCase() + notebook.name.slice(1)}
                 </span>
               )}
+              </div>
             </div>
             
             {/* Count badge */}

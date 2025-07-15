@@ -6,7 +6,7 @@ import { electronStorageService } from './electronStorage'
 class StorageService {
   private readonly NOTES_KEY = 'viny_notes'
   private readonly NOTEBOOKS_KEY = 'viny_notebooks'  
-  private readonly SETTINGS_KEY = 'viny_settings'
+  private readonly SETTINGS_KEY = 'viny-settings'
   private readonly TAG_COLORS_KEY = 'viny_tag_colors'
   
   // Concurrency control
@@ -344,7 +344,10 @@ class StorageService {
     }
 
     try {
-      localStorage.setItem(this.SETTINGS_KEY, JSON.stringify(settings))
+      // Merge with existing settings
+      const existingSettings = this.getSettings()
+      const mergedSettings = { ...existingSettings, ...settings }
+      localStorage.setItem(this.SETTINGS_KEY, JSON.stringify(mergedSettings))
     } catch (error) {
       console.error('Error saving settings to localStorage:', error)
       throw new Error('Failed to save settings')

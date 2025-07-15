@@ -25,26 +25,48 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
           
       - name: Install dependencies
         run: npm ci
         
+      - name: Run tests before release
+        run: npm run test:run
+        
       - name: Build app
         run: npm run build
         
-      - name: Build Electron app
+      - name: Build Electron app (signed for macOS)
+        if: matrix.os == 'macos-latest'
         run: npm run build:electron
         env:
           # GitHub token for releases
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Code signing - will be enabled when secrets are added
+          # Code signing for macOS
+          CSC_NAME: ${{ secrets.CSC_NAME }}
           CSC_LINK: ${{ secrets.CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
           # Notarization
           APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          # Enable notarization only if credentials are present
-          NOTARIZE: ${{ secrets.APPLE_ID && 'true' || 'false' }}
+          # Auto-update token
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        
+      - name: Build Electron app (unsigned for Linux/Windows)
+        if: matrix.os != 'macos-latest'
+        run: npm run build:electron:test
+        env:
+          # GitHub token for releases
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Code signing - only for macOS builds
+          CSC_NAME: ${{ secrets.CSC_NAME }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          # Notarization
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # Auto-update token
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}

@@ -61,7 +61,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
   // Reset selection when results change
   useEffect(() => {
     setSelectedIndex(0)
-  }, [results])
+  }, [searchInterface.results])
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -74,7 +74,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
           break
         case 'ArrowDown':
           e.preventDefault()
-          setSelectedIndex((prev) => Math.min(prev + 1, results.length - 1))
+          setSelectedIndex((prev) => Math.min(prev + 1, searchInterface.results.length - 1))
           break
         case 'ArrowUp':
           e.preventDefault()
@@ -82,8 +82,8 @@ const SearchModal: React.FC<SearchModalProps> = ({
           break
         case 'Enter':
           e.preventDefault()
-          if (results[selectedIndex]) {
-            handleNoteSelect(results[selectedIndex].id)
+          if (searchInterface.results[selectedIndex]) {
+            handleNoteSelect(searchInterface.results[selectedIndex].id)
           }
           break
       }
@@ -91,7 +91,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, results, selectedIndex, onClose])
+  }, [isOpen, searchInterface.results, selectedIndex, onClose])
 
   const handleNoteSelect = useCallback((noteId: string) => {
     onSelectNote(noteId)
@@ -106,25 +106,27 @@ const SearchModal: React.FC<SearchModalProps> = ({
         size="xl"
         position="top"
         showCloseButton={false}
-        className="max-h-[80vh]"
+        className="max-h-[80vh] bg-theme-bg-primary"
         overlayClassName="pt-[10vh]"
       >
-        <div className="flex flex-col h-full -m-4">
-          <SearchInput
-            ref={inputRef}
-            query={localQuery}
-            onQueryChange={(query) => {
-              setLocalQuery(query)
-              searchInterface.search(query)
-            }}
-            onClear={() => {
-              setLocalQuery('')
-              searchInterface.clearSearch()
-            }}
-            onClose={onClose}
-          />
+        <div className="flex flex-col h-full bg-theme-bg-primary">
+          <div className="px-4 py-3 border-b border-theme-border-primary bg-theme-bg-secondary">
+            <SearchInput
+              ref={inputRef}
+              query={localQuery}
+              onQueryChange={(query) => {
+                setLocalQuery(query)
+                searchInterface.search(query)
+              }}
+              onClear={() => {
+                setLocalQuery('')
+                searchInterface.clearSearch()
+              }}
+              onClose={onClose}
+            />
+          </div>
           
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-96 overflow-y-auto px-2 py-2 bg-theme-bg-primary">
             <SearchResults
               results={searchInterface.results}
               selectedIndex={selectedIndex}

@@ -208,14 +208,14 @@ export class ErrorHandler {
   private getLogMethod(severity: ErrorSeverity): (message: string, meta?: any) => void {
     switch (severity) {
       case ErrorSeverity.LOW:
-        return logger.info
+        return (message: string, meta?: any) => logger.info(message, meta)
       case ErrorSeverity.MEDIUM:
-        return logger.warn
+        return (message: string, meta?: any) => logger.warn(message, meta)
       case ErrorSeverity.HIGH:
       case ErrorSeverity.CRITICAL:
-        return logger.error
+        return (message: string, meta?: any) => logger.error(message, meta)
       default:
-        return logger.error
+        return (message: string, meta?: any) => logger.error(message, meta)
     }
   }
 

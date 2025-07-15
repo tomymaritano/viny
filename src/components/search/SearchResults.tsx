@@ -64,7 +64,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   }
 
   return (
-    <div className="divide-y divide-theme-border-primary">
+    <div className="space-y-1">
       {results.map((note, index) => (
         <SearchResultItem
           key={note.id}

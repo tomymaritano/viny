@@ -24,11 +24,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
     { id: 'editing', label: 'Editing', icon: 'FileEdit' },
     { id: 'preview', label: 'Preview', icon: 'Eye' },
     { id: 'keybindings', label: 'Keybindings', icon: 'Command' },
+    { id: 'privacy', label: 'Privacy', icon: 'Settings' },
+    { id: 'backup', label: 'Backup', icon: 'HardDrive' },
+    { id: 'sync', label: 'Sync', icon: 'Cloud' },
     { id: 'plugins', label: 'Plugins', icon: 'Package' },
     { id: 'install', label: 'Install', icon: 'Download' },
     { id: 'updates', label: 'Updates', icon: 'RefreshCw' },
-    { id: 'sync', label: 'Sync', icon: 'Cloud' },
-    { id: 'backup', label: 'Backup', icon: 'HardDrive' },
     { id: 'tags', label: 'Tags', icon: 'Tag' },
     { id: 'about', label: 'About', icon: 'Info' },
   ]
@@ -46,16 +47,18 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
           return LazyTabs.PreviewSettings
         case 'keybindings':
           return LazyTabs.KeybindingsSettings
+        case 'privacy':
+          return LazyTabs.PrivacySettings
+        case 'backup':
+          return LazyTabs.BackupSettings
+        case 'sync':
+          return LazyTabs.SyncSettings
         case 'plugins':
           return LazyTabs.PluginsSettings
         case 'install':
           return LazyTabs.InstallSettings
         case 'updates':
           return LazyTabs.UpdatesSettings
-        case 'sync':
-          return LazyTabs.SyncSettings
-        case 'backup':
-          return LazyTabs.BackupSettings
         case 'tags':
           return LazyTabs.TagsSettingsSimple
         case 'about':

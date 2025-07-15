@@ -140,6 +140,26 @@ export const SettingsValidation = {
       }
     },
 
+    syntaxTheme: (value: string): FieldValidation => {
+      const validSyntaxThemes = ['default-dark', 'default-light', 'github', 'monokai', 'solarized']
+      return {
+        field: 'syntaxTheme',
+        value,
+        isValid: !value || validSyntaxThemes.includes(value),
+        error: value && !validSyntaxThemes.includes(value) ? 'Invalid syntax theme selected' : undefined
+      }
+    },
+
+    previewTheme: (value: string): FieldValidation => {
+      const validPreviewThemes = ['github', 'gitlab', 'minimal', 'academic']
+      return {
+        field: 'previewTheme',
+        value,
+        isValid: !value || validPreviewThemes.includes(value),
+        error: value && !validPreviewThemes.includes(value) ? 'Invalid preview theme selected' : undefined
+      }
+    },
+
     customCSS: (value: string): FieldValidation => {
       // Basic CSS validation - check for obvious syntax errors
       if (!value) return { field: 'customCSS', value, isValid: true }
@@ -148,25 +168,51 @@ export const SettingsValidation = {
       const openBraces = (value.match(/\{/g) || []).length
       const closeBraces = (value.match(/\}/g) || []).length
       
+      // Check for dangerous CSS patterns
+      const hasDangerousContent = /(@import|javascript:|data:text\/html|expression\()/i.test(value)
+      
       return {
         field: 'customCSS',
         value,
-        isValid: openBraces === closeBraces,
-        error: openBraces !== closeBraces ? 'CSS syntax error: unmatched braces' : undefined,
-        warning: value.length > 10000 ? 'Large CSS files may impact performance' : undefined
+        isValid: openBraces === closeBraces && !hasDangerousContent,
+        error: openBraces !== closeBraces ? 'CSS syntax error: unmatched braces' : 
+               hasDangerousContent ? 'CSS contains potentially dangerous content' : undefined,
+        warning: value.length > 10000 ? 'Large CSS files may impact performance' : 
+                 value.includes('!important') ? 'Excessive use of !important may cause styling conflicts' : undefined
       }
     }
   },
 
   editing: {
-    fontSize: (value: number): FieldValidation => 
-      ValidationRules.range(value, 8, 32, 'Font size'),
+    fontSize: (value: number): FieldValidation => {
+      const result = ValidationRules.range(value, 8, 32, 'Font size')
+      if (result.isValid && value < 10) {
+        result.warning = 'Very small font size may be hard to read'
+      }
+      if (result.isValid && value > 24) {
+        result.warning = 'Large font size may reduce visible content'
+      }
+      return result
+    },
 
-    lineHeight: (value: number): FieldValidation => 
-      ValidationRules.range(value, 1.0, 3.0, 'Line height'),
+    lineHeight: (value: number): FieldValidation => {
+      const result = ValidationRules.range(value, 1.0, 3.0, 'Line height')
+      if (result.isValid && value < 1.2) {
+        result.warning = 'Very tight line height may reduce readability'
+      }
+      return result
+    },
 
-    tabSize: (value: number): FieldValidation => 
-      ValidationRules.range(value, 1, 8, 'Tab size'),
+    tabSize: (value: number): FieldValidation => {
+      const result = ValidationRules.range(value, 1, 8, 'Tab size')
+      if (result.isValid && value > 4) {
+        result.warning = 'Large tab size may cause horizontal scrolling'
+      }
+      return result
+    },
+
+    indentUnit: (value: number): FieldValidation => 
+      ValidationRules.range(value, 1, 8, 'Indent unit'),
 
     fontFamily: (value: string): FieldValidation => {
       if (!value) return { field: 'fontFamily', value, isValid: true }
@@ -180,7 +226,21 @@ export const SettingsValidation = {
         isValid: hasValidChars,
         error: !hasValidChars ? 'Font family contains invalid characters' : undefined
       }
-    }
+    },
+
+    autoSaveDelay: (value: number): FieldValidation => {
+      const result = ValidationRules.range(value, 100, 10000, 'Auto-save delay')
+      if (result.isValid && value < 500) {
+        result.warning = 'Very fast auto-save may impact performance'
+      }
+      return result
+    },
+
+    wordWrapColumn: (value: number): FieldValidation => 
+      ValidationRules.range(value, 40, 200, 'Word wrap column'),
+
+    cursorScrollMargin: (value: number): FieldValidation => 
+      ValidationRules.range(value, 0, 300, 'Cursor scroll margin')
   },
 
   sync: {
@@ -212,7 +272,107 @@ export const SettingsValidation = {
 
     backupRetentionDays: (value: number): FieldValidation => 
       ValidationRules.range(value, 1, 365, 'Backup retention days')
+  },
+
+  privacy: {
+    dataRetentionDays: (value: number): FieldValidation => {
+      if (value === 0) {
+        return {
+          field: 'dataRetentionDays',
+          value,
+          isValid: true,
+          warning: 'Data will never be automatically deleted'
+        }
+      }
+      
+      return ValidationRules.range(value, 1, 3650, 'Data retention period')
+    },
+
+    inactivityTimeoutMinutes: (value: number): FieldValidation => {
+      const result = ValidationRules.range(value, 1, 1440, 'Inactivity timeout')
+      
+      if (result.isValid && value < 5) {
+        result.warning = 'Very short timeout may be inconvenient'
+      }
+      
+      return result
+    },
+
+    exportDataSize: (value: string): FieldValidation => {
+      try {
+        const sizeInBytes = new TextEncoder().encode(value).length
+        const sizeInMB = sizeInBytes / (1024 * 1024)
+        
+        return {
+          field: 'exportDataSize',
+          value,
+          isValid: sizeInMB < 100,
+          error: sizeInMB >= 100 ? 'Export data is too large (>100MB)' : undefined,
+          warning: sizeInMB > 10 ? 'Large export may take time to process' : undefined
+        }
+      } catch {
+        return { field: 'exportDataSize', value, isValid: true }
+      }
+    }
+  },
+
+  preview: {
+    previewFontSize: (value: number): FieldValidation => {
+      const result = ValidationRules.range(value, 8, 32, 'Preview font size')
+      if (result.isValid && value < 10) {
+        result.warning = 'Very small preview font may be hard to read'
+      }
+      return result
+    },
+
+    previewPosition: (value: string): FieldValidation => {
+      const validPositions = ['right', 'bottom', 'hidden']
+      return {
+        field: 'previewPosition',
+        value,
+        isValid: !value || validPositions.includes(value),
+        error: value && !validPositions.includes(value) ? 'Invalid preview position' : undefined
+      }
+    }
+  },
+
+  keybindings: {
+    keymapPreset: (value: string): FieldValidation => {
+      const validPresets = ['default', 'vim', 'vscode', 'sublime']
+      return {
+        field: 'keymapPreset',
+        value,
+        isValid: !value || validPresets.includes(value),
+        error: value && !validPresets.includes(value) ? 'Invalid keymap preset' : undefined
+      }
+    },
+
+    customKeybinding: (value: string, commandName: string): FieldValidation => {
+      if (!value) return { field: 'customKeybinding', value, isValid: true }
+      
+      // Basic keyboard shortcut validation
+      const hasValidFormat = /^(Ctrl|Cmd|Alt|Shift|\+|[A-Za-z0-9])+$/i.test(value.replace(/\s/g, ''))
+      
+      return {
+        field: 'customKeybinding',
+        value,
+        isValid: hasValidFormat,
+        error: !hasValidFormat ? `Invalid keyboard shortcut format for ${commandName}` : undefined
+      }
+    }
   }
+}
+
+// Field validation helper
+export function validateField(value: any, validators: ((value: any) => FieldValidation)[]): FieldValidation {
+  for (const validator of validators) {
+    const result = validator(value)
+    if (!result.isValid) {
+      return result
+    }
+  }
+  
+  return { field: 'field', value, isValid: true }
 }
 
 // Form validation helper
@@ -238,16 +398,4 @@ export function validateForm(values: Record<string, any>, validations: Record<st
     errors,
     warnings: warnings.length > 0 ? warnings : undefined
   }
-}
-
-// Real-time validation hook
-export function validateField(value: any, validators: ((value: any) => FieldValidation)[]): FieldValidation {
-  for (const validator of validators) {
-    const result = validator(value)
-    if (!result.isValid) {
-      return result
-    }
-  }
-  
-  return { field: 'unknown', value, isValid: true }
 }

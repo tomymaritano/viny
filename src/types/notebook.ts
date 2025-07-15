@@ -48,4 +48,7 @@ export const NOTEBOOK_COLORS = [
   { value: 'red', label: 'Red', class: 'text-solarized-red' },
   { value: 'purple', label: 'Purple', class: 'text-solarized-magenta' },
   { value: 'cyan', label: 'Cyan', class: 'text-solarized-cyan' },
+  { value: 'teal', label: 'Teal', class: 'text-emerald-600' },
+  { value: 'indigo', label: 'Indigo', class: 'text-indigo-600' },
+  { value: 'pink', label: 'Pink', class: 'text-pink-600' },
 ] as const

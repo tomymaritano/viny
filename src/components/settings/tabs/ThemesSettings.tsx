@@ -1,9 +1,30 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useAppStore } from '../../../stores/newSimpleStore'
 import Icons from '../../Icons'
+import { useLivePreview } from '../../../hooks/useLivePreview'
+import LivePreviewControls from '../../ui/LivePreviewControls'
 
 const ThemesSettings: React.FC = () => {
   const { settings, updateSettings } = useAppStore()
+  const [showPreviewDetails, setShowPreviewDetails] = useState(false)
+
+  // Live preview for theme changes
+  const {
+    isPreviewActive,
+    startPreview,
+    applyPreview,
+    revertPreview,
+    cancelPreview,
+    getEffectiveValue,
+    isKeyModified,
+    getPreviewStatus
+  } = useLivePreview(['uiTheme', 'syntaxTheme', 'previewTheme'], {
+    previewDelay: 150,
+    resetDelay: 5000,
+    autoRevert: true
+  })
+
+  const previewStatus = getPreviewStatus()
 
   const uiThemes = [
     { value: 'light', label: 'Light', icon: 'Sun' },
@@ -35,6 +56,17 @@ const ThemesSettings: React.FC = () => {
 
   return (
     <div className="space-y-8">
+      {/* Live Preview Controls */}
+      <LivePreviewControls
+        isActive={isPreviewActive}
+        modifiedCount={previewStatus.modifiedCount}
+        modifiedKeys={previewStatus.modifiedKeys}
+        onApply={applyPreview}
+        onRevert={revertPreview}
+        onCancel={cancelPreview}
+        showDetails={showPreviewDetails}
+      />
+
       {/* UI Theme */}
       <div>
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
@@ -45,18 +77,23 @@ const ThemesSettings: React.FC = () => {
           {uiThemes.map((theme) => (
             <button
               key={theme.value}
-              onClick={() => updateSettings({ uiTheme: theme.value as 'light' | 'dark' | 'system' })}
+              onClick={() => startPreview('uiTheme', theme.value)}
               className={`
                 p-4 rounded-lg border transition-all flex flex-col items-center space-y-2
                 ${
-                  settings.uiTheme === theme.value
+                  getEffectiveValue('uiTheme') === theme.value
                     ? 'border-theme-accent-primary bg-theme-accent-primary/10'
                     : 'border-theme-border-primary hover:border-theme-border-secondary'
+                }
+                ${
+                  isKeyModified('uiTheme') && getEffectiveValue('uiTheme') === theme.value
+                    ? 'ring-2 ring-blue-500 ring-opacity-50'
+                    : ''
                 }
               `}
             >
               <div className={`w-6 h-6 ${
-                settings.uiTheme === theme.value ? 'text-theme-accent-primary' : 'text-theme-text-muted'
+                getEffectiveValue('uiTheme') === theme.value ? 'text-theme-accent-primary' : 'text-theme-text-muted'
               }`}>
                 {getIcon(theme.icon)}
               </div>

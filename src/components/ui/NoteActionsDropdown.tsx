@@ -29,11 +29,10 @@ const NoteActionsDropdown: React.FC<NoteActionsDropdownProps> = ({
     e.preventDefault()
     e.stopPropagation()
     
-    // Get click position relative to the viewport
-    const rect = e.currentTarget.getBoundingClientRect()
+    // Use the exact click position
     setPosition({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
+      x: e.clientX,
+      y: e.clientY
     })
     setIsOpen(true)
   }

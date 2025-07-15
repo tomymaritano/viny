@@ -24,7 +24,7 @@ const GeneralSettings: React.FC = () => {
   } = useFormValidation({
     initialValues: {
       language: settings.language || 'en',
-      defaultNotebook: settings.defaultNotebook || 'personal'
+      defaultNotebook: settings.defaultNotebook || 'inbox'
     },
     validationRules: {
       language: SettingsValidation.general.language,

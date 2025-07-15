@@ -81,6 +81,7 @@ const SidebarContent: React.FC = () => {
             size={14}
             onClick={createNewNote}
             title="Create new note"
+            variant="ghost"
           />
         }
       >
@@ -103,6 +104,7 @@ const SidebarContent: React.FC = () => {
             size={14}
             onClick={() => setCreateNotebookModal(true)}
             title="Create new notebook"
+            variant="ghost"
           />
         }
       >
@@ -138,6 +140,7 @@ const SidebarContent: React.FC = () => {
             size={14}
             onClick={() => setModal('tagModal', true)}
             title="Create new tag"
+            variant="ghost"
           />
         }
       >

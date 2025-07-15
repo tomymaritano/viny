@@ -1,24 +1,26 @@
 import { useEffect } from 'react'
 import { useAppStore } from '../stores/newSimpleStore'
-import { useSettings } from './useSettings'
 import { storageService } from '../lib/storage'
 import { initLogger as logger } from '../utils/logger'
+import { initializeDefaultData } from '../utils/defaultDataInitializer'
 
 /**
  * Hook responsible for application initialization
  * - Loads notes from storage
+ * - Loads settings from storage
  * - Applies theme settings
  * - Handles storage diagnostics
  */
 export const useAppInit = () => {
-  const { settings } = useSettings() as { settings: { theme?: string } | null }
   const { 
     setNotes, 
     setLoading, 
     setError, 
     theme: currentTheme, 
     setTheme,
-    loadTagColors 
+    loadTagColors,
+    settings,
+    updateSettings
   } = useAppStore()
 
   // Initialize data with proper async loading
@@ -49,11 +51,40 @@ export const useAppInit = () => {
           }
         }
         
+        logger.debug('Initializing default data if needed...')
+        await initializeDefaultData()
+        
         logger.debug('Loading notes from storage...')
         const storedNotes = await storageService.loadNotes()
         
         logger.debug('Loading tag colors from storage...')
         await loadTagColors()
+        
+        logger.debug('Loading settings from storage...')
+        try {
+          const storedSettings = await storageService.loadSettings()
+          
+          // FALLBACK: Try direct localStorage access if storage service fails
+          if (!storedSettings || Object.keys(storedSettings).length === 0) {
+            logger.debug('Storage service returned empty, trying direct localStorage...')
+            try {
+              const directSettings = localStorage.getItem('viny-settings')
+              if (directSettings) {
+                const parsedSettings = JSON.parse(directSettings)
+                updateSettings(parsedSettings, true)
+                logger.debug('Settings loaded from direct localStorage:', Object.keys(parsedSettings))
+              }
+            } catch (fallbackError) {
+              logger.warn('Failed to load settings from direct localStorage:', fallbackError)
+            }
+          } else {
+            // Use the store's updateSettings method to load persisted settings
+            updateSettings(storedSettings, true) // Skip persistence during initialization
+            logger.debug('Settings loaded from storage:', Object.keys(storedSettings))
+          }
+        } catch (error) {
+          logger.warn('Failed to load settings from storage:', error)
+        }
         
         logger.debug('Loaded notes count:', storedNotes.length)
         if (storedNotes.length >= 0) { // Always set notes, even if empty array
@@ -70,11 +101,11 @@ export const useAppInit = () => {
     }
     
     initializeApp()
-  }, [setNotes, setLoading, setError, loadTagColors])
+  }, [setNotes, setLoading, setError, loadTagColors, updateSettings])
 
   // Apply theme settings
   useEffect(() => {
-    const finalTheme = settings?.theme || currentTheme || 'dark'
+    const finalTheme = settings?.uiTheme || currentTheme || 'dark'
     const resolvedTheme = finalTheme === 'system'
       ? window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
       : finalTheme
@@ -84,7 +115,7 @@ export const useAppInit = () => {
     setTheme(resolvedTheme)
     
     logger.debug('Theme applied:', resolvedTheme)
-  }, [settings?.theme, currentTheme, setTheme])
+  }, [settings?.uiTheme, currentTheme, setTheme])
 
   return {
     // Expose initialization status for components that need it

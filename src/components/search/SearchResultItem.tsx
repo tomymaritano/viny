@@ -18,10 +18,10 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
 }) => {
   return (
     <div
-      className={`p-3 cursor-pointer border-l-2 transition-all duration-150 ${
+      className={`p-4 cursor-pointer rounded-lg border-l-2 transition-all duration-150 ${
         isSelected
-          ? 'bg-theme-bg-secondary border-theme-accent-primary'
-          : 'bg-theme-bg-primary border-transparent hover:bg-theme-bg-tertiary'
+          ? 'bg-theme-bg-tertiary border-theme-accent-primary'
+          : 'hover:bg-theme-bg-secondary border-transparent'
       }`}
       onClick={() => onSelect(note.id)}
     >

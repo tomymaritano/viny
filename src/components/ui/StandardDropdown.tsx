@@ -268,7 +268,7 @@ const StandardDropdown: React.FC<StandardDropdownProps> = ({
       {/* Dropdown Menu */}
       {isOpen && (
         <div 
-          className={`absolute ${getPositionClass()} ${getWidthClass()} mt-1 
+          className={`${style?.left !== undefined || style?.top !== undefined ? 'fixed' : 'absolute'} ${getPositionClass()} ${getWidthClass()} ${style?.left === undefined && style?.top === undefined ? 'mt-1' : ''} 
             bg-theme-bg-secondary border border-theme-border-primary rounded-lg shadow-xl
             backdrop-blur-sm z-50 overflow-hidden transition-all duration-200
             animate-in fade-in slide-in-from-top-2`}

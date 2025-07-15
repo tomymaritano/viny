@@ -1,35 +1,49 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useAppStore } from '../../../stores/newSimpleStore'
 import Icons from '../../Icons'
-import { useFormValidation } from '../../../hooks/useFormValidation'
+import { useAdvancedValidation } from '../../../hooks/useAdvancedValidation'
 import { SettingsValidation } from '../../../utils/validation'
 import ValidationMessage from '../../ui/ValidationMessage'
+import ValidationSummary from '../../ui/ValidationSummary'
 
 const EditingSettings: React.FC = () => {
   const { settings, updateSettings } = useAppStore()
+  const [showValidationDetails, setShowValidationDetails] = useState(false)
 
-  // Form validation
+  // Advanced form validation
   const {
     values,
     errors,
     warnings,
     getFieldProps,
     handleFieldChange,
-    validateAllFields
-  } = useFormValidation({
+    validateAllFields,
+    getValidationSummary,
+    isValid,
+    isDirty
+  } = useAdvancedValidation({
     initialValues: {
-      editorFontSize: settings.editorFontSize || 14,
-      fontFamily: settings.fontFamily || 'system',
-      indentSize: settings.indentSize || 4
+      fontSize: settings.fontSize || 14,
+      fontFamily: settings.fontFamily || 'SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace',
+      lineHeight: settings.lineHeight || 1.5,
+      tabSize: settings.tabSize || 2,
+      indentUnit: settings.indentUnit || 2,
+      cursorScrollMargin: settings.cursorScrollMargin || 100
     },
     validationRules: {
-      editorFontSize: SettingsValidation.editing.fontSize,
-      fontFamily: SettingsValidation.editing.fontFamily,
-      indentSize: SettingsValidation.editing.tabSize
+      fontSize: { validator: SettingsValidation.editing.fontSize },
+      fontFamily: { validator: SettingsValidation.editing.fontFamily },
+      lineHeight: { validator: SettingsValidation.editing.lineHeight },
+      tabSize: { validator: SettingsValidation.editing.tabSize },
+      indentUnit: { validator: SettingsValidation.editing.indentUnit },
+      cursorScrollMargin: { validator: SettingsValidation.editing.cursorScrollMargin }
     },
     validateOnChange: true,
-    validateOnBlur: true
+    validateOnBlur: true,
+    validateOnMount: true
   })
+
+  const validationSummary = getValidationSummary()
 
   const fontFamilies = [
     { value: 'system', label: 'System Font' },
@@ -46,6 +60,15 @@ const EditingSettings: React.FC = () => {
 
   return (
     <div className="space-y-8">
+      {/* Validation Summary */}
+      {(validationSummary.hasErrors || validationSummary.hasWarnings) && (
+        <ValidationSummary
+          {...validationSummary}
+          showDetails={showValidationDetails}
+          onToggleDetails={() => setShowValidationDetails(!showValidationDetails)}
+        />
+      )}
+
       {/* Editor Behavior */}
       <div>
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">

@@ -5,6 +5,7 @@ import SettingsStandalone from './SettingsStandalone.tsx'
 import ErrorBoundary from './components/ErrorBoundary.tsx'
 import { runMigration } from './utils/migration.js'
 import { logComponentError } from './services/errorLogger'
+import { setupDevHelpers } from './utils/devHelpers'
 
 // Import simple titlebar CSS for manual dragging
 import './styles/titlebar-simple.css'
@@ -12,6 +13,9 @@ import './styles/titlebar-simple.css'
 // Run migration before app initialization
 runMigration()
 // Migration completed
+
+// Setup development helpers
+setupDevHelpers()
 
 // Check if we should render settings based on URL hash
 const isSettingsRoute = window.location.hash === '#/settings'

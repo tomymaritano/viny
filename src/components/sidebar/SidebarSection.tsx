@@ -26,7 +26,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
   if (!title) {
     return (
       <div className="pb-1">
-        <div className="px-1 space-y-0.5">
+        <div className="space-y-0.5">
           {children}
         </div>
       </div>
@@ -35,18 +35,20 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
 
   return (
     <div className="pb-1">
-      <div className="w-full flex items-center justify-between px-3 py-2 text-sm text-theme-text-tertiary">
+      <div className="w-full flex items-center justify-between px-3 py-2 text-sm group">
         <button
-          className="flex items-center space-x-2 hover:text-theme-text-primary transition-colors"
+          className="flex items-center space-x-3 text-theme-text-tertiary hover:text-theme-text-primary transition-colors"
           onClick={onToggle}
           onContextMenu={onHeaderRightClick}
         >
-          {icon}
-          <span>{title}</span>
+          <div className="w-4 h-4 flex-shrink-0 text-theme-text-muted">
+            {icon}
+          </div>
+          <span className="text-sm">{title}</span>
           {onToggle && (
             <Icons.ChevronDown 
               size={12} 
-              className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+              className={`transition-all duration-200 ${isExpanded ? 'rotate-180' : ''} opacity-0 group-hover:opacity-100`}
             />
           )}
         </button>

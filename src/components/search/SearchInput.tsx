@@ -18,7 +18,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
   placeholder = "Search notes..."
 }, ref) => {
   return (
-    <div className="flex items-center gap-3 p-4 border-b border-theme-border-primary bg-theme-bg-primary">
+    <div className="flex items-center gap-3">
       <div className="flex-1 relative">
         <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
           <Icons.Search size={16} className="text-theme-text-muted" />
@@ -29,7 +29,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full pl-10 pr-10 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-lg text-theme-text-primary placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent-primary focus:border-transparent"
+          className="w-full pl-10 pr-10 py-2.5 bg-transparent border-0 text-theme-text-primary placeholder-theme-text-muted focus:outline-none focus:ring-0"
           autoComplete="off"
           spellCheck="false"
         />
