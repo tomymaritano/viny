@@ -250,7 +250,7 @@ class ErrorLogger {
 
     // Store in localStorage for persistence
     try {
-      const stored = localStorage.getItem('nototo_error_reports')
+      const stored = localStorage.getItem('viny_error_reports')
       const reports = stored ? JSON.parse(stored) : []
       reports.push({
         ...errorReport,
@@ -263,7 +263,7 @@ class ErrorLogger {
       
       // Keep only recent reports in localStorage
       const recentReports = reports.slice(-20)
-      localStorage.setItem('nototo_error_reports', JSON.stringify(recentReports))
+      localStorage.setItem('viny_error_reports', JSON.stringify(recentReports))
     } catch (storageError) {
       console.warn('Failed to store error report in localStorage:', storageError)
     }
@@ -321,7 +321,7 @@ class ErrorLogger {
   private getNotesCount(): number {
     try {
       // Try to get notes count from storage
-      const notes = localStorage.getItem('nototo_notes')
+      const notes = localStorage.getItem('viny_notes')
       return notes ? JSON.parse(notes).length : 0
     } catch {
       return 0

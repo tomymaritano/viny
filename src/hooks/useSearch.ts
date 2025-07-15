@@ -41,7 +41,7 @@ const SEARCH_OPTIONS = {
 }
 
 // Search history storage key
-const SEARCH_HISTORY_KEY = 'nototo_search_history'
+const SEARCH_HISTORY_KEY = 'viny_search_history'
 const MAX_SEARCH_HISTORY = 10
 
 export const useSearch = (notes: Note[] = []) => {

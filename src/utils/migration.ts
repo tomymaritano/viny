@@ -1,9 +1,9 @@
-// Migration utilities for rebranding from Inkrun to Nototo
+// Migration utilities for rebranding from Inkrun to Viny
 // This handles migrating localStorage data to new keys
 
 import { logger } from './logger'
 
-const MIGRATION_KEY = 'nototo_migration_completed'
+const MIGRATION_KEY = 'viny_migration_completed'
 
 export const runMigration = () => {
   // Check if migration already completed
@@ -20,15 +20,15 @@ export const runMigration = () => {
   try {
     // Migrate settings
     const oldSettings = localStorage.getItem('inkrun-settings')
-    if (oldSettings && !localStorage.getItem('nototo-settings')) {
-      localStorage.setItem('nototo-settings', oldSettings)
+    if (oldSettings && !localStorage.getItem('viny-settings')) {
+      localStorage.setItem('viny-settings', oldSettings)
       migratedData.settings = true
     }
 
     // Migrate notes
     const oldNotes = localStorage.getItem('inkrun_notes')
-    if (oldNotes && !localStorage.getItem('nototo_notes')) {
-      localStorage.setItem('nototo_notes', oldNotes)
+    if (oldNotes && !localStorage.getItem('viny_notes')) {
+      localStorage.setItem('viny_notes', oldNotes)
       migratedData.notes = true
     }
 

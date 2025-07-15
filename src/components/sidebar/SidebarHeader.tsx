@@ -18,7 +18,7 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({
           <div className="w-6 h-6 bg-theme-accent-primary rounded-md flex items-center justify-center mr-2">
             <Icons.NotebookPen size={14} className="text-white" />
           </div>
-          <h1 className="text-lg font-semibold text-theme-text-primary">Nototo</h1>
+          <h1 className="text-lg font-semibold text-theme-text-primary">Viny</h1>
         </div>
       </div>
       

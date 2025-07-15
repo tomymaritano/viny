@@ -1,5 +1,5 @@
 /**
- * Feature flags for Nototo application
+ * Feature flags for Viny application
  * Use these to enable/disable features for different environments
  */
 

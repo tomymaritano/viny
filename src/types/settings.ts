@@ -101,7 +101,7 @@ export interface BackupSettingsData {
 
 // Sync settings data interface
 export interface SyncSettingsData {
-  syncProvider: 'none' | 'nototo-sync' | 'custom'
+  syncProvider: 'none' | 'viny-sync' | 'custom'
   syncUrl: string
   syncEncryption: boolean
   autoSync: boolean

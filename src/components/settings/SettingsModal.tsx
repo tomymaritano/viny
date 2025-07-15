@@ -1,24 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, Suspense } from 'react'
 import StandardModal from '../ui/StandardModal'
 import SettingsTabs from './SettingsTabs'
 import Icons from '../Icons'
-import GeneralSettings from './tabs/GeneralSettings'
-import EditorSettings from './tabs/EditorSettings'
-import StorageSettings from './tabs/StorageSettings'
-import KeyboardSettings from './tabs/KeyboardSettings'
-import TagsSettingsSimple from './tabs/TagsSettingsSimple'
-import AboutSettings from './tabs/AboutSettings'
+import LoadingSpinner from '../LoadingSpinner'
 
-// New advanced tabs (to be created)
-import ThemesSettings from './tabs/ThemesSettings'
-import EditingSettings from './tabs/EditingSettings'
-import PreviewSettings from './tabs/PreviewSettings'
-import KeybindingsSettings from './tabs/KeybindingsSettings'
-import PluginsSettings from './tabs/PluginsSettings'
-import InstallSettings from './tabs/InstallSettings'
-import UpdatesSettings from './tabs/UpdatesSettings'
-import SyncSettings from './tabs/SyncSettings'
-import BackupSettings from './tabs/BackupSettings'
+// Lazy loaded settings tabs
+import * as LazyTabs from './LazySettingsTabs'
 
 interface SettingsModalProps {
   isOpen: boolean
@@ -47,34 +34,46 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
   ]
 
   const renderTabContent = () => {
-    switch (activeTab) {
-      case 'general':
-        return <GeneralSettings />
-      case 'themes':
-        return <ThemesSettings />
-      case 'editing':
-        return <EditingSettings />
-      case 'preview':
-        return <PreviewSettings />
-      case 'keybindings':
-        return <KeybindingsSettings />
-      case 'plugins':
-        return <PluginsSettings />
-      case 'install':
-        return <InstallSettings />
-      case 'updates':
-        return <UpdatesSettings />
-      case 'sync':
-        return <SyncSettings />
-      case 'backup':
-        return <BackupSettings />
-      case 'tags':
-        return <TagsSettingsSimple />
-      case 'about':
-        return <AboutSettings />
-      default:
-        return <GeneralSettings />
-    }
+    const TabComponent = (() => {
+      switch (activeTab) {
+        case 'general':
+          return LazyTabs.GeneralSettings
+        case 'themes':
+          return LazyTabs.ThemesSettings
+        case 'editing':
+          return LazyTabs.EditingSettings
+        case 'preview':
+          return LazyTabs.PreviewSettings
+        case 'keybindings':
+          return LazyTabs.KeybindingsSettings
+        case 'plugins':
+          return LazyTabs.PluginsSettings
+        case 'install':
+          return LazyTabs.InstallSettings
+        case 'updates':
+          return LazyTabs.UpdatesSettings
+        case 'sync':
+          return LazyTabs.SyncSettings
+        case 'backup':
+          return LazyTabs.BackupSettings
+        case 'tags':
+          return LazyTabs.TagsSettingsSimple
+        case 'about':
+          return LazyTabs.AboutSettings
+        default:
+          return LazyTabs.GeneralSettings
+      }
+    })()
+
+    return (
+      <Suspense fallback={
+        <div className="flex items-center justify-center py-12">
+          <LoadingSpinner size="sm" />
+        </div>
+      }>
+        <TabComponent />
+      </Suspense>
+    )
   }
 
   // If in standalone mode, render without modal wrapper

@@ -49,7 +49,7 @@ export interface Settings {
   pluginSettings?: PluginSettings
   
   // Sync
-  syncProvider?: 'none' | 'nototo-sync' | 'custom'
+  syncProvider?: 'none' | 'viny-sync' | 'custom'
   syncUrl?: string
   syncEncryption?: boolean
   autoSync?: boolean
@@ -154,7 +154,7 @@ export const createSettingsSlice: StateCreator<SettingsSlice> = (set, get) => ({
     if (window.electronAPI?.isElectron) {
       window.electronAPI.saveSettings(newSettings)
     } else {
-      localStorage.setItem('nototo-settings', JSON.stringify(newSettings))
+      localStorage.setItem('viny-settings', JSON.stringify(newSettings))
     }
   },
   
@@ -165,7 +165,7 @@ export const createSettingsSlice: StateCreator<SettingsSlice> = (set, get) => ({
     if (window.electronAPI?.isElectron) {
       window.electronAPI.saveSettings(defaultSettings)
     } else {
-      localStorage.removeItem('nototo-settings')
+      localStorage.removeItem('viny-settings')
     }
   },
 
@@ -193,7 +193,7 @@ export const createSettingsSlice: StateCreator<SettingsSlice> = (set, get) => ({
       if (window.electronAPI?.isElectron) {
         window.electronAPI.saveSettings(finalSettings)
       } else {
-        localStorage.setItem('nototo-settings', JSON.stringify(finalSettings))
+        localStorage.setItem('viny-settings', JSON.stringify(finalSettings))
       }
       
       return true

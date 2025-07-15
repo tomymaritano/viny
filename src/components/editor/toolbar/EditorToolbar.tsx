@@ -116,18 +116,18 @@ const EditorToolbar = ({
                     
                     // Store in localStorage for persistence
                     try {
-                      const storedImages = JSON.parse(localStorage.getItem('nototo-images') || '{}')
+                      const storedImages = JSON.parse(localStorage.getItem('viny-images') || '{}')
                       storedImages[imageId] = dataUri
-                      localStorage.setItem('nototo-images', JSON.stringify(storedImages))
+                      localStorage.setItem('viny-images', JSON.stringify(storedImages))
                       
                       // Also store in memory for immediate access
-                      if (!window.nototoImageStore) {
-                        window.nototoImageStore = new Map()
+                      if (!window.vinyImageStore) {
+                        window.vinyImageStore = new Map()
                       }
-                      window.nototoImageStore.set(imageId, dataUri)
+                      window.vinyImageStore.set(imageId, dataUri)
                       
                       // Insert clean reference in editor
-                      insertText(`![${altText}](nototo://image:${imageId})`)
+                      insertText(`![${altText}](viny://image:${imageId})`)
                     } catch (error) {
                       console.error('Failed to store image:', error)
                       // Fallback to data URI if storage fails

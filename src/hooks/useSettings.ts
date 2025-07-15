@@ -55,7 +55,7 @@ const loadSettings = () => {
   if (globalSettings) return globalSettings
 
   try {
-    const saved = localStorage.getItem('nototo-settings')
+    const saved = localStorage.getItem('viny-settings')
     globalSettings = saved
       ? { ...defaultSettings, ...JSON.parse(saved) }
       : defaultSettings
@@ -103,7 +103,7 @@ const loadSettings = () => {
 
 const saveSettings = newSettings => {
   try {
-    localStorage.setItem('nototo-settings', JSON.stringify(newSettings))
+    localStorage.setItem('viny-settings', JSON.stringify(newSettings))
     globalSettings = newSettings
 
     // Update CSS variables for typography

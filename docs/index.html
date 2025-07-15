@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nototo - Documentación</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #e1e5e9;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .nav-card {
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 20px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s;
+        }
+        .nav-card:hover {
+            border-color: #0066cc;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .nav-card h3 {
+            margin: 0 0 10px 0;
+            color: #0066cc;
+        }
+        .nav-card p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .category {
+            margin-bottom: 30px;
+        }
+        .category h2 {
+            color: #2c3e50;
+            border-bottom: 1px solid #e1e5e9;
+            padding-bottom: 5px;
+        }
+        .quick-links {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .quick-links h3 {
+            margin-top: 0;
+        }
+        .quick-links a {
+            display: inline-block;
+            margin: 5px 10px 5px 0;
+            padding: 8px 16px;
+            background: #0066cc;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .quick-links a:hover {
+            background: #0052a3;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🗒️ Nototo - Documentación</h1>
+        <p>Documentación completa de componentes, hooks y utilidades</p>
+    </div>
+
+    <div class="quick-links">
+        <h3>🚀 Enlaces Rápidos</h3>
+        <a href="README.md">Inicio</a>
+        <a href="hooks/useSearchWorker.md">Search Worker</a>
+        <a href="components/LazyComponents.md">Lazy Loading</a>
+        <a href="components/ErrorBoundaries.md">Error Boundaries</a>
+        <a href="workers/search-worker.md">Web Worker</a>
+        <a href="utils/errorHandler.md">Error Handler</a>
+    </div>
+
+    <div class="category">
+        <h2>📚 Documentación Principal</h2>
+        <div class="nav-grid">
+            <a href="README.md" class="nav-card">
+                <h3>📖 README Principal</h3>
+                <p>Arquitectura general, quick start y guías de desarrollo</p>
+            </a>
+        </div>
+    </div>
+
+    <div class="category">
+        <h2>🛠️ Utilidades Core</h2>
+        <div class="nav-grid">
+            <a href="utils/errorHandler.md" class="nav-card">
+                <h3>🚨 ErrorHandler</h3>
+                <p>Sistema centralizado de manejo de errores con clasificación automática</p>
+            </a>
+            <a href="utils/syncManager.md" class="nav-card">
+                <h3>🔄 SyncManager</h3>
+                <p>Sincronización de datos con resolución de conflictos y soporte offline</p>
+            </a>
+            <a href="utils/searchUtils.md" class="nav-card">
+                <h3>🔍 SearchUtils</h3>
+                <p>Utilidades para highlighting, formato de resultados y optimización de búsqueda</p>
+            </a>
+            <a href="utils/dateUtils.md" class="nav-card">
+                <h3>📅 DateUtils</h3>
+                <p>Formateo de fechas con soporte relativo, localization y múltiples formatos</p>
+            </a>
+            <a href="utils/logger.md" class="nav-card">
+                <h3>📊 Logger</h3>
+                <p>Sistema de logging avanzado con loggers especializados y performance tracking</p>
+            </a>
+        </div>
+    </div>
+
+    <div class="category">
+        <h2>⚙️ Web Workers</h2>
+        <div class="nav-grid">
+            <a href="workers/search-worker.md" class="nav-card">
+                <h3>🔍 Search Worker</h3>
+                <p>Web Worker para búsqueda optimizada con Fuse.js y procesamiento off-thread</p>
+            </a>
+        </div>
+    </div>
+
+    <div class="category">
+        <h2>🎨 Componentes UI</h2>
+        <div class="nav-grid">
+            <a href="components/ValidationMessage.md" class="nav-card">
+                <h3>✅ ValidationMessage</h3>
+                <p>Componente para mostrar feedback de validación con styling automático</p>
+            </a>
+            <a href="components/VirtualizedList.md" class="nav-card">
+                <h3>📝 VirtualizedList</h3>
+                <p>Lista virtualizada de alto rendimiento para miles de elementos</p>
+            </a>
+            <a href="components/Toast.md" class="nav-card">
+                <h3>🔔 Toast System</h3>
+                <p>Sistema completo de notificaciones con acciones y estilos</p>
+            </a>
+            <a href="components/LazyComponents.md" class="nav-card">
+                <h3>⚡ LazyComponents</h3>
+                <p>Sistema de lazy loading para componentes pesados con error boundaries</p>
+            </a>
+            <a href="components/ErrorBoundaries.md" class="nav-card">
+                <h3>🛡️ ErrorBoundaries</h3>
+                <p>Componentes para manejo robusto de errores con estrategias de recuperación</p>
+            </a>
+        </div>
+    </div>
+
+    <div class="category">
+        <h2>⚛️ React Hooks</h2>
+        <div class="nav-grid">
+            <a href="hooks/useFormValidation.md" class="nav-card">
+                <h3>📋 useFormValidation</h3>
+                <p>Hook para validación de formularios con feedback en tiempo real</p>
+            </a>
+            <a href="hooks/useErrorHandler.md" class="nav-card">
+                <h3>🚨 useErrorHandler</h3>
+                <p>Hook para integrar manejo de errores en componentes React</p>
+            </a>
+            <a href="hooks/useSync.md" class="nav-card">
+                <h3>🔄 useSync</h3>
+                <p>Hook para sincronización de datos con conflictos y estado offline</p>
+            </a>
+            <a href="hooks/useSearchWorker.md" class="nav-card">
+                <h3>🔍 useSearchWorker</h3>
+                <p>Hook para búsqueda optimizada con Web Workers y fallback automático</p>
+            </a>
+        </div>
+    </div>
+
+    <div class="category">
+        <h2>🧪 Testing & Desarrollo</h2>
+        <div class="nav-grid">
+            <div class="nav-card" style="opacity: 0.7;">
+                <h3>🧪 Test Coverage</h3>
+                <p>190 tests unitarios completados - 100% coverage en componentes críticos</p>
+            </div>
+            <div class="nav-card" style="opacity: 0.7;">
+                <h3>⚡ Performance</h3>
+                <p>Lazy loading, virtualización y web workers implementados</p>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e1e5e9; color: #666;">
+        <p>📝 Documentación generada automáticamente | 🔧 Desarrollado con Claude Code</p>
+    </div>
+</body>
+</html>

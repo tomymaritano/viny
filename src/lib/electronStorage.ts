@@ -43,10 +43,10 @@ declare global {
 }
 
 class ElectronStorageService {
-  private readonly LEGACY_NOTES_KEY = 'nototo_notes'
-  private readonly LEGACY_NOTEBOOKS_KEY = 'nototo_notebooks'
-  private readonly LEGACY_SETTINGS_KEY = 'nototo_settings'
-  private readonly LEGACY_TAG_COLORS_KEY = 'nototo_tag_colors'
+  private readonly LEGACY_NOTES_KEY = 'viny_notes'
+  private readonly LEGACY_NOTEBOOKS_KEY = 'viny_notebooks'
+  private readonly LEGACY_SETTINGS_KEY = 'viny_settings'
+  private readonly LEGACY_TAG_COLORS_KEY = 'viny_tag_colors'
   
   private isElectron: boolean
   private migrationCompleted: boolean = false
@@ -156,7 +156,7 @@ class ElectronStorageService {
   // Public method to access tag colors synchronously (for fallback)
   getTagColorsSync(): Record<string, string> {
     // First try the current/persistent key (not affected by migration)
-    const currentKey = 'nototo_tag_colors_current'
+    const currentKey = 'viny_tag_colors_current'
     const currentData = localStorage.getItem(currentKey)
     
     if (currentData) {

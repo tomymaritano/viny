@@ -1,9 +1,35 @@
 import React from 'react'
 import { useAppStore } from '../../../stores/newSimpleStore'
 import Icons from '../../Icons'
+import { useFormValidation } from '../../../hooks/useFormValidation'
+import { SettingsValidation } from '../../../utils/validation'
+import ValidationMessage from '../../ui/ValidationMessage'
 
 const EditingSettings: React.FC = () => {
   const { settings, updateSettings } = useAppStore()
+
+  // Form validation
+  const {
+    values,
+    errors,
+    warnings,
+    getFieldProps,
+    handleFieldChange,
+    validateAllFields
+  } = useFormValidation({
+    initialValues: {
+      editorFontSize: settings.editorFontSize || 14,
+      fontFamily: settings.fontFamily || 'system',
+      indentSize: settings.indentSize || 4
+    },
+    validationRules: {
+      editorFontSize: SettingsValidation.editing.fontSize,
+      fontFamily: SettingsValidation.editing.fontFamily,
+      indentSize: SettingsValidation.editing.tabSize
+    },
+    validateOnChange: true,
+    validateOnBlur: true
+  })
 
   const fontFamilies = [
     { value: 'system', label: 'System Font' },
@@ -150,9 +176,16 @@ const EditingSettings: React.FC = () => {
               Font Family
             </label>
             <select
-              value={settings.fontFamily || 'system'}
-              onChange={(e) => updateSettings({ fontFamily: e.target.value })}
-              className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
+              value={values.fontFamily}
+              onChange={(e) => {
+                const value = e.target.value
+                handleFieldChange('fontFamily', value)
+                updateSettings({ fontFamily: value })
+              }}
+              onBlur={() => getFieldProps('fontFamily').onBlur()}
+              className={`w-full px-3 py-2 bg-theme-bg-secondary border rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary ${
+                errors.fontFamily ? 'border-red-500' : 'border-theme-border-primary'
+              }`}
             >
               {fontFamilies.map((font) => (
                 <option key={font.value} value={font.value} className="bg-theme-bg-secondary text-theme-text-primary">
@@ -160,9 +193,17 @@ const EditingSettings: React.FC = () => {
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-xs text-theme-text-muted">
-              Choose the font used in the editor
-            </p>
+            {errors.fontFamily && (
+              <ValidationMessage type="error" message={errors.fontFamily} />
+            )}
+            {warnings.fontFamily && (
+              <ValidationMessage type="warning" message={warnings.fontFamily} />
+            )}
+            {!errors.fontFamily && !warnings.fontFamily && (
+              <p className="mt-1 text-xs text-theme-text-muted">
+                Choose the font used in the editor
+              </p>
+            )}
           </div>
 
           {/* Editor Font Size */}
@@ -171,20 +212,31 @@ const EditingSettings: React.FC = () => {
               Editor Font Size
             </label>
             <div className="flex items-center space-x-4">
-              <span className="text-xs text-theme-text-muted">10px</span>
+              <span className="text-xs text-theme-text-muted">8px</span>
               <input
                 type="range"
-                min="10"
-                max="24"
-                value={settings.editorFontSize || 14}
-                onChange={(e) => updateSettings({ editorFontSize: parseInt(e.target.value) })}
+                min="8"
+                max="32"
+                value={values.editorFontSize}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value)
+                  handleFieldChange('editorFontSize', value)
+                  updateSettings({ editorFontSize: value })
+                }}
+                onBlur={() => getFieldProps('editorFontSize').onBlur()}
                 className="flex-1 h-2 bg-theme-bg-tertiary rounded-lg appearance-none cursor-pointer"
               />
-              <span className="text-xs text-theme-text-muted">24px</span>
+              <span className="text-xs text-theme-text-muted">32px</span>
               <span className="text-sm font-medium text-theme-text-primary w-12">
-                {settings.editorFontSize || 14}px
+                {values.editorFontSize}px
               </span>
             </div>
+            {errors.editorFontSize && (
+              <ValidationMessage type="error" message={errors.editorFontSize} />
+            )}
+            {warnings.editorFontSize && (
+              <ValidationMessage type="warning" message={warnings.editorFontSize} />
+            )}
           </div>
         </div>
       </div>
@@ -227,20 +279,31 @@ const EditingSettings: React.FC = () => {
               Indent Size ({settings.indentType === 'tabs' ? 'Tab Width' : 'Spaces'})
             </label>
             <div className="flex items-center space-x-4">
-              <span className="text-xs text-theme-text-muted">2</span>
+              <span className="text-xs text-theme-text-muted">1</span>
               <input
                 type="range"
-                min="2"
+                min="1"
                 max="8"
-                value={settings.indentSize || 4}
-                onChange={(e) => updateSettings({ indentSize: parseInt(e.target.value) })}
+                value={values.indentSize}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value)
+                  handleFieldChange('indentSize', value)
+                  updateSettings({ indentSize: value })
+                }}
+                onBlur={() => getFieldProps('indentSize').onBlur()}
                 className="flex-1 h-2 bg-theme-bg-tertiary rounded-lg appearance-none cursor-pointer"
               />
               <span className="text-xs text-theme-text-muted">8</span>
               <span className="text-sm font-medium text-theme-text-primary w-8">
-                {settings.indentSize || 4}
+                {values.indentSize}
               </span>
             </div>
+            {errors.indentSize && (
+              <ValidationMessage type="error" message={errors.indentSize} />
+            )}
+            {warnings.indentSize && (
+              <ValidationMessage type="warning" message={warnings.indentSize} />
+            )}
           </div>
 
           {/* Auto Indent */}

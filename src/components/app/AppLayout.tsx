@@ -10,12 +10,13 @@ import ResizableLayout from '../ResizableLayout'
 import SidebarSimple from '../features/SidebarSimple'
 import NotesListSimple from '../features/NotesListSimple'
 import NotePreview from '../NotePreview'
-import MarkdownPreview from '../MarkdownPreview'
 import ToastContainer from '../ToastContainer'
 import LoadingSpinner from '../LoadingSpinner'
+import LazyWrapper from '../ui/LazyWrapper'
 
 // Lazy components
 import { MarkdownEditor } from '../features/LazyComponents'
+import * as LazyComponents from '../LazyComponents'
 
 interface AppLayoutProps {
   // Data
@@ -87,7 +88,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   return (
     <div className="app-container">
       {/* Compact Electron title bar with manual dragging */}
-      <TitleBarCompact title="Nototo" />
+      <TitleBarCompact title="Viny" />
       
       <ResizableLayout
         settings={settings}
@@ -133,11 +134,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({
         }
         previewPanel={
           isPreviewVisible && currentNote ? (
-            <MarkdownPreview
-              ref={previewRef}
-              note={currentNote}
-              syncScroll={true}
-            />
+            <LazyWrapper className="h-full">
+              <LazyComponents.MarkdownPreview
+                ref={previewRef}
+                note={currentNote}
+                syncScroll={true}
+              />
+            </LazyWrapper>
           ) : null
         }
         isPreviewVisible={isPreviewVisible}

@@ -12,8 +12,8 @@ export default defineConfig({
         registerType: 'autoUpdate',
         includeAssets: ['favicon.png', 'apple-touch-icon.png', 'favicon.svg'],
         manifest: {
-          name: 'Nototo - Markdown Editor',
-          short_name: 'Nototo',
+          name: 'Viny - Markdown Editor',
+          short_name: 'Viny',
           description: 'Professional markdown editor with live preview, note organization, and export capabilities',
           theme_color: '#002B36',
           background_color: '#00141A',

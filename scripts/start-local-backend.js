@@ -67,7 +67,7 @@ function startServer() {
         ...process.env,
         NODE_ENV: 'development',
         PORT: '3001',
-        DATABASE_URL: 'file:./local-nototo.db',
+        DATABASE_URL: 'file:./local-viny.db',
       },
     })
 

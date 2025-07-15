@@ -10,7 +10,7 @@ interface TitleBarModernProps {
  * than manual IPC-based dragging
  */
 const TitleBarModern: React.FC<TitleBarModernProps> = ({ 
-  title = 'Nototo'
+  title = 'Viny'
 }) => {
   useEffect(() => {
     // Add platform and app type classes to body for CSS targeting

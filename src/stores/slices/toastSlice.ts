@@ -1,11 +1,28 @@
 import { StateCreator } from 'zustand'
 
+export interface ToastAction {
+  label: string
+  action: () => void
+}
+
 export interface Toast {
   id: string
   type: 'success' | 'error' | 'warning' | 'info'
   message: string
+  details?: string
   duration?: number
   timestamp: string
+  dismissible?: boolean
+  actions?: ToastAction[]
+}
+
+export interface ShowToastOptions {
+  type: 'success' | 'error' | 'warning' | 'info'
+  message: string
+  details?: string
+  duration?: number
+  dismissible?: boolean
+  actions?: ToastAction[]
 }
 
 export interface ToastSlice {
@@ -16,9 +33,14 @@ export interface ToastSlice {
   addToast: (toast: Omit<Toast, 'id' | 'timestamp'>) => void
   removeToast: (id: string) => void
   clearAllToasts: () => void
+  showToast: (options: ShowToastOptions) => string
+  showSuccess: (message: string, options?: Partial<ShowToastOptions>) => string
+  showError: (message: string, options?: Partial<ShowToastOptions>) => string
+  showWarning: (message: string, options?: Partial<ShowToastOptions>) => string
+  showInfo: (message: string, options?: Partial<ShowToastOptions>) => string
 }
 
-export const createToastSlice: StateCreator<ToastSlice> = (set) => ({
+export const createToastSlice: StateCreator<ToastSlice> = (set, get) => ({
   // Initial state
   toasts: [],
 
@@ -37,5 +59,61 @@ export const createToastSlice: StateCreator<ToastSlice> = (set) => ({
       toasts: state.toasts.filter(toast => toast.id !== toastId)
     })),
 
-  clearAllToasts: () => set({ toasts: [] })
+  clearAllToasts: () => set({ toasts: [] }),
+
+  showToast: (options) => {
+    const id = `toast_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    
+    const newToast: Toast = {
+      id,
+      timestamp: new Date().toISOString(),
+      duration: options.duration ?? getDefaultDuration(options.type),
+      dismissible: options.dismissible ?? true,
+      ...options
+    }
+
+    set((state) => ({
+      toasts: [...state.toasts, newToast]
+    }))
+
+    // Auto-dismiss if duration is set
+    if (newToast.duration && newToast.duration > 0) {
+      setTimeout(() => {
+        get().removeToast(id)
+      }, newToast.duration)
+    }
+
+    return id
+  },
+
+  showSuccess: (message, options = {}) => {
+    return get().showToast({ type: 'success', message, ...options })
+  },
+
+  showError: (message, options = {}) => {
+    return get().showToast({ type: 'error', message, ...options })
+  },
+
+  showWarning: (message, options = {}) => {
+    return get().showToast({ type: 'warning', message, ...options })
+  },
+
+  showInfo: (message, options = {}) => {
+    return get().showToast({ type: 'info', message, ...options })
+  }
 })
+
+function getDefaultDuration(type: 'success' | 'error' | 'warning' | 'info'): number {
+  switch (type) {
+    case 'success':
+      return 3000
+    case 'info':
+      return 4000
+    case 'warning':
+      return 5000
+    case 'error':
+      return 6000
+    default:
+      return 4000
+  }
+}

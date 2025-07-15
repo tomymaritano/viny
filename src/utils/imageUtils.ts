@@ -63,8 +63,8 @@ export function isImageUrlAllowed(url) {
   // Allow blob URLs
   if (url.startsWith('blob:')) return true
 
-  // Allow nototo:// image references
-  if (url.startsWith('nototo://image:')) return true
+  // Allow viny:// image references
+  if (url.startsWith('viny://image:')) return true
 
   // Allow relative paths (local files)
   if (!url.includes('://')) return true

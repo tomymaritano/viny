@@ -50,7 +50,7 @@ const EmptyNotesState: React.FC<EmptyNotesStateProps> = ({
 
     return {
       title: 'No notes found',
-      description: 'Create your first note to get started with Nototo.',
+      description: 'Create your first note to get started with Viny.',
       showCreateButton: true
     }
   }

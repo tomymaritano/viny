@@ -12,7 +12,7 @@ const AboutSettings: React.FC = () => {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
-          About Nototo
+          About Viny
         </h3>
         
         <div className="space-y-4">
@@ -21,7 +21,7 @@ const AboutSettings: React.FC = () => {
               <Icons.NotebookText size={32} className="text-theme-accent-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-theme-text-primary">Nototo</h1>
+              <h1 className="text-2xl font-bold text-theme-text-primary">Viny</h1>
               <p className="text-sm text-theme-text-secondary">
                 A beautiful note-taking app for developers
               </p>
@@ -57,7 +57,7 @@ const AboutSettings: React.FC = () => {
         </h4>
         <div className="space-y-2">
           <a
-            href="https://github.com/tomymaritano/nototo"
+            href="https://github.com/tomymaritano/viny"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center space-x-2 text-sm text-theme-accent-primary hover:underline"
@@ -66,7 +66,7 @@ const AboutSettings: React.FC = () => {
             <span>GitHub Repository</span>
           </a>
           <a
-            href="https://github.com/tomymaritano/nototo/issues"
+            href="https://github.com/tomymaritano/viny/issues"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center space-x-2 text-sm text-theme-accent-primary hover:underline"
@@ -91,7 +91,7 @@ const AboutSettings: React.FC = () => {
       <div className="border-t border-theme-border-primary pt-6">
         <div className="bg-theme-bg-secondary rounded-lg p-4">
           <p className="text-xs text-theme-text-muted text-center">
-            Made with ❤️ by the Nototo team
+            Made with ❤️ by the Viny team
           </p>
         </div>
       </div>

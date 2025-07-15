@@ -4,7 +4,7 @@ interface TitleBarProps {
   title?: string
 }
 
-const TitleBar: React.FC<TitleBarProps> = ({ title = 'Nototo' }) => {
+const TitleBar: React.FC<TitleBarProps> = ({ title = 'Viny' }) => {
   // Don't render anything if not in Electron
   if (typeof window === 'undefined' || !window.electronAPI) {
     return null

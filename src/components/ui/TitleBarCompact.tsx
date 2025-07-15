@@ -15,7 +15,7 @@ interface TitleBarCompactProps {
   title?: string
 }
 
-const TitleBarCompact: React.FC<TitleBarCompactProps> = ({ title = 'Nototo' }) => {
+const TitleBarCompact: React.FC<TitleBarCompactProps> = ({ title = 'Viny' }) => {
   // Don't render anything if not in Electron
   if (typeof window === 'undefined' || !window.electronAPI) {
     return null

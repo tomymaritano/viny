@@ -3,9 +3,36 @@ import { useAppStore } from '../../../stores/newSimpleStore'
 import Icons from '../../Icons'
 import { ElectronAPI, isElectronAPI } from '../../../types/settings'
 import { logger } from '../../../utils/logger'
+import { useFormValidation } from '../../../hooks/useFormValidation'
+import { SettingsValidation } from '../../../utils/validation'
+import ValidationMessage from '../../ui/ValidationMessage'
 
 const GeneralSettings: React.FC = () => {
   const { settings, updateSettings, notebooks = [] } = useAppStore()
+
+  // Get available notebook IDs for validation
+  const availableNotebooks = notebooks.map(nb => nb.id)
+
+  // Form validation
+  const {
+    values,
+    errors,
+    warnings,
+    getFieldProps,
+    handleFieldChange,
+    validateAllFields
+  } = useFormValidation({
+    initialValues: {
+      language: settings.language || 'en',
+      defaultNotebook: settings.defaultNotebook || 'personal'
+    },
+    validationRules: {
+      language: SettingsValidation.general.language,
+      defaultNotebook: (value: string) => SettingsValidation.general.defaultNotebook(value, availableNotebooks)
+    },
+    validateOnChange: true,
+    validateOnBlur: true
+  })
 
   const languages = [
     { value: 'en', label: 'English (US)', flag: '🇺🇸' },
@@ -22,14 +49,22 @@ const GeneralSettings: React.FC = () => {
   ]
 
   const handleExportSettings = () => {
-    const settingsJson = JSON.stringify(settings, null, 2)
-    const blob = new Blob([settingsJson], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'nototo-settings.json'
-    a.click()
-    URL.revokeObjectURL(url)
+    try {
+      const settingsJson = JSON.stringify(settings, null, 2)
+      const blob = new Blob([settingsJson], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'viny-settings.json'
+      a.click()
+      URL.revokeObjectURL(url)
+      
+      // Show success message
+      updateSettings({ showToast: { type: 'success', message: 'Settings exported successfully' } })
+    } catch (error) {
+      logger.error('Failed to export settings:', error)
+      updateSettings({ showToast: { type: 'error', message: 'Failed to export settings' } })
+    }
   }
 
   const handleImportSettings = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,11 +74,20 @@ const GeneralSettings: React.FC = () => {
       reader.onload = (e) => {
         try {
           const importedSettings = JSON.parse(e.target?.result as string)
-          // Validate and update settings
+          
+          // Validate imported settings
+          const validationResult = validateAllFields()
+          if (!validationResult.isValid) {
+            updateSettings({ showToast: { type: 'error', message: 'Invalid settings file format' } })
+            return
+          }
+          
+          // Update settings and show success
           updateSettings(importedSettings)
+          updateSettings({ showToast: { type: 'success', message: 'Settings imported successfully' } })
         } catch (error) {
           logger.error('Failed to import settings:', error)
-          // TODO: Show error toast
+          updateSettings({ showToast: { type: 'error', message: 'Failed to import settings. Please check the file format.' } })
         }
       }
       reader.readAsText(file)
@@ -60,7 +104,7 @@ const GeneralSettings: React.FC = () => {
   }
 
   const openAPIDocumentation = () => {
-    window.open('https://docs.nototo.app/api', '_blank')
+    window.open('https://docs.viny.app/api', '_blank')
   }
 
   return (
@@ -78,9 +122,16 @@ const GeneralSettings: React.FC = () => {
               Default Notebook
             </label>
             <select
-              value={settings.defaultNotebook || 'personal'}
-              onChange={(e) => updateSettings({ defaultNotebook: e.target.value })}
-              className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
+              value={values.defaultNotebook}
+              onChange={(e) => {
+                const value = e.target.value
+                handleFieldChange('defaultNotebook', value)
+                updateSettings({ defaultNotebook: value })
+              }}
+              onBlur={() => getFieldProps('defaultNotebook').onBlur()}
+              className={`w-full px-3 py-2 bg-theme-bg-secondary border rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary ${
+                errors.defaultNotebook ? 'border-red-500' : 'border-theme-border-primary'
+              }`}
             >
               {notebooks.map((notebook) => (
                 <option key={notebook.id} value={notebook.id} className="bg-theme-bg-secondary text-theme-text-primary">
@@ -88,9 +139,17 @@ const GeneralSettings: React.FC = () => {
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-xs text-theme-text-muted">
-              New notes will be saved to this notebook by default
-            </p>
+            {errors.defaultNotebook && (
+              <ValidationMessage type="error" message={errors.defaultNotebook} />
+            )}
+            {warnings.defaultNotebook && (
+              <ValidationMessage type="warning" message={warnings.defaultNotebook} />
+            )}
+            {!errors.defaultNotebook && !warnings.defaultNotebook && (
+              <p className="mt-1 text-xs text-theme-text-muted">
+                New notes will be saved to this notebook by default
+              </p>
+            )}
           </div>
 
           {/* Language */}
@@ -99,9 +158,16 @@ const GeneralSettings: React.FC = () => {
               Language
             </label>
             <select
-              value={settings.language || 'en'}
-              onChange={(e) => updateSettings({ language: e.target.value })}
-              className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
+              value={values.language}
+              onChange={(e) => {
+                const value = e.target.value
+                handleFieldChange('language', value)
+                updateSettings({ language: value })
+              }}
+              onBlur={() => getFieldProps('language').onBlur()}
+              className={`w-full px-3 py-2 bg-theme-bg-secondary border rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary ${
+                errors.language ? 'border-red-500' : 'border-theme-border-primary'
+              }`}
             >
               {languages.map((lang) => (
                 <option key={lang.value} value={lang.value} className="bg-theme-bg-secondary text-theme-text-primary">
@@ -109,9 +175,17 @@ const GeneralSettings: React.FC = () => {
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-xs text-theme-text-muted">
-              Choose your preferred language for the interface
-            </p>
+            {errors.language && (
+              <ValidationMessage type="error" message={errors.language} />
+            )}
+            {warnings.language && (
+              <ValidationMessage type="warning" message={warnings.language} />
+            )}
+            {!errors.language && !warnings.language && (
+              <p className="mt-1 text-xs text-theme-text-muted">
+                Choose your preferred language for the interface
+              </p>
+            )}
           </div>
         </div>
       </div>

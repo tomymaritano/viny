@@ -14,7 +14,7 @@ interface AppHeaderProps {
 }
 
 const AppHeader: React.FC<AppHeaderProps> = ({
-  title = 'Nototo',
+  title = 'Viny',
   subtitle,
   showCreateButton = true,
   showSearchButton = true,

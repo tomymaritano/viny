@@ -85,7 +85,6 @@ import {
   Moon,
   Monitor,
   Palette,
-  Eye as EyeIcon,
 } from 'lucide-react'
 
 interface IconProps {
@@ -445,10 +444,6 @@ const Icons = {
 
   Palette: ({ size = 16, className = '' }: IconProps) => (
     <Palette size={size} className={className} />
-  ),
-
-  Eye: ({ size = 16, className = '' }: IconProps) => (
-    <EyeIcon size={size} className={className} />
   ),
 }
 

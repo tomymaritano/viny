@@ -8,7 +8,7 @@ let viteProcess
 let electronProcess
 
 async function startDev() {
-  console.log('🚀 Starting Nototo development environment...')
+  console.log('🚀 Starting Viny development environment...')
 
   try {
     // Start Vite dev server
@@ -40,7 +40,7 @@ async function startDev() {
       env: { ...process.env, NODE_ENV: 'development' },
     })
 
-    console.log('🎉 Nototo is running!')
+    console.log('🎉 Viny is running!')
     console.log(`   Vite:     http://localhost:${vitePort}`)
     console.log(`   Electron: Desktop app should open`)
   } catch (error) {

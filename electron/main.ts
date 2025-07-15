@@ -93,7 +93,7 @@ class FileSystemStorageService {
   private readonly tagColorsFile: string
 
   constructor() {
-    this.dataDir = path.join(app.getPath('userData'), 'nototo-data')
+    this.dataDir = path.join(app.getPath('userData'), 'viny-data')
     this.notesDir = path.join(this.dataDir, 'notes')
     this.backupDir = path.join(this.dataDir, 'backups')
     this.metadataFile = path.join(this.dataDir, 'metadata.json')
@@ -416,7 +416,7 @@ const createWindow = (): void => {
       v8CacheOptions: 'code',
       backgroundThrottling: false,
     },
-    title: 'Nototo v1.1.1 - Note Taking App',
+    title: 'Viny v1.3.0 - Note Taking App',
     show: false,
     minWidth: 800,
     minHeight: 600,
@@ -437,7 +437,7 @@ const createWindow = (): void => {
     mainWindow.loadURL(devUrl)
     mainWindow.webContents.openDevTools()
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'))
+    mainWindow.loadFile(path.join(__dirname, '../../dist/index.html'))
   }
 
   mainWindow.once('ready-to-show', () => {
@@ -464,7 +464,7 @@ function createSettingsWindow(): void {
       preload: path.join(__dirname, 'preload.js'),
     },
     titleBarStyle: 'default',
-    title: 'Nototo Settings',
+    title: 'Viny Settings',
     minWidth: 800,
     minHeight: 500,
   })
@@ -475,7 +475,7 @@ function createSettingsWindow(): void {
     const devUrl = process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173'
     settingsWindow.loadURL(`${devUrl}#/settings`)
   } else {
-    settingsWindow.loadFile(path.join(__dirname, '../dist/index.html'), {
+    settingsWindow.loadFile(path.join(__dirname, '../../dist/index.html'), {
       hash: '/settings',
     })
   }
@@ -699,7 +699,19 @@ app.on('activate', () => {
 
 // Auto-updater setup
 function setupAutoUpdater(): void {
-  // Configure auto-updater
+  // Configure auto-updater for private repository
+  const token = process.env.GH_TOKEN
+  
+  if (token) {
+    autoUpdater.setFeedURL({
+      provider: 'github',
+      owner: 'tomymaritano',
+      repo: 'markdown',
+      private: true,
+      token: token
+    })
+  }
+  
   autoUpdater.checkForUpdatesAndNotify()
 
   // Auto-updater events
@@ -742,10 +754,10 @@ function setupAutoUpdater(): void {
 function createMenu(): void {
   const template: MenuItemConstructorOptions[] = [
     {
-      label: 'Nototo',
+      label: 'Viny',
       submenu: [
         {
-          label: 'About Nototo',
+          label: 'About Viny',
           role: 'about',
         },
         {
@@ -762,7 +774,7 @@ function createMenu(): void {
         },
         { type: 'separator' },
         {
-          label: 'Hide Nototo',
+          label: 'Hide Viny',
           accelerator: 'Command+H',
           role: 'hide',
         },
@@ -834,9 +846,9 @@ function createMenu(): void {
       label: 'Help',
       submenu: [
         {
-          label: 'Nototo Website',
+          label: 'Viny Website',
           click: () => {
-            shell.openExternal('https://nototo.app')
+            shell.openExternal('https://viny.app')
           },
         },
         {

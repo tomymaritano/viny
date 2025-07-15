@@ -71,7 +71,7 @@ const defaultNotebooks: Notebook[] = [
 export const useNotebooks = () => {
   const [notebooks, setNotebooks] = useState<Notebook[]>(() => {
     try {
-      const saved = localStorage.getItem('nototo_notebooks')
+      const saved = localStorage.getItem('viny_notebooks')
       const parsed = saved ? JSON.parse(saved) : defaultNotebooks
       
       // Migrate old notebooks to new structure if needed
@@ -93,7 +93,7 @@ export const useNotebooks = () => {
   // Save to localStorage whenever notebooks change
   useEffect(() => {
     try {
-      localStorage.setItem('nototo_notebooks', JSON.stringify(notebooks))
+      localStorage.setItem('viny_notebooks', JSON.stringify(notebooks))
     } catch (error) {
       logger.warn('Failed to save notebooks:', error)
     }

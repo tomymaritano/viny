@@ -5,7 +5,7 @@ import { isImageUrlAllowed } from './imageUtils'
 
 /**
  * Processes images in HTML and replaces blocked ones with informative placeholders
- * Also resolves nototo:// image references
+ * Also resolves viny:// image references
  * @param {string} html - The HTML content to process
  * @returns {string} HTML with processed images
  */
@@ -13,27 +13,27 @@ const processBlockedImages = html => {
   return html.replace(
     /<img([^>]*?)src=["']([^"']+)["']([^>]*?)>/g,
     (match, before, src, after) => {
-      // Handle nototo:// image references
-      if (src.startsWith('nototo://image:')) {
-        const imageId = src.replace('nototo://image:', '')
+      // Handle viny:// image references
+      if (src.startsWith('viny://image:')) {
+        const imageId = src.replace('viny://image:', '')
 
         // Try to get from memory first
         let dataUri = null
-        if (window.nototoImageStore && window.nototoImageStore.has(imageId)) {
-          dataUri = window.nototoImageStore.get(imageId)
+        if (window.vinyImageStore && window.vinyImageStore.has(imageId)) {
+          dataUri = window.vinyImageStore.get(imageId)
         } else {
           // Try to load from localStorage
           try {
             const storedImages = JSON.parse(
-              localStorage.getItem('nototo-images') || '{}'
+              localStorage.getItem('viny-images') || '{}'
             )
             if (storedImages[imageId]) {
               dataUri = storedImages[imageId]
               // Cache in memory for next time
-              if (!window.nototoImageStore) {
-                window.nototoImageStore = new Map()
+              if (!window.vinyImageStore) {
+                window.vinyImageStore = new Map()
               }
-              window.nototoImageStore.set(imageId, dataUri)
+              window.vinyImageStore.set(imageId, dataUri)
             }
           } catch (error) {
             console.error('Failed to load image from storage:', error)
@@ -122,10 +122,10 @@ export const renderMarkdownToHtml = (content, options = {}) => {
   })
 
   // Add inline styles using CSS variables (no !important)
-  // Configure DOMPurify to allow our custom nototo:// protocol
+  // Configure DOMPurify to allow our custom viny:// protocol
   let styledHtml = DOMPurify.sanitize(html, {
     ALLOWED_URI_REGEXP:
-      /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|nototo):|[^a-z]|[a-z+.-]+(?:[^a-z+.-:]|$))/i,
+      /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|viny):|[^a-z]|[a-z+.-]+(?:[^a-z+.-:]|$))/i,
   })
 
   // Styles are now handled by CSS in MarkdownPreview component

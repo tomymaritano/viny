@@ -86,7 +86,7 @@ function main() {
   log(`\n🎉 Release ${newVersion} created successfully!`, 'green')
   log(`📦 GitHub Actions will now build and publish the release.`, 'blue')
   log(
-    `🔗 Check progress at: https://github.com/your-username/nototo/actions`,
+    `🔗 Check progress at: https://github.com/your-username/viny/actions`,
     'blue'
   )
 }

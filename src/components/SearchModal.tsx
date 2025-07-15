@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearch } from '../hooks/useSearch'
+import { useSearchWorker } from '../hooks/useSearchWorker'
 import { useAppStore } from '../stores/newSimpleStore'
 import SearchInput from './search/SearchInput'
 import SearchResults from './search/SearchResults'
@@ -21,16 +22,34 @@ const SearchModal: React.FC<SearchModalProps> = ({
   const inputRef = useRef<HTMLInputElement>(null)
   const [selectedIndex, setSelectedIndex] = useState(0)
 
-  const {
-    query,
-    results,
-    isSearching,
-    search,
-    clearSearch,
-    hasResults,
-    hasQuery,
-    highlightMatches
-  } = useSearch(notes)
+  // Use web worker for large datasets (>500 notes)
+  const useWorkerSearch = notes.length > 500
+  
+  const fallbackSearch = useSearch(notes)
+  const workerSearch = useSearchWorker(notes, { 
+    enableWorker: useWorkerSearch,
+    fallbackToMainThread: true 
+  })
+
+  // Choose which search to use
+  const searchInterface = useWorkerSearch ? {
+    query: '', // Worker doesn't track query state
+    results: workerSearch.searchResults,
+    isSearching: workerSearch.isSearching,
+    search: workerSearch.search,
+    clearSearch: workerSearch.clearResults,
+    hasResults: workerSearch.searchResults.length > 0,
+    hasQuery: false, // We'll track this locally
+    highlightMatches: (text: string) => text, // Worker handles highlighting
+    searchTime: workerSearch.searchTime,
+    isUsingWorker: workerSearch.isUsingWorker
+  } : {
+    ...fallbackSearch,
+    searchTime: 0,
+    isUsingWorker: false
+  }
+
+  const [localQuery, setLocalQuery] = useState('')
 
   // Focus input when modal opens
   useEffect(() => {
@@ -93,20 +112,26 @@ const SearchModal: React.FC<SearchModalProps> = ({
         <div className="flex flex-col h-full -m-4">
           <SearchInput
             ref={inputRef}
-            query={query}
-            onQueryChange={search}
-            onClear={clearSearch}
+            query={localQuery}
+            onQueryChange={(query) => {
+              setLocalQuery(query)
+              searchInterface.search(query)
+            }}
+            onClear={() => {
+              setLocalQuery('')
+              searchInterface.clearSearch()
+            }}
             onClose={onClose}
           />
           
           <div className="max-h-96 overflow-y-auto">
             <SearchResults
-              results={results}
+              results={searchInterface.results}
               selectedIndex={selectedIndex}
-              highlightMatches={highlightMatches}
+              highlightMatches={searchInterface.highlightMatches}
               onSelectNote={handleNoteSelect}
-              hasQuery={hasQuery}
-              isSearching={isSearching}
+              hasQuery={localQuery.length > 0}
+              isSearching={searchInterface.isSearching}
             />
           </div>
         </div>

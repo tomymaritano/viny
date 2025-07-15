@@ -10,7 +10,7 @@ let settingsWindow = null
 // File System Storage Service - Inkdrop Style
 class FileSystemStorageService {
   constructor() {
-    this.dataDir = path.join(app.getPath('userData'), 'nototo-data')
+    this.dataDir = path.join(app.getPath('userData'), 'viny-data')
     this.notesDir = path.join(this.dataDir, 'notes')
     this.backupDir = path.join(this.dataDir, 'backups')
     this.metadataFile = path.join(this.dataDir, 'metadata.json')
@@ -337,7 +337,7 @@ const createWindow = () => {
       v8CacheOptions: 'code',
       backgroundThrottling: false,
     },
-    title: 'Nototo v1.1.1 - Note Taking App',
+    title: 'Viny v1.3.0 - Note Taking App',
     show: false,
     minWidth: 800,
     minHeight: 600,
@@ -389,7 +389,7 @@ function createSettingsWindow() {
       preload: path.join(__dirname, 'preload.js'),
     },
     titleBarStyle: 'default',
-    title: 'Nototo Settings',
+    title: 'Viny Settings',
     minWidth: 800,
     minHeight: 500,
   })
@@ -667,10 +667,10 @@ function setupAutoUpdater() {
 function createMenu() {
   const template = [
     {
-      label: 'Nototo',
+      label: 'Viny',
       submenu: [
         {
-          label: 'About Nototo',
+          label: 'About Viny',
           role: 'about',
         },
         {
@@ -687,7 +687,7 @@ function createMenu() {
         },
         { type: 'separator' },
         {
-          label: 'Hide Nototo',
+          label: 'Hide Viny',
           accelerator: 'Command+H',
           role: 'hide',
         },
@@ -759,9 +759,9 @@ function createMenu() {
       label: 'Help',
       submenu: [
         {
-          label: 'Nototo Website',
+          label: 'Viny Website',
           click: () => {
-            shell.openExternal('https://nototo.app')
+            shell.openExternal('https://viny.app')
           },
         },
         {

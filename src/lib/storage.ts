@@ -4,10 +4,10 @@ import { storageLogger as logger } from '../utils/logger'
 import { electronStorageService } from './electronStorage'
 
 class StorageService {
-  private readonly NOTES_KEY = 'nototo_notes'
-  private readonly NOTEBOOKS_KEY = 'nototo_notebooks'  
-  private readonly SETTINGS_KEY = 'nototo_settings'
-  private readonly TAG_COLORS_KEY = 'nototo_tag_colors'
+  private readonly NOTES_KEY = 'viny_notes'
+  private readonly NOTEBOOKS_KEY = 'viny_notebooks'  
+  private readonly SETTINGS_KEY = 'viny_settings'
+  private readonly TAG_COLORS_KEY = 'viny_tag_colors'
   
   // Concurrency control
   private saveQueue: Map<string, { timeoutId: NodeJS.Timeout; note: Note }> = new Map()
@@ -390,7 +390,7 @@ class StorageService {
       
       // Also save to localStorage as backup for synchronous access
       try {
-        localStorage.setItem('nototo_tag_colors_current', JSON.stringify(tagColors))
+        localStorage.setItem('viny_tag_colors_current', JSON.stringify(tagColors))
       } catch (error) {
         console.error('Error saving tag colors to localStorage backup:', error)
       }

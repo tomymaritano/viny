@@ -1,4 +1,4 @@
-# Nototo 📝
+# Viny 📝
 
 > A modern, professional markdown note editor built for productivity and focus.
 
@@ -8,9 +8,9 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue.svg)](https://www.typescriptlang.org/)
 [![MVP Status](https://img.shields.io/badge/Status-MVP%20Ready-brightgreen.svg)](./CURRENT_STATUS_2025.md)
 
-Nototo is a professional-grade markdown editor featuring an Inkdrop-inspired dark theme, real-time preview, and advanced editing capabilities powered by CodeMirror 6. Built with modern React and optimized for performance and reliability.
+Viny is a professional-grade markdown editor featuring an Inkdrop-inspired dark theme, real-time preview, and advanced editing capabilities powered by CodeMirror 6. Built with modern React and optimized for performance and reliability.
 
-![Nototo Screenshot](docs/screenshot.png)
+![Viny Screenshot](docs/screenshot.png)
 
 ## ✨ Features
 

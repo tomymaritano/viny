@@ -126,7 +126,7 @@ export const ContentLoading: React.FC<{
 // App initialization loading
 export const AppLoading: React.FC<{
   message?: string
-}> = ({ message = 'Initializing Nototo...' }) => (
+}> = ({ message = 'Initializing Viny...' }) => (
   <div className="fixed inset-0 bg-theme-bg-primary flex items-center justify-center">
     <div className="flex flex-col items-center gap-4 p-6">
       <LoadingSpinner size="xl" variant="gradient" />

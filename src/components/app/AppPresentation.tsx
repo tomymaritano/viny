@@ -93,7 +93,7 @@ const AppPresentation: React.FC<AppPresentationProps> = ({
 }) => {
   // Loading state
   if (isLoading) {
-    return <AppLoading message="Loading Nototo..." />
+    return <AppLoading message="Loading Viny..." />
   }
 
 

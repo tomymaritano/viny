@@ -81,7 +81,7 @@ export function usePersistentState<T>(
  */
 export function usePersistentSettings() {
   const [settings, setSettings, { clear, isLoading }] = usePersistentState(
-    'nototo-settings',
+    'viny-settings',
     {
       theme: 'dark',
       fontSize: 14,

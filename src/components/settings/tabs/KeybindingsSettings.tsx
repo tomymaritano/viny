@@ -15,7 +15,7 @@ const KeybindingsSettings: React.FC = () => {
   const [editingKeybind, setEditingKeybind] = useState<string | null>(null)
 
   const keymapPresets = [
-    { value: 'default', label: 'Nototo Default' },
+    { value: 'default', label: 'Viny Default' },
     { value: 'vscode', label: 'VS Code' },
     { value: 'vim', label: 'Vim' },
     { value: 'emacs', label: 'Emacs' },
@@ -119,7 +119,7 @@ const KeybindingsSettings: React.FC = () => {
               ))}
             </select>
             <p className="mt-1 text-xs text-theme-text-muted">
-              Choose a familiar keymap or stick with Nototo's defaults
+              Choose a familiar keymap or stick with Viny's defaults
             </p>
           </div>
 

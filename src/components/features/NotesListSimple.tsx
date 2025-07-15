@@ -6,6 +6,7 @@ import { useAppStore } from '../../stores/newSimpleStore'
 import NotesHeader from '../notes/NotesHeader'
 import EmptyNotesState from '../notes/EmptyNotesState'
 import NotesList from '../notes/NotesList'
+import VirtualizedNotesList from '../notes/VirtualizedNotesList'
 
 type SortField = 'title' | 'date' | 'updated' | 'notebook'
 type SortDirection = 'asc' | 'desc'
@@ -85,6 +86,10 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
     return sorted
   }, [notes, searchTerm, sortBy, sortDirection])
 
+  // Performance settings
+  const VIRTUALIZATION_THRESHOLD = 100 // Use virtualization when more than 100 notes
+  const shouldUseVirtualization = filteredAndSortedNotes.length > VIRTUALIZATION_THRESHOLD
+  
   const notesCount = filteredAndSortedNotes.length
 
   const handleSort = useCallback((field: SortField, direction: SortDirection) => {
@@ -144,16 +149,33 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
       />
 
       {/* Notes List */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 custom-scrollbar">
-        <NotesList
-          notes={filteredAndSortedNotes}
-          selectedNoteId={selectedNoteId}
-          onNoteClick={handleNoteClick}
-          onTogglePin={onTogglePin}
-          onDeleteNote={onDeleteNote}
-          onDuplicateNote={onDuplicateNote}
-          onMoveToNotebook={onMoveToNotebook}
-        />
+      <div className="flex-1 overflow-hidden min-h-0">
+        {shouldUseVirtualization ? (
+          <VirtualizedNotesList
+            notes={filteredAndSortedNotes}
+            selectedNote={filteredAndSortedNotes.find(n => n.id === selectedNoteId) || null}
+            onNoteSelect={(note) => handleNoteClick(note.id)}
+            onNoteDelete={(noteId) => {
+              const note = filteredAndSortedNotes.find(n => n.id === noteId)
+              if (note) onDeleteNote(note)
+            }}
+            onNoteDuplicate={onDuplicateNote}
+            searchQuery={searchTerm}
+            className="h-full"
+          />
+        ) : (
+          <div className="h-full overflow-y-auto overflow-x-hidden custom-scrollbar">
+            <NotesList
+              notes={filteredAndSortedNotes}
+              selectedNoteId={selectedNoteId}
+              onNoteClick={handleNoteClick}
+              onTogglePin={onTogglePin}
+              onDeleteNote={onDeleteNote}
+              onDuplicateNote={onDuplicateNote}
+              onMoveToNotebook={onMoveToNotebook}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

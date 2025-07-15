@@ -9,7 +9,7 @@ interface ElectronTitleBarProps {
 }
 
 const ElectronTitleBar: React.FC<ElectronTitleBarProps> = ({
-  title = 'Nototo',
+  title = 'Viny',
   onMinimize,
   onMaximize,
   onClose

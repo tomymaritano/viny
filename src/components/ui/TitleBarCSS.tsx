@@ -11,7 +11,7 @@ interface TitleBarCSSProps {
  * Much more efficient than manual IPC-based dragging
  */
 const TitleBarCSS: React.FC<TitleBarCSSProps> = ({ 
-  title = 'Nototo',
+  title = 'Viny',
   className = ''
 }) => {
   // Don't render anything if not in Electron

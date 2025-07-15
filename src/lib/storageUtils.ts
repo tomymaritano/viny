@@ -12,7 +12,7 @@ export interface StorageInfo {
 export function checkStorageAvailability(): StorageInfo {
   try {
     // Test basic localStorage availability
-    const testKey = 'nototo_test_' + Date.now()
+    const testKey = 'viny_test_' + Date.now()
     localStorage.setItem(testKey, 'test')
     localStorage.removeItem(testKey)
     
@@ -135,29 +135,29 @@ export async function diagnoseSaveIssues(): Promise<string[]> {
   return issues
 }
 
-export function clearAllNototoData(): void {
+export function clearAllVinyData(): void {
   try {
     storageService.clear()
   } catch (error) {
-    console.error('Failed to clear Nototo data:', error)
+    console.error('Failed to clear Viny data:', error)
     throw error
   }
 }
 
-export function exportNototoData(): string {
+export function exportVinyData(): string {
   try {
     return storageService.export()
   } catch (error) {
-    console.error('Failed to export Nototo data:', error)
+    console.error('Failed to export Viny data:', error)
     throw error
   }
 }
 
-export function importNototoData(data: string): void {
+export function importVinyData(data: string): void {
   try {
     storageService.import(data)
   } catch (error) {
-    console.error('Failed to import Nototo data:', error)
+    console.error('Failed to import Viny data:', error)
     throw error
   }
 }

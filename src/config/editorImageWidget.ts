@@ -30,20 +30,20 @@ class ImageWidget extends WidgetType {
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     `
 
-    // Handle nototo:// image URLs
+    // Handle viny:// image URLs
     let resolvedSrc = this.src
-    if (this.src.startsWith('nototo://image:')) {
-      const imageId = this.src.replace('nototo://image:', '')
-      // Try to get from window.nototoImageStore if it exists
-      if (typeof window !== 'undefined' && (window as any).nototoImageStore) {
-        const entry = (window as any).nototoImageStore.get(imageId)
+    if (this.src.startsWith('viny://image:')) {
+      const imageId = this.src.replace('viny://image:', '')
+      // Try to get from window.vinyImageStore if it exists
+      if (typeof window !== 'undefined' && (window as any).vinyImageStore) {
+        const entry = (window as any).vinyImageStore.get(imageId)
         if (entry) {
           resolvedSrc = entry
         }
       } else {
         // Fallback to localStorage if memory store not available
         try {
-          const storedImages = JSON.parse(localStorage.getItem('nototo-images') || '{}')
+          const storedImages = JSON.parse(localStorage.getItem('viny-images') || '{}')
           if (storedImages[imageId]) {
             resolvedSrc = storedImages[imageId]
           }
@@ -133,7 +133,7 @@ function createImageDecorations(view: EditorView) {
                  src.startsWith('blob:') || 
                  src.startsWith('./') || 
                  src.startsWith('/') ||
-                 src.startsWith('nototo://image:') ||
+                 src.startsWith('viny://image:') ||
                  src.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i))) {
         
         editorLogger.debug('Adding image widget for:', 'ImageWidget', src)

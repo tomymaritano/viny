@@ -1,5 +1,5 @@
 // Container component for AppSimple - handles business logic and state management
-import React, { useRef, useMemo } from 'react'
+import React, { useRef, useMemo, useEffect } from 'react'
 import { useAppLogic, useNoteActions } from '../../hooks/useSimpleLogic'
 import { Note } from '../../types'
 import { useAppStore } from '../../stores/newSimpleStore'
@@ -10,8 +10,11 @@ import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { usePageLifecycle } from '../../hooks/usePageLifecycle'
 import { useAppHandlers } from '../../hooks/useAppHandlers'
 import { useSettingsEffects } from '../../hooks/useSettingsEffects'
+import { useErrorHandler } from '../../hooks/useErrorHandler'
+import { setupGlobalErrorHandler } from '../../utils/errorHandler'
 import { i18nService } from '../../services/i18nService'
 import { MarkdownPreviewHandle } from '../MarkdownPreview'
+import ToastContainer from '../ui/ToastContainer'
 
 // Import presentation component
 import AppPresentation from './AppPresentation'
@@ -52,6 +55,14 @@ const AppContainer: React.FC = () => {
     setIsPreviewVisible,
     sortNotes
   } = useAppStore()
+
+  // Error handling
+  const errorHandler = useErrorHandler()
+
+  // Setup global error handler
+  useEffect(() => {
+    setupGlobalErrorHandler()
+  }, [])
 
   const { settings } = useSettings()
   const { notebooks } = useNotebooks()
@@ -163,7 +174,17 @@ const AppContainer: React.FC = () => {
     sortNotes
   ])
 
-  return <AppPresentation {...appProps} />
+  return (
+    <>
+      <AppPresentation {...appProps} />
+      <ToastContainer
+        toasts={toasts}
+        onDismiss={removeToast}
+        position="top-right"
+        maxToasts={5}
+      />
+    </>
+  )
 }
 
 export default AppContainer

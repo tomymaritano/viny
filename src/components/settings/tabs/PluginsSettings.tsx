@@ -20,7 +20,7 @@ const PluginsSettings: React.FC = () => {
             Plugin Management
           </h4>
           <p className="text-sm text-theme-text-secondary mb-4">
-            Install, configure, and manage plugins to extend Nototo's functionality.
+            Install, configure, and manage plugins to extend Viny's functionality.
           </p>
           <p className="text-xs text-theme-text-muted">
             Coming in version 2.0
