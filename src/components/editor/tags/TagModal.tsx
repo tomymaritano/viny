@@ -30,7 +30,7 @@ const TagModal: React.FC<TagModalProps> = ({
   const [tagSettingsModal, setTagSettingsModal] = useState({ show: false, tagName: '' })
   const [newTagName, setNewTagName] = useState('')
   const [selectedColor, setSelectedColor] = useState('ocean')
-  const { addNote, setTagColor } = useAppStore()
+  const { addNote, setTagColor, removeTagFromAllNotes, showSuccess, showError } = useAppStore()
   const availableColors = getAvailableTagColors()
 
   useEffect(() => {
@@ -78,6 +78,21 @@ const TagModal: React.FC<TagModalProps> = ({
     // Update the tag name in available tags list and notify parent
     // This would typically update all notes that use this tag
     console.log('Tag name change:', oldName, '->', newName)
+  }
+
+  // Handler for deleting tags
+  const handleDeleteTag = (tagName: string) => {
+    const confirmMessage = `Are you sure you want to remove the tag "${tagName}" from all notes? This action cannot be undone.`
+    
+    if (window.confirm(confirmMessage)) {
+      try {
+        removeTagFromAllNotes(tagName)
+        showSuccess(`Tag "${tagName}" removed from all notes`)
+      } catch (error) {
+        console.error('Failed to delete tag:', error)
+        showError(`Failed to remove tag "${tagName}". Please try again.`)
+      }
+    }
   }
 
   const handleCancel = () => {
@@ -209,7 +224,7 @@ const TagModal: React.FC<TagModalProps> = ({
                         
                         {/* Delete button */}
                         <button
-                          onClick={() => {/* TODO: Delete tag */}}
+                          onClick={() => handleDeleteTag(tag)}
                           className="p-1 text-theme-text-muted hover:text-red-500 transition-colors"
                           title="Delete tag"
                         >

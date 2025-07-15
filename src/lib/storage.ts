@@ -26,11 +26,11 @@ class StorageService {
     // For backward compatibility, we still provide sync access
     // but internally we may be using async Electron storage
     if (electronStorageService.isElectronEnvironment) {
-      // TODO: Refactor to use async loadNotes() instead of sync getNotes()
-      // Return cached notes from the store instead
+      // In Electron, return cached notes from the Zustand store
       const store = (globalThis as any).__appStore
       if (store && store.getState) {
-        return store.getState().notes || []
+        const state = store.getState()
+        return state.notes || []
       }
       return [] // Return empty array if store not available
     }
@@ -264,8 +264,13 @@ class StorageService {
   // Notebooks
   getNotebooks(): Notebook[] {
     if (electronStorageService.isElectronEnvironment) {
-      // TODO: Refactor to use async loadNotebooks() instead of sync getNotebooks()
-      return []
+      // In Electron, return cached notebooks from the Zustand store
+      const store = (globalThis as any).__appStore
+      if (store && store.getState) {
+        const state = store.getState()
+        return state.notebooks || []
+      }
+      return [] // Return empty array if store not available
     }
 
     try {
@@ -309,8 +314,13 @@ class StorageService {
   // Settings
   getSettings(): Partial<Settings> {
     if (electronStorageService.isElectronEnvironment) {
-      // TODO: Refactor to use async loadSettings() instead of sync getSettings()
-      return {}
+      // In Electron, return cached settings from the Zustand store
+      const store = (globalThis as any).__appStore
+      if (store && store.getState) {
+        const state = store.getState()
+        return state.settings || {}
+      }
+      return {} // Return empty object if store not available
     }
 
     try {

@@ -193,6 +193,10 @@ export const useNoteActions = () => {
     
     try {
       storageService.saveNote(updatedNote)
+      addToast({ 
+        type: 'success', 
+        message: updatedNote.isPinned ? 'Note pinned' : 'Note unpinned' 
+      })
     } catch (error) {
       logger.error('Error updating note:', error)
       addToast({ type: 'error', message: 'Failed to update note' })
@@ -216,6 +220,7 @@ export const useNoteActions = () => {
     
     try {
       storageService.saveNote(duplicatedNote)
+      addToast({ type: 'success', message: 'Note duplicated successfully' })
     } catch (error) {
       logger.error('Error duplicating note:', error)
       addToast({ type: 'error', message: 'Failed to duplicate note' })
