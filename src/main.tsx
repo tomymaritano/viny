@@ -6,6 +6,8 @@ import ErrorBoundary from './components/ErrorBoundary.tsx'
 import { runMigration } from './utils/migration.js'
 import { logComponentError } from './services/errorLogger'
 import { setupDevHelpers } from './utils/devHelpers'
+import './utils/notebookDebug' // Import debug utilities
+import './utils/notebookTesting' // Import testing utilities
 
 // Import simple titlebar CSS for manual dragging
 import './styles/titlebar-simple.css'

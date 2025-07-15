@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Icons from '../Icons'
 import IconButton from './IconButton'
 import { Notebook, NOTEBOOK_COLORS } from '../../types/notebook'
-import { ANIMATIONS, THEME_COLORS } from '../../constants/theme'
+import { ANIMATIONS } from '../../constants/theme'
 
 interface CreateNotebookModalProps {
   isOpen: boolean
@@ -97,8 +97,7 @@ const CreateNotebookModal: React.FC<CreateNotebookModalProps> = ({
       onClick={handleClose}
     >
       <div
-        className={`border border-theme-border-primary rounded-lg shadow-xl w-full max-w-md mx-4 ${ANIMATIONS.ZOOM_IN}`}
-        style={{ backgroundColor: THEME_COLORS.MODAL_BG }}
+        className={`bg-theme-bg-primary border border-theme-border-primary rounded-lg shadow-xl w-full max-w-md mx-4 ${ANIMATIONS.ZOOM_IN}`}
         onClick={e => e.stopPropagation()}
         onKeyDown={handleKeyDown}
         tabIndex={-1}

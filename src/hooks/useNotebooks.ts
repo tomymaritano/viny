@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { logger } from '../utils/logger'
+import { electronStorageService } from '../lib/electronStorage'
 import { 
   Notebook, 
   NotebookWithCounts, 
@@ -94,43 +95,112 @@ const defaultNotebooks: Notebook[] = [
 
 export const useNotebooks = () => {
   const [notebooks, setNotebooks] = useState<Notebook[]>(() => {
-    try {
-      const saved = localStorage.getItem('viny_notebooks')
-      const parsed = saved ? JSON.parse(saved) : defaultNotebooks
-      
-      // Migrate old notebooks to new structure if needed
-      const migrated = parsed.map((notebook: LegacyNotebook) => ({
-        ...notebook,
-        parentId: notebook.parentId || null,
-        children: notebook.children || [],
-        level: notebook.level || 0,
-        path: notebook.path || notebook.name,
-      }))
-      
-      return buildNotebookTree(migrated)
-    } catch (error) {
-      logger.warn('Failed to load notebooks:', error)
-      return buildNotebookTree(defaultNotebooks)
-    }
+    // For initial state, use defaults - async loading will happen in useEffect
+    console.log('🚀 Initializing notebooks with defaults during SSR/initial render')
+    return buildNotebookTree(defaultNotebooks)
   })
 
-  // Save to localStorage whenever notebooks change
+  // Load notebooks from storage (async)
   useEffect(() => {
-    try {
-      localStorage.setItem('viny_notebooks', JSON.stringify(notebooks))
-    } catch (error) {
-      logger.warn('Failed to save notebooks:', error)
+    const loadNotebooks = async () => {
+      try {
+        console.log('🚀 Loading notebooks from storage...')
+        
+        let parsed: Notebook[] = []
+        
+        if (electronStorageService.isElectronEnvironment) {
+          console.log('🚀 Using ElectronStorage to load notebooks')
+          parsed = await electronStorageService.getNotebooks()
+        } else {
+          console.log('🚀 Using localStorage to load notebooks')
+          const saved = localStorage.getItem('viny_notebooks')
+          if (saved) {
+            parsed = JSON.parse(saved)
+          }
+        }
+        
+        if (parsed.length === 0) {
+          console.log('🚀 No notebooks found, using defaults')
+          parsed = defaultNotebooks
+          // Save defaults
+          if (electronStorageService.isElectronEnvironment) {
+            await electronStorageService.saveNotebooks(defaultNotebooks)
+          } else {
+            localStorage.setItem('viny_notebooks', JSON.stringify(defaultNotebooks))
+          }
+        }
+        
+        console.log('🚀 Loaded notebooks from storage:', parsed.length, 'notebooks')
+        
+        // Migrate old notebooks to new structure if needed
+        const migrated = parsed.map((notebook: LegacyNotebook) => ({
+          ...notebook,
+          parentId: notebook.parentId || null,
+          children: notebook.children || [],
+          level: notebook.level || 0,
+          path: notebook.path || notebook.name,
+        }))
+        
+        const result = buildNotebookTree(migrated)
+        console.log('🚀 Built notebook tree:', result.length, 'notebooks')
+        setNotebooks(result)
+      } catch (error) {
+        logger.warn('Failed to load notebooks:', error)
+        console.log('🚀 Error loading notebooks, using defaults')
+        const defaultResult = buildNotebookTree(defaultNotebooks)
+        setNotebooks(defaultResult)
+      }
     }
+
+    loadNotebooks()
+  }, [])
+
+  // Save to storage whenever notebooks change (debounced to avoid excessive saves)
+  useEffect(() => {
+    // Skip saving if we're still in the initial loading state (only defaults)
+    if (notebooks.length === 5 && notebooks.every(nb => ['inbox', 'learn', 'personal', 'projects', 'work'].includes(nb.name))) {
+      console.log('💾 useEffect: Skipping save - using default notebooks during initialization')
+      return
+    }
+    
+    console.log('💾 useEffect: Triggered with', notebooks.length, 'notebooks:', notebooks.map(n => n.name))
+    
+    const saveNotebooks = async () => {
+      try {
+        if (electronStorageService.isElectronEnvironment) {
+          console.log('💾 useEffect: Saving to ElectronStorage')
+          await electronStorageService.saveNotebooks(notebooks)
+          console.log('💾 useEffect: Successfully saved to ElectronStorage')
+        } else {
+          console.log('💾 useEffect: Saving to localStorage')
+          localStorage.setItem('viny_notebooks', JSON.stringify(notebooks))
+          console.log('💾 useEffect: Successfully saved to localStorage')
+        }
+      } catch (error) {
+        console.error('💾 useEffect: Error saving notebooks:', error)
+        logger.warn('Failed to save notebooks:', error)
+      }
+    }
+
+    saveNotebooks()
   }, [notebooks])
 
   const createNotebook = useCallback((data: CreateNotebookData): Notebook | null => {
+    console.log('🔵 Creating notebook:', data)
+    console.log('🔵 Current notebooks before validation:', notebooks.map(n => n.name))
+    
     const nameValidation = validateNotebookName(data.name, notebooks)
     if (!nameValidation.isValid) {
+      console.error('❌ Name validation failed:', nameValidation.error)
+      // Show user-friendly error
+      alert(`Cannot create notebook: ${nameValidation.error}`)
       return null
     }
 
     const nestingValidation = validateNotebookNesting(data.parentId || null, notebooks)
     if (!nestingValidation.isValid) {
+      console.error('❌ Nesting validation failed:', nestingValidation.error)
+      alert(`Cannot create notebook: ${nestingValidation.error}`)
       return null
     }
 
@@ -147,9 +217,14 @@ export const useNotebooks = () => {
       updatedAt: new Date().toISOString(),
     }
     
+    console.log('✅ New notebook created:', newNotebook)
+    
     setNotebooks(prev => {
+      console.log('🔵 Previous notebooks count:', prev.length)
       const updated = [...prev, newNotebook]
+      console.log('🔵 Updated notebooks count:', updated.length)
       const result = buildNotebookTree(updated)
+      console.log('🔵 Final result count:', result.length)
       return result
     })
 
