@@ -29,7 +29,13 @@ const ResizableLayout = ({
 
   const [previewWidth, setPreviewWidth] = useState(() => {
     const saved = localStorage.getItem('inkrun-preview-width')
-    return saved ? parseInt(saved) : settings?.previewWidth || 350
+    if (saved) {
+      return parseInt(saved)
+    }
+    // Convert percentage to pixels based on estimated container width
+    const percentage = settings?.previewWidth || 50
+    const estimatedContainerWidth = window.innerWidth * 0.8
+    return Math.max(280, (percentage / 100) * estimatedContainerWidth)
   })
 
   const sidebarWidth = 200 // Force new width
@@ -60,6 +66,22 @@ const ResizableLayout = ({
   useEffect(() => {
     localStorage.setItem('inkrun-preview-width', previewWidth.toString())
   }, [previewWidth])
+
+  // Update preview width when settings change
+  useEffect(() => {
+    if (settings?.previewWidth && containerWidth > 0) {
+      const percentage = settings.previewWidth
+      const availableWidth = containerWidth - 
+        (isSidebarVisible ? sidebarWidth : 0) - 
+        (isNotesListVisible ? notesListWidth : 0) - 
+        minMainContentWidth
+      const newPixelWidth = Math.max(minPreviewWidth, Math.min(
+        availableWidth * 0.8, // Max 80% of available space
+        (percentage / 100) * containerWidth
+      ))
+      setPreviewWidth(newPixelWidth)
+    }
+  }, [settings?.previewWidth, containerWidth, isSidebarVisible, isNotesListVisible, notesListWidth])
 
   // Calculate available space and constraints
   const getConstraints = useCallback(() => {
@@ -175,7 +197,10 @@ const ResizableLayout = ({
 
       {/* Preview Panel - Resizable */}
       {isPreviewVisible && (
-        <div className="relative flex-shrink-0" style={{ width: previewWidth }}>
+        <div 
+          className="relative flex-shrink-0"
+          style={{ width: `${previewWidth}px` }}
+        >
           <ResizeHandle
             onMouseDown={startX => {
               const startWidth = previewWidth
