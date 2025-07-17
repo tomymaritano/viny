@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import Icons from '../Icons'
+import { Icons } from '../Icons'
 import IconButton from './IconButton'
 import { Notebook, NOTEBOOK_COLORS } from '../../types/notebook'
 import { ANIMATIONS } from '../../constants/theme'

@@ -95,7 +95,7 @@ CSC_KEY_PASSWORD="tu-contraseña-del-p12"
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
       "notarize": {
-        "appBundleId": "com.nototo.app",
+        "appBundleId": "com.viny.app",
         "appleId": "$(APPLE_ID)",
         "appleIdPassword": "$(APPLE_ID_PASSWORD)",
         "ascProvider": "YOUR_TEAM_ID"
@@ -163,7 +163,7 @@ Mientras consigues el certificado, puedes firmar localmente:
 
 ```bash
 # Firma la app solo para tu Mac
-codesign --force --deep --sign - /Applications/Nototo.app
+codesign --force --deep --sign - /Applications/Viny.app
 ```
 
 ### 2. **Buscar sponsors**

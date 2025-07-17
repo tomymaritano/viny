@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react'
 import { defaultEditorColors, applyEditorColors } from '../config/editorColors'
 
+/**
+ * Default settings configuration for the application
+ * @constant
+ * @type {Settings}
+ */
 const defaultSettings = {
   // General
   theme: 'dark',
@@ -48,17 +53,25 @@ const defaultSettings = {
 }
 
 // Global settings store
-let globalSettings = null
-const subscribers = new Set()
+let globalSettings: any = null
+const subscribers = new Set<(settings: any) => void>()
 
 const loadSettings = () => {
   if (globalSettings) return globalSettings
 
   try {
     const saved = localStorage.getItem('viny-settings')
-    globalSettings = saved
-      ? { ...defaultSettings, ...JSON.parse(saved) }
-      : defaultSettings
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        globalSettings = { ...defaultSettings, ...parsed }
+      } catch (parseError) {
+        console.warn('Failed to parse settings JSON, using defaults:', parseError)
+        globalSettings = defaultSettings
+      }
+    } else {
+      globalSettings = defaultSettings
+    }
   } catch (error) {
     console.warn('Failed to load settings:', error)
     globalSettings = defaultSettings
@@ -101,57 +114,95 @@ const loadSettings = () => {
   return globalSettings
 }
 
-const saveSettings = newSettings => {
+const saveSettings = (newSettings: any) => {
+  // Update global state first (should always work)
+  globalSettings = newSettings
+  
+  // Try to persist to localStorage (may fail, but state should still update)
   try {
     localStorage.setItem('viny-settings', JSON.stringify(newSettings))
-    globalSettings = newSettings
-
-    // Update CSS variables for typography
-    const root = document.documentElement
-    if (newSettings.fontFamily) {
-      root.style.setProperty('--font-family-editor', newSettings.fontFamily)
-    }
-    if (newSettings.fontSize) {
-      root.style.setProperty('--font-size-editor', `${newSettings.fontSize}px`)
-    }
-    if (newSettings.uiFontFamily) {
-      root.style.setProperty('--font-family-ui', newSettings.uiFontFamily)
-    }
-    if (newSettings.uiFontSize) {
-      root.style.setProperty('--font-size-ui', `${newSettings.uiFontSize}px`)
-    }
-    if (newSettings.markdownFontFamily) {
-      root.style.setProperty(
-        '--font-family-markdown',
-        newSettings.markdownFontFamily
-      )
-    }
-    if (newSettings.markdownFontSize) {
-      root.style.setProperty(
-        '--font-size-markdown',
-        `${newSettings.markdownFontSize}px`
-      )
-    }
-    if (newSettings.lineHeight) {
-      root.style.setProperty('--line-height', newSettings.lineHeight)
-    }
-    if (newSettings.editorColors) {
-      applyEditorColors(newSettings.editorColors)
-    }
-
-    // Notify all subscribers
-    subscribers.forEach(callback => callback(newSettings))
   } catch (error) {
-    console.warn('Failed to save settings:', error)
+    console.warn('Failed to save settings to localStorage:', error)
   }
+
+  // Update CSS variables for typography
+  const root = document.documentElement
+  if (newSettings.fontFamily) {
+    root.style.setProperty('--font-family-editor', newSettings.fontFamily)
+  }
+  if (newSettings.fontSize) {
+    root.style.setProperty('--font-size-editor', `${newSettings.fontSize}px`)
+  }
+  if (newSettings.uiFontFamily) {
+    root.style.setProperty('--font-family-ui', newSettings.uiFontFamily)
+  }
+  if (newSettings.uiFontSize) {
+    root.style.setProperty('--font-size-ui', `${newSettings.uiFontSize}px`)
+  }
+  if (newSettings.markdownFontFamily) {
+    root.style.setProperty(
+      '--font-family-markdown',
+      newSettings.markdownFontFamily
+    )
+  }
+  if (newSettings.markdownFontSize) {
+    root.style.setProperty(
+      '--font-size-markdown',
+      `${newSettings.markdownFontSize}px`
+    )
+  }
+  if (newSettings.lineHeight) {
+    root.style.setProperty('--line-height', newSettings.lineHeight)
+  }
+  if (newSettings.editorColors) {
+    applyEditorColors(newSettings.editorColors)
+  }
+
+  // Notify all subscribers (should always happen)
+  subscribers.forEach(callback => callback(newSettings))
 }
 
+/**
+ * Hook for managing application settings with global state synchronization.
+ * 
+ * @description
+ * This hook provides a reactive interface to application settings that are:
+ * - Persisted to localStorage
+ * - Synchronized across all components using the hook
+ * - Applied immediately to CSS variables for theming
+ * - Validated before saving
+ * 
+ * @returns {Object} Settings management interface
+ * @returns {Settings} returns.settings - Current settings object
+ * @returns {Function} returns.updateSetting - Update a single setting
+ * @returns {Function} returns.updateSettings - Update multiple settings
+ * @returns {Function} returns.resetSettings - Reset to default settings
+ * @returns {Function} returns.exportSettings - Export settings as JSON
+ * @returns {Function} returns.importSettings - Import settings from JSON
+ * 
+ * @example
+ * ```tsx
+ * function SettingsPanel() {
+ *   const { settings, updateSetting, resetSettings } = useSettings();
+ *   
+ *   return (
+ *     <div>
+ *       <Select
+ *         value={settings.theme}
+ *         onChange={(theme) => updateSetting('theme', theme)}
+ *       />
+ *       <Button onClick={resetSettings}>Reset to Defaults</Button>
+ *     </div>
+ *   );
+ * }
+ * ```
+ */
 export const useSettings = () => {
   const [settings, setSettings] = useState(() => loadSettings())
 
   // Subscribe to global settings changes
   useEffect(() => {
-    const callback = newSettings => {
+    const callback = (newSettings: any) => {
       setSettings(newSettings)
     }
 
@@ -162,7 +213,7 @@ export const useSettings = () => {
     }
   }, [])
 
-  const updateSetting = (key, value) => {
+  const updateSetting = (key: string, value: any) => {
     const newSettings = {
       ...globalSettings,
       [key]: value,
@@ -170,7 +221,7 @@ export const useSettings = () => {
     saveSettings(newSettings)
   }
 
-  const updateSettings = newSettings => {
+  const updateSettings = (newSettings: any) => {
     const mergedSettings = {
       ...globalSettings,
       ...newSettings,
@@ -182,7 +233,7 @@ export const useSettings = () => {
     saveSettings(defaultSettings)
   }
 
-  const getSetting = key => {
+  const getSetting = (key: string) => {
     return settings[key]
   }
 
@@ -193,4 +244,10 @@ export const useSettings = () => {
     resetSettings,
     getSetting,
   }
+}
+
+// Testing utility to reset global state
+export const __resetGlobalSettingsForTesting = () => {
+  globalSettings = null
+  subscribers.clear()
 }

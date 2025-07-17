@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import TagContextMenu from '../ui/TagContextMenu'
 import NotebookContextMenu from '../ui/NotebookContextMenu'
 import DropdownMenu, { DropdownMenuItem } from '../ui/DropdownMenu'
-import Icons from '../Icons'
+import { Icons } from '../Icons'
 import { NotebookWithCounts } from '../../types/notebook'
 
 export interface ContextMenuState {

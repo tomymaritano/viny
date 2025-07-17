@@ -5,7 +5,7 @@ import { useAppStore } from '../stores/newSimpleStore'
 import SearchInput from './search/SearchInput'
 import SearchResults from './search/SearchResults'
 import SearchErrorBoundary from './errors/SearchErrorBoundary'
-import StandardModal from './ui/StandardModal'
+import { StandardModal } from './ui/StandardModal'
 
 interface SearchModalProps {
   isOpen: boolean
@@ -108,6 +108,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
         showCloseButton={false}
         className="max-h-[80vh] bg-theme-bg-primary"
         overlayClassName="pt-[10vh]"
+        data-testid="search-modal"
       >
         <div className="flex flex-col h-full bg-theme-bg-primary">
           <div className="px-4 py-3 border-b border-theme-border-primary bg-theme-bg-secondary">
@@ -142,4 +143,4 @@ const SearchModal: React.FC<SearchModalProps> = ({
   )
 }
 
-export default SearchModal
+export { SearchModal }

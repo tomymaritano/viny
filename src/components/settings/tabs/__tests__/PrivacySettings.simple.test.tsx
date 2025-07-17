@@ -1,50 +1,80 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import React from 'react'
 import PrivacySettings from '../PrivacySettings'
 
-// Mock store
-vi.mock('../../../../stores/newSimpleStore', () => ({
-  useAppStore: () => ({
+// Mock the new settings service
+vi.mock('../../../../hooks/useSettingsService', () => ({
+  useSettingsService: () => ({
     settings: {
-      analyticsEnabled: false,
+      telemetryEnabled: false,
       crashReporting: true,
-      localDataOnly: true,
+      localOnlyMode: true,
       dataRetentionDays: 365,
-      inactivityTimeoutMinutes: 15,
+      autoLockMinutes: 15,
     },
-    updateSettings: vi.fn()
+    setSetting: vi.fn(),
+    schemas: [
+      { key: 'telemetryEnabled', type: 'boolean', defaultValue: false, label: 'Enable Telemetry', category: 'privacy' },
+      { key: 'crashReporting', type: 'boolean', defaultValue: true, label: 'Crash Reporting', category: 'privacy' },
+      { key: 'localOnlyMode', type: 'boolean', defaultValue: true, label: 'Local-Only Mode', category: 'privacy' },
+    ],
+    errors: {},
+    loading: false
   })
 }))
 
-// Simple mock components
+// Mock the settings error handler
+vi.mock('../../../../hooks/useSettingsErrorHandler', () => ({
+  useSettingsErrorHandler: () => ({
+    errors: {},
+    handleSettingsError: vi.fn(),
+    validateAndHandle: vi.fn(),
+    clearError: vi.fn()
+  })
+}))
+
+// Mock the privacy service
+vi.mock('../../../../services/privacyService', () => ({
+  privacyService: {
+    clearUsageData: vi.fn(),
+    downloadUserData: vi.fn()
+  }
+}))
+
+// Mock the error boundary
+vi.mock('../../SettingsErrorBoundary', () => ({
+  default: ({ children }: { children: React.ReactNode }) => children
+}))
+
+// Mock the app store
+vi.mock('../../../../stores/newSimpleStore', () => ({
+  useAppStore: () => ({
+    showSuccess: vi.fn(),
+    showError: vi.fn(),
+    addToast: vi.fn()
+  })
+}))
+
+// Simple mock components  
 vi.mock('../../../Icons', () => ({
   default: {
     Download: () => null,
     ArrowRight: () => null,
-    Trash: () => null,
+    Trash2: () => null,
+    ChevronRight: () => null,
     AlertTriangle: () => null,
     Info: () => null,
+    Shield: () => null,
+    X: () => null,
+    RefreshCw: () => null,
+    RotateCcw: () => null,
   }
-}))
-
-vi.mock('../../ui/ValidationMessage', () => ({
-  default: () => null
-}))
-
-vi.mock('../../../hooks/useFormValidation', () => ({
-  useFormValidation: () => ({
-    values: { dataRetentionDays: 365, inactivityTimeoutMinutes: 15 },
-    errors: {},
-    warnings: {},
-    getFieldProps: () => ({ onBlur: vi.fn() }),
-    handleFieldChange: vi.fn(),
-    validateAllFields: vi.fn()
-  })
 }))
 
 describe('PrivacySettings - Simple', () => {
   it('renders without crashing', () => {
     render(<PrivacySettings />)
-    expect(screen.getByText('Data Collection & Analytics')).toBeInTheDocument()
+    expect(screen.getByText('Analytics & Tracking')).toBeInTheDocument()
   })
 })

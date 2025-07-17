@@ -18,6 +18,9 @@ export const PrivacySettings = lazy(() => import('./tabs/PrivacySettings'))
 export const TagsSettingsSimple = lazy(() => import('./tabs/TagsSettingsSimple'))
 export const AboutSettings = lazy(() => import('./tabs/AboutSettings'))
 
+// Advanced settings
+export const BackupManager = lazy(() => import('./BackupManager').then(module => ({ default: module.BackupManager })))
+
 // Legacy tabs - also lazy loaded
 export const EditorSettings = lazy(() => import('./tabs/EditorSettings'))
 export const StorageSettings = lazy(() => import('./tabs/StorageSettings'))

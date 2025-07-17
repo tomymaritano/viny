@@ -1,10 +1,18 @@
 import { Note, Notebook, Settings } from './index'
 
 interface StorageInfo {
+  dataDirectory: string
   notesCount: number
   notebooksCount: number
+  hasSettings: boolean
+  tagColorsCount: number
+  directories: {
+    data: string
+    notes: string
+    backups: string
+  }
   lastBackup?: string
-  storageSize: number
+  storageSize?: number
 }
 
 interface BackupInfo {
@@ -27,6 +35,14 @@ interface ElectronAPI {
   openSettings: () => void
   isElectron: boolean
   platform: string
+  
+  // Context menu support
+  showContextMenu: (type: string) => void
+  showNoteContextMenu: (note: Note) => void
+  
+  // Event handling
+  on: (event: string, callback: Function) => void
+  removeAllListeners: (event: string) => void
   windowControls: {
     minimize: () => void
     maximize: () => void
@@ -57,6 +73,11 @@ interface ElectronAPI {
     restoreBackup: (filename: string) => Promise<boolean>
     deleteBackup: (filename: string) => Promise<boolean>
   }
+  // File system operations
+  selectDirectory: () => Promise<string | null>
+  
+  // Window management
+  openNoteInNewWindow: (noteId: string) => Promise<void>
 }
 
 interface Window {

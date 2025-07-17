@@ -1,5 +1,5 @@
 import React from 'react'
-import Icons from '../../Icons'
+import { Icons } from '../../Icons'
 import TagContextMenu from '../../ui/TagContextMenu'
 import TagSettingsModal from '../tags/TagSettingsModal'
 import { useTagManager } from '../../../hooks/useTagManager'

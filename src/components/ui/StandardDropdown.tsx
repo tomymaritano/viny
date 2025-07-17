@@ -21,6 +21,7 @@ interface DropdownItem {
   onClick: (e: React.MouseEvent) => void
   variant?: 'default' | 'danger'
   type?: 'item' | 'separator'
+  testId?: string
 }
 
 interface StandardDropdownProps {
@@ -41,6 +42,7 @@ interface StandardDropdownProps {
   isOpen?: boolean
   onClose?: () => void
   style?: React.CSSProperties
+  'data-testid'?: string
 }
 
 const StandardDropdown: React.FC<StandardDropdownProps> = ({
@@ -59,7 +61,8 @@ const StandardDropdown: React.FC<StandardDropdownProps> = ({
   className = '',
   isOpen: isOpenProp,
   onClose,
-  style
+  style,
+  'data-testid': testId
 }) => {
   const [isOpenState, setIsOpenState] = useState(false)
   const isOpen = isOpenProp !== undefined ? isOpenProp : isOpenState
@@ -273,6 +276,7 @@ const StandardDropdown: React.FC<StandardDropdownProps> = ({
             backdrop-blur-sm z-50 overflow-hidden transition-all duration-200
             animate-in fade-in slide-in-from-top-2`}
           style={{ maxHeight: `${maxHeight}px`, ...style }}
+          data-testid={testId}
         >
           {/* Search Input */}
           {showSearch && (
@@ -305,6 +309,7 @@ const StandardDropdown: React.FC<StandardDropdownProps> = ({
                     <button
                       key={index}
                       onClick={item.onClick}
+                      data-testid={item.testId}
                       className={`w-full flex items-center gap-3 px-3 py-2 text-sm text-left
                         transition-colors duration-150
                         ${isFocused ? 'bg-theme-bg-tertiary ring-2 ring-theme-accent-primary/50' : ''}

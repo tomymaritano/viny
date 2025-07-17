@@ -1,12 +1,12 @@
-# 🧩 Nototo Plugin System
+# 🧩 Viny Plugin System
 
-Welcome to the **Nototo Plugin System** - a powerful way to extend your note-taking experience with custom functionality, UI enhancements, and workflow automations.
+Welcome to the **Viny Plugin System** - a powerful way to extend your note-taking experience with custom functionality, UI enhancements, and workflow automations.
 
 ## 🚀 Quick Start
 
 ### Installation
 
-1. Open Nototo
+1. Open Viny
 2. Go to **Settings** → **Plugins** → **Open Plugin Manager**
 3. Choose your installation method:
    - **Drag & Drop**: Drop `.js` plugin files directly
@@ -312,7 +312,7 @@ Here are some ideas for plugins you could create:
 
 ### Community
 
-- **GitHub**: [Plugin Repository](https://github.com/nototo/plugins)
+- **GitHub**: [Plugin Repository](https://github.com/viny/plugins)
 - **Discussions**: Share ideas and get help
 - **Examples**: Learn from community plugins
 
@@ -393,7 +393,7 @@ deactivate() {
 3. **Build your first plugin**: Start with the Hello World template
 4. **Join the community**: Share your creations and get help
 
-The Nototo Plugin System is designed to be powerful yet approachable. Whether you're customizing your workflow or building complex integrations, the plugin system gives you the tools you need.
+The Viny Plugin System is designed to be powerful yet approachable. Whether you're customizing your workflow or building complex integrations, the plugin system gives you the tools you need.
 
 **Happy coding! 🚀**
 

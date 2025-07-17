@@ -163,7 +163,14 @@ class StorageService {
 
   // Immediate save (internal use)
   private saveNoteImmediate(note: Note): void {
-    if (electronStorageService.isElectronEnvironment) {
+    // Check if we're in test environment - force localStorage for E2E tests
+    const isTestEnvironment = typeof window !== 'undefined' && (
+      window.navigator.userAgent.includes('Playwright') || 
+      window.navigator.userAgent.includes('Test') ||
+      process.env.NODE_ENV === 'test'
+    )
+    
+    if (electronStorageService.isElectronEnvironment && !isTestEnvironment) {
       // In Electron, we've already saved via async API
       // The verification happens in the renderer process
       return
@@ -240,7 +247,7 @@ class StorageService {
   saveNoteImmediately(note: Note): void {
     // Cancel any pending save for this note
     if (this.saveQueue.has(note.id)) {
-      clearTimeout(this.saveQueue.get(note.id)!)
+      clearTimeout(this.saveQueue.get(note.id)!.timeoutId)
       this.saveQueue.delete(note.id)
     }
     

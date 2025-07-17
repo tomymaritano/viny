@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import Icons from '../../Icons'
+import { Icons } from '../../Icons'
 import BaseModal from '../../ui/BaseModal'
 import CustomTag from '../../ui/CustomTag'
 import { getAvailableTagColors } from '../../../utils/customTagColors'

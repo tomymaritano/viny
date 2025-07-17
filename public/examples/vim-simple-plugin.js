@@ -1,9 +1,9 @@
-// Simple Vim Mode Plugin for Nototo
+// Simple Vim Mode Plugin for Viny
 export default {
   name: 'Simple Vim Mode',
   version: '1.0.0',
-  description: 'Basic Vim keybindings for Nototo editor',
-  author: 'Nototo',
+  description: 'Basic Vim keybindings for Viny editor',
+  author: 'Viny',
   
   activate(api) {
     console.log('Simple Vim Mode plugin activated!')

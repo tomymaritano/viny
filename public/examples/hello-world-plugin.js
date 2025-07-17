@@ -1,11 +1,11 @@
-// Nototo Plugin: Hello World
-// This is an example plugin that demonstrates basic Nototo plugin functionality
+// Viny Plugin: Hello World
+// This is an example plugin that demonstrates basic Viny plugin functionality
 
 export default {
   name: 'hello-world',
   version: '1.0.0',
-  description: 'A simple example plugin that adds a greeting feature to Nototo',
-  author: 'Nototo Team',
+  description: 'A simple example plugin that adds a greeting feature to Viny',
+  author: 'Viny Team',
   
   // Plugin configuration
   config: {
@@ -142,7 +142,7 @@ export default {
 Plugin Documentation:
 ====================
 
-This example plugin demonstrates all the major features of the Nototo Plugin API:
+This example plugin demonstrates all the major features of the Viny Plugin API:
 
 1. Basic plugin structure with metadata
 2. Configuration options
@@ -158,7 +158,7 @@ This example plugin demonstrates all the major features of the Nototo Plugin API
 8. HTTP requests
 
 To install this plugin:
-1. Open Nototo
+1. Open Viny
 2. Go to Settings > Plugins
 3. Click "Open Plugin Manager"
 4. Upload this file or install from URL

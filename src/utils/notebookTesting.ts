@@ -16,8 +16,8 @@ export const inspectNotebookStorage = async () => {
   if (isElectron) {
     console.log('🔍 Checking Electron storage...')
     try {
-      const { electronStorageService } = await import('../lib/electronStorage')
-      const notebooks = await electronStorageService.getNotebooks()
+      const electronStorage = await import('../lib/electronStorage')
+      const notebooks = await electronStorage.electronStorageService.getNotebooks()
       console.log('Electron notebooks:', notebooks.length)
       
       console.log('Notebooks from Electron:')

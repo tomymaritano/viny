@@ -38,7 +38,7 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
-    service: 'Nototo Backend',
+    service: 'Viny Backend',
     version: '1.0.0'
   })
 })
@@ -74,7 +74,7 @@ process.on('SIGTERM', async () => {
 })
 
 app.listen(port, () => {
-  console.log(`🚀 Nototo server running on http://localhost:${port}`)
+  console.log(`🚀 Viny server running on http://localhost:${port}`)
   console.log(`📊 Health check: http://localhost:${port}/health`)
   console.log(`📝 API docs: http://localhost:${port}/api`)
 })

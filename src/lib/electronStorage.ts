@@ -36,11 +36,7 @@ interface ElectronAPI {
   }
 }
 
-declare global {
-  interface Window {
-    electronAPI?: ElectronAPI
-  }
-}
+// ElectronAPI is already declared in types/electron.d.ts
 
 class ElectronStorageService {
   private readonly LEGACY_NOTES_KEY = 'viny_notes'
@@ -256,9 +252,12 @@ class ElectronStorageService {
       try {
         const result = await window.electronAPI!.storage.deleteNote(noteId)
         if (!result.success) {
-          throw new Error('Failed to delete note from file system')
+          // If the note file doesn't exist, consider it already deleted
+          logger.info('[ElectronStorage] Note file may not exist:', noteId)
+          // Don't throw error for missing files - they're already "deleted"
+        } else {
+          logger.info('[ElectronStorage] Note deleted:', noteId)
         }
-        logger.info('[ElectronStorage] Note deleted:', noteId)
       } catch (error) {
         logger.error('[ElectronStorage] Failed to delete note:', error)
         throw error

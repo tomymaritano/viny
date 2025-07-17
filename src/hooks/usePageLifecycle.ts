@@ -20,19 +20,28 @@ export const usePageLifecycle = ({ currentNote }: UsePageLifecycleProps) => {
   
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      storageService.flushPendingSaves()
+      try {
+        storageService.flushPendingSaves()
+      } catch (error) {
+        console.error('Failed to flush pending saves:', error)
+      }
       
       // If there are unsaved changes, warn the user
       if (currentNoteRef.current) {
         e.preventDefault()
-        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?'
-        return e.returnValue
+        const message = 'You have unsaved changes. Are you sure you want to leave?'
+        e.returnValue = message
+        return message
       }
     }
     
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        storageService.flushPendingSaves()
+        try {
+          storageService.flushPendingSaves()
+        } catch (error) {
+          console.error('Failed to flush pending saves:', error)
+        }
       }
     }
     
@@ -40,7 +49,11 @@ export const usePageLifecycle = ({ currentNote }: UsePageLifecycleProps) => {
     document.addEventListener('visibilitychange', handleVisibilityChange)
     
     return () => {
-      storageService.flushPendingSaves()
+      try {
+        storageService.flushPendingSaves()
+      } catch (error) {
+        console.error('Failed to flush pending saves:', error)
+      }
       window.removeEventListener('beforeunload', handleBeforeUnload)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }

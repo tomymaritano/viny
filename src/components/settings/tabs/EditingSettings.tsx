@@ -1,73 +1,123 @@
-import React, { useState } from 'react'
-import { useAppStore } from '../../../stores/newSimpleStore'
-import Icons from '../../Icons'
-import { useAdvancedValidation } from '../../../hooks/useAdvancedValidation'
-import { SettingsValidation } from '../../../utils/validation'
-import ValidationMessage from '../../ui/ValidationMessage'
-import ValidationSummary from '../../ui/ValidationSummary'
+import React from 'react'
+import { useSettingsService } from '../../../hooks/useSettingsService'
+import { Icons } from '../../Icons'
 
 const EditingSettings: React.FC = () => {
-  const { settings, updateSettings } = useAppStore()
-  const [showValidationDetails, setShowValidationDetails] = useState(false)
+  const editorService = useSettingsService({ category: 'editor' })
+  const themesService = useSettingsService({ category: 'themes' })
 
-  // Advanced form validation
-  const {
-    values,
-    errors,
-    warnings,
-    getFieldProps,
-    handleFieldChange,
-    validateAllFields,
-    getValidationSummary,
-    isValid,
-    isDirty
-  } = useAdvancedValidation({
-    initialValues: {
-      fontSize: settings.fontSize || 14,
-      fontFamily: settings.fontFamily || 'SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace',
-      lineHeight: settings.lineHeight || 1.5,
-      tabSize: settings.tabSize || 2,
-      indentUnit: settings.indentUnit || 2,
-      cursorScrollMargin: settings.cursorScrollMargin || 100
-    },
-    validationRules: {
-      fontSize: { validator: SettingsValidation.editing.fontSize },
-      fontFamily: { validator: SettingsValidation.editing.fontFamily },
-      lineHeight: { validator: SettingsValidation.editing.lineHeight },
-      tabSize: { validator: SettingsValidation.editing.tabSize },
-      indentUnit: { validator: SettingsValidation.editing.indentUnit },
-      cursorScrollMargin: { validator: SettingsValidation.editing.cursorScrollMargin }
-    },
-    validateOnChange: true,
-    validateOnBlur: true,
-    validateOnMount: true
-  })
+  // Merge settings from both categories
+  const settings = { ...editorService.settings, ...themesService.settings }
+  const schemas = [...editorService.schemas, ...themesService.schemas]
+  const errors = { ...editorService.errors, ...themesService.errors }
 
-  const validationSummary = getValidationSummary()
+  // Function to set setting in the correct category
+  const setSetting = (key: string, value: any) => {
+    const editorSchema = editorService.schemas.find(s => s.key === key)
+    const themesSchema = themesService.schemas.find(s => s.key === key)
+    
+    if (editorSchema) {
+      editorService.setSetting(key, value)
+    } else if (themesSchema) {
+      themesService.setSetting(key, value)
+    }
+  }
 
-  const fontFamilies = [
-    { value: 'system', label: 'System Font' },
-    { value: 'source-code-pro', label: 'Source Code Pro' },
-    { value: 'fira-code', label: 'Fira Code' },
-    { value: 'jetbrains-mono', label: 'JetBrains Mono' },
-    { value: 'cascadia-code', label: 'Cascadia Code' },
-  ]
+  // Get schema options
+  const fontFamilySchema = schemas.find(s => s.key === 'fontFamily')
+  const fontFamilies = fontFamilySchema?.options || []
 
-  const indentTypes = [
-    { value: 'spaces', label: 'Spaces' },
-    { value: 'tabs', label: 'Tabs' },
-  ]
+  const editorModeSchema = schemas.find(s => s.key === 'editorMode')
+  const editorModes = editorModeSchema?.options || []
+
+  const renderToggle = (key: string, label: string, description: string, testId?: string) => {
+    const schema = schemas.find(s => s.key === key)
+    const value = settings[key] ?? schema?.defaultValue ?? false
+    
+    return (
+      <div className="flex items-center justify-between">
+        <div>
+          <h4 className="text-sm font-medium text-theme-text-primary">
+            {label}
+          </h4>
+          <p className="text-xs text-theme-text-muted mt-1">
+            {description}
+          </p>
+        </div>
+        <label className="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            checked={value as boolean}
+            onChange={(e) => setSetting(key, e.target.checked)}
+            className="sr-only peer"
+            data-testid={testId}
+          />
+          <div className="w-11 h-6 bg-theme-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent-primary"></div>
+        </label>
+      </div>
+    )
+  }
+
+  const renderNumberInput = (key: string, label: string, testId?: string) => {
+    const schema = schemas.find(s => s.key === key)
+    const value = settings[key] ?? schema?.defaultValue ?? 0
+    
+    return (
+      <div>
+        <label className="block text-sm font-medium text-theme-text-secondary mb-2">
+          {label}
+        </label>
+        <div className="flex items-center space-x-4">
+          <span className="text-xs text-theme-text-muted">{schema?.min}</span>
+          <input
+            type="range"
+            min={schema?.min}
+            max={schema?.max}
+            step={schema?.step}
+            value={value as number}
+            onChange={(e) => setSetting(key, parseFloat(e.target.value))}
+            className="flex-1 h-2 bg-theme-bg-tertiary rounded-lg appearance-none cursor-pointer"
+            data-testid={testId}
+          />
+          <span className="text-xs text-theme-text-muted">{schema?.max}</span>
+          <span className="text-sm font-medium text-theme-text-primary w-12">
+            {schema?.step && schema.step < 1 ? (value as number).toFixed(1) : String(value)}
+          </span>
+        </div>
+        {errors[key] && (
+          <p className="mt-1 text-xs text-red-500">{errors[key]}</p>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8">
-      {/* Validation Summary */}
-      {(validationSummary.hasErrors || validationSummary.hasWarnings) && (
-        <ValidationSummary
-          {...validationSummary}
-          showDetails={showValidationDetails}
-          onToggleDetails={() => setShowValidationDetails(!showValidationDetails)}
-        />
-      )}
+      {/* Editor Mode */}
+      <div>
+        <h3 className="text-lg font-medium text-theme-text-primary mb-4">
+          Editor Mode
+        </h3>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-theme-text-secondary mb-2">
+              Choose Editor
+            </label>
+            <select
+              value={settings.editorMode || 'markdown'}
+              onChange={(e) => setSetting('editorMode', e.target.value)}
+              className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
+            >
+              {editorModes.map((mode) => (
+                <option key={mode.value} value={mode.value} className="bg-theme-bg-secondary text-theme-text-primary">
+                  {mode.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
 
       {/* Editor Behavior */}
       <div>
@@ -76,113 +126,15 @@ const EditingSettings: React.FC = () => {
         </h3>
         
         <div className="space-y-6">
-          {/* Auto Save */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-medium text-theme-text-primary">
-                Auto Save
-              </h4>
-              <p className="text-xs text-theme-text-muted mt-1">
-                Automatically save changes as you type
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.autoSave || true}
-                onChange={(e) => updateSettings({ autoSave: e.target.checked })}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-theme-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent-primary"></div>
-            </label>
-          </div>
-
-          {/* Auto Save Delay */}
-          {settings.autoSave && (
-            <div>
-              <label className="block text-sm font-medium text-theme-text-secondary mb-2">
-                Auto Save Delay (seconds)
-              </label>
-              <div className="flex items-center space-x-4">
-                <span className="text-xs text-theme-text-muted">1s</span>
-                <input
-                  type="range"
-                  min="1"
-                  max="10"
-                  value={settings.autoSaveDelay || 3}
-                  onChange={(e) => updateSettings({ autoSaveDelay: parseInt(e.target.value) })}
-                  className="flex-1 h-2 bg-theme-bg-tertiary rounded-lg appearance-none cursor-pointer"
-                />
-                <span className="text-xs text-theme-text-muted">10s</span>
-                <span className="text-sm font-medium text-theme-text-primary w-8">
-                  {settings.autoSaveDelay || 3}s
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Word Wrap */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-medium text-theme-text-primary">
-                Word Wrap
-              </h4>
-              <p className="text-xs text-theme-text-muted mt-1">
-                Wrap long lines to fit in the editor
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.wordWrap || true}
-                onChange={(e) => updateSettings({ wordWrap: e.target.checked })}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-theme-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent-primary"></div>
-            </label>
-          </div>
-
-          {/* Show Line Numbers */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-medium text-theme-text-primary">
-                Show Line Numbers
-              </h4>
-              <p className="text-xs text-theme-text-muted mt-1">
-                Display line numbers in the editor
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.showLineNumbers || false}
-                onChange={(e) => updateSettings({ showLineNumbers: e.target.checked })}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-theme-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent-primary"></div>
-            </label>
-          </div>
-
-          {/* Highlight Active Line */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-medium text-theme-text-primary">
-                Highlight Active Line
-              </h4>
-              <p className="text-xs text-theme-text-muted mt-1">
-                Highlight the line where your cursor is
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.highlightActiveLine || true}
-                onChange={(e) => updateSettings({ highlightActiveLine: e.target.checked })}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-theme-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent-primary"></div>
-            </label>
-          </div>
+          {renderToggle('autoSave', 'Auto Save', 'Automatically save changes as you type', 'auto-save-toggle')}
+          {renderToggle('spellCheck', 'Spell Check', 'Check spelling as you type')}
+          {renderToggle('wordWrap', 'Word Wrap', 'Wrap long lines in the editor')}
+          {renderToggle('showLineNumbers', 'Line Numbers', 'Display line numbers in the editor')}
+          {renderToggle('highlightActiveLine', 'Highlight Active Line', 'Highlight the line where your cursor is')}
+          {renderToggle('bracketMatching', 'Bracket Matching', 'Highlight matching brackets')}
+          {renderToggle('autoCloseBrackets', 'Auto Close Brackets', 'Automatically close brackets and quotes')}
+          {renderToggle('autoComplete', 'Auto Complete', 'Show autocomplete suggestions while typing')}
+          {renderToggle('showInvisibles', 'Show Invisible Characters', 'Display spaces, tabs, and line breaks')}
         </div>
       </div>
 
@@ -199,16 +151,9 @@ const EditingSettings: React.FC = () => {
               Font Family
             </label>
             <select
-              value={values.fontFamily}
-              onChange={(e) => {
-                const value = e.target.value
-                handleFieldChange('fontFamily', value)
-                updateSettings({ fontFamily: value })
-              }}
-              onBlur={() => getFieldProps('fontFamily').onBlur()}
-              className={`w-full px-3 py-2 bg-theme-bg-secondary border rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary ${
-                errors.fontFamily ? 'border-red-500' : 'border-theme-border-primary'
-              }`}
+              value={settings.fontFamily || 'default'}
+              onChange={(e) => setSetting('fontFamily', e.target.value)}
+              className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
             >
               {fontFamilies.map((font) => (
                 <option key={font.value} value={font.value} className="bg-theme-bg-secondary text-theme-text-primary">
@@ -216,50 +161,6 @@ const EditingSettings: React.FC = () => {
                 </option>
               ))}
             </select>
-            {errors.fontFamily && (
-              <ValidationMessage type="error" message={errors.fontFamily} />
-            )}
-            {warnings.fontFamily && (
-              <ValidationMessage type="warning" message={warnings.fontFamily} />
-            )}
-            {!errors.fontFamily && !warnings.fontFamily && (
-              <p className="mt-1 text-xs text-theme-text-muted">
-                Choose the font used in the editor
-              </p>
-            )}
-          </div>
-
-          {/* Editor Font Size */}
-          <div>
-            <label className="block text-sm font-medium text-theme-text-secondary mb-2">
-              Editor Font Size
-            </label>
-            <div className="flex items-center space-x-4">
-              <span className="text-xs text-theme-text-muted">8px</span>
-              <input
-                type="range"
-                min="8"
-                max="32"
-                value={values.editorFontSize}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value)
-                  handleFieldChange('editorFontSize', value)
-                  updateSettings({ editorFontSize: value })
-                }}
-                onBlur={() => getFieldProps('editorFontSize').onBlur()}
-                className="flex-1 h-2 bg-theme-bg-tertiary rounded-lg appearance-none cursor-pointer"
-              />
-              <span className="text-xs text-theme-text-muted">32px</span>
-              <span className="text-sm font-medium text-theme-text-primary w-12">
-                {values.editorFontSize}px
-              </span>
-            </div>
-            {errors.editorFontSize && (
-              <ValidationMessage type="error" message={errors.editorFontSize} />
-            )}
-            {warnings.editorFontSize && (
-              <ValidationMessage type="warning" message={warnings.editorFontSize} />
-            )}
           </div>
         </div>
       </div>
@@ -271,176 +172,52 @@ const EditingSettings: React.FC = () => {
         </h3>
         
         <div className="space-y-6">
-          {/* Indent Type */}
-          <div>
-            <label className="block text-sm font-medium text-theme-text-secondary mb-2">
-              Indent Type
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {indentTypes.map((type) => (
-                <button
-                  key={type.value}
-                  onClick={() => updateSettings({ indentType: type.value as 'spaces' | 'tabs' })}
-                  className={`
-                    px-4 py-2 rounded-md border transition-all
-                    ${
-                      settings.indentType === type.value
-                        ? 'border-theme-accent-primary bg-theme-accent-primary/10 text-theme-accent-primary'
-                        : 'border-theme-border-primary text-theme-text-secondary hover:border-theme-border-secondary'
-                    }
-                  `}
-                >
-                  {type.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Indent Size */}
-          <div>
-            <label className="block text-sm font-medium text-theme-text-secondary mb-2">
-              Indent Size ({settings.indentType === 'tabs' ? 'Tab Width' : 'Spaces'})
-            </label>
-            <div className="flex items-center space-x-4">
-              <span className="text-xs text-theme-text-muted">1</span>
-              <input
-                type="range"
-                min="1"
-                max="8"
-                value={values.indentSize}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value)
-                  handleFieldChange('indentSize', value)
-                  updateSettings({ indentSize: value })
-                }}
-                onBlur={() => getFieldProps('indentSize').onBlur()}
-                className="flex-1 h-2 bg-theme-bg-tertiary rounded-lg appearance-none cursor-pointer"
-              />
-              <span className="text-xs text-theme-text-muted">8</span>
-              <span className="text-sm font-medium text-theme-text-primary w-8">
-                {values.indentSize}
-              </span>
-            </div>
-            {errors.indentSize && (
-              <ValidationMessage type="error" message={errors.indentSize} />
-            )}
-            {warnings.indentSize && (
-              <ValidationMessage type="warning" message={warnings.indentSize} />
-            )}
-          </div>
-
-          {/* Auto Indent */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-medium text-theme-text-primary">
-                Auto Indent
-              </h4>
-              <p className="text-xs text-theme-text-muted mt-1">
-                Automatically indent new lines
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.autoIndent || true}
-                onChange={(e) => updateSettings({ autoIndent: e.target.checked })}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-theme-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent-primary"></div>
-            </label>
-          </div>
+          {renderNumberInput('tabSize', 'Tab Size')}
+          {renderNumberInput('lineHeight', 'Line Height')}
+          {renderNumberInput('editorFontSize', 'Editor Font Size', 'font-size-slider')}
         </div>
       </div>
 
-      {/* Advanced Features */}
+      {/* Advanced */}
       <div>
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
-          Advanced Features
+          Advanced
         </h3>
         
         <div className="space-y-6">
-          {/* Vim Mode */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-medium text-theme-text-primary">
-                Vim Mode
-              </h4>
-              <p className="text-xs text-theme-text-muted mt-1">
-                Enable Vim key bindings in the editor
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.vimMode || false}
-                onChange={(e) => updateSettings({ vimMode: e.target.checked })}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-theme-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent-primary"></div>
-            </label>
-          </div>
+          {renderToggle('scrollBeyondLastLine', 'Scroll Beyond Last Line', 'Allow scrolling past the last line')}
+          {renderToggle('minimap', 'Show Minimap', 'Display code minimap for navigation')}
+          {renderToggle('vimMode', 'Vim Mode', 'Enable Vim keybindings')}
+          {renderToggle('smoothScrolling', 'Smooth Scrolling', 'Enable smooth scrolling animations')}
+          {renderToggle('folding', 'Code Folding', 'Enable code folding for sections')}
+          {renderToggle('emmetEnabled', 'Emmet Support', 'Enable Emmet abbreviations for HTML/CSS')}
+        </div>
+      </div>
 
-          {/* Smart Quotes */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-medium text-theme-text-primary">
-                Smart Quotes
-              </h4>
-              <p className="text-xs text-theme-text-muted mt-1">
-                Automatically convert straight quotes to curly quotes
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.smartQuotes || false}
-                onChange={(e) => updateSettings({ smartQuotes: e.target.checked })}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-theme-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent-primary"></div>
+      {/* Clipboard */}
+      <div>
+        <h3 className="text-lg font-medium text-theme-text-primary mb-4">
+          Clipboard
+        </h3>
+        
+        <div className="space-y-6">
+          {/* Auto Save Delay */}
+          <div>
+            <label className="block text-sm font-medium text-theme-text-secondary mb-2">
+              Auto Save Delay (ms)
             </label>
-          </div>
-
-          {/* Auto Close Brackets */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-medium text-theme-text-primary">
-                Auto Close Brackets
-              </h4>
-              <p className="text-xs text-theme-text-muted mt-1">
-                Automatically close brackets, quotes, and parentheses
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.autoCloseBrackets || true}
-                onChange={(e) => updateSettings({ autoCloseBrackets: e.target.checked })}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-theme-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent-primary"></div>
-            </label>
-          </div>
-
-          {/* Spell Check */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-medium text-theme-text-primary">
-                Spell Check
-              </h4>
-              <p className="text-xs text-theme-text-muted mt-1">
-                Check spelling as you type
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.spellCheck || true}
-                onChange={(e) => updateSettings({ spellCheck: e.target.checked })}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-theme-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent-primary"></div>
-            </label>
+            <input
+              type="number"
+              value={settings.autoSaveDelay || 2000}
+              onChange={(e) => setSetting('autoSaveDelay', parseInt(e.target.value))}
+              min={500}
+              max={10000}
+              step={500}
+              className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
+            />
+            <p className="mt-1 text-xs text-theme-text-muted">
+              Delay before auto-saving changes
+            </p>
           </div>
         </div>
       </div>

@@ -1,58 +1,95 @@
+import React from 'react'
 import PropTypes from 'prop-types'
-import Icons from '../Icons'
+import { Icons } from '../Icons'
 
-const FloatingViewControls = ({ viewMode, onViewModeChange }) => {
-  const handlePreviewOnlyToggle = () => {
-    onViewModeChange(viewMode === 'preview' ? 'editor' : 'preview')
-  }
-
+const FloatingViewControls = ({ viewMode, onViewModeChange, splitRatio = 50 }) => {
+  // Split view toggle - always toggles split on/off
   const handleSplitToggle = () => {
-    onViewModeChange(viewMode === 'split' ? 'editor' : 'split')
+    if (viewMode === 'split') {
+      // If we're in split, go back to editor
+      onViewModeChange('editor')
+    } else {
+      // If we're in editor or preview, go to split
+      onViewModeChange('split')
+    }
   }
 
-  const buttonBaseStyle =
-    'p-1.5 rounded-full transition-all duration-200 border border-transparent'
+  // Editor/Preview toggle - switches between editor and preview
+  const handleEditorPreviewToggle = () => {
+    switch (viewMode) {
+      case 'editor':
+        onViewModeChange('preview')
+        break
+      case 'preview':
+        onViewModeChange('editor')
+        break
+      case 'split':
+        // When in split view, this button switches to preview only
+        onViewModeChange('preview')
+        break
+      default:
+        onViewModeChange('editor')
+    }
+  }
+
+  const getEditorPreviewIcon = () => {
+    // Show the icon for what we'll switch TO
+    if (viewMode === 'preview') {
+      return Icons.Edit // Will switch to editor
+    } else {
+      return Icons.Eye // Will switch to preview
+    }
+  }
+
+  const getEditorPreviewTitle = () => {
+    switch (viewMode) {
+      case 'editor':
+        return 'Switch to Preview'
+      case 'preview':
+        return 'Switch to Editor'
+      case 'split':
+        return 'Switch to Preview Only'
+      default:
+        return 'Toggle Editor/Preview'
+    }
+  }
+
+  const buttonStyle = `
+    p-2.5 rounded-full bg-black/30 backdrop-blur-sm border
+    transition-all duration-200 shadow-lg hover:shadow-xl
+    hover:scale-105 active:scale-95
+  `
 
   return (
-    <div className="fixed bottom-2 sm:bottom-4 right-2 sm:right-4 z-50 flex flex-col gap-2 p-2 bg-black/20 backdrop-blur-sm rounded-xl border border-white/10">
-      {/* Preview Only Button */}
+    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-3">
+      {/* Split View Toggle */}
       <button
-        onClick={handlePreviewOnlyToggle}
-        className={`${buttonBaseStyle} ${
-          viewMode === 'preview'
-            ? 'text-white border-white/20 bg-white/10'
-            : 'text-theme-text-secondary hover:text-theme-text-primary hover:border-white/10 hover:bg-white/5'
+        onClick={handleSplitToggle}
+        className={`${buttonStyle} ${
+          viewMode === 'split'
+            ? 'border-white/40 bg-white/10 text-white'
+            : 'border-white/20 text-white/80 hover:text-white hover:border-white/30'
         }`}
-        title={viewMode === 'preview' ? 'Close preview' : 'Open preview only'}
-        aria-label={
-          viewMode === 'preview' ? 'Close preview' : 'Open preview only'
-        }
+        title={viewMode === 'split' ? 'Exit Split View' : 'Toggle Split View'}
+        aria-label={viewMode === 'split' ? 'Exit Split View' : 'Toggle Split View'}
+        data-testid="split-view-toggle"
       >
-        {viewMode === 'preview' ? (
-          <Icons.EyeOff size={16} />
+        {viewMode === 'split' && splitRatio > 50 ? (
+          <Icons.PanelLeft size={18} />
         ) : (
-          <Icons.Eye size={16} />
+          <Icons.PanelRight size={18} />
         )}
       </button>
 
-      {/* Split View Button */}
+      {/* Editor/Preview Toggle */}
       <button
-        onClick={handleSplitToggle}
-        className={`${buttonBaseStyle} ${
-          viewMode === 'split'
-            ? 'text-white border-white/20 bg-white/10'
-            : 'text-theme-text-secondary hover:text-theme-text-primary hover:border-white/10 hover:bg-white/5'
-        }`}
-        title={viewMode === 'split' ? 'Close split view' : 'Open split view'}
-        aria-label={
-          viewMode === 'split' ? 'Close split view' : 'Open split view'
-        }
+        onClick={handleEditorPreviewToggle}
+        className={`${buttonStyle} border-white/20 text-white/80 hover:text-white hover:border-white/30`}
+        title={getEditorPreviewTitle()}
+        aria-label={getEditorPreviewTitle()}
+        data-testid="preview-toggle"
       >
-        {viewMode === 'split' ? (
-          <Icons.Sidebar size={16} />
-        ) : (
-          <Icons.PanelRight size={16} />
-        )}
+        {React.createElement(getEditorPreviewIcon(), { size: 18 })}
       </button>
     </div>
   )
@@ -61,6 +98,7 @@ const FloatingViewControls = ({ viewMode, onViewModeChange }) => {
 FloatingViewControls.propTypes = {
   viewMode: PropTypes.oneOf(['editor', 'preview', 'split']).isRequired,
   onViewModeChange: PropTypes.func.isRequired,
+  splitRatio: PropTypes.number,
 }
 
 export default FloatingViewControls

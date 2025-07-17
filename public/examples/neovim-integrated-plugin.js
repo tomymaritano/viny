@@ -1,9 +1,9 @@
-// Integrated Neovim Plugin for Nototo using built-in monaco-vim
+// Integrated Neovim Plugin for Viny using built-in monaco-vim
 export default {
   name: 'Neovim Integrated',
   version: '1.0.0',
   description: 'Neovim experience using integrated monaco-vim library',
-  author: 'Nototo Team',
+  author: 'Viny Team',
   
   activate(api) {
     console.log('🚀 Neovim Integrated plugin activated!')

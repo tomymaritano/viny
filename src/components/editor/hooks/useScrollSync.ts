@@ -1,13 +1,16 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
+import { useSettingsService } from '../../../hooks/useSettingsService'
 
 export const useScrollSync = viewMode => {
   const [isScrollSyncing, setIsScrollSyncing] = useState(false)
   const editorContainerRef = useRef(null)
   const previewContainerRef = useRef(null)
+  const { settings } = useSettingsService({ category: 'preview' })
+  const syncScrollEnabled = settings.syncScrolling !== false // Default to true
 
   const syncScroll = useCallback(
     (sourceElement, targetElement) => {
-      if (!sourceElement || !targetElement || isScrollSyncing) return
+      if (!sourceElement || !targetElement || isScrollSyncing || !syncScrollEnabled) return
 
       setIsScrollSyncing(true)
 
@@ -25,7 +28,7 @@ export const useScrollSync = viewMode => {
 
       setTimeout(() => setIsScrollSyncing(false), 50)
     },
-    [isScrollSyncing]
+    [isScrollSyncing, syncScrollEnabled]
   )
 
   const handleEditorScroll = useCallback(

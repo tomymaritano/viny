@@ -20,7 +20,11 @@ interface NotesListSimpleProps {
   onDeleteNote: (note: Note) => void
   onDuplicateNote: (note: Note) => void
   onMoveToNotebook?: (note: Note) => void
+  onRestoreNote?: (note: Note) => void
+  onPermanentDelete?: (note: Note) => void
   currentSection?: string
+  isTrashView?: boolean
+  onSortNotes?: (sortBy: string) => void
 }
 
 const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
@@ -32,7 +36,11 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
   onDeleteNote,
   onDuplicateNote,
   onMoveToNotebook,
-  currentSection = 'notes'
+  onRestoreNote,
+  onPermanentDelete,
+  currentSection = 'notes',
+  isTrashView = false,
+  onSortNotes
 }) => {
   const { isEmpty } = useNotesListLogic(notes)
   const { sortBy, sortDirection, setSortBy, setSortDirection } = useAppStore()
@@ -173,6 +181,9 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
               onDeleteNote={onDeleteNote}
               onDuplicateNote={onDuplicateNote}
               onMoveToNotebook={onMoveToNotebook}
+              onRestoreNote={onRestoreNote}
+              onPermanentDelete={onPermanentDelete}
+              isTrashView={isTrashView}
             />
           </div>
         )}

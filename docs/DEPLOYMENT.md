@@ -1,6 +1,6 @@
 # Deployment Guide
 
-> Production deployment instructions for Nototo
+> Production deployment instructions for Viny
 
 ## 🚀 Quick Deployment
 
@@ -8,8 +8,8 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/your-username/nototo.git
-cd nototo
+git clone https://github.com/your-username/viny.git
+cd viny
 
 # Build and start production environment
 make build
@@ -33,8 +33,8 @@ The simplest production deployment using Docker Compose:
 
 ```bash
 # Production deployment
-git clone https://github.com/your-username/nototo.git
-cd nototo
+git clone https://github.com/your-username/viny.git
+cd viny
 
 # Configure environment (optional)
 cp .env.example .env
@@ -62,27 +62,27 @@ Deploy frontend and backend independently:
 
 ```bash
 # Build images
-docker build -t nototo-frontend .
-docker build -t nototo-backend ./server
+docker build -t viny-frontend .
+docker build -t viny-backend ./server
 
 # Create network
-docker network create nototo-network
+docker network create viny-network
 
 # Start backend
 docker run -d \
-  --name nototo-backend \
-  --network nototo-network \
+  --name viny-backend \
+  --network viny-network \
   -p 3001:3001 \
-  -v nototo_data:/app/data \
+  -v viny_data:/app/data \
   -e NODE_ENV=production \
-  nototo-backend
+  viny-backend
 
 # Start frontend
 docker run -d \
-  --name nototo-frontend \
-  --network nototo-network \
+  --name viny-frontend \
+  --network viny-network \
   -p 80:80 \
-  nototo-frontend
+  viny-frontend
 ```
 
 ## ☁️ Cloud Platform Deployment
@@ -176,8 +176,8 @@ curl -L "https://github.com/docker/compose/releases/latest/download/docker-compo
 chmod +x /usr/local/bin/docker-compose
 
 # Clone and deploy
-git clone https://github.com/your-username/nototo.git
-cd nototo
+git clone https://github.com/your-username/viny.git
+cd viny
 make build
 make start
 
@@ -203,7 +203,7 @@ chmod +x ecs-cli && sudo mv ecs-cli /usr/local/bin
 aws configure
 
 # Create ECS cluster
-ecs-cli configure --cluster nototo-cluster --region us-east-1
+ecs-cli configure --cluster viny-cluster --region us-east-1
 ecs-cli up --keypair your-key-pair --capability-iam --size 1 --instance-type t3.micro
 
 # Deploy
@@ -214,21 +214,21 @@ ecs-cli compose --file docker-compose.yml up
 
 ```json
 {
-  "family": "nototo",
+  "family": "viny",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "256",
   "memory": "512",
   "containerDefinitions": [
     {
-      "name": "nototo-backend",
-      "image": "your-account.dkr.ecr.region.amazonaws.com/nototo-backend",
+      "name": "viny-backend",
+      "image": "your-account.dkr.ecr.region.amazonaws.com/viny-backend",
       "portMappings": [{ "containerPort": 3001 }],
       "essential": true
     },
     {
-      "name": "nototo-frontend",
-      "image": "your-account.dkr.ecr.region.amazonaws.com/nototo-frontend",
+      "name": "viny-frontend",
+      "image": "your-account.dkr.ecr.region.amazonaws.com/viny-frontend",
       "portMappings": [{ "containerPort": 80 }],
       "essential": true
     }
@@ -249,17 +249,17 @@ gcloud services enable run.googleapis.com
 gcloud services enable cloudbuild.googleapis.com
 
 # Build and deploy backend
-gcloud builds submit --tag gcr.io/your-project-id/nototo-backend ./server
-gcloud run deploy nototo-backend \
-  --image gcr.io/your-project-id/nototo-backend \
+gcloud builds submit --tag gcr.io/your-project-id/viny-backend ./server
+gcloud run deploy viny-backend \
+  --image gcr.io/your-project-id/viny-backend \
   --platform managed \
   --region us-central1 \
   --allow-unauthenticated
 
 # Build and deploy frontend
-gcloud builds submit --tag gcr.io/your-project-id/nototo-frontend .
-gcloud run deploy nototo-frontend \
-  --image gcr.io/your-project-id/nototo-frontend \
+gcloud builds submit --tag gcr.io/your-project-id/viny-frontend .
+gcloud run deploy viny-frontend \
+  --image gcr.io/your-project-id/viny-frontend \
   --platform managed \
   --region us-central1 \
   --allow-unauthenticated
@@ -277,7 +277,7 @@ NODE_ENV=production
 PORT=3001
 
 # Database
-DATABASE_URL=file:./nototo.db
+DATABASE_URL=file:./viny.db
 
 # Security
 CORS_ORIGIN=https://yourapp.com
@@ -474,7 +474,7 @@ sudo firewall-cmd --reload
 ### Nginx Security Headers
 
 ```nginx
-# /etc/nginx/sites-available/nototo
+# /etc/nginx/sites-available/viny
 server {
     listen 80;
     server_name yourdomain.com;
@@ -516,7 +516,7 @@ make db-backup
 #!/bin/bash
 # backup.sh
 DATE=$(date +%Y%m%d_%H%M%S)
-docker-compose exec backend cp /app/prisma/nototo.db /app/data/backup_$DATE.db
+docker-compose exec backend cp /app/prisma/viny.db /app/data/backup_$DATE.db
 
 # Keep only last 7 days of backups
 find /path/to/backups -name "backup_*.db" -mtime +7 -delete
@@ -529,15 +529,15 @@ find /path/to/backups -name "backup_*.db" -mtime +7 -delete
 
 ```bash
 # Backup application data
-tar -czf nototo-backup-$(date +%Y%m%d).tar.gz \
+tar -czf viny-backup-$(date +%Y%m%d).tar.gz \
   docker-compose.yml \
   .env \
   server/.env \
-  /var/lib/docker/volumes/nototo_data \
-  /var/lib/docker/volumes/nototo_db
+  /var/lib/docker/volumes/viny_data \
+  /var/lib/docker/volumes/viny_db
 
 # Backup to S3 (optional)
-aws s3 cp nototo-backup-*.tar.gz s3://your-backup-bucket/
+aws s3 cp viny-backup-*.tar.gz s3://your-backup-bucket/
 ```
 
 ### Disaster Recovery
@@ -549,13 +549,13 @@ curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh
 
 # 2. Restore application files
-git clone https://github.com/your-username/nototo.git
-cd nototo
+git clone https://github.com/your-username/viny.git
+cd viny
 
 # 3. Restore data volumes
-tar -xzf nototo-backup-YYYYMMDD.tar.gz
-docker volume create nototo_data
-docker volume create nototo_db
+tar -xzf viny-backup-YYYYMMDD.tar.gz
+docker volume create viny_data
+docker volume create viny_db
 
 # 4. Start application
 make build
@@ -645,21 +645,21 @@ git pull origin main
 make build
 
 # Start new containers with different names
-docker-compose -f docker-compose.yml -p nototo-green up -d
+docker-compose -f docker-compose.yml -p viny-green up -d
 
 # Health check
 sleep 30
 if curl -f http://localhost:3001/health; then
     # Switch traffic (update load balancer)
     # Stop old containers
-    docker-compose -p nototo-blue down
+    docker-compose -p viny-blue down
     # Rename green to blue
-    docker-compose -p nototo-green down
-    docker-compose -f docker-compose.yml -p nototo-blue up -d
+    docker-compose -p viny-green down
+    docker-compose -f docker-compose.yml -p viny-blue up -d
     echo "Deployment successful"
 else
     # Rollback
-    docker-compose -p nototo-green down
+    docker-compose -p viny-green down
     echo "Deployment failed, rolled back"
     exit 1
 fi
@@ -672,7 +672,7 @@ fi
 #!/bin/bash
 # auto-update.sh
 
-cd /path/to/nototo
+cd /path/to/viny
 git fetch origin main
 
 if [ $(git rev-parse HEAD) != $(git rev-parse @{u}) ]; then
@@ -689,9 +689,9 @@ if [ $(git rev-parse HEAD) != $(git rev-parse @{u}) ]; then
     # Verify deployment
     sleep 30
     if make health; then
-        echo "Update successful" | mail -s "Nototo Updated" admin@yourapp.com
+        echo "Update successful" | mail -s "Viny Updated" admin@yourapp.com
     else
-        echo "Update failed" | mail -s "Nototo Update Failed" admin@yourapp.com
+        echo "Update failed" | mail -s "Viny Update Failed" admin@yourapp.com
     fi
 fi
 ```
@@ -736,11 +736,11 @@ make db-backup
 
 # Reset and restore from backup
 cd server
-rm prisma/nototo.db
+rm prisma/viny.db
 npm run db:push
 
 # Restore from backup if needed
-cp /path/to/backup.db prisma/nototo.db
+cp /path/to/backup.db prisma/viny.db
 ```
 
 #### SSL Certificate Issues
@@ -758,9 +758,9 @@ curl -I https://yourdomain.com
 
 ### Support & Help
 
-- **Documentation**: [GitHub Wiki](https://github.com/your-username/nototo/wiki)
-- **Issues**: [GitHub Issues](https://github.com/your-username/nototo/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-username/nototo/discussions)
+- **Documentation**: [GitHub Wiki](https://github.com/your-username/viny/wiki)
+- **Issues**: [GitHub Issues](https://github.com/your-username/viny/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-username/viny/discussions)
 - **Email**: support@yourapp.com
 
 ---
@@ -796,6 +796,6 @@ curl -I https://yourdomain.com
 
 ---
 
-**🎉 Congratulations!** Your Nototo application is now deployed and ready for production use.
+**🎉 Congratulations!** Your Viny application is now deployed and ready for production use.
 
 For ongoing maintenance and updates, refer to the [Development Guide](DEVELOPMENT.md) and keep your documentation up to date.

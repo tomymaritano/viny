@@ -1,57 +1,54 @@
 import React from 'react'
 import { useAppStore } from '../../../stores/newSimpleStore'
-import Icons from '../../Icons'
+import { useSettingsService } from '../../../hooks/useSettingsService'
+import { useNotebooks } from '../../../hooks/useNotebooks'
+import { getSettingsService } from '../../../services/settings'
+import { Icons } from '../../Icons'
 import { ElectronAPI, isElectronAPI } from '../../../types/settings'
 import { logger } from '../../../utils/logger'
-import { useFormValidation } from '../../../hooks/useFormValidation'
-import { SettingsValidation } from '../../../utils/validation'
-import ValidationMessage from '../../ui/ValidationMessage'
 
 const GeneralSettings: React.FC = () => {
-  const { settings, updateSettings, notebooks = [] } = useAppStore()
-
-  // Get available notebook IDs for validation
-  const availableNotebooks = notebooks.map(nb => nb.id)
-
-  // Form validation
+  const { showSuccess, showError } = useAppStore()
+  const { notebooks = [] } = useNotebooks()
+  
+  // Helper function to convert setting values to appropriate types
+  const stringValue = (value: any): string => typeof value === 'string' ? value : ''
+  const booleanValue = (value: any): boolean => typeof value === 'boolean' ? value : false
+  
   const {
-    values,
+    settings,
+    setSetting,
+    schemas,
     errors,
-    warnings,
-    getFieldProps,
-    handleFieldChange,
-    validateAllFields
-  } = useFormValidation({
-    initialValues: {
-      language: settings.language || 'en',
-      defaultNotebook: settings.defaultNotebook || 'inbox'
-    },
-    validationRules: {
-      language: SettingsValidation.general.language,
-      defaultNotebook: (value: string) => SettingsValidation.general.defaultNotebook(value, availableNotebooks)
-    },
-    validateOnChange: true,
-    validateOnBlur: true
-  })
+    exportSettings,
+    importSettings
+  } = useSettingsService({ category: 'general' })
 
-  const languages = [
-    { value: 'en', label: 'English (US)', flag: '🇺🇸' },
-    { value: 'en-gb', label: 'English (UK)', flag: '🇬🇧' },
-    { value: 'es', label: 'Español', flag: '🇪🇸' },
-    { value: 'es-mx', label: 'Español (México)', flag: '🇲🇽' },
-    { value: 'fr', label: 'Français', flag: '🇫🇷' },
-    { value: 'de', label: 'Deutsch', flag: '🇩🇪' },
-    { value: 'it', label: 'Italiano', flag: '🇮🇹' },
-    { value: 'pt-br', label: 'Português (Brasil)', flag: '🇧🇷' },
-    { value: 'zh-cn', label: '中文 (简体)', flag: '🇨🇳' },
-    { value: 'ja', label: '日本語', flag: '🇯🇵' },
-    { value: 'ko', label: '한국어', flag: '🇰🇷' },
-  ]
+  // Get language options from schema
+  const languageSchema = schemas.find(s => s.key === 'language')
+  const languages = languageSchema?.options?.map(opt => {
+    const flags: Record<string, string> = {
+      'en': '🇺🇸',
+      'es': '🇪🇸',
+      'fr': '🇫🇷',
+      'de': '🇩🇪',
+      'it': '🇮🇹',
+      'pt-br': '🇧🇷',
+      'zh-cn': '🇨🇳',
+      'ja': '🇯🇵',
+      'ko': '🇰🇷'
+    }
+    return {
+      value: opt.value,
+      label: opt.label,
+      flag: flags[opt.value as string] || '🌐'
+    }
+  }) || []
 
   const handleExportSettings = () => {
     try {
-      const settingsJson = JSON.stringify(settings, null, 2)
-      const blob = new Blob([settingsJson], { type: 'application/json' })
+      const settingsJson = exportSettings()
+      const blob = new Blob([JSON.stringify(settingsJson, null, 2)], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
@@ -59,35 +56,30 @@ const GeneralSettings: React.FC = () => {
       a.click()
       URL.revokeObjectURL(url)
       
-      // Show success message
-      updateSettings({ showToast: { type: 'success', message: 'Settings exported successfully' } })
+      showSuccess('Settings exported successfully')
     } catch (error) {
       logger.error('Failed to export settings:', error)
-      updateSettings({ showToast: { type: 'error', message: 'Failed to export settings' } })
+      showError('Failed to export settings')
     }
   }
 
-  const handleImportSettings = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportSettings = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
       const reader = new FileReader()
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         try {
-          const importedSettings = JSON.parse(e.target?.result as string)
+          const data = e.target?.result as string
+          const success = await importSettings(data)
           
-          // Validate imported settings
-          const validationResult = validateAllFields()
-          if (!validationResult.isValid) {
-            updateSettings({ showToast: { type: 'error', message: 'Invalid settings file format' } })
-            return
+          if (success) {
+            showSuccess('Settings imported successfully')
+          } else {
+            showError('Invalid settings file format')
           }
-          
-          // Update settings and show success
-          updateSettings(importedSettings)
-          updateSettings({ showToast: { type: 'success', message: 'Settings imported successfully' } })
         } catch (error) {
           logger.error('Failed to import settings:', error)
-          updateSettings({ showToast: { type: 'error', message: 'Failed to import settings. Please check the file format.' } })
+          showError('Failed to import settings. Please check the file format.')
         }
       }
       reader.readAsText(file)
@@ -122,13 +114,8 @@ const GeneralSettings: React.FC = () => {
               Default Notebook
             </label>
             <select
-              value={values.defaultNotebook}
-              onChange={(e) => {
-                const value = e.target.value
-                handleFieldChange('defaultNotebook', value)
-                updateSettings({ defaultNotebook: value })
-              }}
-              onBlur={() => getFieldProps('defaultNotebook').onBlur()}
+              value={stringValue(settings.defaultNotebook) || 'inbox'}
+              onChange={(e) => setSetting('defaultNotebook', e.target.value)}
               className={`w-full px-3 py-2 bg-theme-bg-secondary border rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary ${
                 errors.defaultNotebook ? 'border-red-500' : 'border-theme-border-primary'
               }`}
@@ -140,12 +127,9 @@ const GeneralSettings: React.FC = () => {
               ))}
             </select>
             {errors.defaultNotebook && (
-              <ValidationMessage type="error" message={errors.defaultNotebook} />
+              <p className="mt-1 text-xs text-red-500">{errors.defaultNotebook}</p>
             )}
-            {warnings.defaultNotebook && (
-              <ValidationMessage type="warning" message={warnings.defaultNotebook} />
-            )}
-            {!errors.defaultNotebook && !warnings.defaultNotebook && (
+            {!errors.defaultNotebook && (
               <p className="mt-1 text-xs text-theme-text-muted">
                 New notes will be saved to this notebook by default
               </p>
@@ -158,13 +142,8 @@ const GeneralSettings: React.FC = () => {
               Language
             </label>
             <select
-              value={values.language}
-              onChange={(e) => {
-                const value = e.target.value
-                handleFieldChange('language', value)
-                updateSettings({ language: value })
-              }}
-              onBlur={() => getFieldProps('language').onBlur()}
+              value={stringValue(settings.language) || 'en'}
+              onChange={(e) => setSetting('language', e.target.value)}
               className={`w-full px-3 py-2 bg-theme-bg-secondary border rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary ${
                 errors.language ? 'border-red-500' : 'border-theme-border-primary'
               }`}
@@ -176,12 +155,9 @@ const GeneralSettings: React.FC = () => {
               ))}
             </select>
             {errors.language && (
-              <ValidationMessage type="error" message={errors.language} />
+              <p className="mt-1 text-xs text-red-500">{errors.language}</p>
             )}
-            {warnings.language && (
-              <ValidationMessage type="warning" message={warnings.language} />
-            )}
-            {!errors.language && !warnings.language && (
+            {!errors.language && (
               <p className="mt-1 text-xs text-theme-text-muted">
                 Choose your preferred language for the interface
               </p>
@@ -209,13 +185,40 @@ const GeneralSettings: React.FC = () => {
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                checked={settings.autoUpdates || false}
-                onChange={(e) => updateSettings({ autoUpdates: e.target.checked })}
+                checked={booleanValue(settings.checkForUpdates)}
+                onChange={(e) => setSetting('checkForUpdates', e.target.checked)}
                 className="sr-only peer"
               />
               <div className="w-11 h-6 bg-theme-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent-primary"></div>
             </label>
           </div>
+          
+          {settings.checkForUpdates && (
+            <div>
+              <label className="block text-sm font-medium text-theme-text-secondary mb-2">
+                Update Channel
+              </label>
+              <select
+                value={stringValue(settings.updateChannel) || 'stable'}
+                onChange={(e) => setSetting('updateChannel', e.target.value)}
+                className={`w-full px-3 py-2 bg-theme-bg-secondary border rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary ${
+                  errors.updateChannel ? 'border-red-500' : 'border-theme-border-primary'
+                }`}
+              >
+                <option value="stable">Stable</option>
+                <option value="beta">Beta</option>
+                <option value="alpha">Alpha</option>
+              </select>
+              {errors.updateChannel && (
+                <p className="mt-1 text-xs text-red-500">{errors.updateChannel}</p>
+              )}
+              {!errors.updateChannel && (
+                <p className="mt-1 text-xs text-theme-text-muted">
+                  Choose which type of updates to receive
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -238,8 +241,8 @@ const GeneralSettings: React.FC = () => {
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                checked={settings.developmentMode || false}
-                onChange={(e) => updateSettings({ developmentMode: e.target.checked })}
+                checked={booleanValue(settings.developmentMode)}
+                onChange={(e) => setSetting('developmentMode', e.target.checked)}
                 className="sr-only peer"
               />
               <div className="w-11 h-6 bg-theme-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent-primary"></div>

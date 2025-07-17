@@ -2,7 +2,7 @@ import React from 'react'
 import { useSidebarContext } from './SidebarLogicProvider'
 import { useSidebarState } from '../../hooks/useSidebarState'
 import { useAppStore } from '../../stores/newSimpleStore'
-import Icons from '../Icons'
+import { Icons } from '../Icons'
 import IconButton from '../ui/IconButton'
 import SidebarSection from './SidebarSection'
 import MainSections from './MainSections'
@@ -24,6 +24,7 @@ const SidebarContent: React.FC = () => {
     tagsWithCounts,
     handleSectionClick,
     handleToggleSection,
+    handleSettingsClick,
     createNewNote,
     setModal,
     getTagColor,
@@ -60,10 +61,12 @@ const SidebarContent: React.FC = () => {
   return (
     <SidebarContainer onContextMenuClose={closeAllContextMenus}>
       {/* Settings button at top */}
-      <SettingsButton onClick={() => handleSectionClick('settings')} />
+      <SettingsButton onClick={handleSettingsClick} />
       
-      {/* Main Navigation Sections */}
-      <SidebarSection>
+      {/* Scrollable content area */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
+        {/* Main Navigation Sections */}
+        <SidebarSection>
         <MainSections
           sections={mainSections}
           activeSection={activeSection}
@@ -165,8 +168,9 @@ const SidebarContent: React.FC = () => {
         />
       </SidebarSection>
       
-      {/* Footer/Bottom spacer */}
-      <div className="flex-1" />
+        {/* Footer/Bottom spacer */}
+        <div className="flex-1" />
+      </div>
 
       {/* Context Menu Manager */}
       <SidebarContextMenuManager
@@ -182,7 +186,7 @@ const SidebarContent: React.FC = () => {
             
             if (window.confirm(confirmMessage)) {
               removeTagFromAllNotes(tagContextMenu.tagName)
-              showSuccess(`Tag "${tagContextMenu.tagName}" removed from all notes`)
+              // Success notification is handled by the store function
             }
           }
           closeAllContextMenus()

@@ -1,17 +1,43 @@
 import { useEffect } from 'react'
 import { useAppStore } from '../stores/newSimpleStore'
-import { storageService } from '../lib/storage'
-import { initLogger as logger } from '../utils/logger'
-import { initializeDefaultData } from '../utils/defaultDataInitializer'
+import { useServices } from '../services/ServiceProvider'
 
 /**
- * Hook responsible for application initialization
- * - Loads notes from storage
- * - Loads settings from storage
- * - Applies theme settings
- * - Handles storage diagnostics
+ * Hook responsible for application initialization coordination.
+ * Manages the startup sequence including data loading, theme initialization, and error handling.
+ * 
+ * @description
+ * This hook orchestrates the entire application initialization process using dependency injection
+ * for better testability. It handles:
+ * - Loading notes from storage
+ * - Initializing theme settings
+ * - Loading tag colors
+ * - Running diagnostics if needed
+ * - Error state management
+ * 
+ * @returns {Object} Initialization state
+ * @returns {boolean} returns.isInitializing - Whether the app is currently initializing
+ * @returns {Error|null} returns.initError - Any error that occurred during initialization
+ * 
+ * @example
+ * ```tsx
+ * function App() {
+ *   const { isInitializing, initError } = useAppInit();
+ *   
+ *   if (isInitializing) return <LoadingScreen />;
+ *   if (initError) return <ErrorScreen error={initError} />;
+ *   
+ *   return <MainApp />;
+ * }
+ * ```
  */
 export const useAppInit = () => {
+  const storeState = useAppStore()
+  const { appInitializationService, themeService } = useServices()
+  
+  console.log('useAppInit store state keys:', Object.keys(storeState))
+  console.log('setLoading function:', storeState.setLoading)
+  
   const { 
     setNotes, 
     setLoading, 
@@ -21,101 +47,40 @@ export const useAppInit = () => {
     loadTagColors,
     settings,
     updateSettings
-  } = useAppStore()
+  } = storeState
 
-  // Initialize data with proper async loading
+  // Initialize data using the injected service
   useEffect(() => {
-    let isInitialized = false
+    console.log('useAppInit useEffect triggered')
     
     const initializeApp = async () => {
-      if (isInitialized) return // Prevent double initialization
+      console.log('initializeApp starting via injected service')
       
-      try {
-        setLoading(true)
-        setError(null)
-        
-        // Run storage diagnostics in development
-        if (process.env.NODE_ENV === 'development') {
-          logger.debug('Running storage diagnostics...')
-          const { diagnoseSaveIssues, checkStorageAvailability } = await import('../lib/storageUtils')
-          
-          const storageInfo = checkStorageAvailability()
-          logger.debug('Storage availability:', storageInfo)
-          
-          const issues = await diagnoseSaveIssues()
-          if (issues.length > 0) {
-            logger.warn('Storage issues detected:', issues)
-            issues.forEach(issue => logger.warn('Issue:', issue))
-          } else {
-            logger.debug('No storage issues detected')
-          }
-        }
-        
-        logger.debug('Initializing default data if needed...')
-        await initializeDefaultData()
-        
-        logger.debug('Loading notes from storage...')
-        const storedNotes = await storageService.loadNotes()
-        
-        logger.debug('Loading tag colors from storage...')
-        await loadTagColors()
-        
-        logger.debug('Loading settings from storage...')
-        try {
-          const storedSettings = await storageService.loadSettings()
-          
-          // FALLBACK: Try direct localStorage access if storage service fails
-          if (!storedSettings || Object.keys(storedSettings).length === 0) {
-            logger.debug('Storage service returned empty, trying direct localStorage...')
-            try {
-              const directSettings = localStorage.getItem('viny-settings')
-              if (directSettings) {
-                const parsedSettings = JSON.parse(directSettings)
-                updateSettings(parsedSettings, true)
-                logger.debug('Settings loaded from direct localStorage:', Object.keys(parsedSettings))
-              }
-            } catch (fallbackError) {
-              logger.warn('Failed to load settings from direct localStorage:', fallbackError)
-            }
-          } else {
-            // Use the store's updateSettings method to load persisted settings
-            updateSettings(storedSettings, true) // Skip persistence during initialization
-            logger.debug('Settings loaded from storage:', Object.keys(storedSettings))
-          }
-        } catch (error) {
-          logger.warn('Failed to load settings from storage:', error)
-        }
-        
-        logger.debug('Loaded notes count:', storedNotes.length)
-        if (storedNotes.length >= 0) { // Always set notes, even if empty array
-          setNotes(storedNotes)
-          isInitialized = true
-          logger.info('App initialization completed successfully')
-        }
-      } catch (error) {
-        logger.error('Failed to initialize app:', error)
-        setError('Failed to load your notes. Please refresh the page.')
-      } finally {
-        setLoading(false)
+      const dependencies = {
+        setNotes,
+        setLoading,
+        setError,
+        loadTagColors,
+        updateSettings
+      }
+      
+      const result = await appInitializationService.initialize(dependencies)
+      
+      if (!result.success) {
+        console.log('Initialization failed:', result.error)
+      } else {
+        console.log('Initialization completed successfully')
       }
     }
     
     initializeApp()
-  }, [setNotes, setLoading, setError, loadTagColors, updateSettings])
+  }, [setNotes, setLoading, setError, loadTagColors, updateSettings, appInitializationService])
 
-  // Apply theme settings
+  // Apply theme settings using the injected service
   useEffect(() => {
-    const finalTheme = settings?.uiTheme || currentTheme || 'dark'
-    const resolvedTheme = finalTheme === 'system'
-      ? window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-      : finalTheme
-    
-    // Apply theme to DOM
-    document.documentElement.setAttribute('data-theme', resolvedTheme)
-    setTheme(resolvedTheme)
-    
-    logger.debug('Theme applied:', resolvedTheme)
-  }, [settings?.uiTheme, currentTheme, setTheme])
+    const themeDependencies = { setTheme }
+    themeService.applyTheme(settings, currentTheme, themeDependencies)
+  }, [settings?.uiTheme, currentTheme, setTheme, themeService])
 
   return {
     // Expose initialization status for components that need it

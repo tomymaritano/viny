@@ -7,6 +7,7 @@ import { NotebookWithCounts } from '../types/notebook'
 import { useAppInit } from './useAppInit'
 import { useNoteActions } from './useNoteActions'
 import { useSidebarLogic } from './useSidebarLogic'
+import { getStats } from '../utils/statsUtils'
 
 // Helper function to get all child notebook names recursively
 const getAllChildNotebooks = (notebooks: NotebookWithCounts[], parentName: string): string[] => {
@@ -112,26 +113,8 @@ export const getFilteredNotes = (
   })
 }
 
-export const getStats = (notes: Note[]) => {
-  // Filter out trashed notes
-  const activeNotes = notes.filter(note => !note.isTrashed)
-  
-  // Filter out completed/archived for main counts (consistent with UI filtering)
-  const visibleNotes = activeNotes.filter(note => !['completed', 'archived'].includes(note.status))
-  
-  return {
-    total: visibleNotes.length,
-    pinned: visibleNotes.filter(note => note.isPinned).length,
-    trashed: notes.filter(note => note.isTrashed).length,
-    byStatus: {
-      draft: activeNotes.filter(note => note.status === 'draft').length,
-      'in-progress': activeNotes.filter(note => note.status === 'in-progress').length,
-      review: activeNotes.filter(note => note.status === 'review').length,
-      completed: activeNotes.filter(note => note.status === 'completed').length,
-      archived: activeNotes.filter(note => note.status === 'archived').length
-    }
-  }
-}
+// Re-export getStats from utils for backward compatibility
+export { getStats } from '../utils/statsUtils'
 
 // Main app logic hook - now a coordinating hook
 export const useAppLogic = () => {

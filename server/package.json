@@ -1,7 +1,7 @@
 {
-  "name": "nototo-server",
+  "name": "viny-server",
   "version": "1.0.0",
-  "description": "Backend server for Nototo - Single user markdown note editor",
+  "description": "Backend server for Viny - Single user markdown note editor",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",

@@ -1,6 +1,6 @@
-# Nototo Performance Optimizations
+# Viny Performance Optimizations
 
-Este documento detalla las optimizaciones implementadas para mejorar significativamente el rendimiento del DMG de Nototo.
+Este documento detalla las optimizaciones implementadas para mejorar significativamente el rendimiento del DMG de Viny.
 
 ## 🎯 Problemas Identificados
 
@@ -120,8 +120,8 @@ npm run build:electron
 
 Los DMG optimizados se generan en:
 
-- `dist-electron/Nototo-1.0.0.dmg` (Universal Binary)
-- `dist-electron/Nototo-1.0.0-arm64.dmg` (Apple Silicon)
+- `dist-electron/Viny-1.0.0.dmg` (Universal Binary)
+- `dist-electron/Viny-1.0.0-arm64.dmg` (Apple Silicon)
 
 ## 🧪 Testing de Rendimiento
 
@@ -154,7 +154,7 @@ Si experimentas problemas después de las optimizaciones:
 1. **Revisar console**: `View → Developer → Toggle Developer Tools`
 2. **Memory usage**: Activity Monitor → Memory tab
 3. **Restart app**: Completamente cerrar y reabrir
-4. **Clear cache**: `~/Library/Application Support/Nototo/`
+4. **Clear cache**: `~/Library/Application Support/Viny/`
 
 ---
 

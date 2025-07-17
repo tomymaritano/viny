@@ -50,7 +50,7 @@ export function useSearchWorker(notes: Note[], options: UseSearchWorkerOptions =
     try {
       workerRef.current = new Worker('/search-worker.js')
       
-      workerRef.current.onmessage = (e) => {
+      workerRef.current.onmessage = (e: MessageEvent) => {
         const { type, results, query, totalResults, searchTime, error, success, notesCount } = e.data
         
         switch (type) {
@@ -126,27 +126,34 @@ export function useSearchWorker(notes: Note[], options: UseSearchWorkerOptions =
 
   // Fallback search function (main thread)
   const fallbackSearch = useCallback((query: string) => {
+    const startTime = performance.now()
+    
     if (!query.trim()) {
+      const endTime = performance.now()
       setSearchResults([])
+      setSearchTime(Math.max(endTime - startTime, 0.01)) // Ensure minimum time > 0
+      setIsSearching(false)
       return
     }
 
-    const startTime = performance.now()
     const searchLower = query.toLowerCase()
     
-    const results = notes.filter(note => 
-      note.title.toLowerCase().includes(searchLower) ||
-      note.content.toLowerCase().includes(searchLower) ||
-      note.tags.some(tag => tag.toLowerCase().includes(searchLower))
-    ).slice(0, 50) // Limit results
+    const results = notes
+      .filter(note => !note.isTrashed) // Exclude trashed notes
+      .filter(note => 
+        note.title.toLowerCase().includes(searchLower) ||
+        note.content.toLowerCase().includes(searchLower) ||
+        note.tags.some(tag => tag.toLowerCase().includes(searchLower))
+      ).slice(0, 50) // Limit results
     
     const endTime = performance.now()
+    const searchTime = Math.max(endTime - startTime, 0.01) // Ensure minimum time > 0
     
     setSearchResults(results)
-    setSearchTime(endTime - startTime)
+    setSearchTime(searchTime)
     setIsSearching(false)
     
-    logger.debug(`Fallback search completed in ${(endTime - startTime).toFixed(2)}ms with ${results.length} results`)
+    logger.debug(`Fallback search completed in ${searchTime.toFixed(2)}ms with ${results.length} results`)
   }, [notes])
 
   // Search function
@@ -188,7 +195,7 @@ export function useSearchWorker(notes: Note[], options: UseSearchWorkerOptions =
       })
     } else {
       // Simple fallback filtering
-      let filtered = [...notes]
+      let filtered = notes.filter(note => !note.isTrashed) // Exclude trashed notes
       
       if (filters.tags && filters.tags.length > 0) {
         filtered = filtered.filter(note => 
@@ -197,7 +204,7 @@ export function useSearchWorker(notes: Note[], options: UseSearchWorkerOptions =
       }
       
       if (filters.notebook) {
-        filtered = filtered.filter(note => note.notebookId === filters.notebook)
+        filtered = filtered.filter(note => note.notebook === filters.notebook)
       }
       
       setSearchResults(filtered)

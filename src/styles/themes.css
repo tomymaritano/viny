@@ -13,14 +13,14 @@
   --color-base3: #e0e0e0;
   --color-base4: #f0f0f0;
   --color-base5: #ffffff;
-  --color-blue: #4fc3f7;
-  --color-cyan: #26c6da;
-  --color-green: #66bb6a;
-  --color-yellow: #ffca28;
-  --color-orange: #ff8a65;
-  --color-red: #ef5350;
-  --color-magenta: #ba68c8;
-  --color-violet: #7986cb;
+  --color-blue: #5dade2;
+  --color-cyan: #48c9b0;
+  --color-green: #52c41a;
+  --color-yellow: #fadb14;
+  --color-orange: #fa8c16;
+  --color-red: #ff4d4f;
+  --color-magenta: #eb2f96;
+  --color-violet: #b794f4; /* Lighter violet for better visibility in dark theme */
 
   /* Modern sidebar color */
   --color-sidebar: #221f21;
@@ -69,7 +69,7 @@
 
   /* Light theme interaction colors */
   --color-hover-bg: #e3f2fd;
-  --color-active-bg: #a4b3cf;
+  --color-active-bg: #e1e1e1;
   --color-active-border: #ff5722;
   --color-active-text: #ffffff;
 }
@@ -103,4 +103,38 @@
   --color-active-bg: #073642;
   --color-active-border: #cb4b16;
   --color-active-text: #eee8d5;
+}
+
+/* Hacklab theme - Ultra serious, professional dark theme */
+[data-theme='hacklab'] {
+  /* Base colors - Monochromatic with subtle contrast */
+  --color-base03: #0a0a0a; /* Deep black background */
+  --color-base02: #141414; /* Slightly lighter black */
+  --color-base01: #1f1f1f; /* Dark gray for borders */
+  --color-base00: #2a2a2a; /* Medium dark gray */
+  --color-base0: #505050; /* Mid gray for muted text */
+  --color-base1: #707070; /* Light gray */
+  --color-base2: #b0b0b0; /* Lighter gray for text */
+  --color-base3: #d0d0d0; /* Main text - high contrast */
+  --color-base4: #e0e0e0; /* Very light gray */
+  --color-base5: #f0f0f0; /* Near white */
+
+  /* Accent colors - Minimal, professional palette */
+  --color-blue: #4a90e2; /* Professional blue */
+  --color-cyan: #5dade2; /* Muted cyan */
+  --color-green: #27ae60; /* Serious green */
+  --color-yellow: #f39c12; /* Muted amber */
+  --color-orange: #e67e22; /* Burnt orange */
+  --color-red: #e74c3c; /* Serious red */
+  --color-magenta: #8e44ad; /* Deep purple */
+  --color-violet: #9b59b6; /* Muted violet */
+
+  /* Modern sidebar color */
+  --color-sidebar: #0f0f0f;
+
+  /* Hacklab theme interaction colors */
+  --color-hover-bg: #1a1a1a;
+  --color-active-bg: #252525;
+  --color-active-border: #4a90e2; /* Professional blue accent */
+  --color-active-text: #f0f0f0;
 }

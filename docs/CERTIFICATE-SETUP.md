@@ -2,7 +2,7 @@
 
 ## Resumen
 
-Tu proyecto Nototo ya está completamente preparado para usar certificados de Apple Developer. Solo necesitas agregar tu certificado específico y configurar las credenciales.
+Tu proyecto Viny ya está completamente preparado para usar certificados de Apple Developer. Solo necesitas agregar tu certificado específico y configurar las credenciales.
 
 ## Estado Actual ✅
 
@@ -67,7 +67,7 @@ npm run electron:build:dev
 ## Estructura de Archivos
 
 ```
-nototo/
+viny/
 ├── .env                           # ✅ Configurado
 ├── certificate.p12               # ❌ Necesitas agregarlo
 ├── package.json                  # ✅ Notarización habilitada
@@ -97,7 +97,7 @@ security find-identity -v -p codesigning
 npm run electron:build
 
 # Verificar la app firmada
-codesign -dv --verbose=4 dist-electron/mac/Nototo.app
+codesign -dv --verbose=4 dist-electron/mac/Viny.app
 ```
 
 ## Solución de Problemas

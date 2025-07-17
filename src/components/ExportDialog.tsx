@@ -1,19 +1,9 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import Icons from './Icons'
-import { useExport } from '../hooks/useExport'
-import { useSettings } from '../hooks/useSettings'
-
-interface Note {
-  id: string
-  title: string
-  content?: string
-  notebook?: string
-  tags?: string[]
-  status?: string
-  createdAt?: string
-  updatedAt?: string
-}
+import { Icons } from './Icons'
+import { useElectronExport } from '../hooks/useElectronExport'
+import { useSettingsService } from '../hooks/useSettingsService'
+import { Note } from '../types' // Use the proper Note type instead of local interface
 
 interface ExportDialogProps {
   isVisible: boolean
@@ -40,9 +30,9 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
   selectedNotes = [],
   type = 'single',
 }) => {
-  const { exportToHTML, exportToPDF, exportToMarkdown, exportMultipleNotes } =
-    useExport()
-  const { settings } = useSettings()
+  const { exportToHTML, exportToPDF, exportToMarkdown, exportMultipleNotes, isElectron } =
+    useElectronExport()
+  const { settings } = useSettingsService()
 
   const [exportFormat, setExportFormat] = useState<ExportFormat>(
     (settings.exportFormat as ExportFormat) || 'pdf'
@@ -121,7 +111,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
       description: 'Print-ready document format',
       icon: <Icons.FileText size={20} />,
       note: isSingleNote
-        ? 'Opens print dialog'
+        ? (isElectron ? 'Generates native PDF file' : 'Opens print dialog')
         : 'Exports as HTML for printing',
     },
     {
@@ -167,44 +157,45 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
         onClick={onClose}
       >
         <motion.div
-          className="bg-theme-bg-secondary border border-theme-border-primary rounded-lg shadow-xl w-full max-w-lg"
+          data-testid="export-dialog"
+          className="bg-theme-bg-secondary border border-theme-border-primary rounded-lg shadow-xl w-full max-w-md"
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-theme-border-primary">
+          <div className="flex items-center justify-between p-4 border-b border-theme-border-primary">
             <div>
-              <h2 className="text-xl font-semibold text-theme-text-primary">
+              <h2 className="text-lg font-semibold text-theme-text-primary">
                 Export {isSingleNote ? 'Note' : 'Notes'}
               </h2>
-              <p className="text-sm text-theme-text-tertiary mt-1">
-                {isSingleNote
-                  ? `Export "${notesToExport[0]?.title}" to your preferred format`
-                  : `Export ${notesToExport.length} selected notes`}
-              </p>
+              {isSingleNote && (
+                <p className="text-xs text-theme-text-tertiary mt-0.5 truncate max-w-[200px]">
+                  {notesToExport[0]?.title}
+                </p>
+              )}
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary rounded transition-colors"
+              className="p-1.5 text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary rounded transition-colors"
             >
-              <Icons.X size={20} />
+              <Icons.X size={16} />
             </button>
           </div>
 
           {/* Content */}
-          <div className="p-6 space-y-6">
+          <div className="p-3 space-y-3">
             {/* Format Selection */}
             <div>
-              <label className="block text-sm font-medium text-theme-text-secondary mb-3">
-                Export Format
+              <label className="block text-sm font-medium text-theme-text-secondary mb-1.5">
+                Format
               </label>
-              <div className="space-y-2">
+              <div className="grid grid-cols-3 gap-2">
                 {formatOptions.map(format => (
                   <label
                     key={format.value}
-                    className={`flex items-start p-3 border rounded-lg cursor-pointer transition-colors ${
+                    className={`flex flex-col items-center p-2.5 border rounded-lg cursor-pointer transition-colors ${
                       exportFormat === format.value
                         ? 'border-theme-accent-primary bg-theme-accent-primary/10'
                         : 'border-theme-border-primary hover:border-theme-text-tertiary'
@@ -218,25 +209,15 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
                       onChange={handleFormatChange}
                       className="sr-only"
                     />
-                    <div className="flex items-start space-x-3 flex-1">
-                      <div
-                        className={`mt-0.5 ${exportFormat === format.value ? 'text-theme-accent-primary' : 'text-theme-text-tertiary'}`}
-                      >
-                        {format.icon}
-                      </div>
-                      <div className="flex-1">
-                        <div
-                          className={`font-medium ${exportFormat === format.value ? 'text-theme-accent-primary' : 'text-theme-text-secondary'}`}
-                        >
-                          {format.label}
-                        </div>
-                        <div className="text-sm text-theme-text-tertiary mt-0.5">
-                          {format.description}
-                        </div>
-                        <div className="text-xs text-theme-text-muted mt-1">
-                          {format.note}
-                        </div>
-                      </div>
+                    <div
+                      className={`mb-1.5 ${exportFormat === format.value ? 'text-theme-accent-primary' : 'text-theme-text-tertiary'}`}
+                    >
+                      {format.icon}
+                    </div>
+                    <div
+                      className={`text-xs font-medium text-center ${exportFormat === format.value ? 'text-theme-accent-primary' : 'text-theme-text-secondary'}`}
+                    >
+                      {format.label}
                     </div>
                   </label>
                 ))}
@@ -244,93 +225,59 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
             </div>
 
             {/* Options */}
-            <div className="space-y-4">
+            <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-medium text-theme-text-secondary">
-                    Include Metadata
-                  </div>
-                  <div className="text-xs text-theme-text-tertiary mt-0.5">
-                    Include title, date, notebook, and tags in export
-                  </div>
-                </div>
+                <span className="text-sm text-theme-text-secondary">Include Metadata</span>
                 <button
                   onClick={() => setIncludeMetadata(!includeMetadata)}
-                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                  className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${
                     includeMetadata
                       ? 'bg-theme-accent-primary'
                       : 'bg-theme-bg-tertiary'
                   }`}
                 >
                   <span
-                    className={`inline-block h-3 w-3 transform rounded-full bg-theme-text-primary transition-transform ${
-                      includeMetadata ? 'translate-x-5' : 'translate-x-1'
+                    className={`inline-block h-2.5 w-2.5 transform rounded-full bg-white transition-transform ${
+                      includeMetadata ? 'translate-x-4' : 'translate-x-0.5'
                     }`}
                   />
                 </button>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-theme-text-secondary mb-2">
-                  Custom Filename (Optional)
-                </label>
                 <input
                   type="text"
                   value={customFilename}
                   onChange={handleFilenameChange}
-                  placeholder={generateDefaultFilename()}
-                  className="w-full px-3 py-2 bg-theme-bg-primary border border-theme-border-primary rounded text-theme-text-secondary focus:border-theme-accent-primary focus:outline-none"
+                  placeholder={`Filename (default: ${generateDefaultFilename()})`}
+                  className="w-full px-2.5 py-1.5 text-sm bg-theme-bg-primary border border-theme-border-primary rounded text-theme-text-secondary focus:border-theme-accent-primary focus:outline-none"
                 />
-                <div className="text-xs text-theme-text-muted mt-1">
-                  Leave empty to use default filename
-                </div>
-              </div>
-            </div>
-
-            {/* Preview Info */}
-            <div className="bg-theme-bg-tertiary rounded-lg p-3">
-              <div className="text-sm text-theme-text-secondary font-medium mb-2">
-                Export Preview
-              </div>
-              <div className="space-y-1 text-xs text-theme-text-tertiary">
-                <div>
-                  Format:{' '}
-                  {formatOptions.find(f => f.value === exportFormat)?.label}
-                </div>
-                <div>
-                  Filename: {customFilename || generateDefaultFilename()}.
-                  {exportFormat === 'markdown' ? 'md' : exportFormat}
-                </div>
-                <div>Metadata: {includeMetadata ? 'Included' : 'Excluded'}</div>
-                {!isSingleNote && (
-                  <div>Notes: {notesToExport.length} selected</div>
-                )}
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between p-6 border-t border-theme-border-primary">
+          <div className="flex items-center justify-end gap-2 p-3 border-t border-theme-border-primary">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm text-theme-text-tertiary border border-theme-border-primary rounded hover:bg-theme-bg-tertiary transition-colors"
+              className="px-3 py-1.5 text-sm text-theme-text-tertiary hover:bg-theme-bg-tertiary rounded transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleExport}
               disabled={isExporting || notesToExport.length === 0}
-              className="px-4 py-2 text-sm bg-theme-accent-primary text-theme-text-primary rounded hover:bg-theme-accent-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+              className="px-3 py-1.5 text-sm bg-theme-accent-primary text-theme-text-primary rounded hover:bg-theme-accent-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
             >
               {isExporting ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-theme-text-primary border-t-transparent rounded-full animate-spin" />
+                  <div className="w-3 h-3 border-2 border-theme-text-primary border-t-transparent rounded-full animate-spin" />
                   <span>Exporting...</span>
                 </>
               ) : (
                 <>
-                  <Icons.Download size={16} />
-                  <span>Export {isSingleNote ? 'Note' : 'Notes'}</span>
+                  <Icons.Download size={14} />
+                  <span>Export</span>
                 </>
               )}
             </button>
@@ -342,3 +289,4 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
 }
 
 export default ExportDialog
+export { ExportDialog }

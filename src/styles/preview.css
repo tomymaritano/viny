@@ -10,8 +10,8 @@
     Roboto,
     sans-serif
   );
-  font-size: 15px;
-  line-height: 1.7;
+  font-size: var(--font-size-preview, 16px);
+  line-height: var(--line-height-preview, 1.7);
   color: var(--color-base2);
   background: transparent;
 }
@@ -100,9 +100,9 @@
 /* Paragraphs and text */
 .markdown-content p {
   margin: 1.2em 0;
-  line-height: 1.7;
+  line-height: var(--line-height, 1.7);
   color: var(--color-base2);
-  font-size: 1rem;
+  font-size: var(--font-size-markdown, 1rem);
 }
 
 .markdown-content p:first-child {
@@ -154,8 +154,14 @@
   border: 1px solid #1a1a1a !important;
   border-radius: 4px !important;
   font-size: 0.85em !important;
-  font-family:
-    'SF Mono', 'Monaco', 'Consolas', 'Fira Code', monospace !important;
+  font-family: var(
+    --font-family-editor,
+    'SF Mono',
+    'Monaco',
+    'Consolas',
+    'Fira Code',
+    monospace
+  ) !important;
   font-weight: 600 !important;
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.3),

@@ -6,7 +6,7 @@ services:
     build: 
       context: ./server
       target: base
-    container_name: nototo-backend-hybrid
+    container_name: viny-backend-hybrid
     ports:
       - "3001:3001"
     volumes:
@@ -18,16 +18,16 @@ services:
       # Mount node_modules as volume for performance
       - backend_node_modules:/app/node_modules
       # Persistent database
-      - nototo_db:/app/prisma
+      - viny_db:/app/prisma
     environment:
       - NODE_ENV=development
       - PORT=3001
-      - DATABASE_URL=file:./nototo.db
+      - DATABASE_URL=file:./viny.db
       # Allow CORS from local frontend
       - CORS_ORIGIN=http://localhost:5173
     command: npm run dev
     networks:
-      - nototo-network
+      - viny-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
       interval: 15s
@@ -37,12 +37,12 @@ services:
 
 volumes:
   # Persistent database storage
-  nototo_db:
+  viny_db:
     driver: local
   # Node modules volume for better performance
   backend_node_modules:
     driver: local
 
 networks:
-  nototo-network:
+  viny-network:
     driver: bridge

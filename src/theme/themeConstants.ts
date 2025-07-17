@@ -95,7 +95,7 @@ export const STATUS_BG_COLORS = {
 // Theme configuration
 export const THEME_CONFIG = {
   DEFAULT: 'dark',
-  AVAILABLE: ['dark', 'light', 'solarized', 'system'] as const,
+  AVAILABLE: ['dark', 'light', 'solarized', 'hacklab', 'system'] as const,
 } as const
 
 // Color values for direct use (when CSS vars can't be used)

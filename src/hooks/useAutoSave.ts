@@ -125,4 +125,3 @@ export const useAutoSave = (options: AutoSaveOptions) => {
   }
 }
 
-export default useAutoSave

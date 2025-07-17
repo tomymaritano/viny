@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import Toast, { ToastProps } from './Toast'
+import { Toast, ToastProps } from './Toast'
 
 interface ToastData extends Omit<ToastProps, 'onDismiss'> {
   id: string
@@ -21,19 +21,6 @@ const ToastContainer: React.FC<ToastContainerProps> = ({
   maxToasts = 5
 }) => {
   const [mountedToasts, setMountedToasts] = useState<ToastData[]>([])
-
-  // Auto-dismiss toasts with duration
-  useEffect(() => {
-    toasts.forEach(toast => {
-      if (toast.duration && toast.duration > 0) {
-        const timer = setTimeout(() => {
-          onDismiss(toast.id)
-        }, toast.duration)
-
-        return () => clearTimeout(timer)
-      }
-    })
-  }, [toasts, onDismiss])
 
   // Update mounted toasts
   useEffect(() => {
@@ -80,7 +67,7 @@ const ToastContainer: React.FC<ToastContainerProps> = ({
   const toastContainer = (
     <div 
       className={`
-        fixed z-50 flex flex-col space-y-4 p-6 pointer-events-none
+        fixed z-50 flex flex-col gap-3 p-4 pointer-events-none
         ${getPositionClasses()}
       `}
       style={{ maxHeight: '100vh', overflow: 'hidden' }}
@@ -102,4 +89,4 @@ const ToastContainer: React.FC<ToastContainerProps> = ({
   return createPortal(toastContainer, document.body)
 }
 
-export default ToastContainer
+export { ToastContainer }

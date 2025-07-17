@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import Icons from '../../Icons'
+import { Icons } from '../../Icons'
 import BaseModal from '../../ui/BaseModal'
 import TagManager from './TagManager'
 import TagSettingsModal from './TagSettingsModal'
@@ -35,7 +35,27 @@ const TagModal: React.FC<TagModalProps> = ({
 
   useEffect(() => {
     setLocalTags(currentTags)
-  }, [currentTags])
+    
+    // Check if we need to open tag settings for a specific tag
+    if (isOpen && mode === 'global') {
+      try {
+        const tempAction = window.localStorage.getItem('temp-tag-action')
+        if (tempAction) {
+          const { tag, action } = JSON.parse(tempAction)
+          window.localStorage.removeItem('temp-tag-action')
+          
+          if (action === 'color' && tag) {
+            // Open the tag settings modal for color change
+            setTimeout(() => {
+              setTagSettingsModal({ show: true, tagName: tag })
+            }, 100)
+          }
+        }
+      } catch (error) {
+        console.error('Error parsing temp tag action:', error)
+      }
+    }
+  }, [currentTags, isOpen, mode])
 
   if (!isOpen) return null
 
@@ -87,7 +107,7 @@ const TagModal: React.FC<TagModalProps> = ({
     if (window.confirm(confirmMessage)) {
       try {
         removeTagFromAllNotes(tagName)
-        showSuccess(`Tag "${tagName}" removed from all notes`)
+        // Success notification is handled by the store function
       } catch (error) {
         console.error('Failed to delete tag:', error)
         showError(`Failed to remove tag "${tagName}". Please try again.`)
@@ -327,4 +347,4 @@ const TagModal: React.FC<TagModalProps> = ({
   )
 }
 
-export default TagModal
+export { TagModal }

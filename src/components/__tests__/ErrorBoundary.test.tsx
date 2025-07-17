@@ -5,7 +5,7 @@ import ErrorBoundary, { useErrorHandler } from '../ErrorBoundary'
 
 // Mock dependencies
 vi.mock('../Icons', () => ({
-  default: {
+  Icons: {
     AlertTriangle: ({ size, className }: any) => (
       <div data-testid="alert-triangle" className={className}>AlertTriangle</div>
     ),

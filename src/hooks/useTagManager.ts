@@ -96,8 +96,20 @@ export function useTagManager(note: any, onTagsChange: (tags: string[]) => void)
     if (e.key === 'Enter') {
       e.preventDefault()
       if (selectedSuggestionIndex >= 0 && filteredSuggestions[selectedSuggestionIndex]) {
-        setTagInput(filteredSuggestions[selectedSuggestionIndex])
-        handleAddTag()
+        // When a suggestion is selected, add it directly instead of updating the input first
+        const selectedSuggestion = filteredSuggestions[selectedSuggestionIndex]
+        if (!note) return
+        
+        try {
+          const newTags = addTag(note.tags || [], selectedSuggestion)
+          onTagsChange(newTags)
+          setTagInput('')
+          setShowTagSuggestions(false)
+          setSelectedSuggestionIndex(-1)
+          logger.debug('Tag added successfully:', selectedSuggestion)
+        } catch (error) {
+          logger.error('Failed to add tag:', error)
+        }
       } else {
         handleAddTag()
       }

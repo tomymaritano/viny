@@ -1,4 +1,4 @@
-// Debug Plugin for Nototo
+// Debug Plugin for Viny
 export default {
   name: 'Debug Plugin',
   version: '1.0.0',

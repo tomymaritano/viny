@@ -1,8 +1,8 @@
 import React from 'react'
-import SettingsModal from './components/settings/SettingsModal'
+import { SettingsModal } from './components/settings/SettingsModal'
 import './App.css'
 
-const SettingsStandalone: React.FC = () => {
+export const SettingsStandalone: React.FC = () => {
   return (
     <div className="app">
       <SettingsModal
@@ -17,5 +17,3 @@ const SettingsStandalone: React.FC = () => {
     </div>
   )
 }
-
-export default SettingsStandalone

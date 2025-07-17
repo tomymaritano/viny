@@ -1,6 +1,6 @@
-# Nototo Backend
+# Viny Backend
 
-Backend server for Nototo - A single-user markdown note editor.
+Backend server for Viny - A single-user markdown note editor.
 
 ## Tech Stack
 
@@ -143,7 +143,7 @@ curl -X POST http://localhost:3001/api/migration/import \
 ```bash
 PORT=3001                    # Server port (default: 3001)
 NODE_ENV=development         # Environment
-DATABASE_URL="file:./nototo.db"  # SQLite database path
+DATABASE_URL="file:./viny.db"  # SQLite database path
 ```
 
 ## Production Deployment
@@ -160,7 +160,7 @@ The SQLite database file will be created automatically on first run.
 server/
 ├── prisma/
 │   ├── schema.prisma       # Database schema
-│   └── nototo.db          # SQLite database (auto-generated)
+│   └── viny.db          # SQLite database (auto-generated)
 ├── src/
 │   ├── controllers/       # Route handlers
 │   ├── routes/           # Express routes

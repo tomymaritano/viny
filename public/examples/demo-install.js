@@ -1,5 +1,5 @@
 // Demo: Instalación rápida de plugin para testing
-// Ejecuta esto en la consola del navegador cuando Nototo esté abierto
+// Ejecuta esto en la consola del navegador cuando Viny esté abierto
 
 // Simulación de API básica para testing
 const mockAPI = {

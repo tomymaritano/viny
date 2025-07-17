@@ -1,8 +1,8 @@
-# 📱 Nototo PWA - Instalación y Despliegue
+# 📱 Viny PWA - Instalación y Despliegue
 
 ## ✨ Características PWA
 
-Nototo ahora es una **Progressive Web App (PWA)** completamente funcional que ofrece:
+Viny ahora es una **Progressive Web App (PWA)** completamente funcional que ofrece:
 
 - 🔧 **Instalable** desde cualquier navegador moderno
 - 🌐 **Funciona offline** con Service Worker
@@ -17,7 +17,7 @@ Nototo ahora es una **Progressive Web App (PWA)** completamente funcional que of
 
 1. Visita la aplicación en tu navegador
 2. Busca el ícono **"Instalar"** en la barra de direcciones
-3. O usa el menú: **⋮ → Instalar Nototo**
+3. O usa el menú: **⋮ → Instalar Viny**
 4. La app aparecerá en tu escritorio/menú de aplicaciones
 
 ### Safari (iOS/Mac)
@@ -158,4 +158,4 @@ runtimeCaching: [
 - [Workbox](https://developers.google.com/web/tools/workbox) - Service Worker toolkit
 - [Web App Manifest](https://developer.mozilla.org/en-US/docs/Web/Manifest) - Documentación oficial
 
-¡Tu aplicación Nototo ya está lista para instalación profesional! 🎉
+¡Tu aplicación Viny ya está lista para instalación profesional! 🎉

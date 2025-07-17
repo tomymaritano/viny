@@ -1,10 +1,10 @@
 # Architecture Overview
 
-> Understanding Nototo's technical architecture and design decisions
+> Understanding Viny's technical architecture and design decisions
 
 ## 🏗 System Architecture
 
-Nototo follows a modern, containerized architecture with clear separation of concerns:
+Viny follows a modern, containerized architecture with clear separation of concerns:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -235,7 +235,7 @@ User → Frontend → API → Database
 
 ### Dual Storage Mode
 
-Nototo supports two storage modes for maximum flexibility:
+Viny supports two storage modes for maximum flexibility:
 
 #### 1. API Mode (Production)
 
@@ -381,7 +381,7 @@ PORT=3001
 NODE_ENV=production
 
 # Database
-DATABASE_URL=file:./nototo.db
+DATABASE_URL=file:./viny.db
 
 # Security
 CORS_ORIGIN=http://localhost:5173
@@ -483,4 +483,4 @@ services:
 
 ---
 
-This architecture document provides a comprehensive overview of Nototo's technical design. For specific implementation details, refer to the related documentation files.
+This architecture document provides a comprehensive overview of Viny's technical design. For specific implementation details, refer to the related documentation files.

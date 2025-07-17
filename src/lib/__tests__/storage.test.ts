@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { storageService } from '../storage'
 import type { Note, Notebook, Settings } from '../../types'
 
@@ -260,6 +260,75 @@ describe('StorageService', () => {
       const notes = storageService.getNotes()
       
       expect(notes).toEqual([])
+    })
+  })
+
+  describe('Async Methods', () => {
+    it('should load notes asynchronously', () => {
+      const mockNotes: Note[] = [
+        {
+          id: '1',
+          title: 'Async Note',
+          content: 'Async content',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          tags: ['async'],
+          notebook: 'default',
+          status: 'draft'
+        }
+      ]
+      
+      localStorageMock.getItem.mockReturnValue(JSON.stringify(mockNotes))
+      
+      // Test that the method exists and returns a promise
+      const promise = storageService.loadNotes()
+      expect(promise).toBeInstanceOf(Promise)
+    })
+
+    it('should load notebooks asynchronously', async () => {
+      const mockNotebooks: Notebook[] = [
+        {
+          id: '1',
+          name: 'Async Notebook',
+          color: 'blue',
+          description: 'Async description',
+          parentId: null,
+          children: [],
+          level: 0,
+          path: 'async-notebook',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      ]
+      
+      localStorageMock.getItem.mockReturnValue(JSON.stringify(mockNotebooks))
+      
+      const notebooks = await storageService.loadNotebooks()
+      
+      expect(notebooks).toEqual(mockNotebooks)
+      expect(localStorageMock.getItem).toHaveBeenCalledWith('viny_notebooks')
+    })
+
+    it('should load settings asynchronously', async () => {
+      const mockSettings: Partial<Settings> = {
+        theme: 'dark',
+        autoSave: true,
+        saveInterval: 5000
+      }
+      
+      localStorageMock.getItem.mockReturnValue(JSON.stringify(mockSettings))
+      
+      const settings = await storageService.loadSettings()
+      
+      expect(settings).toEqual(mockSettings)
+      expect(localStorageMock.getItem).toHaveBeenCalledWith('viny-settings')
+    })
+
+    it('should handle async methods existence', () => {
+      // Test that async methods exist and return promises
+      expect(typeof storageService.loadNotes).toBe('function')
+      expect(typeof storageService.loadNotebooks).toBe('function')
+      expect(typeof storageService.loadSettings).toBe('function')
     })
   })
 })

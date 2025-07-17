@@ -1,7 +1,8 @@
 import { useCallback } from 'react'
+import { flushSync } from 'react-dom'
 import { useAppStore } from '../stores/newSimpleStore'
 import { storageService } from '../lib/storage'
-import MarkdownProcessor from '../lib/markdown'
+import { MarkdownProcessor } from '../lib/markdown'
 import { Note } from '../types'
 
 import { noteLogger as logger } from '../utils/logger'
@@ -21,6 +22,8 @@ export const useNoteActions = () => {
     setSelectedNoteId,
     setIsEditorOpen,
     addToast,
+    showSuccess,
+    showError,
     createNoteFromTemplate
   } = useAppStore()
 
@@ -61,11 +64,11 @@ export const useNoteActions = () => {
       storageService.saveNote(newNote)
     } catch (error) {
       logger.error('Error saving new note:', error)
-      addToast({ type: 'error', message: 'Failed to save note' })
+      showError('Failed to save note')
     }
 
     return newNote
-  }, [activeSection, addNote, setCurrentNote, setSelectedNoteId, setIsEditorOpen, addToast])
+  }, [activeSection, addNote, setCurrentNote, setSelectedNoteId, setIsEditorOpen, showSuccess, showError])
 
   /**
    * Creates a note from a template
@@ -78,17 +81,17 @@ export const useNoteActions = () => {
         setSelectedNoteId(newNote.id)
         setIsEditorOpen(true)
         addNote(newNote)
-        addToast({ type: 'success', message: 'Note created from template' })
+        showSuccess('Note created from template')
         return newNote
       } else {
-        addToast({ type: 'error', message: 'Failed to create note from template' })
+        showError('Failed to create note from template')
       }
     } catch (error) {
       logger.error('Error creating note from template:', error)
-      addToast({ type: 'error', message: 'Failed to create note from template' })
+      showError('Failed to create note from template')
     }
     return null
-  }, [createNoteFromTemplate, setCurrentNote, setSelectedNoteId, setIsEditorOpen, addNote, addToast])
+  }, [createNoteFromTemplate, setCurrentNote, setSelectedNoteId, setIsEditorOpen, addNote, showSuccess, showError])
 
   /**
    * Saves a note with automatic title extraction and tag management
@@ -156,57 +159,76 @@ export const useNoteActions = () => {
       return updatedNote
     } catch (error) {
       logger.error('Error saving note:', error)
-      addToast({ type: 'error', message: 'Failed to save note: ' + (error as Error).message })
+      showError('Failed to save note: ' + (error as Error).message)
       throw error // Re-throw so auto-save can handle it
     }
-  }, [updateNote, addToast])
+  }, [updateNote, showSuccess, showError])
 
   /**
    * Moves a note to trash
    */
-  const handleDeleteNote = useCallback((note: Note) => {
+  const handleDeleteNote = useCallback(async (note: Note) => {
+    console.log('handleDeleteNote called with note:', note.id, note.title)
     const trashedNote = {
       ...note,
       isTrashed: true,
       trashedAt: new Date().toISOString(),
     }
-    updateNote(trashedNote)
+    console.log('Updating note to trashed:', trashedNote.id, trashedNote.isTrashed)
     
     try {
-      storageService.saveNote(trashedNote)
+      // Update the note in the store first and force synchronous re-render
+      flushSync(() => {
+        updateNote(trashedNote)
+      })
+      
+      // Wait for storage operation to complete
+      await storageService.saveNote(trashedNote)
+      
+      // Force flush any pending saves to ensure completion
+      await storageService.flushPendingSaves()
+      
+      showSuccess('Note moved to trash')
+      console.log('Note moved to trash successfully:', trashedNote.id)
     } catch (error) {
       logger.error('Error deleting note:', error)
-      addToast({ type: 'error', message: 'Failed to delete note' })
+      showError('Failed to delete note')
+      throw error // Re-throw so callers can handle the error
     }
-  }, [updateNote, addToast])
+  }, [updateNote, showSuccess, showError])
 
   /**
    * Toggles note pin status
    */
-  const handleTogglePin = useCallback((note: Note) => {
+  const handleTogglePin = useCallback(async (note: Note) => {
     const updatedNote = {
       ...note,
       isPinned: !note.isPinned,
       updatedAt: new Date().toISOString(),
     }
-    updateNote(updatedNote)
     
     try {
-      storageService.saveNote(updatedNote)
-      addToast({ 
-        type: 'success', 
-        message: updatedNote.isPinned ? 'Note pinned' : 'Note unpinned' 
+      // Update store first
+      flushSync(() => {
+        updateNote(updatedNote)
       })
+      
+      // Wait for storage operation to complete
+      await storageService.saveNote(updatedNote)
+      await storageService.flushPendingSaves()
+      
+      showSuccess(updatedNote.isPinned ? 'Note pinned' : 'Note unpinned')
     } catch (error) {
       logger.error('Error updating note:', error)
-      addToast({ type: 'error', message: 'Failed to update note' })
+      showError('Failed to update note')
+      throw error
     }
-  }, [updateNote, addToast])
+  }, [updateNote, showSuccess, showError])
 
   /**
    * Duplicates a note
    */
-  const handleDuplicateNote = useCallback((note: Note) => {
+  const handleDuplicateNote = useCallback(async (note: Note) => {
     const duplicatedNote: Note = {
       ...note,
       id: Date.now().toString(),
@@ -216,18 +238,24 @@ export const useNoteActions = () => {
       isPinned: false
     }
 
-    addNote(duplicatedNote)
-    
     try {
-      storageService.saveNote(duplicatedNote)
-      addToast({ type: 'success', message: 'Note duplicated successfully' })
+      // Add to store first
+      flushSync(() => {
+        addNote(duplicatedNote)
+      })
+      
+      // Wait for storage operation to complete
+      await storageService.saveNote(duplicatedNote)
+      await storageService.flushPendingSaves()
+      
+      showSuccess('Note duplicated successfully')
+      return duplicatedNote
     } catch (error) {
       logger.error('Error duplicating note:', error)
-      addToast({ type: 'error', message: 'Failed to duplicate note' })
+      showError('Failed to duplicate note')
+      throw error
     }
-
-    return duplicatedNote
-  }, [addNote, addToast])
+  }, [addNote, showSuccess, showError])
 
   /**
    * Permanently deletes all trashed notes
@@ -246,50 +274,65 @@ export const useNoteActions = () => {
         }
       })
       
-      addToast({ 
-        type: 'success', 
-        message: `Permanently deleted ${trashedNotes.length} note(s)` 
-      })
+      showSuccess(`Permanently deleted ${trashedNotes.length} note(s)`)
     } catch (error) {
       logger.error('Error emptying trash:', error)
-      addToast({ type: 'error', message: 'Failed to empty trash' })
+      showError('Failed to empty trash')
     }
-  }, [notes, removeNote, addToast])
+  }, [notes, removeNote, showSuccess, showError])
 
   /**
    * Restores a note from trash
    */
-  const handleRestoreNote = useCallback((note: Note) => {
+  const handleRestoreNote = useCallback(async (note: Note) => {
     const restoredNote = {
       ...note,
       isTrashed: false,
       trashedAt: undefined,
       updatedAt: new Date().toISOString(),
     }
-    updateNote(restoredNote)
     
     try {
-      storageService.saveNote(restoredNote)
-      addToast({ type: 'success', message: 'Note restored' })
+      // Update store first
+      flushSync(() => {
+        updateNote(restoredNote)
+      })
+      
+      // Wait for storage operation to complete
+      await storageService.saveNote(restoredNote)
+      await storageService.flushPendingSaves()
+      
+      showSuccess('Note restored')
     } catch (error) {
       logger.error('Error restoring note:', error)
-      addToast({ type: 'error', message: 'Failed to restore note' })
+      showError('Failed to restore note')
+      throw error
     }
-  }, [updateNote, addToast])
+  }, [updateNote, showSuccess, showError])
 
   /**
    * Permanently deletes a note
    */
-  const handlePermanentDelete = useCallback((note: Note) => {
+  const handlePermanentDelete = useCallback(async (note: Note) => {
     try {
+      // First remove from state
       removeNote(note.id)
-      storageService.deleteNote(note.id)
-      addToast({ type: 'success', message: 'Note permanently deleted' })
+      
+      // Then try to delete from storage (might fail if file doesn't exist)
+      try {
+        await storageService.deleteNote(note.id)
+      } catch (storageError) {
+        // Log the error but don't fail the operation
+        // The note might already be deleted from file system
+        logger.warn('Note file might already be deleted:', storageError)
+      }
+      
+      showSuccess('Note permanently deleted')
     } catch (error) {
       logger.error('Error permanently deleting note:', error)
-      addToast({ type: 'error', message: 'Failed to delete note permanently' })
+      showError('Failed to delete note permanently')
     }
-  }, [removeNote, addToast])
+  }, [removeNote, showSuccess, showError])
 
   /**
    * Removes a tag from all notes
@@ -314,13 +357,10 @@ export const useNoteActions = () => {
         }
       })
       
-      addToast({ 
-        type: 'success', 
-        message: `Removed tag "${tagName}" from ${notesWithTag.length} note(s)` 
-      })
+      showSuccess(`Removed tag "${tagName}" from ${notesWithTag.length} note(s)`)
     } catch (error) {
       logger.error('Error removing tag:', error)
-      addToast({ type: 'error', message: 'Failed to remove tag' })
+      showError('Failed to remove tag')
     }
   }, [notes, updateNote, addToast])
 

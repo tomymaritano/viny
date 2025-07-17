@@ -1,9 +1,9 @@
-// Emoji Picker Plugin for Nototo
+// Emoji Picker Plugin for Viny
 export default {
   name: 'Emoji Picker',
   version: '1.0.0',
   description: 'Add emojis to your notes with a convenient picker and search',
-  author: 'Nototo Team',
+  author: 'Viny Team',
   
   activate(api) {
     console.log('😀 Emoji Picker plugin activated!')

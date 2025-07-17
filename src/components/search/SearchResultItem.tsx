@@ -1,7 +1,7 @@
 import React from 'react'
 import { Note } from '../../types'
 import { formatDate } from '../../utils/dateUtils'
-import Icons from '../Icons'
+import { Icons } from '../Icons'
 
 interface SearchResultItemProps {
   note: Note
@@ -24,6 +24,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
           : 'hover:bg-theme-bg-secondary border-transparent'
       }`}
       onClick={() => onSelect(note.id)}
+      data-testid="search-result-item"
     >
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">

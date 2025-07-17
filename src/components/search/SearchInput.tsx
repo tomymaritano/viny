@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react'
-import Icons from '../Icons'
+import { Icons } from '../Icons'
 import IconButton from '../ui/IconButton'
 
 interface SearchInputProps {
@@ -32,6 +32,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
           className="w-full pl-10 pr-10 py-2.5 bg-transparent border-0 text-theme-text-primary placeholder-theme-text-muted focus:outline-none focus:ring-0"
           autoComplete="off"
           spellCheck="false"
+          data-testid="search-input"
         />
         {query && (
           <button

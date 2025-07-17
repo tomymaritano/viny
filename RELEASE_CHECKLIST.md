@@ -2,7 +2,7 @@
 
 ## 🎯 Release Overview
 
-This release implements a comprehensive auto-update system for Nototo, allowing seamless updates via GitHub Releases.
+This release implements a comprehensive auto-update system for Viny, allowing seamless updates via GitHub Releases.
 
 ## ✅ Pre-Release Checklist
 

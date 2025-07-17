@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect, useRef, useImperativeHandle, forwardRef } from 'react'
-import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import { Note } from '../types'
+import { MarkdownProcessor } from '../lib/markdown'
 
 interface MarkdownPreviewProps {
   note: Note | null
@@ -14,14 +14,39 @@ export interface MarkdownPreviewHandle {
   syncScrollPosition: (scrollTop: number, scrollHeight: number) => void
 }
 
-// Configure marked options
-const markedOptions = {
-  breaks: true,
-  gfm: true,
-  sanitize: false, // We use DOMPurify for sanitization
-  highlight: null, // Could add syntax highlighting later
-  silent: false,
-  xhtml: false
+// DOMPurify configuration - back to original with syntax highlighting support
+const purifyConfig = {
+  ALLOWED_TAGS: [
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'p', 'br', 'div', 'span',
+    'strong', 'b', 'em', 'i', 'u', 'code', 'pre',
+    'blockquote',
+    'ul', 'ol', 'li',
+    'a', 'img',
+    'table', 'thead', 'tbody', 'tr', 'th', 'td',
+    'hr', 'del', 'ins',
+    'input' // For task list checkboxes
+  ],
+  ALLOWED_ATTR: [
+    'href', 'src', 'alt', 'title', 'class', 'id',
+    'target', 'rel',
+    'type', 'checked', 'disabled' // Checkbox attributes
+  ],
+  ALLOW_DATA_ATTR: false,
+  ADD_TAGS: ['span'],
+  ALLOWED_SCHEMES: ['http', 'https', 'mailto', 'tel', 'data'],
+  // Allow basic syntax highlighting classes
+  ALLOWED_CLASSES: {
+    'pre': ['hljs'],
+    'code': ['hljs', /^language-/, /^hljs-/],
+    'span': [/^hljs-/, 'env-var', 'blockquote-icon'],
+    'blockquote': ['blockquote', 'blockquote-note', 'blockquote-warning', 'blockquote-tip', 'blockquote-important'],
+    'li': ['task-list-item'],
+    'table': ['enhanced-table'],
+    'hr': ['enhanced-hr'],
+    'a': ['external-link'],
+    'div': ['table-wrapper']
+  }
 }
 
 const MarkdownPreview = forwardRef<MarkdownPreviewHandle, MarkdownPreviewProps>(({
@@ -32,35 +57,16 @@ const MarkdownPreview = forwardRef<MarkdownPreviewHandle, MarkdownPreviewProps>(
 }, ref) => {
   const previewRef = useRef<HTMLDivElement>(null)
 
-  // Convert markdown to HTML with sanitization
+  // Convert markdown to HTML with syntax highlighting and sanitization
   const htmlContent = useMemo(() => {
     if (!note?.content) return ''
 
     try {
-      // Configure marked with our options
-      marked.setOptions(markedOptions)
+      // Use MarkdownProcessor for enhanced rendering with syntax highlighting
+      const rawHtml = MarkdownProcessor.render(note.content)
       
-      // Parse markdown to HTML
-      const rawHtml = marked(note.content)
-      
-      // Sanitize HTML to prevent XSS attacks
-      const sanitizedHtml = DOMPurify.sanitize(rawHtml, {
-        ALLOWED_TAGS: [
-          'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-          'p', 'br', 'div', 'span',
-          'strong', 'b', 'em', 'i', 'u', 'code',
-          'pre', 'blockquote',
-          'ul', 'ol', 'li',
-          'a', 'img',
-          'table', 'thead', 'tbody', 'tr', 'th', 'td',
-          'hr', 'del', 'ins'
-        ],
-        ALLOWED_ATTR: [
-          'href', 'src', 'alt', 'title', 'class', 'id',
-          'target', 'rel'
-        ],
-        ALLOW_DATA_ATTR: false
-      })
+      // Sanitize HTML to prevent XSS attacks while preserving highlight.js classes
+      const sanitizedHtml = DOMPurify.sanitize(rawHtml, purifyConfig)
       
       return sanitizedHtml
     } catch (error) {
@@ -172,7 +178,7 @@ const MarkdownPreview = forwardRef<MarkdownPreviewHandle, MarkdownPreviewProps>(
 
         {/* Rendered markdown content */}
         <div 
-          className="prose prose-invert max-w-none break-words overflow-wrap-anywhere markdown-content"
+          className="prose-theme max-w-none break-words overflow-wrap-anywhere"
           dangerouslySetInnerHTML={{ __html: htmlContent }}
         />
       </div>
@@ -182,4 +188,4 @@ const MarkdownPreview = forwardRef<MarkdownPreviewHandle, MarkdownPreviewProps>(
 
 MarkdownPreview.displayName = 'MarkdownPreview'
 
-export default MarkdownPreview
+export { MarkdownPreview }

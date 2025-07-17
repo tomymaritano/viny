@@ -1,25 +1,16 @@
-import React, { useState, useRef, useEffect, memo } from 'react'
-import ExportDialog from './ExportDialog'
-import { useSettings } from '../hooks/useSettings'
+import React, { useState, useRef, useEffect, memo, Suspense } from 'react'
+import { ExportDialog } from './features/LazyComponents'
+import { useSettingsService } from '../hooks/useSettingsService'
 import { useAppStore } from '../stores/newSimpleStore'
 import EmptyNoteState from './preview/EmptyNoteState'
 import NotePreviewHeader from './preview/NotePreviewHeader'
 import NotePreviewMenu from './preview/NotePreviewMenu'
 import NotePreviewContent from './preview/NotePreviewContent'
 
-interface Note {
-  id: string
-  title: string
-  content: string
-  notebook: string
-  tags?: string[]
-  isPinned?: boolean
-  date: string
-  updatedAt?: string
-}
+import { Note } from '../types'
 
 interface NotePreviewProps {
-  note: Note
+  note: Note | null
   onEdit?: (note: Note) => void
   onTogglePin?: (note: Note) => void
   onDuplicate?: (note: Note) => void
@@ -45,7 +36,7 @@ const NotePreview: React.FC<NotePreviewProps> = ({
   onPermanentDelete,
   onExport,
 }) => {
-  const { settings } = useSettings()
+  const { settings } = useSettingsService()
   const { getTagColor } = useAppStore()
   const [showMenu, setShowMenu] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)
@@ -111,18 +102,22 @@ const NotePreview: React.FC<NotePreviewProps> = ({
       />
 
       {/* Export Dialog */}
-      <ExportDialog
-        isVisible={showExportDialog}
-        onClose={() => setShowExportDialog(false)}
-        notes={[note]}
-        type="single"
-      />
+      {showExportDialog && (
+        <Suspense fallback={<div>Loading Export Dialog...</div>}>
+          <ExportDialog
+            isVisible={showExportDialog}
+            onClose={() => setShowExportDialog(false)}
+            notes={note ? [note] : []}
+            type="single"
+          />
+        </Suspense>
+      )}
     </div>
   )
 }
 
 // Memoize the component to prevent unnecessary re-renders
-export default memo(NotePreview, (prevProps, nextProps) => {
+const MemoizedNotePreview = memo(NotePreview, (prevProps, nextProps) => {
   return (
     prevProps.note?.id === nextProps.note?.id &&
     prevProps.note?.content === nextProps.note?.content &&
@@ -132,3 +127,5 @@ export default memo(NotePreview, (prevProps, nextProps) => {
     prevProps.isTrashView === nextProps.isTrashView
   )
 })
+
+export { MemoizedNotePreview as NotePreview }

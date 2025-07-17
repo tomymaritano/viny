@@ -1,7 +1,7 @@
 import React from 'react'
 import { Note } from '../../types'
 import SearchResultItem from './SearchResultItem'
-import Icons from '../Icons'
+import { Icons } from '../Icons'
 
 interface SearchResultsProps {
   results: Note[]
@@ -49,11 +49,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
   if (results.length === 0) {
     return (
-      <div className="flex items-center justify-center py-8">
+      <div className="flex items-center justify-center py-8" data-testid="search-no-results">
         <div className="text-center max-w-sm">
           <Icons.Search size={32} className="text-theme-text-muted mx-auto mb-3 opacity-50" />
           <h3 className="text-lg font-medium text-theme-text-secondary mb-2">
-            No results found
+            No notes found
           </h3>
           <p className="text-sm text-theme-text-muted leading-relaxed">
             Try adjusting your search terms or check for typos.
@@ -64,7 +64,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   }
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1" data-testid="search-results">
       {results.map((note, index) => (
         <SearchResultItem
           key={note.id}

@@ -38,6 +38,11 @@ logs
 
 # Runtime data
 pids
+
+# E2E test results
+test-results/
+playwright-report/
+playwright/.cache/
 *.pid
 *.seed
 *.pid.lock

@@ -1,4 +1,4 @@
-# Nototo - Component Documentation
+# Viny - Component Documentation
 
 This documentation covers the new components, hooks, and utilities implemented for performance optimization, validation, error handling, and data synchronization.
 

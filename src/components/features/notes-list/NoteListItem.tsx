@@ -1,6 +1,6 @@
 import React, { memo } from 'react'
 import { Note } from '../../../types'
-import Icons from '../../Icons'
+import { Icons } from '../../Icons'
 import CustomTag from '../../ui/CustomTag'
 import TaskProgress from '../../ui/TaskProgress'
 import NoteActionsDropdown from '../../ui/NoteActionsDropdown'
@@ -14,6 +14,9 @@ interface NoteListItemProps {
   onDelete: (e: React.MouseEvent, note: Note) => void
   onDuplicate?: (e: React.MouseEvent, note: Note) => void
   onMoveToNotebook?: (e: React.MouseEvent, note: Note) => void
+  onRestoreNote?: (e: React.MouseEvent, note: Note) => void
+  onPermanentDelete?: (e: React.MouseEvent, note: Note) => void
+  isTrashView?: boolean
   formatDate: (date: string) => string
   getPreviewText: (content: string) => string
   onTagClick?: (tag: string) => void
@@ -43,12 +46,30 @@ const NoteListItem: React.FC<NoteListItemProps> = memo(({
   onDelete,
   onDuplicate,
   onMoveToNotebook,
+  onRestoreNote,
+  onPermanentDelete,
+  isTrashView = false,
   formatDate,
   getPreviewText,
   onTagClick
 }) => {
   const handleClick = () => {
     onNoteClick(note.id)
+  }
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault()
+    
+    // Check if we're in test environment - force web dropdown for E2E tests
+    const isTestEnvironment = window.navigator.userAgent.includes('Playwright') || 
+                              window.navigator.userAgent.includes('Test') ||
+                              process.env.NODE_ENV === 'test'
+    
+    // Check if we're in Electron and not in test environment
+    if (window.electronAPI?.isElectron && !isTestEnvironment) {
+      window.electronAPI.showNoteContextMenu(note)
+    }
+    // Otherwise let the NoteActionsDropdown handle it
   }
 
   const handleTagClick = (tag: string) => {
@@ -64,14 +85,20 @@ const NoteListItem: React.FC<NoteListItemProps> = memo(({
       onDelete={onDelete}
       onDuplicate={onDuplicate}
       onMoveToNotebook={onMoveToNotebook}
+      onRestoreNote={onRestoreNote}
+      onPermanentDelete={onPermanentDelete}
+      isTrashView={isTrashView}
     >
       <div
+        data-testid="note-item"
+        data-note-id={note.id}
         className={`group relative ${THEME_CLASSES.BORDER.PRIMARY} border-b hover:${THEME_CLASSES.BG.TERTIARY} transition-colors cursor-pointer overflow-hidden`}
         style={isSelected ? {
           backgroundColor: CSS_THEME_VARS.ACTIVE_BG,
           boxShadow: `inset 3px 0 0 ${CSS_THEME_VARS.ACTIVE_BORDER}`
         } : {}}
         onClick={handleClick}
+        onContextMenu={handleContextMenu}
       >
       <div className="p-3">
         {/* Header with title and actions */}

@@ -56,7 +56,7 @@ vi.mock('../../NotePreview', () => ({
       {note && (
         <>
           <div data-testid="preview-title">{note.title}</div>
-          <button onClick={() => onEdit(note.id)} data-testid="edit-button">Edit</button>
+          <button onClick={() => onEdit(note)} data-testid="edit-button">Edit</button>
           <button onClick={() => onTogglePin(note)} data-testid="preview-pin-button">Pin</button>
           <button onClick={() => onDuplicate(note)} data-testid="preview-duplicate-button">Duplicate</button>
           <button onClick={() => onDelete(note)} data-testid="preview-delete-button">Delete</button>
@@ -74,12 +74,6 @@ vi.mock('../../features/LazyComponents', () => ({
         onChange={(e) => props.onChange(e.target.value)}
         data-testid="editor-textarea"
       />
-      <button onClick={() => props.onTogglePreview()} data-testid="toggle-preview">
-        Toggle Preview
-      </button>
-      <button onClick={() => props.onExport()} data-testid="export-button">
-        Export
-      </button>
       <button onClick={() => props.onNotebookChange('new-notebook')} data-testid="change-notebook">
         Change Notebook
       </button>
@@ -164,10 +158,7 @@ describe('AppLayout', () => {
     notebooks: mockNotebooks,
     settings: mockSettings,
     isEditorOpen: false,
-    isPreviewVisible: false,
     activeSection: 'notes',
-    toasts: [],
-    previewRef: React.createRef<any>(),
     handleOpenNote: mockHandleOpenNote,
     handleContentChange: mockHandleContentChange,
     handleNotebookChange: mockHandleNotebookChange,
@@ -176,9 +167,9 @@ describe('AppLayout', () => {
     handleDeleteNote: mockHandleDeleteNote,
     handleTogglePin: mockHandleTogglePin,
     handleDuplicateNote: mockHandleDuplicateNote,
+    handleRestoreNote: vi.fn(),
+    handlePermanentDelete: vi.fn(),
     setModal: mockSetModal,
-    removeToast: mockRemoveToast,
-    setIsPreviewVisible: mockSetIsPreviewVisible,
     sortNotes: mockSortNotes
   }
 
@@ -193,7 +184,7 @@ describe('AppLayout', () => {
     expect(screen.getByTestId('resizable-layout')).toBeInTheDocument()
     expect(screen.getByTestId('sidebar-simple')).toBeInTheDocument()
     expect(screen.getByTestId('notes-list-simple')).toBeInTheDocument()
-    expect(screen.getByTestId('toast-container')).toBeInTheDocument()
+    // AppLayout doesn't render ToastContainer, that's in AppContainer
   })
 
   it('renders note preview when no editor is open', () => {
@@ -247,36 +238,17 @@ describe('AppLayout', () => {
     fireEvent.change(textarea, { target: { value: 'New content' } })
     expect(mockHandleContentChange).toHaveBeenCalledWith('New content')
 
-    // Test toggle preview
-    fireEvent.click(screen.getByTestId('toggle-preview'))
-    expect(mockSetIsPreviewVisible).toHaveBeenCalledWith(true)
-
-    // Test export
-    fireEvent.click(screen.getByTestId('export-button'))
-    expect(mockSetModal).toHaveBeenCalledWith('export', true)
-
     // Test notebook change
     fireEvent.click(screen.getByTestId('change-notebook'))
     expect(mockHandleNotebookChange).toHaveBeenCalledWith('new-notebook')
   })
 
-  it('renders preview panel when preview is visible', () => {
-    render(<AppLayout {...defaultProps} isPreviewVisible={true} currentNote={mockNote} />)
-
-    expect(screen.getByTestId('preview-panel-container')).toBeInTheDocument()
-    expect(screen.getByTestId('markdown-preview')).toHaveTextContent('Preview: Test Note')
-  })
-
-  it('does not render preview panel when preview is not visible', () => {
-    render(<AppLayout {...defaultProps} isPreviewVisible={false} currentNote={mockNote} />)
-
-    expect(screen.queryByTestId('preview-panel-container')).not.toBeInTheDocument()
-  })
+  // Note: AppLayout doesn't handle preview panels directly - that's handled by ResizableLayout
 
   it('handles note preview actions correctly', () => {
     render(<AppLayout {...defaultProps} selectedNote={mockNote} />)
 
-    // Test edit button
+    // Test edit button - AppLayout passes onEdit={(note) => handleOpenNote(note.id)}
     fireEvent.click(screen.getByTestId('edit-button'))
     expect(mockHandleOpenNote).toHaveBeenCalledWith('1')
 
@@ -293,15 +265,7 @@ describe('AppLayout', () => {
     expect(mockHandleDeleteNote).toHaveBeenCalledWith(mockNote)
   })
 
-  it('renders toasts correctly', () => {
-    render(<AppLayout {...defaultProps} toasts={mockToasts} />)
-
-    expect(screen.getByTestId('toast-1')).toHaveTextContent('Success!')
-    
-    // Test dismiss toast
-    fireEvent.click(screen.getByTestId('dismiss-toast-1'))
-    expect(mockRemoveToast).toHaveBeenCalledWith('1')
-  })
+  // Note: Toast rendering is handled by AppContainer, not AppLayout
 
   it('shows loading spinner for editor when in suspense', () => {
     // This test would require more complex setup to test Suspense boundary
@@ -317,12 +281,7 @@ describe('AppLayout', () => {
     expect(screen.getByTestId('preview-title')).toHaveTextContent('Test Note')
   })
 
-  it('toggles preview visibility correctly', () => {
-    render(<AppLayout {...defaultProps} isEditorOpen={true} currentNote={mockNote} isPreviewVisible={false} />)
-
-    fireEvent.click(screen.getByTestId('toggle-preview'))
-    expect(mockSetIsPreviewVisible).toHaveBeenCalledWith(true)
-  })
+  // Note: Preview visibility is handled by ResizableLayout, not AppLayout directly
 
   it('passes settings to ResizableLayout', () => {
     const { container } = render(<AppLayout {...defaultProps} />)

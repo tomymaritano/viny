@@ -1,4 +1,4 @@
-# Sistema de Auto-Updates de Nototo
+# Sistema de Auto-Updates de Viny
 
 ## Cómo funciona el sistema de actualizaciones automáticas
 
@@ -31,7 +31,7 @@ La aplicación utiliza **semantic versioning** (semver):
 #### En la aplicación:
 
 1. **Configuración**: Ve a Settings → pestaña "Updates"
-2. **Footer de Settings**: Muestra "Nototo v1.1.1" en la parte inferior
+2. **Footer de Settings**: Muestra "Viny v1.1.1" en la parte inferior
 3. **UpdateChecker**: Componente que monitorea actualizaciones
 
 #### En el código:
@@ -87,13 +87,13 @@ npm version major  # Para 1.1.1 → 2.0.0
   "version": "1.1.1",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tu-usuario/nototo.git"
+    "url": "git+https://github.com/tu-usuario/viny.git"
   },
   "build": {
     "publish": {
       "provider": "github",
       "owner": "tu-usuario",
-      "repo": "nototo"
+      "repo": "viny"
     }
   }
 }

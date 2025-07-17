@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import Icons from '../../Icons'
+import { Icons } from '../../Icons'
 import TagContextMenu from '../../ui/TagContextMenu'
 import TagEditInput from '../../ui/TagEditInput'
 import DropdownMenu, { DropdownMenuItem } from '../../ui/DropdownMenu'

@@ -54,11 +54,95 @@ export default defineConfig({
     rollupOptions: {
       external: ['electron'],
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          monaco: ['monaco-editor', '@monaco-editor/react'],
-          utils: ['marked', 'dompurify', 'fuse.js'],
-          motion: ['framer-motion'],
+        manualChunks: (id) => {
+          // Group dependencies by type for better caching
+          if (id.includes('node_modules')) {
+            // React ecosystem
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor'
+            }
+            
+            // Monaco Editor - large dependency
+            if (id.includes('monaco-editor') || id.includes('@monaco-editor')) {
+              return 'monaco'
+            }
+            
+            // CodeMirror - large dependency
+            if (id.includes('@codemirror') || id.includes('codemirror')) {
+              return 'codemirror'
+            }
+            
+            // Highlight.js languages - split per language for dynamic loading
+            if (id.includes('highlight.js/lib/languages/')) {
+              const lang = id.match(/languages\/([^.]+)/)?.[1] || 'unknown'
+              return `hljs-${lang}`
+            }
+            
+            // Core highlight.js
+            if (id.includes('highlight.js')) {
+              return 'highlight-core'
+            }
+            
+            // Markdown processing
+            if (id.includes('markdown-it') || id.includes('marked') || id.includes('remark') || id.includes('rehype')) {
+              return 'markdown'
+            }
+            
+            // Animation libraries
+            if (id.includes('framer-motion')) {
+              return 'animation'
+            }
+            
+            // Search and utilities
+            if (id.includes('fuse.js') || id.includes('dompurify')) {
+              return 'search-utils'
+            }
+            
+            // State management
+            if (id.includes('zustand')) {
+              return 'state'
+            }
+            
+            // Large UI libraries
+            if (id.includes('lucide-react')) {
+              return 'icons'
+            }
+            
+            // Everything else goes to vendor
+            return 'vendor'
+          }
+          
+          // App code splitting
+          if (id.includes('/src/')) {
+            // Components
+            if (id.includes('/components/')) {
+              if (id.includes('/settings/')) {
+                return 'settings'
+              }
+              if (id.includes('/editor/')) {
+                return 'editor'
+              }
+              if (id.includes('/features/')) {
+                return 'features'
+              }
+              return 'components'
+            }
+            
+            // Hooks
+            if (id.includes('/hooks/')) {
+              return 'hooks'
+            }
+            
+            // Stores
+            if (id.includes('/stores/')) {
+              return 'stores'
+            }
+            
+            // Utils and config
+            if (id.includes('/utils/') || id.includes('/config/') || id.includes('/lib/')) {
+              return 'utils'
+            }
+          }
         },
       },
     },
@@ -68,6 +152,8 @@ export default defineConfig({
         drop_debugger: true,
       },
     },
+    // Increase chunk size warning limit for expected large chunks
+    chunkSizeWarningLimit: 1000,
   },
   test: {
     environment: 'jsdom',

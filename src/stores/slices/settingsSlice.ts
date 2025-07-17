@@ -43,6 +43,9 @@ export interface Settings {
   // Keybindings
   keymapPreset?: 'default' | 'vim' | 'vscode' | 'sublime'
   customKeybindings?: Record<string, string>
+  enableCustomKeybindings?: boolean
+  showKeybindingsInTooltips?: boolean
+  enableGlobalShortcuts?: boolean
   
   // Plugins
   enabledPlugins?: string[]

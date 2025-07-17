@@ -1,6 +1,6 @@
 # Custom Tag Colors System
 
-Nototo ahora incluye un sistema de colores personalizado para tags, que reemplaza los colores genéricos de Tailwind con una paleta elegante y distintiva diseñada específicamente para la organización de notas.
+Viny ahora incluye un sistema de colores personalizado para tags, que reemplaza los colores genéricos de Tailwind con una paleta elegante y distintiva diseñada específicamente para la organización de notas.
 
 ## Características
 
@@ -55,7 +55,6 @@ Componente principal para renderizar tags con colores personalizados:
 
 ```tsx
 import CustomTag from '../ui/CustomTag'
-
 ;<CustomTag
   tagName="project"
   size="md"
@@ -80,7 +79,6 @@ Modal para seleccionar colores de tags:
 
 ```tsx
 import TagColorPicker from '../ui/TagColorPicker'
-
 ;<TagColorPicker
   tagName="project"
   isOpen={showPicker}
@@ -203,7 +201,6 @@ Puedes ver todos los colores en acción ejecutando el componente demo:
 
 ```tsx
 import TagColorsDemo from '../components/demo/TagColorsDemo'
-
 ;<TagColorsDemo />
 ```
 

@@ -6,6 +6,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-18+-blue.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue.svg)](https://www.typescriptlang.org/)
+[![E2E Tests](https://github.com/your-username/viny/actions/workflows/e2e.yml/badge.svg)](https://github.com/your-username/viny/actions/workflows/e2e.yml)
 [![MVP Status](https://img.shields.io/badge/Status-MVP%20Ready-brightgreen.svg)](./CURRENT_STATUS_2025.md)
 
 Viny is a professional-grade markdown editor featuring an Inkdrop-inspired dark theme, real-time preview, and advanced editing capabilities powered by CodeMirror 6. Built with modern React and optimized for performance and reliability.
@@ -51,8 +52,8 @@ Viny is a professional-grade markdown editor featuring an Inkdrop-inspired dark 
 **🏃‍♂️ FASTEST - Hybrid Development (Recommended)**
 
 ```bash
-git clone https://github.com/your-username/nototo.git
-cd nototo
+git clone https://github.com/your-username/viny.git
+cd viny
 npm install
 make dev-fast    # Backend in Docker + Frontend local (~5s startup)
 ```
@@ -107,7 +108,7 @@ npm run dev
 ## 📁 Project Structure
 
 ```
-nototo/
+viny/
 ├── src/                    # Frontend React application
 │   ├── components/         # React components
 │   ├── hooks/             # Custom React hooks
@@ -200,12 +201,14 @@ See [`Makefile`](Makefile) for all available commands.
 
 ### Environment Variables
 
+⚠️ **Security Note**: See [Security Setup Guide](docs/SECURITY_SETUP.md) for secure credential management.
+
 **Backend** (`server/.env`):
 
 ```env
 PORT=3001
 NODE_ENV=development
-DATABASE_URL=file:./nototo.db
+DATABASE_URL=file:./viny.db
 ```
 
 **Frontend** (`.env`):
@@ -216,7 +219,7 @@ VITE_API_BASE_URL=http://localhost:3001/api
 
 ### Storage Modes
 
-Nototo supports two storage modes:
+Viny supports two storage modes:
 
 1. **API Mode** (Default)
    - Full backend with SQLite database
@@ -242,7 +245,7 @@ Switch between modes using the toggle in the bottom-left corner.
 
 ## 🔌 Plugin System
 
-Nototo features an extensible plugin system:
+Viny features an extensible plugin system:
 
 ```javascript
 // Example plugin
@@ -318,8 +321,8 @@ For detailed timeline and implementation details, see our [Complete Roadmap](doc
 
 ```bash
 # Clone and build
-git clone https://github.com/your-username/nototo.git
-cd nototo
+git clone https://github.com/your-username/viny.git
+cd viny
 
 # Start production environment
 make build
@@ -340,10 +343,41 @@ See [Deployment Guide](docs/DEPLOYMENT.md) for detailed instructions.
 
 ## 🧪 Testing
 
+### Unit Tests
+
 ```bash
-# Run frontend tests
+# Run frontend unit tests
 npm test
 
+# Run with coverage
+npm run test:coverage
+
+# Run in watch mode
+npm run test:watch
+```
+
+### End-to-End Tests
+
+```bash
+# Install Playwright browsers (first time)
+npm run test:e2e:install
+
+# Run all E2E tests
+npm run test:e2e
+
+# Run E2E tests in UI mode (recommended)
+npm run test:e2e:ui
+
+# Run specific browser tests
+npm run test:e2e:chrome
+npm run test:e2e:firefox
+```
+
+See [E2E Testing Guide](docs/E2E_TESTING.md) for detailed information.
+
+### Backend Tests
+
+```bash
 # Run backend tests
 cd server
 npm test
@@ -353,6 +387,8 @@ make test
 ```
 
 ## 🤝 Contributing
+
+Please read our [Code Style Guide](docs/STYLE_GUIDE.md) before contributing.
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
@@ -374,11 +410,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - 📖 [Documentation](docs/)
-- 🐛 [Issues](https://github.com/your-username/nototo/issues)
-- 💬 [Discussions](https://github.com/your-username/nototo/discussions)
+- 🐛 [Issues](https://github.com/your-username/viny/issues)
+- 💬 [Discussions](https://github.com/your-username/viny/discussions)
 
 ---
 
 Made with ❤️ for writers, developers, and anyone who loves clean, focused note-taking.
 
-**Nototo** - _Where thoughts become organized._
+**Viny** - _Where thoughts become organized._

@@ -1,6 +1,6 @@
-# Contributing to Nototo
+# Contributing to Viny
 
-Thank you for your interest in contributing to Nototo! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to Viny! This document provides guidelines and information for contributors.
 
 ## 🎯 Current Focus: Settings System
 
@@ -57,8 +57,8 @@ Our development is organized into milestones:
 
 ```bash
 # Clone the repository
-git clone https://github.com/tomymaritano/nototo.git
-cd nototo
+git clone https://github.com/tomymaritano/viny.git
+cd viny
 
 # Install dependencies
 npm install
@@ -82,7 +82,7 @@ We offer multiple development modes for different needs:
 ## 📁 Project Structure
 
 ```
-nototo/
+viny/
 ├── src/                    # Frontend React application
 │   ├── components/         # React components
 │   │   ├── settings/       # Settings-related components
@@ -286,7 +286,7 @@ If you discover a security vulnerability, please email [maintainer email] instea
 
 ## 📄 License
 
-By contributing to Nototo, you agree that your contributions will be licensed under the same license as the project (MIT License).
+By contributing to Viny, you agree that your contributions will be licensed under the same license as the project (MIT License).
 
 ## 🎉 Recognition
 
@@ -303,7 +303,7 @@ Contributors are recognized in:
 - **Documentation**: Check the `/docs` folder for guides
 - **Discord/Slack**: [Coming soon] Community chat
 
-Thank you for contributing to Nototo! 🚀
+Thank you for contributing to Viny! 🚀
 
 ---
 

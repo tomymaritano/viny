@@ -26,7 +26,7 @@ This document summarizes the architectural improvements made to address code mai
 
 ### 3. **Global Variable Elimination** ✅
 
-- **Problem**: `window.nototoImageStore` created memory leaks and coupling
+- **Problem**: `window.vinyImageStore` created memory leaks and coupling
 - **Solution**: Created `useImageStore.ts` hook
   - Encapsulated image storage with React patterns
   - Automatic cleanup of old entries
@@ -57,7 +57,7 @@ This document summarizes the architectural improvements made to address code mai
 
 - **SidebarSimple.tsx**: 488 lines, 12+ useState hooks
 - **Direct localStorage calls**: 15+ locations
-- **Global variables**: 1 (window.nototoImageStore)
+- **Global variables**: 1 (window.vinyImageStore)
 - **Console statements**: 36+ scattered
 - **Type safety**: Partial
 
@@ -94,7 +94,7 @@ const usePersistentSettings = () => { ... }
 ### 3. **Service Encapsulation**
 
 ```typescript
-// Before: window.nototoImageStore = new Map()
+// Before: window.vinyImageStore = new Map()
 // After: const { storeImage, getImage } = useImageStore()
 ```
 

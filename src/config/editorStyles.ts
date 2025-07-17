@@ -187,7 +187,7 @@ export const getTodoKeywordStyle = (keyword: keyof typeof TODO_STYLES.keywords.v
   return { ...baseStyle, ...variantStyle }
 }
 
-export const generateScrollbarCSS = (size: keyof typeof SCROLLBAR_STYLES = 'medium') => {
+export const generateScrollbarCSS = (size: 'thin' | 'medium' | 'thick' = 'medium') => {
   const { width, height } = SCROLLBAR_STYLES[size]
   const { track, thumb, thumbHover } = SCROLLBAR_STYLES.colors
   

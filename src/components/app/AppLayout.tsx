@@ -1,22 +1,17 @@
 // Layout component - handles the main app layout structure
 import React, { Suspense } from 'react'
 import { Note, Notebook, Settings } from '../../types'
-import { Toast } from '../../stores/slices/uiSlice'
-import { MarkdownPreviewHandle } from '../MarkdownPreview'
 
 // Layout Components  
 import TitleBarCompact from '../ui/TitleBarCompact'
-import ResizableLayout from '../ResizableLayout'
+import { ResizableLayout } from '../ResizableLayout'
 import SidebarSimple from '../features/SidebarSimple'
 import NotesListSimple from '../features/NotesListSimple'
-import NotePreview from '../NotePreview'
-import ToastContainer from '../ToastContainer'
+import { NotePreview } from '../NotePreview'
 import LoadingSpinner from '../LoadingSpinner'
-import LazyWrapper from '../ui/LazyWrapper'
 
 // Lazy components
 import { MarkdownEditor } from '../features/LazyComponents'
-import * as LazyComponents from '../LazyComponents'
 
 interface AppLayoutProps {
   // Data
@@ -28,12 +23,13 @@ interface AppLayoutProps {
   
   // UI State
   isEditorOpen: boolean
-  isPreviewVisible: boolean
   activeSection: string
-  toasts: Toast[]
   
-  // Refs
-  previewRef: React.RefObject<MarkdownPreviewHandle>
+  // Auto-save state
+  autoSaveState?: {
+    isSaving: boolean
+    hasUnsavedChanges: boolean
+  }
   
   // Handlers
   handleOpenNote: (noteId: string) => void
@@ -41,12 +37,12 @@ interface AppLayoutProps {
   handleNotebookChange: (notebookName: string) => void
   handleMetadataChange: (note: Note) => void
   createNewNote: () => void
-  handleDeleteNote: (note: Note) => void
-  handleTogglePin: (note: Note) => void
-  handleDuplicateNote: (note: Note) => void
+  handleDeleteNote: (note: Note) => void | Promise<void>
+  handleTogglePin: (note: Note) => void | Promise<void>
+  handleDuplicateNote: (note: Note) => void | Promise<void>
+  handleRestoreNote: (note: Note) => void | Promise<void>
+  handlePermanentDelete: (note: Note) => void | Promise<void>
   setModal: (modalName: string, isOpen: boolean) => void
-  removeToast: (id: string) => void
-  setIsPreviewVisible: (visible: boolean) => void
   sortNotes: (sortBy: string) => void
 }
 
@@ -64,12 +60,10 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   
   // UI State
   isEditorOpen,
-  isPreviewVisible,
   activeSection,
-  toasts,
   
-  // Refs
-  previewRef,
+  // Auto-save state
+  autoSaveState,
   
   // Handlers
   handleOpenNote,
@@ -80,13 +74,29 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   handleDeleteNote,
   handleTogglePin,
   handleDuplicateNote,
+  handleRestoreNote,
+  handlePermanentDelete,
   setModal,
-  removeToast,
-  setIsPreviewVisible,
   sortNotes
 }) => {
+  // Add general context menu handler
+  const handleGeneralContextMenu = (e: React.MouseEvent) => {
+    // Check if the click is on an empty area (not on specific elements)
+    const target = e.target as HTMLElement
+    const isEmptyArea = target.classList.contains('app-container') || 
+                       target.classList.contains('notes-list-container') ||
+                       target.classList.contains('sidebar-content') ||
+                       !target.closest('[data-context-menu]')
+    
+    const electronAPI = window.electronAPI as any
+    if (isEmptyArea && electronAPI?.isElectron) {
+      e.preventDefault()
+      electronAPI.showContextMenu('general')
+    }
+  }
+  
   return (
-    <div className="app-container">
+    <div className="app-container" onContextMenu={handleGeneralContextMenu}>
       {/* Compact Electron title bar with manual dragging */}
       <TitleBarCompact title="Viny" />
       
@@ -98,11 +108,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({
             notes={filteredNotes}
             onOpenNote={handleOpenNote}
             onNewNote={createNewNote}
-            selectedNoteId={currentNote?.id || null}
+            selectedNoteId={currentNote?.id || undefined}
             onDeleteNote={handleDeleteNote}
             onTogglePin={handleTogglePin}
             onDuplicateNote={handleDuplicateNote}
+            onRestoreNote={handleRestoreNote}
+            onPermanentDelete={handlePermanentDelete}
             currentSection={activeSection}
+            isTrashView={activeSection === 'trash'}
             onSortNotes={sortNotes}
           />
         }
@@ -116,42 +129,27 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                 onSave={handleMetadataChange}
                 selectedNote={currentNote}
                 onNotebookChange={handleNotebookChange}
-                onExport={() => setModal('export', true)}
-                onTogglePreview={() => setIsPreviewVisible(!isPreviewVisible)}
-                isPreviewVisible={isPreviewVisible}
                 notebooks={notebooks}
+                autoSaveState={autoSaveState}
               />
             </Suspense>
           ) : (
             <NotePreview
               note={selectedNote || currentNote}
-              onEdit={handleOpenNote}
+              onEdit={(note) => handleOpenNote(note.id)}
               onTogglePin={handleTogglePin}
               onDuplicate={handleDuplicateNote}
               onDelete={handleDeleteNote}
+              onRestoreNote={handleRestoreNote}
+              onPermanentDelete={handlePermanentDelete}
+              isTrashView={activeSection === 'trash'}
             />
           )
         }
-        previewPanel={
-          isPreviewVisible && currentNote ? (
-            <LazyWrapper className="h-full">
-              <LazyComponents.MarkdownPreview
-                ref={previewRef}
-                note={currentNote}
-                syncScroll={true}
-              />
-            </LazyWrapper>
-          ) : null
-        }
-        isPreviewVisible={isPreviewVisible}
         isSidebarVisible={true}
         isNotesListVisible={true}
       />
 
-      {/* Toast Container */}
-      <div className="fixed top-4 right-4 z-50">
-        <ToastContainer toasts={toasts} onRemove={removeToast} />
-      </div>
     </div>
   )
 }

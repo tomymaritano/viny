@@ -26,12 +26,19 @@ import { markdownKeybindings } from './editorKeybindings'
  * @param {string} options.theme - Theme variant name
  * @returns {Array} Array of CodeMirror extensions
  */
+interface EditorExtensionsOptions {
+  placeholder?: string
+  showLineNumbers?: boolean
+  onChange?: (value: string) => void
+  theme?: string
+}
+
 export const createEditorExtensions = ({
   placeholder = 'Start writing your markdown here...',
   showLineNumbers = false,
-  onChange = null,
+  onChange,
   theme = 'default',
-} = {}) => {
+}: EditorExtensionsOptions = {}) => {
   const extensions = [
     // Core functionality
     minimalSetup,
@@ -100,12 +107,24 @@ export const extensionCategories = {
   },
 }
 
+interface ExtensionCategoriesOptions {
+  includeCore?: boolean
+  includeKeyboard?: boolean
+  includeFeatures?: boolean
+  includeBehavior?: boolean
+  lineNumbers?: boolean
+  placeholder?: string
+  onChange?: (value: string) => void
+  theme?: string
+  customExtensions?: any[]
+}
+
 /**
  * Create extensions from categories
  * @param {Object} options - Configuration options
  * @returns {Array} CodeMirror extensions
  */
-export const createExtensionsFromCategories = (options = {}) => {
+export const createExtensionsFromCategories = (options: ExtensionCategoriesOptions = {}) => {
   const {
     includeCore = true,
     includeKeyboard = true,
@@ -113,7 +132,7 @@ export const createExtensionsFromCategories = (options = {}) => {
     includeBehavior = true,
     lineNumbers = false,
     placeholder = '',
-    onChange = null,
+    onChange,
     theme = 'default',
     customExtensions = [],
   } = options

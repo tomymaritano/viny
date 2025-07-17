@@ -1,12 +1,33 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 
+interface DropdownOptions {
+  closeOnEscape?: boolean
+  closeOnClickOutside?: boolean
+  containerSelector?: string
+}
+
+interface DropdownReturn {
+  isOpen: boolean
+  focusedIndex: number
+  open: () => void
+  close: () => void
+  toggle: () => void
+  handleKeyDown: (e: KeyboardEvent, optionsLength?: number) => number | void
+  dropdownRef: React.RefObject<HTMLElement | null>
+  triggerRef: React.RefObject<HTMLElement | null>
+  setFocusedIndex: React.Dispatch<React.SetStateAction<number>>
+}
+
 /**
  * Custom hook for dropdown management with accessibility and keyboard navigation
- * @param {boolean} initialState - Initial open/closed state
- * @param {Object} options - Configuration options
- * @returns {Object} Dropdown state and handlers
+ * @param initialState - Initial open/closed state
+ * @param options - Configuration options
+ * @returns Dropdown state and handlers
  */
-export const useDropdown = (initialState = false, options = {}) => {
+export const useDropdown = (
+  initialState = false, 
+  options: DropdownOptions = {}
+): DropdownReturn => {
   const {
     closeOnEscape = true,
     closeOnClickOutside = true,
@@ -15,8 +36,8 @@ export const useDropdown = (initialState = false, options = {}) => {
 
   const [isOpen, setIsOpen] = useState(initialState)
   const [focusedIndex, setFocusedIndex] = useState(-1)
-  const dropdownRef = useRef(null)
-  const triggerRef = useRef(null)
+  const dropdownRef = useRef<HTMLElement>(null)
+  const triggerRef = useRef<HTMLElement>(null)
 
   // Basic handlers
   const open = useCallback(() => {
@@ -43,7 +64,7 @@ export const useDropdown = (initialState = false, options = {}) => {
 
   // Keyboard navigation
   const handleKeyDown = useCallback(
-    (e, optionsLength = 0) => {
+    (e: KeyboardEvent, optionsLength = 0) => {
       if (!isOpen) return
 
       switch (e.key) {
@@ -86,12 +107,13 @@ export const useDropdown = (initialState = false, options = {}) => {
   useEffect(() => {
     if (!isOpen || !closeOnClickOutside) return
 
-    const handleClickOutside = event => {
-      const container = event.target.closest(containerSelector)
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element
+      const container = target.closest(containerSelector)
       const dropdown = dropdownRef.current
 
       // Close if clicking outside the dropdown container
-      if (!container && !dropdown?.contains(event.target)) {
+      if (!container && !dropdown?.contains(target)) {
         close()
       }
     }
@@ -110,7 +132,8 @@ export const useDropdown = (initialState = false, options = {}) => {
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       )
       if (focusableElements.length > 0 && focusedIndex >= 0) {
-        focusableElements[focusedIndex]?.focus()
+        const element = focusableElements[focusedIndex] as HTMLElement
+        element?.focus()
       }
     }
   }, [isOpen, focusedIndex])
@@ -128,4 +151,3 @@ export const useDropdown = (initialState = false, options = {}) => {
   }
 }
 
-export default useDropdown

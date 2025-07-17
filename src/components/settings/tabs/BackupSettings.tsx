@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
 import { useAppStore } from '../../../stores/newSimpleStore'
-import Icons from '../../Icons'
+import { Icons } from '../../Icons'
 import { useFormValidation } from '../../../hooks/useFormValidation'
 import { SettingsValidation } from '../../../utils/validation'
 import ValidationMessage from '../../ui/ValidationMessage'
 
 const BackupSettings: React.FC = () => {
-  const { settings, updateSettings } = useAppStore()
+  const { settings, updateSettings, showSuccess, showError, showInfo } = useAppStore()
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [isCreatingBackup, setIsCreatingBackup] = useState(false)
   const [isRestoringBackup, setIsRestoringBackup] = useState(false)
@@ -28,22 +28,17 @@ const BackupSettings: React.FC = () => {
         }
       } catch (error) {
         console.error('Failed to select backup location:', error)
-        updateSettings({ showToast: { type: 'error', message: 'Failed to select backup location' } })
+        showError('Failed to select backup location')
       }
     } else {
       // For web, show instruction
-      updateSettings({ 
-        showToast: { 
-          type: 'info', 
-          message: 'Backup location can be selected in the Electron app. In the web version, backups are downloaded to your default Downloads folder.' 
-        } 
-      })
+      showInfo('Backup location can be selected in the Electron app. In the web version, backups are downloaded to your default Downloads folder.')
     }
   }
 
   const handleTestAutoBackup = async () => {
     if (!settings.autoBackup) {
-      updateSettings({ showToast: { type: 'warning', message: 'Auto backup is not enabled' } })
+      showError('Auto backup is not enabled')
       return
     }
 
@@ -51,19 +46,14 @@ const BackupSettings: React.FC = () => {
       const backupLocation = settings.backupLocation || getDefaultBackupLocation()
       const frequency = settings.backupFrequency || 'daily'
       
-      updateSettings({ 
-        showToast: { 
-          type: 'success', 
-          message: `Auto backup is configured to run ${frequency} and save to: ${backupLocation}` 
-        } 
-      })
+      showSuccess(`Auto backup is configured to run ${frequency} and save to: ${backupLocation}`)
       
       // If in Electron, test actual backup creation
       if (window.electronAPI?.isElectron) {
         await handleCreateBackup() // Use the existing manual backup function
       }
     } catch (error) {
-      updateSettings({ showToast: { type: 'error', message: 'Auto backup test failed' } })
+      showError('Auto backup test failed')
     }
   }
 
@@ -82,7 +72,12 @@ const BackupSettings: React.FC = () => {
     validationRules: {
       backupRetentionDays: (value: number) => {
         const result = SettingsValidation.backup.backupRetentionDays(value)
-        return result.error || null
+        return {
+          field: 'backupRetentionDays',
+          value: value,
+          isValid: !result.error,
+          error: result.error
+        }
       }
     },
     validateOnChange: true,
@@ -115,9 +110,9 @@ const BackupSettings: React.FC = () => {
       a.click()
       URL.revokeObjectURL(url)
 
-      updateSettings({ showToast: { type: 'success', message: 'Backup created successfully' } })
+      showSuccess('Backup created successfully')
     } catch (error) {
-      updateSettings({ showToast: { type: 'error', message: 'Failed to create backup' } })
+      showError('Failed to create backup')
     } finally {
       setIsCreatingBackup(false)
     }
@@ -150,12 +145,7 @@ const BackupSettings: React.FC = () => {
             updateSettings(backupData.settings)
           }
 
-          updateSettings({ 
-            showToast: { 
-              type: 'success', 
-              message: 'Backup restored successfully. Please restart the application.' 
-            } 
-          })
+          showSuccess('Backup restored successfully. Please restart the application.')
           
           // Reload after delay to apply restored settings
           setTimeout(() => {
@@ -163,12 +153,7 @@ const BackupSettings: React.FC = () => {
           }, 2000)
         }
       } catch (error) {
-        updateSettings({ 
-          showToast: { 
-            type: 'error', 
-            message: 'Failed to restore backup. Please check the file format.' 
-          } 
-        })
+        showError('Failed to restore backup. Please check the file format.')
       } finally {
         setIsRestoringBackup(false)
       }

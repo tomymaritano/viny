@@ -1,4 +1,4 @@
-# Nototo - Modern React Architecture
+# Viny - Modern React Architecture
 
 ## 🏗️ Arquitectura Completamente Refactorizada
 

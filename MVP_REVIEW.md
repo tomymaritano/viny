@@ -1,4 +1,4 @@
-# 📋 NOTOTO - MVP CODE REVIEW
+# 📋 VINY - MVP CODE REVIEW
 
 ## 🎯 **ESTADO ACTUAL: LISTO PARA MVP - ENERO 2025**
 
@@ -170,7 +170,7 @@ const pluginAPI = {
     "publish": {
       "provider": "github",
       "owner": "username",
-      "repo": "nototo"
+      "repo": "viny"
     }
   }
 }

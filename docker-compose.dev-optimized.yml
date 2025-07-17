@@ -8,9 +8,9 @@ services:
       dockerfile: Dockerfile.dev
       cache_from:
         - node:18-alpine
-        - nototo-backend-dev:latest
-    image: nototo-backend-dev:latest
-    container_name: nototo-backend-dev-opt
+        - viny-backend-dev:latest
+    image: viny-backend-dev:latest
+    container_name: viny-backend-dev-opt
     ports:
       - "3001:3001"
     volumes:
@@ -22,15 +22,15 @@ services:
       # Named volume for node_modules (better performance)
       - backend_node_modules:/app/node_modules
       # Persistent database
-      - nototo_db:/app/prisma
+      - viny_db:/app/prisma
     environment:
       - NODE_ENV=development
       - PORT=3001
-      - DATABASE_URL=file:./nototo.db
+      - DATABASE_URL=file:./viny.db
       - TSX_TSCONFIG_PATH=./tsconfig.json
     command: npm run dev
     networks:
-      - nototo-network
+      - viny-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
       interval: 10s
@@ -46,9 +46,9 @@ services:
       dockerfile: Dockerfile.dev
       cache_from:
         - node:18-alpine
-        - nototo-frontend-dev:latest
-    image: nototo-frontend-dev:latest
-    container_name: nototo-frontend-dev-opt
+        - viny-frontend-dev:latest
+    image: viny-frontend-dev:latest
+    container_name: viny-frontend-dev-opt
     ports:
       - "5173:5173"
     volumes:
@@ -68,7 +68,7 @@ services:
       - VITE_HMR_HOST=localhost
     command: npm run dev -- --host 0.0.0.0 --port 5173
     networks:
-      - nototo-network
+      - viny-network
     depends_on:
       backend:
         condition: service_healthy
@@ -76,7 +76,7 @@ services:
 
 volumes:
   # Persistent volumes with optimized settings
-  nototo_db:
+  viny_db:
     driver: local
     driver_opts:
       type: none
@@ -88,7 +88,7 @@ volumes:
     driver: local
 
 networks:
-  nototo-network:
+  viny-network:
     driver: bridge
     driver_opts:
-      com.docker.network.bridge.name: nototo-br0
+      com.docker.network.bridge.name: viny-br0

@@ -79,6 +79,19 @@ describe('NotesSlice', () => {
       expect(notes.find(n => n.id === '1')?.title).toBe('Updated Title')
     })
 
+    it('should update note with isTrashed property', () => {
+      // Set initial notes
+      store.getState().setNotes([mockNote1, mockNote2])
+      
+      const trashedNote = { ...mockNote1, isTrashed: true, trashedAt: new Date().toISOString() }
+      store.getState().updateNote(trashedNote)
+      
+      const notes = store.getState().notes
+      const updatedNote = notes.find(n => n.id === '1')
+      expect(updatedNote?.isTrashed).toBe(true)
+      expect(updatedNote?.trashedAt).toBeDefined()
+    })
+
     it('should remove note', () => {
       // Set initial notes
       store.getState().setNotes([mockNote1, mockNote2])

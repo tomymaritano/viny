@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useAppStore } from '../../../stores/newSimpleStore'
-import Icons from '../../Icons'
+import { Icons } from '../../Icons'
 
 interface Keybinding {
   action: string

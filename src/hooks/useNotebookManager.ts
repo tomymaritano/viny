@@ -19,7 +19,7 @@ export function useNotebookManager(note: any, onNotebookChange: (notebookId: str
     return flatNotebooks.map(notebook => ({
       value: notebook.id,
       label: notebook.name,
-      icon: notebook.icon || 'Book'
+      icon: 'Book' // Default icon since icon property doesn't exist in Notebook type
     }))
   }, [flatNotebooks])
 

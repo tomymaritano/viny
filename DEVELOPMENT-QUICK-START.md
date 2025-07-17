@@ -1,14 +1,14 @@
 # Quick Development Guide
 
-> Get Nototo running in under 30 seconds
+> Get Viny running in under 30 seconds
 
 ## 🚀 Ultra-Fast Setup
 
 ### For Electron Development (Recommended)
 
 ```bash
-git clone https://github.com/your-username/nototo.git
-cd nototo
+git clone https://github.com/your-username/viny.git
+cd viny
 npm install
 make dev-electron-fast
 ```

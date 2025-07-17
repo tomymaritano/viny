@@ -8,7 +8,7 @@ const path = require('path')
 require('dotenv').config()
 
 const GH_TOKEN = process.env.GH_TOKEN
-const REPO = 'tomymaritano/nototo'
+const REPO = 'tomymaritano/viny'
 
 if (!GH_TOKEN) {
   console.error('❌ Error: GH_TOKEN not found in .env file')
@@ -45,7 +45,7 @@ try {
 # Viny ${version}
 
 ## What's New
-- Renamed from Nototo to Viny
+- Renamed from Viny to Viny
 - Improved performance and stability
 - Auto-update support for private repositories
 

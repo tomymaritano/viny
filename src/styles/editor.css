@@ -15,11 +15,33 @@
 /* Markdown font family */
 .markdown-font {
   font-family: var(--font-family-markdown);
-  font-size: var(--font-size-markdown);
-  line-height: var(--line-height);
+  font-size: var(--font-size-editor);
+  line-height: var(--line-height-editor);
 }
 
 /* CodeMirror Theme Override - Dynamic theme support via CSS variables */
+
+/* Theme-aware editor color variables */
+:root {
+  --editor-code-color: var(--color-violet); /* Dark theme default */
+  --editor-code-background: var(--color-base02); /* Dark theme default */
+  --editor-text-color: var(--color-base1); /* Dark theme text */
+  --editor-list-color: var(--color-base1); /* Dark theme lists */
+}
+
+[data-theme='light'] {
+  --editor-code-color: #6b21a8; /* Light theme uses dark purple */
+  --editor-code-background: #f8f9fa; /* Light theme uses light gray */
+  --editor-text-color: #212529; /* Light theme uses dark text */
+  --editor-list-color: #495057; /* Light theme uses darker gray for lists */
+}
+
+[data-theme='dark'] {
+  --editor-code-color: var(--color-violet); /* Dark theme uses violet */
+  --editor-code-background: var(--color-base02); /* Dark theme uses base02 */
+  --editor-text-color: var(--color-base1); /* Dark theme uses base1 */
+  --editor-list-color: var(--color-base1); /* Dark theme uses base1 for lists */
+}
 
 /* CodeMirror placeholder text */
 .cm-placeholder {
@@ -130,7 +152,7 @@
   color: var(--color-base1);
   font-family: var(--font-family-editor);
   font-size: var(--font-size-editor);
-  line-height: var(--line-height);
+  line-height: var(--line-height-editor);
   resize: none;
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -151,4 +173,303 @@
 .markdown-editor:focus-within {
   border-color: var(--color-blue);
   box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.1);
+}
+
+/* ============================= */
+/* LIGHT THEME EDITOR OVERRIDES */
+/* ============================= */
+
+/* Light theme specific editor colors for better contrast */
+[data-theme='light'] .cm-editor,
+[data-theme='light'] .cm-content,
+[data-theme='light'] .cm-scroller {
+  background-color: #ffffff !important;
+  color: #212529 !important;
+}
+
+[data-theme='light'] .cm-placeholder {
+  color: #6c757d !important;
+}
+
+[data-theme='light'] .cm-lineNumbers .cm-gutterElement {
+  color: #6c757d !important;
+}
+
+[data-theme='light'] .cm-gutters {
+  background-color: #ffffff !important;
+  color: #6c757d !important;
+}
+
+[data-theme='light'] .cm-cursor,
+[data-theme='light'] .cm-dropCursor {
+  border-left-color: #495057 !important;
+}
+
+/* Light theme syntax highlighting in editor */
+[data-theme='light'] .cm-editor .ͼ1 {
+  /* Headers */
+  color: #d97706 !important; /* Darker yellow */
+  font-weight: 700;
+}
+
+[data-theme='light'] .cm-editor .ͼ2 {
+  /* Bold */
+  color: #dc2626 !important; /* Darker red */
+  font-weight: bold;
+}
+
+[data-theme='light'] .cm-editor .ͼ3 {
+  /* Code inline */
+  color: #6b21a8 !important; /* Dark purple */
+  background-color: #f8f9fa !important;
+}
+
+[data-theme='light'] .cm-editor .ͼ4 {
+  /* Links */
+  color: #0891b2 !important; /* Darker teal */
+}
+
+[data-theme='light'] .cm-editor .ͼ5 {
+  /* Quotes */
+  color: #059669 !important; /* Darker green */
+  font-style: italic;
+}
+
+/* Light theme TODO keywords */
+[data-theme='light'] .todo-keyword-todo {
+  color: #0066cc !important;
+  background-color: rgba(0, 102, 204, 0.1) !important;
+}
+
+[data-theme='light'] .todo-keyword-fixme,
+[data-theme='light'] .todo-keyword-bug {
+  color: #dc2626 !important;
+  background-color: rgba(220, 38, 38, 0.1) !important;
+}
+
+[data-theme='light'] .todo-keyword-hack {
+  color: #ea580c !important;
+  background-color: rgba(234, 88, 12, 0.1) !important;
+}
+
+[data-theme='light'] .todo-keyword-note {
+  color: #d97706 !important;
+  background-color: rgba(217, 119, 6, 0.1) !important;
+}
+
+[data-theme='light'] .todo-keyword-optimize {
+  color: #059669 !important;
+  background-color: rgba(5, 150, 105, 0.1) !important;
+}
+
+[data-theme='light'] .todo-keyword-review {
+  color: #7c3aed !important;
+  background-color: rgba(124, 58, 237, 0.1) !important;
+}
+
+/* Light theme markdown editor */
+[data-theme='light'] .markdown-editor {
+  background: #ffffff;
+  border-color: #dee2e6;
+}
+
+[data-theme='light'] .markdown-editor textarea {
+  color: #212529 !important;
+}
+
+[data-theme='light'] .markdown-editor textarea::placeholder {
+  color: #6c757d !important;
+}
+
+[data-theme='light'] .markdown-editor textarea:focus {
+  color: #212529 !important;
+}
+
+[data-theme='light'] .markdown-editor:focus-within {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+/* ============================= */
+/* DARK THEME EDITOR OVERRIDES */
+/* ============================= */
+
+/* Dark theme specific editor colors - Default and explicit dark theme */
+:root .cm-editor,
+:root .cm-content,
+:root .cm-scroller,
+[data-theme='dark'] .cm-editor,
+[data-theme='dark'] .cm-content,
+[data-theme='dark'] .cm-scroller {
+  background-color: var(--color-base03) !important;
+  color: var(--color-base1) !important;
+}
+
+:root .cm-placeholder,
+[data-theme='dark'] .cm-placeholder {
+  color: var(--color-base0) !important;
+}
+
+:root .cm-lineNumbers .cm-gutterElement,
+[data-theme='dark'] .cm-lineNumbers .cm-gutterElement {
+  color: var(--color-base0) !important;
+}
+
+:root .cm-gutters,
+[data-theme='dark'] .cm-gutters {
+  background-color: var(--color-base03) !important;
+  color: var(--color-base0) !important;
+}
+
+:root .cm-cursor,
+:root .cm-dropCursor,
+[data-theme='dark'] .cm-cursor,
+[data-theme='dark'] .cm-dropCursor {
+  border-left-color: var(--color-base1) !important;
+}
+
+/* Dark theme syntax highlighting in editor */
+:root .cm-editor .ͼ1,
+[data-theme='dark'] .cm-editor .ͼ1 {
+  /* Headers */
+  color: var(--color-yellow) !important;
+  font-weight: 700;
+}
+
+:root .cm-editor .ͼ2,
+[data-theme='dark'] .cm-editor .ͼ2 {
+  /* Bold */
+  color: var(--color-red) !important;
+  font-weight: bold;
+}
+
+:root .cm-editor .ͼ3,
+[data-theme='dark'] .cm-editor .ͼ3 {
+  /* Code inline */
+  color: var(--color-violet) !important;
+  background-color: var(--color-base02) !important;
+}
+
+:root .cm-editor .ͼ4,
+[data-theme='dark'] .cm-editor .ͼ4 {
+  /* Links */
+  color: var(--color-blue) !important;
+}
+
+:root .cm-editor .ͼ5,
+[data-theme='dark'] .cm-editor .ͼ5 {
+  /* Quotes */
+  color: var(--color-green) !important;
+  font-style: italic;
+}
+
+/* Dark theme TODO keywords */
+:root .todo-keyword-todo,
+[data-theme='dark'] .todo-keyword-todo {
+  color: #4fc3f7 !important;
+  background-color: rgba(79, 195, 247, 0.1) !important;
+}
+
+:root .todo-keyword-fixme,
+:root .todo-keyword-bug,
+[data-theme='dark'] .todo-keyword-fixme,
+[data-theme='dark'] .todo-keyword-bug {
+  color: #ef5350 !important;
+  background-color: rgba(239, 83, 80, 0.1) !important;
+}
+
+:root .todo-keyword-hack,
+[data-theme='dark'] .todo-keyword-hack {
+  color: #ff8a65 !important;
+  background-color: rgba(255, 138, 101, 0.1) !important;
+}
+
+:root .todo-keyword-note,
+[data-theme='dark'] .todo-keyword-note {
+  color: #ffca28 !important;
+  background-color: rgba(255, 202, 40, 0.1) !important;
+}
+
+:root .todo-keyword-optimize,
+[data-theme='dark'] .todo-keyword-optimize {
+  color: #66bb6a !important;
+  background-color: rgba(102, 187, 106, 0.1) !important;
+}
+
+:root .todo-keyword-review,
+[data-theme='dark'] .todo-keyword-review {
+  color: #ba68c8 !important;
+  background-color: rgba(186, 104, 200, 0.1) !important;
+}
+
+/* Dark theme markdown editor */
+:root .markdown-editor,
+[data-theme='dark'] .markdown-editor {
+  background: var(--color-base03);
+  border-color: var(--color-base01);
+}
+
+:root .markdown-editor textarea,
+[data-theme='dark'] .markdown-editor textarea {
+  color: var(--color-base1) !important;
+}
+
+:root .markdown-editor textarea::placeholder,
+[data-theme='dark'] .markdown-editor textarea::placeholder {
+  color: var(--color-base0) !important;
+}
+
+:root .markdown-editor textarea:focus,
+[data-theme='dark'] .markdown-editor textarea:focus {
+  color: var(--color-base2) !important;
+}
+
+:root .markdown-editor:focus-within,
+[data-theme='dark'] .markdown-editor:focus-within {
+  border-color: var(--color-blue);
+  box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.1);
+}
+
+/* Fix CodeMirror scrolling in standalone windows */
+.cm-editor {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.cm-scroller {
+  overflow: auto !important;
+  height: 100%;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* Ensure the content container allows scrolling */
+.cm-content {
+  min-height: auto !important;
+}
+
+.cm-scroller::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.cm-scroller::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cm-scroller::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.cm-scroller::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Additional fix for editor container in standalone windows */
+#root > div > div > div:last-child > div {
+  height: 100%;
+  overflow: hidden;
 }

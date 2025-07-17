@@ -45,8 +45,8 @@ Tu `package.json` ya tiene la configuración básica. Revisa que tengas:
 ```json
 {
   "build": {
-    "appId": "com.nototo.app",
-    "productName": "Nototo",
+    "appId": "com.viny.app",
+    "productName": "Viny",
     "directories": {
       "output": "dist"
     },
@@ -64,7 +64,7 @@ Tu `package.json` ya tiene la configuración básica. Revisa que tengas:
     "publish": {
       "provider": "github",
       "owner": "tu-usuario",
-      "repo": "nototo"
+      "repo": "viny"
     }
   }
 }
@@ -126,7 +126,7 @@ npm run version
 npm run release:patch
 
 # Ver el estado de GitHub Actions
-# Ve a: https://github.com/tu-usuario/nototo/actions
+# Ve a: https://github.com/tu-usuario/viny/actions
 
 # Verificar que todo esté bien
 npm run build
@@ -145,7 +145,7 @@ const { autoUpdater } = require('electron-updater')
 autoUpdater.setFeedURL({
   provider: 'github',
   owner: 'tu-usuario',
-  repo: 'nototo',
+  repo: 'viny',
 })
 
 // Verificar actualizaciones al iniciar
@@ -176,10 +176,10 @@ git commit -m "test: new feature"
 npm run release:patch
 
 # 3. Ve a GitHub Actions
-# https://github.com/tu-usuario/nototo/actions
+# https://github.com/tu-usuario/viny/actions
 
 # 4. Verifica el release
-# https://github.com/tu-usuario/nototo/releases
+# https://github.com/tu-usuario/viny/releases
 ```
 
 ### 11. 📈 Ventajas del Sistema

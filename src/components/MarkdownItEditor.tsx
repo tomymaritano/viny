@@ -6,10 +6,10 @@ import { Note } from '../types'
 // Components
 import EditorToolbar from './editor/toolbar/EditorToolbar'
 import NoteMetadata from './editor/metadata/NoteMetadata'
-import TagModal from './editor/tags/TagModal'
+import { TagModal } from './editor/tags/TagModal'
 import SplitEditor from './editor/SplitEditor'
 import EditorOptionsModal from './editor/modals/EditorOptionsModal'
-import Icons from './Icons'
+import { Icons } from './Icons'
 import IconButton from './ui/IconButton'
 
 // Hooks
@@ -28,6 +28,12 @@ interface MarkdownItEditorProps {
   onSave?: (note: Note) => void
   selectedNote?: Note
   onNotebookChange?: (noteId: string, notebookId: string) => void
+  notebooks?: any[] // Add notebooks prop that was missing
+  // Auto-save state from parent
+  autoSaveState?: {
+    isSaving: boolean
+    hasUnsavedChanges: boolean
+  }
 }
 
 const MarkdownItEditor: React.FC<MarkdownItEditorProps> = ({
@@ -36,6 +42,8 @@ const MarkdownItEditor: React.FC<MarkdownItEditorProps> = ({
   onSave,
   selectedNote,
   onNotebookChange,
+  notebooks,
+  autoSaveState,
 }) => {
   // Editor ref for text insertion
   const editorRef = useRef<HTMLTextAreaElement | null>(null)
@@ -55,6 +63,10 @@ const MarkdownItEditor: React.FC<MarkdownItEditorProps> = ({
     handleCloseOptionsModal,
     handleDuplicateNote,
     handleDeleteNote,
+    handlePinNote,
+    handleExportNote,
+    handleOpenInNewWindow,
+    handleCopyLink,
   } = useEditorState(selectedNote || null)
 
   // Main editor logic
@@ -149,8 +161,8 @@ const MarkdownItEditor: React.FC<MarkdownItEditorProps> = ({
             onStrikethrough={insertStrikethrough}
             onCode={insertCode}
             onHeading={insertHeading}
-            isSaving={isSaving}
-            lastSaved={lastSaved}
+            isSaving={autoSaveState?.isSaving || isSaving}
+            lastSaved={autoSaveState && !autoSaveState.isSaving ? new Date().toISOString() : lastSaved}
             saveError={saveError}
             onLink={insertLink}
             onImage={insertImage}
@@ -195,6 +207,7 @@ const MarkdownItEditor: React.FC<MarkdownItEditorProps> = ({
             aria-label="Editor options"
             aria-pressed={false}
             aria-keyshortcuts=""
+            data-testid="editor-options"
           />
         </div>
 
@@ -219,6 +232,11 @@ const MarkdownItEditor: React.FC<MarkdownItEditorProps> = ({
           onClose={handleCloseOptionsModal}
           onDuplicate={handleDuplicateNote}
           onDelete={handleDeleteNote}
+          onPin={handlePinNote}
+          onExport={handleExportNote}
+          onOpenInNewWindow={handleOpenInNewWindow}
+          onCopyLink={handleCopyLink}
+          selectedNote={selectedNote}
           isClosing={isClosingModal}
           isOpening={isOpeningModal}
         />

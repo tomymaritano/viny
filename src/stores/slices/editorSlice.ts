@@ -3,7 +3,6 @@ import { StateCreator } from 'zustand'
 export interface EditorSlice {
   // Editor state
   viewMode: 'edit' | 'preview'
-  isPreviewVisible: boolean
   editorSettings: {
     fontSize: number
     lineHeight: number
@@ -15,8 +14,6 @@ export interface EditorSlice {
 
   // Editor actions
   setViewMode: (mode: 'edit' | 'preview') => void
-  setIsPreviewVisible: (visible: boolean) => void
-  togglePreview: () => void
   updateEditorSetting: <K extends keyof EditorSlice['editorSettings']>(
     key: K, 
     value: EditorSlice['editorSettings'][K]
@@ -33,24 +30,21 @@ const defaultEditorSettings = {
   minimap: false
 }
 
-export const createEditorSlice: StateCreator<EditorSlice> = (set) => ({
-  // Initial state
-  viewMode: 'edit',
-  isPreviewVisible: false,
-  editorSettings: { ...defaultEditorSettings },
+export const createEditorSlice: StateCreator<EditorSlice> = (set, get) => {
+  return {
+    // Initial state
+    viewMode: 'edit',
+    editorSettings: { ...defaultEditorSettings },
 
-  // Actions
-  setViewMode: (viewMode) => set({ viewMode }),
-  setIsPreviewVisible: (isPreviewVisible) => set({ isPreviewVisible }),
-  
-  togglePreview: () =>
-    set((state) => ({ isPreviewVisible: !state.isPreviewVisible })),
+    // Actions
+    setViewMode: (viewMode) => set({ viewMode }),
 
-  updateEditorSetting: (key, value) =>
-    set((state) => ({
-      editorSettings: { ...state.editorSettings, [key]: value }
-    })),
+    updateEditorSetting: (key, value) =>
+      set((state) => ({
+        editorSettings: { ...state.editorSettings, [key]: value }
+      })),
 
-  resetEditorSettings: () =>
-    set({ editorSettings: { ...defaultEditorSettings } })
-})
+    resetEditorSettings: () =>
+      set({ editorSettings: { ...defaultEditorSettings } })
+  }
+}

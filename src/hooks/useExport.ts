@@ -1,16 +1,20 @@
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
+import type { Note } from '../types'
+
+interface ExportOptions {
+  includeMetadata?: boolean
+  filename?: string
+}
 
 export const useExport = () => {
-  const generateHTML = (note, includeMetadata = true) => {
+  const generateHTML = (note: Note, includeMetadata = true): string => {
     const html = marked(note.content || '', {
       breaks: true,
       gfm: true,
-      headerIds: false,
-      mangle: false,
     })
 
-    const sanitizedHtml = DOMPurify.sanitize(html)
+    const sanitizedHtml = DOMPurify.sanitize(html as string)
 
     const metadata = includeMetadata
       ? `
@@ -18,7 +22,7 @@ export const useExport = () => {
         <h1>${note.title}</h1>
         <div class="metadata-info">
           <span><strong>Notebook:</strong> ${note.notebook}</span>
-          <span><strong>Created:</strong> ${new Date(note.date).toLocaleDateString()}</span>
+          <span><strong>Created:</strong> ${new Date(note.createdAt).toLocaleDateString()}</span>
           ${note.updatedAt ? `<span><strong>Updated:</strong> ${new Date(note.updatedAt).toLocaleDateString()}</span>` : ''}
           ${note.tags && note.tags.length > 0 ? `<span><strong>Tags:</strong> ${note.tags.join(', ')}</span>` : ''}
         </div>
@@ -169,7 +173,7 @@ export const useExport = () => {
     `
   }
 
-  const exportToHTML = (note, options = {}) => {
+  const exportToHTML = (note: Note, options: ExportOptions = {}): void => {
     const { includeMetadata = true, filename } = options
     const html = generateHTML(note, includeMetadata)
 
@@ -185,7 +189,7 @@ export const useExport = () => {
     URL.revokeObjectURL(url)
   }
 
-  const exportToPDF = async (note, options = {}) => {
+  const exportToPDF = async (note: Note, options: ExportOptions = {}): Promise<void> => {
     const { includeMetadata = true, filename } = options
 
     try {
@@ -200,11 +204,11 @@ export const useExport = () => {
       printWindow.document.close()
 
       // Wait for content to load
-      await new Promise(resolve => {
+      await new Promise<void>(resolve => {
         if (printWindow.document.readyState === 'complete') {
           resolve()
         } else {
-          printWindow.addEventListener('load', resolve)
+          printWindow.addEventListener('load', () => resolve())
         }
       })
 
@@ -222,7 +226,7 @@ export const useExport = () => {
     }
   }
 
-  const exportToMarkdown = (note, options = {}) => {
+  const exportToMarkdown = (note: Note, options: ExportOptions = {}): void => {
     const { includeMetadata = true, filename } = options
 
     let content = ''
@@ -230,7 +234,7 @@ export const useExport = () => {
     if (includeMetadata) {
       content += `# ${note.title}\n\n`
       content += `**Notebook:** ${note.notebook}\n`
-      content += `**Created:** ${new Date(note.date).toLocaleDateString()}\n`
+      content += `**Created:** ${new Date(note.createdAt).toLocaleDateString()}\n`
       if (note.updatedAt) {
         content += `**Updated:** ${new Date(note.updatedAt).toLocaleDateString()}\n`
       }
@@ -254,7 +258,7 @@ export const useExport = () => {
     URL.revokeObjectURL(url)
   }
 
-  const exportMultipleNotes = (notes, format = 'html', options = {}) => {
+  const exportMultipleNotes = (notes: Note[], format: 'html' | 'markdown' = 'html', options: ExportOptions = {}): void => {
     const { includeMetadata = true, filename = 'inkrun_export' } = options
 
     if (format === 'markdown') {
@@ -269,7 +273,7 @@ export const useExport = () => {
         if (includeMetadata) {
           combinedContent += `# ${note.title}\n\n`
           combinedContent += `**Notebook:** ${note.notebook}\n`
-          combinedContent += `**Created:** ${new Date(note.date).toLocaleDateString()}\n`
+          combinedContent += `**Created:** ${new Date(note.createdAt).toLocaleDateString()}\n`
           if (note.updatedAt) {
             combinedContent += `**Updated:** ${new Date(note.updatedAt).toLocaleDateString()}\n`
           }
@@ -435,11 +439,9 @@ export const useExport = () => {
         const html = marked(note.content || '', {
           breaks: true,
           gfm: true,
-          headerIds: false,
-          mangle: false,
         })
 
-        const sanitizedHtml = DOMPurify.sanitize(html)
+        const sanitizedHtml = DOMPurify.sanitize(html as string)
 
         if (includeMetadata) {
           combinedHtml += `
@@ -447,7 +449,7 @@ export const useExport = () => {
               <h2>${note.title}</h2>
               <div class="metadata-info">
                 <span><strong>Notebook:</strong> ${note.notebook}</span>
-                <span><strong>Created:</strong> ${new Date(note.date).toLocaleDateString()}</span>
+                <span><strong>Created:</strong> ${new Date(note.createdAt).toLocaleDateString()}</span>
                 ${note.updatedAt ? `<span><strong>Updated:</strong> ${new Date(note.updatedAt).toLocaleDateString()}</span>` : ''}
                 ${note.tags && note.tags.length > 0 ? `<span><strong>Tags:</strong> ${note.tags.join(', ')}</span>` : ''}
               </div>

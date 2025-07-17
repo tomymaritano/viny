@@ -58,7 +58,7 @@ export const useSearch = (notes: Note[] = []) => {
     dateRange: { start: Date; end: Date } | null
     isPinned: boolean | null
   }>({
-    notebooks: [], // Array of notebook names to filter by
+    notebooks: [], // Array of notebook IDs to filter by
     tags: [], // Array of tags to filter by
     dateRange: null, // { start: Date, end: Date }
     isPinned: null, // null, true, or false
@@ -146,7 +146,7 @@ export const useSearch = (notes: Note[] = []) => {
 
         // Date range filter
         if (filters.dateRange) {
-          const noteDate = new Date(note.updatedAt || note.date)
+          const noteDate = new Date(note.updatedAt || note.createdAt)
           const { start, end } = filters.dateRange
           if (start && noteDate < start) return false
           if (end && noteDate > end) return false
@@ -326,4 +326,4 @@ export const useSearch = (notes: Note[] = []) => {
   }
 }
 
-export default useSearch
+// useSearch is already exported as a named export above

@@ -1,6 +1,6 @@
 # 📋 Release Roadmap & Tag Strategy
 
-> Comprehensive roadmap for Nototo development and release management
+> Comprehensive roadmap for Viny development and release management
 
 ## 🎯 Release Overview
 
@@ -279,9 +279,9 @@ strategy:
 
 #### **Release Artifacts**
 
-- **macOS**: `Nototo-{version}.dmg`, `Nototo-{version}-arm64.dmg`
-- **Windows**: `Nototo-{version}.exe`, `Nototo-{version}-Setup.exe`
-- **Linux**: `Nototo-{version}.AppImage`, `Nototo-{version}.deb`
+- **macOS**: `Viny-{version}.dmg`, `Viny-{version}-arm64.dmg`
+- **Windows**: `Viny-{version}.exe`, `Viny-{version}-Setup.exe`
+- **Linux**: `Viny-{version}.AppImage`, `Viny-{version}.deb`
 
 #### **Auto-Update System**
 
@@ -381,7 +381,7 @@ git push origin v1.2.2-rollback
 ## 📝 Release Notes Template
 
 ```markdown
-# Nototo v1.X.X
+# Viny v1.X.X
 
 ## 🚀 New Features
 

@@ -9,7 +9,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for suggesting a settings enhancement! This template is specifically for improvements to Nototo's settings and configuration system.
+        Thanks for suggesting a settings enhancement! This template is specifically for improvements to Viny's settings and configuration system.
 
   - type: textarea
     id: summary

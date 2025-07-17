@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
-import ToastContainer from '../ToastContainer'
+import { ToastContainer } from '../ToastContainer'
 import { ToastProps } from '../Toast'
 
 // Mock lucide-react icons

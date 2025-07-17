@@ -1,5 +1,5 @@
 name: Feature Request
-description: Suggest a new feature or enhancement for Nototo
+description: Suggest a new feature or enhancement for Viny
 title: "[FEATURE] "
 labels: ["type:feature", "status:needs-design"]
 projects: ["tomymaritano/1"]
@@ -51,7 +51,7 @@ body:
     id: category
     attributes:
       label: Feature Category
-      description: Which area of Nototo does this feature relate to?
+      description: Which area of Viny does this feature relate to?
       options:
         - Settings & Configuration
         - Editor & Writing

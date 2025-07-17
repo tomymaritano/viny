@@ -13,6 +13,31 @@ interface PreviewState<T> {
   originalValues: Partial<T>
 }
 
+interface UseLivePreviewReturn<T> {
+  // State
+  isPreviewActive: boolean
+  previewValues: Partial<T>
+  originalValues: Partial<T>
+  
+  // Actions
+  startPreview: (key: keyof T, value: T[keyof T]) => void
+  applyPreview: () => void
+  revertPreview: () => void
+  cancelPreview: () => void
+  updatePreviewValue: (key: keyof T, value: T[keyof T]) => void
+  extendPreview: () => void
+  
+  // Utilities
+  getEffectiveValue: (key: keyof T) => T[keyof T]
+  isKeyModified: (key: keyof T) => boolean
+  getPreviewStatus: () => {
+    isActive: boolean
+    modifiedCount: number
+    modifiedKeys: string[]
+    hasChanges: boolean
+  }
+}
+
 /**
  * Hook for implementing live preview of settings changes
  * Allows users to see changes in real-time before applying them
@@ -20,7 +45,7 @@ interface PreviewState<T> {
 export function useLivePreview<T extends Record<string, any>>(
   settingsKeys: (keyof T)[],
   options: LivePreviewOptions = {}
-) {
+): UseLivePreviewReturn<T> {
   const { settings, updateSettings } = useAppStore()
   const {
     previewDelay = 100,
@@ -34,8 +59,8 @@ export function useLivePreview<T extends Record<string, any>>(
     originalValues: {}
   })
 
-  const previewTimer = useRef<NodeJS.Timeout>()
-  const revertTimer = useRef<NodeJS.Timeout>()
+  const previewTimer = useRef<number | null>(null)
+  const revertTimer = useRef<number | null>(null)
 
   // Clear timers on unmount
   useEffect(() => {
@@ -46,7 +71,7 @@ export function useLivePreview<T extends Record<string, any>>(
   }, [])
 
   // Start live preview for a setting
-  const startPreview = useCallback((key: keyof T, value: any) => {
+  const startPreview = useCallback((key: keyof T, value: T[keyof T]) => {
     // Clear existing timers
     if (previewTimer.current) clearTimeout(previewTimer.current)
     if (revertTimer.current) clearTimeout(revertTimer.current)
@@ -66,12 +91,12 @@ export function useLivePreview<T extends Record<string, any>>(
     })
 
     // Apply preview change after delay
-    previewTimer.current = setTimeout(() => {
-      updateSettings({ [key]: value } as any)
+    previewTimer.current = window.setTimeout(() => {
+      updateSettings({ [key]: value } as Partial<T>)
       
       // Set auto-revert timer if enabled
       if (autoRevert) {
-        revertTimer.current = setTimeout(() => {
+        revertTimer.current = window.setTimeout(() => {
           revertPreview()
         }, resetDelay)
       }
@@ -87,7 +112,7 @@ export function useLivePreview<T extends Record<string, any>>(
     if (revertTimer.current) clearTimeout(revertTimer.current)
 
     // Apply all preview values
-    updateSettings(previewState.previewValues as any)
+    updateSettings(previewState.previewValues as Partial<T>)
 
     // Reset preview state
     setPreviewState({
@@ -106,7 +131,7 @@ export function useLivePreview<T extends Record<string, any>>(
     if (revertTimer.current) clearTimeout(revertTimer.current)
 
     // Revert to original values
-    updateSettings(previewState.originalValues as any)
+    updateSettings(previewState.originalValues as Partial<T>)
 
     // Reset preview state
     setPreviewState({
@@ -122,7 +147,7 @@ export function useLivePreview<T extends Record<string, any>>(
   }, [revertPreview])
 
   // Update a preview value without applying it immediately
-  const updatePreviewValue = useCallback((key: keyof T, value: any) => {
+  const updatePreviewValue = useCallback((key: keyof T, value: T[keyof T]) => {
     setPreviewState(prev => ({
       ...prev,
       previewValues: { ...prev.previewValues, [key]: value }
@@ -130,11 +155,11 @@ export function useLivePreview<T extends Record<string, any>>(
   }, [])
 
   // Get the current effective value (preview or actual)
-  const getEffectiveValue = useCallback((key: keyof T) => {
+  const getEffectiveValue = useCallback((key: keyof T): T[keyof T] => {
     if (previewState.isPreviewActive && key in previewState.previewValues) {
-      return previewState.previewValues[key]
+      return previewState.previewValues[key] as T[keyof T]
     }
-    return settings[key as keyof typeof settings]
+    return settings[key as keyof typeof settings] as T[keyof T]
   }, [previewState, settings])
 
   // Check if a specific key has been modified in preview
@@ -157,7 +182,7 @@ export function useLivePreview<T extends Record<string, any>>(
   const extendPreview = useCallback(() => {
     if (revertTimer.current) {
       clearTimeout(revertTimer.current)
-      revertTimer.current = setTimeout(() => {
+      revertTimer.current = window.setTimeout(() => {
         revertPreview()
       }, resetDelay)
     }

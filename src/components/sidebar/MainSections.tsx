@@ -1,5 +1,5 @@
 import React, { memo } from 'react'
-import Icons from '../Icons'
+import { Icons } from '../Icons'
 
 interface MainSection {
   id: string
@@ -45,7 +45,16 @@ const MainSections: React.FC<MainSectionsProps> = memo(({
               boxShadow: 'inset 3px 0 0 var(--color-active-border)'
             } : {}}
             onClick={() => onSectionClick(section.id)}
-            onContextMenu={section.onRightClick || (section.id === 'trash' ? onTrashRightClick : undefined)}
+            onContextMenu={(e) => {
+              if (window.electronAPI?.isElectron && section.id === 'trash') {
+                e.preventDefault()
+                window.electronAPI.showContextMenu('trash')
+              } else if (section.onRightClick) {
+                section.onRightClick(e)
+              } else if (section.id === 'trash' && onTrashRightClick) {
+                onTrashRightClick(e)
+              }
+            }}
           >
             <div className="flex items-center space-x-3">
               <div className={`w-4 h-4 flex-shrink-0 ${

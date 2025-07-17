@@ -91,3 +91,37 @@
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) rgba(0, 0, 0, 0.1);
 }
+
+/* Show scrollbar only when scrolling */
+.scrollbar-on-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-on-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.scrollbar-on-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-on-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0);
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+/* Show on hover or when scrolling */
+.scrollbar-on-scroll:hover::-webkit-scrollbar-thumb,
+.scrollbar-on-scroll.is-scrolling::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.scrollbar-on-scroll:hover::-webkit-scrollbar-track,
+.scrollbar-on-scroll.is-scrolling::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}

@@ -1,5 +1,5 @@
 import React from 'react'
-import Icons from '../Icons'
+import { Icons } from '../Icons'
 import CustomTag from '../ui/CustomTag'
 import TagEditInput from '../ui/TagEditInput'
 import { THEME_COLORS } from '../../constants/theme'

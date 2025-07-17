@@ -1,11 +1,11 @@
-// Nototo Plugin: Note Counter
+// Viny Plugin: Note Counter
 // Displays note statistics and productivity metrics
 
 export default {
   name: 'note-counter',
   version: '1.2.0',
   description: 'Track your note-taking productivity with detailed statistics and insights',
-  author: 'Nototo Community',
+  author: 'Viny Community',
   
   config: {
     showInSidebar: true,

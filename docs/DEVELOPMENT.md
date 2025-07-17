@@ -1,6 +1,6 @@
 # Development Guide
 
-> Everything you need to know to develop and contribute to Nototo
+> Everything you need to know to develop and contribute to Viny
 
 ## 🚀 Quick Start
 
@@ -15,8 +15,8 @@
 **🏃‍♂️ FASTEST - Hybrid Mode (Recommended)**
 
 ```bash
-git clone https://github.com/your-username/nototo.git
-cd nototo
+git clone https://github.com/your-username/viny.git
+cd viny
 npm install
 make dev-fast
 ```
@@ -183,7 +183,7 @@ npm run dev
 ### 1. Project Structure
 
 ```
-nototo/
+viny/
 ├── src/                    # Frontend React application
 │   ├── components/         # React components
 │   │   ├── MarkdownEditor.jsx
@@ -500,7 +500,7 @@ VITE_DEBUG_MODE=true
 # Backend (server/.env)
 NODE_ENV=development
 PORT=3001
-DATABASE_URL=file:./nototo.db
+DATABASE_URL=file:./viny.db
 CORS_ORIGIN=http://localhost:5173
 ```
 
@@ -515,7 +515,7 @@ VITE_DEBUG_MODE=false
 # Backend
 NODE_ENV=production
 PORT=3001
-DATABASE_URL=file:./nototo.db
+DATABASE_URL=file:./viny.db
 CORS_ORIGIN=https://yourapp.com
 ```
 
@@ -709,7 +709,7 @@ PORT=3002 npm run dev
 ```bash
 # Reset database
 cd server
-rm -f prisma/nototo.db
+rm -f prisma/viny.db
 npm run db:push
 ```
 
@@ -754,12 +754,12 @@ node --version  # Should be 18+
 
 ### Community
 
-- [GitHub Issues](https://github.com/your-username/nototo/issues)
-- [GitHub Discussions](https://github.com/your-username/nototo/discussions)
+- [GitHub Issues](https://github.com/your-username/viny/issues)
+- [GitHub Discussions](https://github.com/your-username/viny/discussions)
 - [Contributing Guidelines](../CONTRIBUTING.md)
 
 ---
 
 Happy coding! 🎉
 
-For questions or issues, please check our [GitHub Issues](https://github.com/your-username/nototo/issues) or start a [Discussion](https://github.com/your-username/nototo/discussions).
+For questions or issues, please check our [GitHub Issues](https://github.com/your-username/viny/issues) or start a [Discussion](https://github.com/your-username/viny/discussions).

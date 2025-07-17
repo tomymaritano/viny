@@ -1,4 +1,4 @@
-# 📦 NOTOTO - DISTRIBUTION GUIDE
+# 📦 VINY - DISTRIBUTION GUIDE
 
 ## 🚀 **CÓMO DISTRIBUIR TU APP ELECTRON**
 
@@ -27,8 +27,8 @@ npm install electron-updater
     "dist:linux": "npm run build && electron-builder --linux"
   },
   "build": {
-    "appId": "com.nototo.app",
-    "productName": "Nototo",
+    "appId": "com.viny.app",
+    "productName": "Viny",
     "directories": {
       "output": "dist"
     },
@@ -68,7 +68,7 @@ npm install electron-updater
     "publish": {
       "provider": "github",
       "owner": "tu-usuario",
-      "repo": "nototo"
+      "repo": "viny"
     }
   }
 }
@@ -297,11 +297,11 @@ npm run dist:snap
 ```html
 <!-- index.html -->
 <div class="download-section">
-  <h2>Download Nototo</h2>
+  <h2>Download Viny</h2>
 
   <div class="download-buttons">
     <a
-      href="https://github.com/usuario/nototo/releases/latest/download/Nototo-1.0.0.dmg"
+      href="https://github.com/usuario/viny/releases/latest/download/Viny-1.0.0.dmg"
       class="btn btn-mac"
     >
       <i class="fab fa-apple"></i>
@@ -309,7 +309,7 @@ npm run dist:snap
     </a>
 
     <a
-      href="https://github.com/usuario/nototo/releases/latest/download/Nototo-Setup-1.0.0.exe"
+      href="https://github.com/usuario/viny/releases/latest/download/Viny-Setup-1.0.0.exe"
       class="btn btn-windows"
     >
       <i class="fab fa-windows"></i>
@@ -317,7 +317,7 @@ npm run dist:snap
     </a>
 
     <a
-      href="https://github.com/usuario/nototo/releases/latest/download/Nototo-1.0.0.AppImage"
+      href="https://github.com/usuario/viny/releases/latest/download/Viny-1.0.0.AppImage"
       class="btn btn-linux"
     >
       <i class="fab fa-linux"></i>
@@ -397,7 +397,7 @@ ipcRenderer.send('analytics-event', {
 1. **Product Hunt** - Submit for maximum exposure
 2. **Reddit** - r/SideProject, r/productivity
 3. **Twitter** - Tweet con GIFs/videos
-4. **Hacker News** - "Show HN: Nototo - Note-taking app"
+4. **Hacker News** - "Show HN: Viny - Note-taking app"
 5. **Dev.to** - Technical blog post
 6. **YouTube** - Demo video
 

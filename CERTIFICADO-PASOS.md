@@ -79,7 +79,7 @@ security find-certificate -c "Developer ID Application" -p | openssl x509 -text
 ### Verificar app firmada:
 
 ```bash
-codesign -dv --verbose=4 dist-electron/mac/Nototo.app
+codesign -dv --verbose=4 dist-electron/mac/Viny.app
 ```
 
 ## Si encuentras problemas:
@@ -92,7 +92,7 @@ codesign -dv --verbose=4 dist-electron/mac/Nototo.app
 ## Archivos a tener:
 
 ```
-nototo/
+viny/
 ├── .env                    # ✅ Creado
 ├── certificate.p12        # ❌ Falta crear
 ├── CertificateSigningRequest.certSigningRequest  # ✅ Existe

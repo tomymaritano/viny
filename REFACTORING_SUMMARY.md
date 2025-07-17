@@ -251,7 +251,7 @@ Para mantener compatibilidad durante la migración:
 
 ## 📝 Conclusión
 
-El refactoring integral ha transformado exitosamente el codebase de Nototo de un sistema monolítico con múltiples anti-patrones a una arquitectura modular, mantenible y type-safe.
+El refactoring integral ha transformado exitosamente el codebase de Viny de un sistema monolítico con múltiples anti-patrones a una arquitectura modular, mantenible y type-safe.
 
 **Resultados clave**:
 

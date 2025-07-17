@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import Icons from '../Icons'
+import { Icons } from '../Icons'
 import IconButton from '../ui/IconButton'
 import SortDropdown from '../ui/SortDropdown'
 
@@ -75,6 +75,7 @@ const NotesHeader: React.FC<NotesHeaderProps> = ({
             aria-pressed={false}
             aria-keyshortcuts=""
             className="p-1"
+            data-testid="create-note-button"
           />
         </div>
       </div>
@@ -92,6 +93,7 @@ const NotesHeader: React.FC<NotesHeaderProps> = ({
             placeholder="Search notes..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
+            data-testid="search-input"
             className="w-full pl-10 pr-16 py-2 bg-theme-bg-tertiary border border-theme-border-secondary 
               rounded-md text-sm text-theme-text-primary placeholder-theme-text-muted
               focus:outline-none focus:ring-2 focus:ring-theme-accent-primary focus:border-transparent"

@@ -4,9 +4,9 @@ import { Note } from '../../types'
 import { useAppStore } from '../../stores/newSimpleStore'
 
 // Modal Components
-import SearchModal from '../SearchModal'
-import TagModal from '../editor/tags/TagModal'
-import SettingsModal from '../settings/SettingsModal'
+import { SearchModal } from '../SearchModal'
+import { TagModal } from '../editor/tags/TagModal'
+import { SettingsModal } from '../settings/SettingsModal'
 
 // Lazy modal components
 import { ExportDialog } from '../features/LazyComponents'
@@ -78,9 +78,10 @@ const AppModals: React.FC<AppModalsProps> = ({
       {modals.export && currentNote && (
         <Suspense fallback={<div>Loading Export Dialog...</div>}>
           <ExportDialog
-            isOpen={modals.export}
+            isVisible={modals.export}
             onClose={() => setModal('export', false)}
-            note={currentNote}
+            notes={[currentNote]}
+            type="single"
           />
         </Suspense>
       )}

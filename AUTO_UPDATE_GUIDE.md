@@ -2,7 +2,7 @@
 
 ## 🔄 Overview
 
-Nototo now includes a comprehensive auto-update system that automatically checks for and installs updates from GitHub Releases. The system is built with `electron-updater` and provides a seamless update experience.
+Viny now includes a comprehensive auto-update system that automatically checks for and installs updates from GitHub Releases. The system is built with `electron-updater` and provides a seamless update experience.
 
 ## ✅ Implementation Status
 
@@ -106,7 +106,7 @@ npx electron-builder --publish=always
     "publish": {
       "provider": "github",
       "owner": "your-github-username",
-      "repo": "nototo"
+      "repo": "viny"
     }
   }
 }

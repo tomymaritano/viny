@@ -1,13 +1,11 @@
 // Presentation component for AppSimple - handles only UI rendering
 import React, { Suspense } from 'react'
 import { Note, Notebook, Settings } from '../../types'
-import { Toast } from '../../stores/slices/uiSlice'
-import { MarkdownPreviewHandle } from '../MarkdownPreview'
 
 // UI Components
 import { AppLoading } from '../LoadingStates'
 import LoadingSpinner from '../LoadingSpinner'
-import ErrorBoundary from '../ErrorBoundary'
+import { ErrorBoundary } from '../ErrorBoundary'
 import StorageErrorBoundary from '../errors/StorageErrorBoundary'
 import AppLayout from './AppLayout'
 import AppModals from './AppModals'
@@ -23,7 +21,6 @@ interface AppPresentationProps {
   // UI State
   isEditorOpen: boolean
   isLoading: boolean
-  isPreviewVisible: boolean
   activeSection: string
   modals: {
     search: boolean
@@ -32,10 +29,6 @@ interface AppPresentationProps {
     tagModal: boolean
     notebookManager: boolean
   }
-  toasts: Toast[]
-  
-  // Refs
-  previewRef: React.RefObject<MarkdownPreviewHandle | null>
   
   // Handlers
   handleOpenNote: (noteId: string) => void
@@ -44,12 +37,12 @@ interface AppPresentationProps {
   handleMetadataChange: (note: Note) => void
   createNewNote: () => void
   handleSaveNote: (note: Note) => Promise<Note>
-  handleDeleteNote: (note: Note) => void
-  handleTogglePin: (note: Note) => void
-  handleDuplicateNote: (note: Note) => void
+  handleDeleteNote: (note: Note) => void | Promise<void>
+  handleTogglePin: (note: Note) => void | Promise<void>
+  handleDuplicateNote: (note: Note) => void | Promise<void>
+  handleRestoreNote: (note: Note) => void | Promise<void>
+  handlePermanentDelete: (note: Note) => void | Promise<void>
   setModal: (modalName: string, isOpen: boolean) => void
-  removeToast: (id: string) => void
-  setIsPreviewVisible: (visible: boolean) => void
   sortNotes: (sortBy: string) => void
 }
 
@@ -68,13 +61,8 @@ const AppPresentation: React.FC<AppPresentationProps> = ({
   // UI State
   isEditorOpen,
   isLoading,
-  isPreviewVisible,
   activeSection,
   modals,
-  toasts,
-  
-  // Refs
-  previewRef,
   
   // Handlers
   handleOpenNote,
@@ -86,9 +74,9 @@ const AppPresentation: React.FC<AppPresentationProps> = ({
   handleDeleteNote,
   handleTogglePin,
   handleDuplicateNote,
+  handleRestoreNote,
+  handlePermanentDelete,
   setModal,
-  removeToast,
-  setIsPreviewVisible,
   sortNotes
 }) => {
   // Loading state
@@ -98,17 +86,18 @@ const AppPresentation: React.FC<AppPresentationProps> = ({
 
 
   return (
-    <ErrorBoundary>
-      <StorageErrorBoundary
-        clearStorageOnRetry={true}
-        onError={(error) => {
-          console.error('Storage service error:', error)
-        }}
-        onRetry={() => {
-          window.location.reload()
-        }}
-      >
-        <AppLayout
+    <div data-testid="app-container">
+      <ErrorBoundary>
+        <StorageErrorBoundary
+          clearStorageOnRetry={true}
+          onError={(error) => {
+            console.error('Storage service error:', error)
+          }}
+          onRetry={() => {
+            window.location.reload()
+          }}
+        >
+          <AppLayout
           // Data
           currentNote={currentNote}
           selectedNote={selectedNote}
@@ -118,12 +107,7 @@ const AppPresentation: React.FC<AppPresentationProps> = ({
           
           // UI State
           isEditorOpen={isEditorOpen}
-          isPreviewVisible={isPreviewVisible}
           activeSection={activeSection}
-          toasts={toasts}
-          
-          // Refs
-          previewRef={previewRef}
           
           // Handlers
           handleOpenNote={handleOpenNote}
@@ -134,9 +118,9 @@ const AppPresentation: React.FC<AppPresentationProps> = ({
           handleDeleteNote={handleDeleteNote}
           handleTogglePin={handleTogglePin}
           handleDuplicateNote={handleDuplicateNote}
+          handleRestoreNote={handleRestoreNote}
+          handlePermanentDelete={handlePermanentDelete}
           setModal={setModal}
-          removeToast={removeToast}
-          setIsPreviewVisible={setIsPreviewVisible}
           sortNotes={sortNotes}
         />
 
@@ -151,6 +135,7 @@ const AppPresentation: React.FC<AppPresentationProps> = ({
         />
       </StorageErrorBoundary>
     </ErrorBoundary>
+    </div>
   )
 }
 

@@ -116,19 +116,32 @@ input,
 .prose h1,
 .prose-theme h1,
 .markdown-preview h1 {
-  color: var(--color-blue);
+  color: var(--color-base3);
   font-size: 2.2em;
   font-weight: 600;
-  margin: 1.2em 0 0.8em 0;
+  margin: 0.3em 0 0.5em 0;
   line-height: 1.2;
   border-bottom: 0.5px solid var(--color-base01) !important;
   padding-bottom: 0.3em;
 }
 
+/* Reduce top margin for first heading */
+.prose h1:first-child,
+.prose-theme h1:first-child,
+.markdown-preview h1:first-child {
+  margin-top: 0;
+}
+
+/* Reduce top margin for first heading in prose content */
+.prose-theme > h1:first-child,
+.prose-theme > *:first-child h1:first-child {
+  margin-top: 0 !important;
+}
+
 .prose h2,
 .prose-theme h2,
 .markdown-preview h2 {
-  color: var(--color-cyan);
+  color: var(--color-base3);
   font-size: 1.8em;
   font-weight: 600;
   margin: 1em 0 0.6em 0;
@@ -140,7 +153,7 @@ input,
 .prose h3,
 .prose-theme h3,
 .markdown-preview h3 {
-  color: var(--color-violet);
+  color: var(--color-base3);
   font-size: 1.4em;
   font-weight: 600;
   margin: 0.9em 0 0.5em 0;
@@ -150,7 +163,7 @@ input,
 .prose h4,
 .prose-theme h4,
 .markdown-preview h4 {
-  color: var(--color-green);
+  color: var(--color-base3);
   font-size: 1.2em;
   font-weight: 600;
   margin: 0.8em 0 0.4em 0;
@@ -160,7 +173,7 @@ input,
 .prose h5,
 .prose-theme h5,
 .markdown-preview h5 {
-  color: var(--color-yellow);
+  color: var(--color-base3);
   font-size: 1.1em;
   font-weight: 600;
   margin: 0.7em 0 0.3em 0;
@@ -170,7 +183,7 @@ input,
 .prose h6,
 .prose-theme h6,
 .markdown-preview h6 {
-  color: var(--color-orange);
+  color: var(--color-base3);
   font-size: 1em;
   font-weight: 600;
   margin: 0.6em 0 0.2em 0;
@@ -213,9 +226,9 @@ p {
 .prose-theme p,
 .markdown-preview p {
   margin: 1.2em 0;
-  line-height: 1.7;
-  color: var(--color-base2);
-  font-size: 1rem;
+  line-height: var(--line-height) !important;
+  color: var(--color-base2) !important;
+  font-size: var(--font-size-markdown) !important;
 }
 
 .prose p:first-child,
@@ -241,10 +254,10 @@ p {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   max-width: none;
-  color: var(--color-base1);
+  color: var(--color-base2) !important;
   font-family: var(--font-family-markdown);
-  font-size: var(--font-size-markdown);
-  line-height: var(--line-height);
+  font-size: var(--font-size-markdown) !important;
+  line-height: var(--line-height) !important;
 }
 
 /* Links */
@@ -366,4 +379,504 @@ p {
 
 .preview-white-text ol {
   list-style-type: decimal !important;
+}
+
+/* Additional prose styles for better theme support */
+.prose-theme ul,
+.prose-theme ol {
+  margin: 1em 0;
+  padding-left: 1.5em;
+  color: var(--color-base2) !important;
+}
+
+.prose-theme li {
+  margin: 0.5em 0;
+  color: var(--color-base2) !important;
+}
+
+.prose-theme blockquote {
+  border-left: 4px solid var(--color-base01);
+  padding-left: 1em;
+  margin: 1.5em 0;
+  color: var(--color-base1) !important;
+  font-style: italic;
+}
+
+.prose-theme code {
+  background-color: var(--color-base02) !important;
+  color: var(--color-base3) !important;
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-family: var(--font-family-editor);
+}
+
+.prose-theme pre {
+  background-color: var(--color-base02) !important;
+  color: var(--color-base2) !important;
+  padding: 1em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1.5em 0;
+}
+
+.prose-theme pre code {
+  background-color: transparent !important;
+  padding: 0;
+  color: inherit !important;
+}
+
+.prose-theme table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+}
+
+.prose-theme th,
+.prose-theme td {
+  border: 1px solid var(--color-base01);
+  padding: 0.5em 1em;
+  text-align: left;
+}
+
+.prose-theme th {
+  background-color: var(--color-base02) !important;
+  font-weight: 600;
+  color: var(--color-base3) !important;
+}
+
+.prose-theme td {
+  color: var(--color-base2) !important;
+}
+
+.prose-theme hr {
+  border: none;
+  border-top: 1px solid var(--color-base01);
+  margin: 2em 0;
+}
+
+/* Additional essential prose-theme styles */
+.prose-theme strong,
+.prose-theme b {
+  color: var(--color-base3) !important;
+  font-weight: 700;
+}
+
+.prose-theme em,
+.prose-theme i {
+  color: var(--color-violet) !important;
+  font-style: italic;
+}
+
+/* List styling improvements */
+.prose-theme ul {
+  list-style-type: disc !important;
+}
+
+.prose-theme ul ul {
+  list-style-type: circle !important;
+}
+
+.prose-theme ul ul ul {
+  list-style-type: square !important;
+}
+
+.prose-theme ol {
+  list-style-type: decimal !important;
+}
+
+.prose-theme ol ol {
+  list-style-type: lower-alpha !important;
+}
+
+.prose-theme ol ol ol {
+  list-style-type: lower-roman !important;
+}
+
+/* Nested lists */
+.prose-theme ul ul,
+.prose-theme ol ol,
+.prose-theme ul ol,
+.prose-theme ol ul {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+  padding-left: 1.5em;
+}
+
+/* Task lists (checkboxes) */
+.prose-theme li input[type='checkbox'] {
+  margin-right: 0.5em;
+  accent-color: var(--color-blue);
+}
+
+.prose-theme li input[type='checkbox']:checked + * {
+  text-decoration: line-through;
+  color: var(--color-base0) !important;
+}
+
+/* Definition lists */
+.prose-theme dl {
+  margin: 1em 0;
+}
+
+.prose-theme dt {
+  color: var(--color-base3) !important;
+  font-weight: 600;
+  margin-top: 1em;
+  margin-bottom: 0.25em;
+}
+
+.prose-theme dd {
+  color: var(--color-base2) !important;
+  margin-left: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+/* List spacing improvements */
+.prose-theme li p {
+  margin-bottom: 0.5em;
+}
+
+.prose-theme li p:last-child {
+  margin-bottom: 0;
+}
+
+/* Compact lists */
+.prose-theme ul li:only-child,
+.prose-theme ol li:only-child {
+  margin-bottom: 0;
+}
+
+/* Multi-paragraph list items */
+.prose-theme li > p + p {
+  margin-top: 0.5em;
+}
+
+/* ============================= */
+/* PREVIEW THEME VARIATIONS */
+/* ============================= */
+
+/* Default Light Preview Theme - Clean & Professional */
+[data-preview-theme='default-light'] .prose-theme,
+[data-preview-theme='default-light'] .markdown-preview {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+  line-height: 1.6;
+  background: #ffffff;
+  color: #1f2937;
+  max-width: none;
+}
+
+[data-preview-theme='default-light'] .prose-theme h1,
+[data-preview-theme='default-light'] .prose-theme h2,
+[data-preview-theme='default-light'] .prose-theme h3,
+[data-preview-theme='default-light'] .prose-theme h4,
+[data-preview-theme='default-light'] .prose-theme h5,
+[data-preview-theme='default-light'] .prose-theme h6 {
+  color: #111827 !important;
+  font-weight: 600 !important;
+  margin-top: 0.8em !important;
+  margin-bottom: 0.5em !important;
+}
+
+[data-preview-theme='default-light'] .prose-theme h1 {
+  font-size: 2em !important;
+  border-bottom: 2px solid #e5e7eb !important;
+  padding-bottom: 0.3rem !important;
+}
+
+[data-preview-theme='default-light'] .prose-theme > h1:first-child,
+[data-preview-theme='default-light']
+  .prose-theme
+  > *:first-child
+  h1:first-child {
+  margin-top: 0 !important;
+}
+
+[data-preview-theme='default-light'] .prose-theme h2 {
+  font-size: 1.5em !important;
+  border-bottom: 1px solid #f3f4f6 !important;
+  padding-bottom: 0.2rem !important;
+}
+
+[data-preview-theme='default-light'] .prose-theme a {
+  color: #2563eb !important;
+  text-decoration: none !important;
+}
+
+[data-preview-theme='default-light'] .prose-theme a:hover {
+  text-decoration: underline !important;
+}
+
+[data-preview-theme='default-light'] .prose-theme code {
+  background: #f9fafb !important;
+  color: #7c3aed !important;
+  padding: 0.2em 0.4em !important;
+  border-radius: 3px !important;
+  font-size: 0.9em !important;
+}
+
+[data-preview-theme='default-light'] .prose-theme blockquote {
+  border-left: 4px solid #d1d5db !important;
+  margin: 1.5em 0 !important;
+  padding-left: 1em !important;
+  color: #6b7280 !important;
+  font-style: italic !important;
+}
+
+/* Default Dark Preview Theme - Modern Dark */
+[data-preview-theme='default-dark'] .prose-theme,
+[data-preview-theme='default-dark'] .markdown-preview {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+  line-height: 1.6;
+  background: var(--color-base03);
+  color: var(--color-base1);
+  max-width: none;
+}
+
+[data-preview-theme='default-dark'] .prose-theme h1,
+[data-preview-theme='default-dark'] .prose-theme h2,
+[data-preview-theme='default-dark'] .prose-theme h3,
+[data-preview-theme='default-dark'] .prose-theme h4,
+[data-preview-theme='default-dark'] .prose-theme h5,
+[data-preview-theme='default-dark'] .prose-theme h6 {
+  color: var(--color-base3) !important;
+  font-weight: 600 !important;
+  margin-top: 0.8em !important;
+  margin-bottom: 0.5em !important;
+}
+
+[data-preview-theme='default-dark'] .prose-theme h1 {
+  font-size: 2em !important;
+  border-bottom: 2px solid var(--color-base01) !important;
+  padding-bottom: 0.3rem !important;
+}
+
+[data-preview-theme='default-dark'] .prose-theme > h1:first-child,
+[data-preview-theme='default-dark']
+  .prose-theme
+  > *:first-child
+  h1:first-child {
+  margin-top: 0 !important;
+}
+
+[data-preview-theme='default-dark'] .prose-theme h2 {
+  font-size: 1.5em !important;
+  border-bottom: 1px solid var(--color-base02) !important;
+  padding-bottom: 0.2rem !important;
+}
+
+[data-preview-theme='default-dark'] .prose-theme a {
+  color: var(--color-blue) !important;
+  text-decoration: none !important;
+}
+
+[data-preview-theme='default-dark'] .prose-theme a:hover {
+  text-decoration: underline !important;
+  color: var(--color-cyan) !important;
+}
+
+[data-preview-theme='default-dark'] .prose-theme code {
+  background: var(--color-base02) !important;
+  color: var(--color-violet) !important;
+  padding: 0.2em 0.4em !important;
+  border-radius: 3px !important;
+  font-size: 0.9em !important;
+}
+
+[data-preview-theme='default-dark'] .prose-theme blockquote {
+  border-left: 4px solid var(--color-base01) !important;
+  margin: 1.5em 0 !important;
+  padding-left: 1em !important;
+  color: var(--color-base0) !important;
+  font-style: italic !important;
+}
+
+/* GitHub Preview Theme - clean GitHub style */
+[data-preview-theme='github'] .prose-theme,
+[data-preview-theme='github'] .markdown-preview {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  background: #ffffff;
+  color: #24292e;
+}
+
+[data-preview-theme='github'] .prose-theme h1,
+[data-preview-theme='github'] .prose-theme > h1:first-child,
+[data-preview-theme='github'] .prose-theme > *:first-child h1:first-child {
+  margin-top: 0 !important;
+}
+
+[data-preview-theme='github'] .prose-theme h2 {
+  border-bottom: 1px solid #eaecef !important;
+  padding-bottom: 0.3rem !important;
+}
+
+[data-preview-theme='github'] .prose-theme a {
+  color: #0366d6 !important;
+}
+
+[data-preview-theme='github'] .prose-theme code {
+  background: #f6f8fa !important;
+  color: #24292e !important;
+  padding: 0.2em 0.4em !important;
+  border-radius: 3px !important;
+}
+
+[data-preview-theme='github'] .prose-theme blockquote {
+  border-left: 0.25em solid #dfe2e5 !important;
+  color: #6a737d !important;
+  background: transparent !important;
+}
+
+/* Minimal Preview Theme - elegant serif */
+[data-preview-theme='minimal'] .prose-theme,
+[data-preview-theme='minimal'] .markdown-preview {
+  font-family: Georgia, serif;
+  line-height: 1.8;
+  max-width: none;
+  background: #fefefe;
+}
+
+[data-preview-theme='minimal'] .prose-theme h1,
+[data-preview-theme='minimal'] .prose-theme h2,
+[data-preview-theme='minimal'] .prose-theme h3,
+[data-preview-theme='minimal'] .prose-theme h4,
+[data-preview-theme='minimal'] .prose-theme h5,
+[data-preview-theme='minimal'] .prose-theme h6 {
+  font-family: Georgia, serif;
+  letter-spacing: -0.01em;
+  text-align: center !important;
+  margin: 1em 0 0.8em 0 !important;
+}
+
+[data-preview-theme='minimal'] .prose-theme > h1:first-child,
+[data-preview-theme='minimal'] .prose-theme > *:first-child h1:first-child {
+  margin-top: 0 !important;
+}
+
+[data-preview-theme='minimal'] .prose-theme p {
+  text-align: justify !important;
+  margin: 1.5em 0 !important;
+}
+
+/* Academic Preview Theme - formal paper style */
+[data-preview-theme='academic'] .prose-theme,
+[data-preview-theme='academic'] .markdown-preview {
+  font-family: 'Times New Roman', Times, serif;
+  line-height: 1.8;
+  max-width: none;
+  background: #fafafa;
+  color: #2c3e50;
+}
+
+[data-preview-theme='academic'] .prose-theme h1 {
+  text-align: center !important;
+  font-size: 2em !important;
+  border-bottom: 3px double #2c3e50 !important;
+  padding-bottom: 0.5em !important;
+  margin: 0 0 1em 0 !important;
+}
+
+[data-preview-theme='academic'] .prose-theme > h1:first-child,
+[data-preview-theme='academic'] .prose-theme > *:first-child h1:first-child {
+  margin-top: 0 !important;
+}
+
+[data-preview-theme='academic'] .prose-theme h2 {
+  border-bottom: 1px solid #bdc3c7 !important;
+  padding-bottom: 0.3em !important;
+  margin: 1em 0 0.8em 0 !important;
+}
+
+[data-preview-theme='academic'] .prose-theme h1,
+[data-preview-theme='academic'] .prose-theme h2,
+[data-preview-theme='academic'] .prose-theme h3,
+[data-preview-theme='academic'] .prose-theme h4,
+[data-preview-theme='academic'] .prose-theme h5,
+[data-preview-theme='academic'] .prose-theme h6 {
+  font-family: 'Times New Roman', serif;
+  font-weight: bold;
+  color: #2c3e50 !important;
+}
+
+[data-preview-theme='academic'] .prose-theme p {
+  text-align: justify !important;
+  text-indent: 1.5em !important;
+  margin: 1.5em 0 !important;
+}
+
+[data-preview-theme='academic'] .prose-theme code {
+  font-family: 'Courier New', monospace;
+  background: #ecf0f1 !important;
+  color: #2c3e50 !important;
+}
+
+/* Modern Preview Theme - sleek contemporary */
+[data-preview-theme='modern'] .prose-theme,
+[data-preview-theme='modern'] .markdown-preview {
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  line-height: 1.7;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-attachment: fixed;
+  color: #1a202c;
+}
+
+[data-preview-theme='modern'] .prose-theme h1 {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  font-size: 2.5em !important;
+  text-align: center !important;
+}
+
+[data-preview-theme='modern'] .prose-theme > h1:first-child,
+[data-preview-theme='modern'] .prose-theme > *:first-child h1:first-child {
+  margin-top: 0 !important;
+}
+
+[data-preview-theme='modern'] .prose-theme h2 {
+  border-left: 4px solid #667eea !important;
+  padding-left: 1em !important;
+  color: #4a5568 !important;
+}
+
+[data-preview-theme='modern'] .prose-theme h1,
+[data-preview-theme='modern'] .prose-theme h2,
+[data-preview-theme='modern'] .prose-theme h3,
+[data-preview-theme='modern'] .prose-theme h4,
+[data-preview-theme='modern'] .prose-theme h5,
+[data-preview-theme='modern'] .prose-theme h6 {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+[data-preview-theme='modern'] .prose-theme a {
+  color: #667eea !important;
+  text-decoration: none !important;
+  border-bottom: 2px solid transparent !important;
+  transition: border-color 0.3s ease !important;
+}
+
+[data-preview-theme='modern'] .prose-theme a:hover {
+  border-bottom-color: #667eea !important;
+}
+
+[data-preview-theme='modern'] .prose-theme code {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #e53e3e !important;
+  font-weight: 600 !important;
+  padding: 0.3em 0.6em !important;
+  border-radius: 6px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }

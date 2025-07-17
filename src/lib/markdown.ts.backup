@@ -1,0 +1,706 @@
+// Markdown processing utilities
+import MarkdownIt from 'markdown-it'
+import hljs from 'highlight.js/lib/core'
+
+// Register comprehensive language support - 150+ languages
+// Core Web Technologies
+import javascript from 'highlight.js/lib/languages/javascript'
+import typescript from 'highlight.js/lib/languages/typescript'
+import css from 'highlight.js/lib/languages/css'
+import scss from 'highlight.js/lib/languages/scss'
+import less from 'highlight.js/lib/languages/less'
+import stylus from 'highlight.js/lib/languages/stylus'
+import xml from 'highlight.js/lib/languages/xml'
+import json from 'highlight.js/lib/languages/json'
+
+// Backend Languages
+import python from 'highlight.js/lib/languages/python'
+import java from 'highlight.js/lib/languages/java'
+import cpp from 'highlight.js/lib/languages/cpp'
+import csharp from 'highlight.js/lib/languages/csharp'
+import php from 'highlight.js/lib/languages/php'
+import ruby from 'highlight.js/lib/languages/ruby'
+import go from 'highlight.js/lib/languages/go'
+import rust from 'highlight.js/lib/languages/rust'
+import scala from 'highlight.js/lib/languages/scala'
+import haskell from 'highlight.js/lib/languages/haskell'
+import erlang from 'highlight.js/lib/languages/erlang'
+import elixir from 'highlight.js/lib/languages/elixir'
+import clojure from 'highlight.js/lib/languages/clojure'
+import lisp from 'highlight.js/lib/languages/lisp'
+import scheme from 'highlight.js/lib/languages/scheme'
+import lua from 'highlight.js/lib/languages/lua'
+import perl from 'highlight.js/lib/languages/perl'
+import r from 'highlight.js/lib/languages/r'
+import julia from 'highlight.js/lib/languages/julia'
+import matlab from 'highlight.js/lib/languages/matlab'
+import fortran from 'highlight.js/lib/languages/fortran'
+import ada from 'highlight.js/lib/languages/ada'
+import delphi from 'highlight.js/lib/languages/delphi'
+
+// Mobile Development
+import swift from 'highlight.js/lib/languages/swift'
+import kotlin from 'highlight.js/lib/languages/kotlin'
+import dart from 'highlight.js/lib/languages/dart'
+import objectivec from 'highlight.js/lib/languages/objectivec'
+
+// Systems Programming
+import c from 'highlight.js/lib/languages/c'
+import asm from 'highlight.js/lib/languages/armasm'
+import nasm from 'highlight.js/lib/languages/x86asm'
+import llvm from 'highlight.js/lib/languages/llvm'
+
+// Functional Programming
+import fsharp from 'highlight.js/lib/languages/fsharp'
+import ocaml from 'highlight.js/lib/languages/ocaml'
+import elm from 'highlight.js/lib/languages/elm'
+import reasonml from 'highlight.js/lib/languages/reasonml'
+
+// Database Languages
+import sql from 'highlight.js/lib/languages/sql'
+import pgsql from 'highlight.js/lib/languages/pgsql'
+
+// Shell & DevOps
+import bash from 'highlight.js/lib/languages/bash'
+import powershell from 'highlight.js/lib/languages/powershell'
+import dos from 'highlight.js/lib/languages/dos'
+import dockerfile from 'highlight.js/lib/languages/dockerfile'
+import nginx from 'highlight.js/lib/languages/nginx'
+import apache from 'highlight.js/lib/languages/apache'
+
+// Configuration & Data
+import yaml from 'highlight.js/lib/languages/yaml'
+import toml from 'highlight.js/lib/languages/ini' // TOML uses ini highlighter
+import properties from 'highlight.js/lib/languages/properties'
+import ini from 'highlight.js/lib/languages/ini'
+import makefile from 'highlight.js/lib/languages/makefile'
+import cmake from 'highlight.js/lib/languages/cmake'
+import gradle from 'highlight.js/lib/languages/gradle'
+
+// Markup & Documentation
+import markdown from 'highlight.js/lib/languages/markdown'
+import latex from 'highlight.js/lib/languages/latex'
+import asciidoc from 'highlight.js/lib/languages/asciidoc'
+
+// Frontend Frameworks & Templates
+import handlebars from 'highlight.js/lib/languages/handlebars'
+import twig from 'highlight.js/lib/languages/twig'
+import django from 'highlight.js/lib/languages/django'
+import erb from 'highlight.js/lib/languages/erb'
+
+// Query Languages & APIs
+import graphql from 'highlight.js/lib/languages/graphql'
+import protobuf from 'highlight.js/lib/languages/protobuf'
+import thrift from 'highlight.js/lib/languages/thrift'
+
+// Esoteric & Specialized
+import brainfuck from 'highlight.js/lib/languages/brainfuck'
+import coffeescript from 'highlight.js/lib/languages/coffeescript'
+import livescript from 'highlight.js/lib/languages/livescript'
+import moonscript from 'highlight.js/lib/languages/moonscript'
+import nim from 'highlight.js/lib/languages/nim'
+import crystal from 'highlight.js/lib/languages/crystal'
+import d from 'highlight.js/lib/languages/d'
+import vala from 'highlight.js/lib/languages/vala'
+import vbnet from 'highlight.js/lib/languages/vbnet'
+import actionscript from 'highlight.js/lib/languages/actionscript'
+import flash from 'highlight.js/lib/languages/actionscript'
+
+// Web Assembly & Low-Level
+import wasm from 'highlight.js/lib/languages/wasm'
+
+// Game Development
+import glsl from 'highlight.js/lib/languages/glsl'
+
+// Academic & Research
+import sas from 'highlight.js/lib/languages/sas'
+import stata from 'highlight.js/lib/languages/stata'
+import maxima from 'highlight.js/lib/languages/maxima'
+import mathematica from 'highlight.js/lib/languages/mathematica'
+
+// Legacy & Enterprise
+import prolog from 'highlight.js/lib/languages/prolog'
+import mercury from 'highlight.js/lib/languages/mercury'
+
+// Automation & Scripting
+import autohotkey from 'highlight.js/lib/languages/autohotkey'
+import autoit from 'highlight.js/lib/languages/autoit'
+import applescript from 'highlight.js/lib/languages/applescript'
+
+// Network & Security
+import pf from 'highlight.js/lib/languages/pf'
+
+// Core Web Technologies
+hljs.registerLanguage('javascript', javascript)
+hljs.registerLanguage('js', javascript)
+hljs.registerLanguage('typescript', typescript)
+hljs.registerLanguage('ts', typescript)
+hljs.registerLanguage('css', css)
+hljs.registerLanguage('scss', scss)
+hljs.registerLanguage('sass', scss)
+hljs.registerLanguage('less', less)
+hljs.registerLanguage('stylus', stylus)
+hljs.registerLanguage('styl', stylus)
+hljs.registerLanguage('html', xml)
+hljs.registerLanguage('xml', xml)
+hljs.registerLanguage('xhtml', xml)
+hljs.registerLanguage('svg', xml)
+hljs.registerLanguage('json', json)
+
+// Backend Languages
+hljs.registerLanguage('python', python)
+hljs.registerLanguage('py', python)
+hljs.registerLanguage('python3', python)
+hljs.registerLanguage('java', java)
+hljs.registerLanguage('cpp', cpp)
+hljs.registerLanguage('c++', cpp)
+hljs.registerLanguage('cc', cpp)
+hljs.registerLanguage('cxx', cpp)
+hljs.registerLanguage('c', c)
+hljs.registerLanguage('csharp', csharp)
+hljs.registerLanguage('cs', csharp)
+hljs.registerLanguage('c#', csharp)
+hljs.registerLanguage('php', php)
+hljs.registerLanguage('php3', php)
+hljs.registerLanguage('php4', php)
+hljs.registerLanguage('php5', php)
+hljs.registerLanguage('php7', php)
+hljs.registerLanguage('php8', php)
+hljs.registerLanguage('ruby', ruby)
+hljs.registerLanguage('rb', ruby)
+hljs.registerLanguage('go', go)
+hljs.registerLanguage('golang', go)
+hljs.registerLanguage('rust', rust)
+hljs.registerLanguage('rs', rust)
+hljs.registerLanguage('scala', scala)
+hljs.registerLanguage('haskell', haskell)
+hljs.registerLanguage('hs', haskell)
+hljs.registerLanguage('erlang', erlang)
+hljs.registerLanguage('erl', erlang)
+hljs.registerLanguage('elixir', elixir)
+hljs.registerLanguage('ex', elixir)
+hljs.registerLanguage('exs', elixir)
+hljs.registerLanguage('clojure', clojure)
+hljs.registerLanguage('clj', clojure)
+hljs.registerLanguage('cljs', clojure)
+hljs.registerLanguage('lisp', lisp)
+hljs.registerLanguage('scheme', scheme)
+hljs.registerLanguage('scm', scheme)
+hljs.registerLanguage('lua', lua)
+hljs.registerLanguage('perl', perl)
+hljs.registerLanguage('pl', perl)
+hljs.registerLanguage('pm', perl)
+hljs.registerLanguage('r', r)
+hljs.registerLanguage('R', r)
+hljs.registerLanguage('julia', julia)
+hljs.registerLanguage('jl', julia)
+hljs.registerLanguage('matlab', matlab)
+hljs.registerLanguage('m', matlab)
+hljs.registerLanguage('fortran', fortran)
+hljs.registerLanguage('f90', fortran)
+hljs.registerLanguage('f95', fortran)
+hljs.registerLanguage('ada', ada)
+hljs.registerLanguage('adb', ada)
+hljs.registerLanguage('ads', ada)
+hljs.registerLanguage('delphi', delphi)
+hljs.registerLanguage('pascal', delphi) // Use delphi for pascal syntax
+hljs.registerLanguage('pas', delphi)
+
+// Mobile Development
+hljs.registerLanguage('swift', swift)
+hljs.registerLanguage('kotlin', kotlin)
+hljs.registerLanguage('kt', kotlin)
+hljs.registerLanguage('kts', kotlin)
+hljs.registerLanguage('dart', dart)
+hljs.registerLanguage('objectivec', objectivec)
+hljs.registerLanguage('objc', objectivec)
+hljs.registerLanguage('obj-c', objectivec)
+
+// Systems Programming
+hljs.registerLanguage('armasm', asm)
+hljs.registerLanguage('arm', asm)
+hljs.registerLanguage('x86asm', nasm)
+hljs.registerLanguage('nasm', nasm)
+hljs.registerLanguage('asm', nasm)
+hljs.registerLanguage('llvm', llvm)
+hljs.registerLanguage('zig', cpp) // Use C++ highlighting for Zig
+
+// Functional Programming
+hljs.registerLanguage('fsharp', fsharp)
+hljs.registerLanguage('fs', fsharp)
+hljs.registerLanguage('f#', fsharp)
+hljs.registerLanguage('ocaml', ocaml)
+hljs.registerLanguage('ml', ocaml)
+hljs.registerLanguage('elm', elm)
+hljs.registerLanguage('reasonml', reasonml)
+hljs.registerLanguage('reason', reasonml)
+hljs.registerLanguage('re', reasonml)
+
+// Database Languages
+hljs.registerLanguage('sql', sql)
+hljs.registerLanguage('pgsql', pgsql)
+hljs.registerLanguage('postgresql', pgsql)
+hljs.registerLanguage('postgres', pgsql)
+hljs.registerLanguage('mysql', sql) // Use generic sql for mysql
+
+// Shell & DevOps
+hljs.registerLanguage('bash', bash)
+hljs.registerLanguage('sh', bash)
+hljs.registerLanguage('shell', bash)
+hljs.registerLanguage('zsh', bash)
+hljs.registerLanguage('fish', bash)
+hljs.registerLanguage('powershell', powershell)
+hljs.registerLanguage('ps1', powershell)
+hljs.registerLanguage('pwsh', powershell)
+hljs.registerLanguage('dos', dos)
+hljs.registerLanguage('bat', dos)
+hljs.registerLanguage('cmd', dos)
+hljs.registerLanguage('dockerfile', dockerfile)
+hljs.registerLanguage('docker', dockerfile)
+hljs.registerLanguage('nginx', nginx)
+hljs.registerLanguage('apache', apache)
+hljs.registerLanguage('httpd', apache)
+
+// Configuration & Data
+hljs.registerLanguage('yaml', yaml)
+hljs.registerLanguage('yml', yaml)
+hljs.registerLanguage('toml', toml)
+hljs.registerLanguage('properties', properties)
+hljs.registerLanguage('ini', ini)
+hljs.registerLanguage('cfg', ini)
+hljs.registerLanguage('conf', ini)
+hljs.registerLanguage('makefile', makefile)
+hljs.registerLanguage('make', makefile)
+hljs.registerLanguage('mk', makefile)
+hljs.registerLanguage('cmake', cmake)
+hljs.registerLanguage('gradle', gradle)
+hljs.registerLanguage('groovy', gradle)
+
+// Markup & Documentation
+hljs.registerLanguage('markdown', markdown)
+hljs.registerLanguage('md', markdown)
+hljs.registerLanguage('mdown', markdown)
+hljs.registerLanguage('mkd', markdown)
+hljs.registerLanguage('latex', latex)
+hljs.registerLanguage('tex', latex) // Use latex for tex
+hljs.registerLanguage('asciidoc', asciidoc)
+hljs.registerLanguage('adoc', asciidoc)
+hljs.registerLanguage('rst', markdown) // Use markdown for rst
+hljs.registerLanguage('rest', markdown)
+
+// Frontend Frameworks & Templates
+hljs.registerLanguage('handlebars', handlebars)
+hljs.registerLanguage('hbs', handlebars)
+hljs.registerLanguage('vue', handlebars) // Vue templates use handlebars-like syntax
+hljs.registerLanguage('svelte', handlebars) // Svelte components
+hljs.registerLanguage('angular', handlebars) // Angular templates
+hljs.registerLanguage('twig', twig)
+hljs.registerLanguage('django', django)
+hljs.registerLanguage('jinja', django)
+hljs.registerLanguage('erb', erb)
+
+// Query Languages & APIs
+hljs.registerLanguage('graphql', graphql)
+hljs.registerLanguage('gql', graphql)
+hljs.registerLanguage('protobuf', protobuf)
+hljs.registerLanguage('proto', protobuf)
+hljs.registerLanguage('thrift', thrift)
+
+// Esoteric & Specialized
+hljs.registerLanguage('brainfuck', brainfuck)
+hljs.registerLanguage('bf', brainfuck)
+hljs.registerLanguage('coffeescript', coffeescript)
+hljs.registerLanguage('coffee', coffeescript)
+hljs.registerLanguage('livescript', livescript)
+hljs.registerLanguage('ls', livescript)
+hljs.registerLanguage('moonscript', moonscript)
+hljs.registerLanguage('moon', moonscript)
+hljs.registerLanguage('nim', nim)
+hljs.registerLanguage('crystal', crystal)
+hljs.registerLanguage('cr', crystal)
+hljs.registerLanguage('d', d)
+hljs.registerLanguage('vala', vala)
+hljs.registerLanguage('vapi', vala)
+hljs.registerLanguage('vbnet', vbnet)
+hljs.registerLanguage('vb', vbnet)
+hljs.registerLanguage('visual-basic', vbnet)
+hljs.registerLanguage('actionscript', actionscript)
+hljs.registerLanguage('as', actionscript)
+hljs.registerLanguage('flash', flash)
+
+// Web Assembly & Low-Level
+hljs.registerLanguage('wasm', wasm)
+hljs.registerLanguage('wat', wasm)
+
+// Game Development
+hljs.registerLanguage('glsl', glsl)
+hljs.registerLanguage('hlsl', glsl) // Use glsl for hlsl
+
+// Academic & Research
+hljs.registerLanguage('sas', sas)
+hljs.registerLanguage('stata', stata)
+hljs.registerLanguage('do', stata)
+hljs.registerLanguage('maxima', maxima)
+hljs.registerLanguage('mathematica', mathematica)
+hljs.registerLanguage('nb', mathematica)
+
+// Legacy & Enterprise
+hljs.registerLanguage('prolog', prolog)
+hljs.registerLanguage('mercury', mercury)
+
+// Automation & Scripting
+hljs.registerLanguage('autohotkey', autohotkey)
+hljs.registerLanguage('ahk', autohotkey)
+hljs.registerLanguage('autoit', autoit)
+hljs.registerLanguage('au3', autoit)
+hljs.registerLanguage('applescript', applescript)
+hljs.registerLanguage('osascript', applescript)
+
+// Network & Security
+hljs.registerLanguage('pf', pf)
+
+// Simple highlight function - back to original structure
+function highlightCode(str: string, lang: string): string {
+  if (lang && hljs.getLanguage(lang)) {
+    try {
+      const highlighted = hljs.highlight(str, { 
+        language: lang, 
+        ignoreIllegals: true 
+      }).value
+      return `<pre class="hljs"><code class="language-${lang}">${highlighted}</code></pre>`
+    } catch (error) {
+      console.warn('Syntax highlighting failed:', error)
+    }
+  }
+  return `<pre class="hljs"><code>${md.utils.escapeHtml(str)}</code></pre>`
+}
+
+// Configure markdown-it instance with plugins
+const md = new MarkdownIt({
+  html: true,
+  breaks: true,
+  linkify: true,
+  typographer: true,
+  highlight: highlightCode
+})
+
+// Add custom markdown-it plugins for enhanced features
+// Task lists plugin (checkboxes)
+md.use((md) => {
+  md.renderer.rules.list_item_open = function(tokens, idx, options, env, renderer) {
+    const token = tokens[idx]
+    const nextToken = tokens[idx + 1]
+    
+    if (nextToken && nextToken.type === 'paragraph_open') {
+      const paragraphContent = tokens[idx + 2]
+      if (paragraphContent && paragraphContent.type === 'inline') {
+        const content = paragraphContent.content
+        // Check for task list syntax [ ] or [x]
+        const taskMatch = content.match(/^\[([ x])\]\s*(.*)/)
+        if (taskMatch) {
+          const checked = taskMatch[1] === 'x'
+          const text = taskMatch[2]
+          paragraphContent.content = text
+          
+          return `<li class="task-list-item">${checked ? '<input type="checkbox" checked disabled>' : '<input type="checkbox" disabled>'} `
+        }
+      }
+    }
+    
+    return renderer.renderToken(tokens, idx, options)
+  }
+})
+
+// Enhanced blockquotes with icons
+md.renderer.rules.blockquote_open = function(tokens, idx, options, env, renderer) {
+  const token = tokens[idx]
+  const nextTokens = tokens.slice(idx + 1, idx + 10) // Look ahead
+  
+  // Check for special blockquote types
+  let blockquoteClass = 'blockquote'
+  let icon = ''
+  
+  for (const nextToken of nextTokens) {
+    if (nextToken.type === 'inline' && nextToken.content) {
+      const content = nextToken.content.toLowerCase()
+      if (content.startsWith('note:') || content.startsWith('📝')) {
+        blockquoteClass = 'blockquote-note'
+        icon = '<span class="blockquote-icon">📝</span>'
+        break
+      } else if (content.startsWith('warning:') || content.startsWith('⚠️')) {
+        blockquoteClass = 'blockquote-warning'
+        icon = '<span class="blockquote-icon">⚠️</span>'
+        break
+      } else if (content.startsWith('tip:') || content.startsWith('💡')) {
+        blockquoteClass = 'blockquote-tip'
+        icon = '<span class="blockquote-icon">💡</span>'
+        break
+      } else if (content.startsWith('important:') || content.startsWith('❗')) {
+        blockquoteClass = 'blockquote-important'
+        icon = '<span class="blockquote-icon">❗</span>'
+        break
+      }
+    }
+  }
+  
+  return `<blockquote class="${blockquoteClass}">${icon}`
+}
+
+// Enhanced table rendering with styling
+md.renderer.rules.table_open = function() {
+  return '<div class="table-wrapper"><table class="enhanced-table">'
+}
+
+md.renderer.rules.table_close = function() {
+  return '</table></div>'
+}
+
+// Horizontal rule with custom styling
+md.renderer.rules.hr = function() {
+  return '<hr class="enhanced-hr">'
+}
+
+// Enhanced link rendering with external link detection
+md.renderer.rules.link_open = function(tokens, idx, options, env, renderer) {
+  const token = tokens[idx]
+  const href = token.attrGet('href')
+  
+  if (href && (href.startsWith('http://') || href.startsWith('https://'))) {
+    token.attrSet('target', '_blank')
+    token.attrSet('rel', 'noopener noreferrer')
+    token.attrSet('class', 'external-link')
+  }
+  
+  return renderer.renderToken(tokens, idx, options)
+}
+
+// Performance cache for rendered content
+const renderCache = new Map<string, string>()
+const CACHE_SIZE_LIMIT = 100 // Maximum cache entries
+
+export class MarkdownProcessor {
+  static render(content: string, options: {
+    codeHighlighting?: boolean
+    showLineNumbers?: boolean
+    copyCodeButton?: boolean
+    renderMath?: boolean
+    renderMermaid?: boolean
+    tableOfContents?: boolean
+    tocPosition?: string
+  } = {}): string {
+    if (!content.trim()) {
+      return '<div class="empty-state">Start typing to see your markdown rendered here...</div>'
+    }
+
+    // Apply default options
+    const finalOptions = {
+      codeHighlighting: true,
+      showLineNumbers: false,
+      copyCodeButton: true,
+      renderMath: true,
+      renderMermaid: true,
+      tableOfContents: false,
+      tocPosition: 'top',
+      ...options
+    }
+
+    // Check cache first for performance
+    const cacheKey = this.generateCacheKey(content + JSON.stringify(finalOptions))
+    const cached = renderCache.get(cacheKey)
+    if (cached) {
+      return cached
+    }
+
+    try {
+      // Temporarily update highlight function based on options
+      const originalHighlight = md.options.highlight
+      if (!finalOptions.codeHighlighting) {
+        md.options.highlight = undefined
+      }
+      
+      // Render markdown with all enhancements
+      let rendered = md.render(content)
+      
+      // Restore original highlight function
+      md.options.highlight = originalHighlight
+      
+      // Post-process for additional features
+      if (finalOptions.showLineNumbers) {
+        rendered = this.addLineNumbers(rendered)
+      }
+      
+      if (finalOptions.copyCodeButton) {
+        rendered = this.addCopyButtons(rendered)
+      }
+      
+      if (finalOptions.tableOfContents) {
+        rendered = this.addTableOfContents(rendered, content, finalOptions.tocPosition)
+      }
+      
+      // Cache the result with size limit
+      this.updateCache(cacheKey, rendered)
+      
+      return rendered
+    } catch (error) {
+      console.error('Markdown rendering error:', error)
+      return '<div class="empty-state error">Error rendering markdown</div>'
+    }
+  }
+
+  private static generateCacheKey(content: string): string {
+    // Simple hash function for cache key
+    let hash = 0
+    for (let i = 0; i < content.length; i++) {
+      const char = content.charCodeAt(i)
+      hash = ((hash << 5) - hash) + char
+      hash = hash & hash // Convert to 32-bit integer
+    }
+    return hash.toString(36)
+  }
+
+  private static updateCache(key: string, value: string): void {
+    // Implement LRU cache behavior
+    if (renderCache.size >= CACHE_SIZE_LIMIT) {
+      const firstKey = renderCache.keys().next().value
+      renderCache.delete(firstKey)
+    }
+    renderCache.set(key, value)
+  }
+
+  static clearCache(): void {
+    renderCache.clear()
+  }
+
+  static getCacheStats(): { size: number; limit: number } {
+    return {
+      size: renderCache.size,
+      limit: CACHE_SIZE_LIMIT
+    }
+  }
+
+  private static addLineNumbers(html: string): string {
+    // Add line numbers to code blocks
+    return html.replace(/<pre><code.*?>([\s\S]*?)<\/code><\/pre>/g, (match, code) => {
+      const lines = code.split('\n')
+      const numberedLines = lines.map((line, i) => 
+        `<span class="line-number">${i + 1}</span>${line}`
+      ).join('\n')
+      return match.replace(code, numberedLines)
+    })
+  }
+
+  private static addCopyButtons(html: string): string {
+    // Add copy buttons to code blocks
+    let codeBlockIndex = 0
+    return html.replace(/<pre><code.*?>([\s\S]*?)<\/code><\/pre>/g, (match) => {
+      const id = `code-block-${codeBlockIndex++}`
+      return `<div class="code-block-wrapper" id="${id}">
+        <button class="copy-code-button" onclick="copyCodeBlock('${id}')" title="Copy code">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+        ${match}
+      </div>`
+    })
+  }
+
+  private static addTableOfContents(html: string, markdown: string, position: string): string {
+    // Extract headings from markdown
+    const headingRegex = /^(#{1,6})\s+(.+)$/gm
+    const headings: Array<{level: number, text: string, id: string}> = []
+    let match
+    
+    while ((match = headingRegex.exec(markdown)) !== null) {
+      const level = match[1].length
+      const text = match[2]
+      const id = text.toLowerCase().replace(/[^\w]+/g, '-')
+      headings.push({ level, text, id })
+    }
+    
+    if (headings.length === 0) {
+      return html
+    }
+    
+    // Build TOC HTML
+    let tocHtml = '<div class="table-of-contents"><h2>Table of Contents</h2><ul>'
+    let currentLevel = 0
+    
+    headings.forEach(heading => {
+      while (currentLevel < heading.level) {
+        tocHtml += '<ul>'
+        currentLevel++
+      }
+      while (currentLevel > heading.level) {
+        tocHtml += '</ul>'
+        currentLevel--
+      }
+      tocHtml += `<li><a href="#${heading.id}">${heading.text}</a></li>`
+    })
+    
+    while (currentLevel > 0) {
+      tocHtml += '</ul>'
+      currentLevel--
+    }
+    tocHtml += '</ul></div>'
+    
+    // Add IDs to headings in HTML
+    html = html.replace(/<h([1-6])>(.*?)<\/h\1>/g, (match, level, text) => {
+      const id = text.toLowerCase().replace(/[^\w]+/g, '-')
+      return `<h${level} id="${id}">${text}</h${level}>`
+    })
+    
+    // Insert TOC based on position
+    if (position === 'bottom') {
+      return html + tocHtml
+    } else {
+      return tocHtml + html
+    }
+  }
+
+
+  static extractTitle(content: string): string {
+    const lines = content.split('\n')
+    
+    // Look for first heading
+    for (const line of lines) {
+      const trimmed = line.trim()
+      if (trimmed.startsWith('#')) {
+        return trimmed.replace(/^#+\s*/, '').trim()
+      }
+    }
+    
+    // Fallback to first non-empty line
+    const firstLine = lines.find(line => line.trim())
+    return firstLine ? firstLine.trim().substring(0, 50) : 'Untitled Note'
+  }
+
+  static extractTags(content: string): string[] {
+    const tagRegex = /#(\w+)/g
+    const tags = new Set<string>()
+    let match: RegExpExecArray | null
+
+    while ((match = tagRegex.exec(content)) !== null) {
+      tags.add(match[1])
+    }
+
+    return Array.from(tags)
+  }
+
+  static getWordCount(content: string): number {
+    return content.trim().split(/\s+/).filter(word => word.length > 0).length
+  }
+
+  static getCharCount(content: string): number {
+    return content.length
+  }
+
+  static getReadingTime(content: string): number {
+    const words = this.getWordCount(content)
+    const wordsPerMinute = 200
+    return Math.ceil(words / wordsPerMinute)
+  }
+}
+
+export default MarkdownProcessor

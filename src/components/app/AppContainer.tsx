@@ -3,7 +3,7 @@ import React, { useRef, useMemo, useEffect } from 'react'
 import { useAppLogic, useNoteActions } from '../../hooks/useSimpleLogic'
 import { Note } from '../../types'
 import { useAppStore } from '../../stores/newSimpleStore'
-import { useSettings } from '../../hooks/useSettings'
+import { useSettingsService } from '../../hooks/useSettingsService'
 import { useNotebooks } from '../../hooks/useNotebooks'
 import { useAutoSave } from '../../hooks/useAutoSave'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
@@ -11,10 +11,14 @@ import { usePageLifecycle } from '../../hooks/usePageLifecycle'
 import { useAppHandlers } from '../../hooks/useAppHandlers'
 import { useSettingsEffects } from '../../hooks/useSettingsEffects'
 import { useErrorHandler } from '../../hooks/useErrorHandler'
+import { useNoteSync } from '../../hooks/useNoteSync'
 import { setupGlobalErrorHandler } from '../../utils/errorHandler'
 import { i18nService } from '../../services/i18nService'
-import { MarkdownPreviewHandle } from '../MarkdownPreview'
-import ToastContainer from '../ui/ToastContainer'
+import { initializeSettings } from '../../services/settings/initialize'
+import { getSettingsService } from '../../services/settings'
+import { ToastContainer } from '../ui/ToastContainer'
+import ElectronExportHandler from '../ElectronExportHandler'
+import GlobalContextMenu from '../GlobalContextMenu'
 
 // Import presentation component
 import AppPresentation from './AppPresentation'
@@ -23,9 +27,7 @@ import AppPresentation from './AppPresentation'
  * Container component that handles all business logic and state management
  * This follows the Container/Presentational pattern for better separation of concerns
  */
-const AppContainer: React.FC = () => {
-  // Refs for scroll sync
-  const previewRef = useRef<MarkdownPreviewHandle>(null)
+export const AppContainer: React.FC = () => {
 
   // Logic hooks - business logic and data fetching
   const { 
@@ -41,34 +43,38 @@ const AppContainer: React.FC = () => {
     handleSaveNote,
     handleDeleteNote,
     handleTogglePin,
-    handleDuplicateNote
+    handleDuplicateNote,
+    handleRestoreNote,
+    handlePermanentDelete
   } = useNoteActions()
 
   // UI state from store
   const {
     modals,
     toasts,
-    isPreviewVisible,
     activeSection,
     setModal,
     removeToast,
-    setIsPreviewVisible,
     sortNotes
   } = useAppStore()
 
   // Error handling
   const errorHandler = useErrorHandler()
 
-  // Setup global error handler
+  // Setup global error handler and initialize settings
   useEffect(() => {
     setupGlobalErrorHandler()
+    initializeSettings()
   }, [])
 
-  const { settings } = useSettings()
+  const { settings } = useSettingsService()
   const { notebooks } = useNotebooks()
 
   // Apply settings effects
   useSettingsEffects()
+  
+  // Initialize note synchronization for real-time updates between windows
+  useNoteSync()
 
   // Initialize i18n service on mount
   React.useEffect(() => {
@@ -76,7 +82,7 @@ const AppContainer: React.FC = () => {
   }, [])
 
   // Auto-save functionality
-  const { debouncedAutoSave } = useAutoSave({ 
+  const { debouncedAutoSave, isSaving: autoSaving, hasUnsavedChanges } = useAutoSave({ 
     onSave: async (note: Note) => {
       await handleSaveNote(note)
     },
@@ -112,6 +118,19 @@ const AppContainer: React.FC = () => {
   // Page lifecycle management
   usePageLifecycle({ currentNote })
 
+  // Initialize settings service on startup
+  useEffect(() => {
+    const initSettings = async () => {
+      try {
+        await initializeSettings()
+        console.log('Settings service initialized')
+      } catch (error) {
+        console.error('Failed to initialize settings service:', error)
+      }
+    }
+    initSettings()
+  }, [])
+
   // Memoized props to prevent unnecessary re-renders
   const appProps = useMemo(() => ({
     // Data
@@ -124,13 +143,15 @@ const AppContainer: React.FC = () => {
     // UI State
     isEditorOpen,
     isLoading,
-    isPreviewVisible,
     activeSection,
     modals,
     toasts,
     
-    // Refs
-    previewRef,
+    // Auto-save state
+    autoSaveState: {
+      isSaving: autoSaving,
+      hasUnsavedChanges
+    },
     
     // Handlers
     handleOpenNote,
@@ -142,9 +163,10 @@ const AppContainer: React.FC = () => {
     handleDeleteNote,
     handleTogglePin,
     handleDuplicateNote,
+    handleRestoreNote,
+    handlePermanentDelete,
     setModal,
     removeToast,
-    setIsPreviewVisible,
     sortNotes
   }), [
     currentNote,
@@ -154,11 +176,11 @@ const AppContainer: React.FC = () => {
     settings,
     isEditorOpen,
     isLoading,
-    isPreviewVisible,
     activeSection,
     modals,
     toasts,
-    previewRef,
+    autoSaving,
+    hasUnsavedChanges,
     handleOpenNote,
     handleContentChange,
     handleNotebookChange,
@@ -168,9 +190,10 @@ const AppContainer: React.FC = () => {
     handleDeleteNote,
     handleTogglePin,
     handleDuplicateNote,
+    handleRestoreNote,
+    handlePermanentDelete,
     setModal,
     removeToast,
-    setIsPreviewVisible,
     sortNotes
   ])
 
@@ -183,8 +206,9 @@ const AppContainer: React.FC = () => {
         position="top-right"
         maxToasts={5}
       />
+      <ElectronExportHandler />
+      <GlobalContextMenu />
     </>
   )
 }
 
-export default AppContainer

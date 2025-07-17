@@ -40,7 +40,14 @@ const TagsList: React.FC<TagsListProps> = ({
               boxShadow: 'inset 3px 0 0 var(--color-active-border)'
             } : {}}
             onClick={() => onSectionClick(sectionKey)}
-            onContextMenu={(e) => onContextMenu(e, tag)}
+            onContextMenu={(e) => {
+              if (window.electronAPI?.isElectron) {
+                e.preventDefault()
+                window.electronAPI.showContextMenu('tag', { name: tag })
+              } else {
+                onContextMenu(e, tag)
+              }
+            }}
           >
             <div className="flex items-center space-x-3 flex-1 min-w-0">
               <div className="w-4 h-4 flex-shrink-0 flex items-center justify-center">

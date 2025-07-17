@@ -1,11 +1,11 @@
-// Nototo Plugin: Advanced Vim Mode with Monaco Integration
+// Viny Plugin: Advanced Vim Mode with Monaco Integration
 // This version shows how to properly integrate with Monaco Editor
 
 export default {
   name: 'vim-mode-advanced',
   version: '3.0.0',
   description: 'Production-ready Vim mode with full Monaco Editor integration',
-  author: 'Nototo Team',
+  author: 'Viny Team',
   
   config: {
     enabled: true,
@@ -392,7 +392,7 @@ export default {
   },
 
   saveFile() {
-    // Trigger Nototo's save functionality
+    // Trigger Viny's save functionality
     this.api.ui.showToast('File saved (:w)', 'success')
   },
 
@@ -540,5 +540,5 @@ This plugin demonstrates production-level integration with Monaco Editor:
 - Toggle relative line numbers
 - Customize status bar
 
-This is a complete, production-ready Vim implementation for Nototo.
+This is a complete, production-ready Vim implementation for Viny.
 */

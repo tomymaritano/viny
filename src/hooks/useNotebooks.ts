@@ -137,12 +137,13 @@ export const useNotebooks = () => {
         console.log('🚀 Loaded notebooks from storage:', parsed.length, 'notebooks')
         
         // Migrate old notebooks to new structure if needed
-        const migrated = parsed.map((notebook: LegacyNotebook) => ({
+        const migrated = parsed.map((notebook: any) => ({
           ...notebook,
           parentId: notebook.parentId || null,
           children: notebook.children || [],
           level: notebook.level || 0,
           path: notebook.path || notebook.name,
+          updatedAt: notebook.updatedAt || new Date().toISOString(),
         }))
         
         const result = buildNotebookTree(migrated)
@@ -297,11 +298,12 @@ export const useNotebooks = () => {
     
     // Move all notes from these notebooks to trash
     const notesToTrash = notes.filter(note => 
-      note.notebookId && idsToDelete.includes(note.notebookId)
+      note.notebook && idsToDelete.includes(note.notebook)
     )
     
     notesToTrash.forEach(note => {
-      updateNote(note.id, { deletedAt: new Date().toISOString() })
+      const updatedNote = { ...note, isTrashed: true, trashedAt: new Date().toISOString() }
+      updateNote(updatedNote)
     })
     
     // Delete the notebooks

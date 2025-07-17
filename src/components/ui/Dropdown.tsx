@@ -1,6 +1,6 @@
 import React, { forwardRef, useCallback } from 'react'
 import { useDropdown } from '../../hooks/useDropdown'
-import Icons from '../Icons'
+import { Icons } from '../Icons'
 
 interface DropdownOption {
   value: string | number

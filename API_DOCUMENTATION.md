@@ -1,6 +1,6 @@
 # 📚 API DOCUMENTATION
 
-## 🚀 Nototo API v1.0
+## 🚀 Viny API v1.0
 
 ### Base URL
 
@@ -367,17 +367,17 @@ Export notes in various formats
 ```javascript
 // For offline mode
 {
-  "nototo_notes": [
+  "viny_notes": [
     // Array of note objects
   ],
-  "nototo_notebooks": [
+  "viny_notebooks": [
     // Array of notebook objects
   ],
-  "nototo_settings": {
+  "viny_settings": {
     // Settings object
   },
-  "nototo_use_api": boolean, // Toggle between API/localStorage
-  "nototo_last_sync": "ISO 8601 date"
+  "viny_use_api": boolean, // Toggle between API/localStorage
+  "viny_last_sync": "ISO 8601 date"
 }
 ```
 

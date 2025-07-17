@@ -1,11 +1,11 @@
-// Nototo Plugin: Vim Mode
+// Viny Plugin: Vim Mode
 // Adds comprehensive Vim keybindings and modes to the Monaco Editor
 
 export default {
   name: 'vim-mode',
   version: '2.0.0',
-  description: 'Complete Vim mode implementation for Nototo with all major Vim features',
-  author: 'Nototo Community',
+  description: 'Complete Vim mode implementation for Viny with all major Vim features',
+  author: 'Viny Community',
   
   config: {
     enabled: true,
@@ -630,8 +630,8 @@ This comprehensive Vim plugin provides:
 
 ## Integration:
 - Monaco Editor keybinding integration
-- Nototo save/quit integration
-- Settings panel in Nototo preferences
+- Viny save/quit integration
+- Settings panel in Viny preferences
 - Toolbar toggle button
 
 To install:
@@ -641,5 +641,5 @@ To install:
 4. Use Ctrl+Shift+V to toggle Vim mode
 5. Press ESC to enter Normal mode
 
-The plugin provides a near-complete Vim experience within Nototo's editor.
+The plugin provides a near-complete Vim experience within Viny's editor.
 */

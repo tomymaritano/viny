@@ -1,6 +1,7 @@
 import React from 'react'
-import Icons from '../Icons'
+import { Icons } from '../Icons'
 import { logStorageError } from '../../services/errorLogger'
+import { debugStorage, clearCorruptedData, backupAndClearStorage } from '../../utils/storageDebug'
 
 interface StorageErrorBoundaryProps {
   children: React.ReactNode
@@ -31,6 +32,8 @@ class StorageErrorBoundary extends React.Component<StorageErrorBoundaryProps, St
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Storage Error:', error, errorInfo)
+    console.error('Error stack:', error.stack)
+    console.error('Component stack:', errorInfo.componentStack)
 
     this.setState({
       error: error,
@@ -86,6 +89,27 @@ class StorageErrorBoundary extends React.Component<StorageErrorBoundaryProps, St
     }
   }
 
+  handleDebug = () => {
+    debugStorage()
+  }
+
+  handleClearCorrupted = () => {
+    const cleared = clearCorruptedData()
+    if (cleared > 0) {
+      alert(`Cleared ${cleared} corrupted items. Reloading...`)
+      window.location.reload()
+    } else {
+      alert('No corrupted data found.')
+    }
+  }
+
+  handleBackupAndClear = () => {
+    if (window.confirm('This will backup your data and then clear storage. Continue?')) {
+      backupAndClearStorage()
+      window.location.reload()
+    }
+  }
+
   render() {
     if (this.state.hasError) {
       return (
@@ -125,6 +149,27 @@ class StorageErrorBoundary extends React.Component<StorageErrorBoundaryProps, St
                 ) : (
                   'Try Again'
                 )}
+              </button>
+
+              <button
+                onClick={this.handleDebug}
+                className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm rounded transition-colors"
+              >
+                Debug Storage (Check Console)
+              </button>
+
+              <button
+                onClick={this.handleClearCorrupted}
+                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm rounded transition-colors"
+              >
+                Clear Corrupted Data Only
+              </button>
+
+              <button
+                onClick={this.handleBackupAndClear}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded transition-colors"
+              >
+                Backup & Clear Storage
               </button>
 
               <button

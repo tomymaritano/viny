@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
-import Icons from '../../Icons'
+import { Icons } from '../../Icons'
 import IconButton from '../../ui/IconButton'
+import { useAppStore } from '../../../stores/newSimpleStore'
 
 const EditorToolbar = ({
   onBold,
@@ -35,12 +36,14 @@ const EditorToolbar = ({
           onClick: onBold,
           title: 'Bold (Ctrl+B)',
           shortcut: 'Ctrl+B',
+          testId: 'toolbar-bold',
         },
         {
           icon: Icons.Italic,
           onClick: onItalic,
           title: 'Italic (Ctrl+I)',
           shortcut: 'Ctrl+I',
+          testId: 'toolbar-italic',
         },
         {
           icon: Icons.Strikethrough,
@@ -191,6 +194,7 @@ const EditorToolbar = ({
           onClick: onCodeBlock,
           title: 'Code Block (Ctrl+Shift+C)',
           shortcut: 'Ctrl+Shift+C',
+          testId: 'toolbar-code-block',
         },
         {
           icon: Icons.Quote,
@@ -222,6 +226,7 @@ const EditorToolbar = ({
           title: 'Toggle Line Numbers',
           shortcut: '',
           active: showLineNumbers,
+          testId: 'toggle-line-numbers',
         },
       ],
     },
@@ -296,6 +301,7 @@ const EditorToolbar = ({
                   aria-label={item.title}
                   aria-pressed={item.active}
                   aria-keyshortcuts={item.shortcut}
+                  data-testid={item.testId}
                 />
               ))}
             </div>
@@ -308,7 +314,12 @@ const EditorToolbar = ({
       </div>
 
       {/* Save indicator - hide on very small screens */}
-      <div className="hidden sm:flex items-center ml-2 flex-shrink-0">
+      <div 
+        className="hidden sm:flex items-center ml-2 flex-shrink-0" 
+        data-testid="save-indicator"
+        aria-live="polite"
+        aria-label="Save status"
+      >
         {getSaveIndicator()}
       </div>
 

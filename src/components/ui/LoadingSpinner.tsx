@@ -5,13 +5,15 @@ interface LoadingSpinnerProps {
   className?: string
   color?: 'primary' | 'secondary' | 'muted' | 'white'
   variant?: 'spinner' | 'dots' | 'pulse' | 'gradient'
+  'data-testid'?: string
 }
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'md',
   className = '',
   color = 'primary',
-  variant = 'spinner'
+  variant = 'spinner',
+  'data-testid': testId = 'loading-spinner'
 }) => {
   const sizeClasses = {
     xs: 'w-3 h-3',
@@ -38,7 +40,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     }
 
     return (
-      <div className={`flex items-center justify-center gap-1 ${className}`}>
+      <div className={`flex items-center justify-center gap-1 ${className}`} data-testid={testId}>
         {[0, 1, 2].map((i) => (
           <div
             key={i}
@@ -55,7 +57,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   if (variant === 'pulse') {
     return (
-      <div className={`${sizeClasses[size]} ${colorClasses[color]} ${className}`}>
+      <div className={`${sizeClasses[size]} ${colorClasses[color]} ${className}`} data-testid={testId}>
         <div className="w-full h-full rounded-full bg-current animate-ping opacity-75" />
       </div>
     )
@@ -63,7 +65,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   if (variant === 'gradient') {
     return (
-      <div className={`relative ${sizeClasses[size]} ${className}`}>
+      <div className={`relative ${sizeClasses[size]} ${className}`} data-testid={testId}>
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-theme-accent-primary via-theme-accent-cyan to-theme-accent-primary animate-spin opacity-75">
           <div 
             className="absolute inset-1 rounded-full bg-theme-bg-primary"
@@ -76,7 +78,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   // Default spinner variant
   return (
-    <div className={`inline-block animate-spin ${sizeClasses[size]} ${colorClasses[color]} ${className}`}>
+    <div className={`inline-block animate-spin ${sizeClasses[size]} ${colorClasses[color]} ${className}`} data-testid={testId}>
       <svg
         className="w-full h-full"
         xmlns="http://www.w3.org/2000/svg"

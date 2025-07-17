@@ -26,100 +26,84 @@ const Toast: React.FC<ToastProps> = ({
   actions = [],
   onDismiss
 }) => {
+  const getAccentStyles = () => {
+    switch (type) {
+      case 'success':
+        return {
+          bar: 'bg-theme-accent-green',
+          icon: 'text-theme-accent-green',
+          button: 'text-theme-accent-green'
+        }
+      case 'error':
+        return {
+          bar: 'bg-theme-accent-red',
+          icon: 'text-theme-accent-red',
+          button: 'text-theme-accent-red'
+        }
+      case 'warning':
+        return {
+          bar: 'bg-theme-accent-yellow',
+          icon: 'text-theme-accent-yellow',
+          button: 'text-theme-accent-yellow'
+        }
+      case 'info':
+        return {
+          bar: 'bg-theme-accent-primary',
+          icon: 'text-theme-accent-primary',
+          button: 'text-theme-accent-primary'
+        }
+    }
+  }
+
+  const styles = getAccentStyles()
+  
   const getIcon = () => {
     switch (type) {
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-green-500" />
+        return <CheckCircle className={`w-5 h-5 ${styles.icon}`} />
       case 'error':
-        return <AlertCircle className="w-5 h-5 text-red-500" />
+        return <AlertCircle className={`w-5 h-5 ${styles.icon}`} />
       case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-yellow-500" />
+        return <AlertTriangle className={`w-5 h-5 ${styles.icon}`} />
       case 'info':
-        return <Info className="w-5 h-5 text-blue-500" />
+        return <Info className={`w-5 h-5 ${styles.icon}`} />
     }
   }
-
-  const getBorderColor = () => {
-    switch (type) {
-      case 'success':
-        return 'border-l-green-500'
-      case 'error':
-        return 'border-l-red-500'
-      case 'warning':
-        return 'border-l-yellow-500'
-      case 'info':
-        return 'border-l-blue-500'
-    }
-  }
-
-  const getBackgroundColor = () => {
-    switch (type) {
-      case 'success':
-        return 'bg-green-50 dark:bg-green-900/20'
-      case 'error':
-        return 'bg-red-50 dark:bg-red-900/20'
-      case 'warning':
-        return 'bg-yellow-50 dark:bg-yellow-900/20'
-      case 'info':
-        return 'bg-blue-50 dark:bg-blue-900/20'
-    }
-  }
-
-  const getTextColor = () => {
-    switch (type) {
-      case 'success':
-        return 'text-green-800 dark:text-green-200'
-      case 'error':
-        return 'text-red-800 dark:text-red-200'
-      case 'warning':
-        return 'text-yellow-800 dark:text-yellow-200'
-      case 'info':
-        return 'text-blue-800 dark:text-blue-200'
-    }
-  }
-
-  const getButtonColor = () => {
-    switch (type) {
-      case 'success':
-        return 'hover:bg-green-100 dark:hover:bg-green-800/30 text-green-600 dark:text-green-400'
-      case 'error':
-        return 'hover:bg-red-100 dark:hover:bg-red-800/30 text-red-600 dark:text-red-400'
-      case 'warning':
-        return 'hover:bg-yellow-100 dark:hover:bg-yellow-800/30 text-yellow-600 dark:text-yellow-400'
-      case 'info':
-        return 'hover:bg-blue-100 dark:hover:bg-blue-800/30 text-blue-600 dark:text-blue-400'
-    }
-  }
-
+  
   return (
     <div className={`
-      max-w-md w-full shadow-lg rounded-lg pointer-events-auto overflow-hidden
-      border-l-4 ${getBorderColor()} ${getBackgroundColor()}
+      relative max-w-sm w-full pointer-events-auto
+      bg-theme-bg-primary border border-theme-border-primary
+      rounded-lg shadow-lg overflow-hidden
       transform transition-all duration-300 ease-in-out
     `}>
-      <div className="p-4">
+      {/* Accent bar */}
+      <div className={`absolute left-0 top-0 bottom-0 w-1 ${styles.bar}`} />
+      
+      <div className="pl-4 pr-3 py-3">
         <div className="flex items-start">
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 mt-0.5">
             {getIcon()}
           </div>
-          <div className="ml-3 w-0 flex-1">
-            <p className={`text-sm font-medium ${getTextColor()}`}>
+          <div className="ml-3 flex-1 min-w-0">
+            <p className="text-sm font-medium text-theme-text-primary">
               {message}
             </p>
             {details && (
-              <p className={`mt-1 text-xs ${getTextColor()} opacity-75`}>
+              <p className="mt-1 text-xs text-theme-text-secondary">
                 {details}
               </p>
             )}
             {actions.length > 0 && (
-              <div className="mt-3 flex space-x-2">
+              <div className="mt-2 flex gap-2">
                 {actions.map((action, index) => (
                   <button
                     key={index}
                     onClick={action.action}
                     className={`
-                      text-xs font-medium px-3 py-1 rounded-md transition-colors
-                      ${getButtonColor()}
+                      text-xs font-medium px-2 py-1 rounded
+                      bg-theme-bg-secondary hover:bg-theme-bg-tertiary
+                      ${styles.button} transition-colors
                     `}
                   >
                     {action.label}
@@ -129,19 +113,13 @@ const Toast: React.FC<ToastProps> = ({
             )}
           </div>
           {dismissible && (
-            <div className="ml-4 flex-shrink-0 flex">
-              <button
-                onClick={() => onDismiss(id)}
-                className={`
-                  inline-flex rounded-md p-1.5 transition-colors
-                  ${getButtonColor()}
-                  focus:outline-none focus:ring-2 focus:ring-offset-2
-                `}
-              >
-                <span className="sr-only">Dismiss</span>
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+            <button
+              onClick={() => onDismiss(id)}
+              className="ml-3 flex-shrink-0 p-1 rounded hover:bg-theme-bg-secondary transition-colors"
+              aria-label="Dismiss"
+            >
+              <X className="w-4 h-4 text-theme-text-muted hover:text-theme-text-primary" />
+            </button>
           )}
         </div>
       </div>
@@ -149,4 +127,4 @@ const Toast: React.FC<ToastProps> = ({
   )
 }
 
-export default Toast
+export { Toast }

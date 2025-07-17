@@ -1,5 +1,5 @@
 name: Bug Report
-description: Report a bug or issue with Nototo
+description: Report a bug or issue with Viny
 title: "[BUG] "
 labels: ["bug", "status:needs-design"]
 projects: ["tomymaritano/1"]
@@ -68,7 +68,7 @@ body:
     id: component
     attributes:
       label: Component
-      description: Which part of Nototo is affected?
+      description: Which part of Viny is affected?
       options:
         - Editor
         - Search
@@ -105,8 +105,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: Nototo Version
-      description: What version of Nototo are you using?
+      label: Viny Version
+      description: What version of Viny are you using?
       placeholder: "e.g., 1.2.4"
     validations:
       required: true

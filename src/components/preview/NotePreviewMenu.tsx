@@ -1,16 +1,6 @@
 import React from 'react'
-import Icons from '../Icons'
-
-interface Note {
-  id: string
-  title: string
-  content: string
-  notebook: string
-  tags?: string[]
-  isPinned?: boolean
-  date: string
-  updatedAt?: string
-}
+import { Icons } from '../Icons'
+import { Note } from '../../types'
 
 interface NotePreviewMenuProps {
   note: Note

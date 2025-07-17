@@ -36,6 +36,17 @@ interface StorageInfo {
   }
 }
 
+interface ExportOptions {
+  format: 'html' | 'markdown' | 'pdf'
+  includeMetadata?: boolean
+}
+
+interface ExportResult {
+  success: boolean
+  filePath?: string
+  error?: string
+}
+
 interface Note {
   id: string
   title: string
@@ -100,6 +111,17 @@ interface StorageAPI {
   getDataDirectory: () => Promise<string>
 }
 
+interface ExportAPI {
+  showSaveDialog: (defaultFileName: string, filters: any[]) => Promise<string | null>
+  exportNoteToFile: (note: Note, filePath: string, options: ExportOptions) => Promise<ExportResult>
+  exportNoteToPDF: (note: Note, filePath: string, options: ExportOptions) => Promise<ExportResult>
+  showItemInFolder: (filePath: string) => Promise<void>
+}
+
+interface WindowManagement {
+  openNoteInNewWindow: (noteId: string) => Promise<void>
+}
+
 interface ElectronAPI {
   openSettings: () => void
   isElectron: boolean
@@ -113,6 +135,24 @@ interface ElectronAPI {
   
   // File System Storage APIs - Inkdrop Style
   storage: StorageAPI
+  
+  // Native Export APIs
+  export: ExportAPI
+
+  // Window management
+  openNoteInNewWindow: (noteId: string) => Promise<void>
+  
+  // Context Menu
+  showNoteContextMenu: (note: Note) => void
+  showContextMenu: (type: string, context?: any) => void
+  
+  // File operations
+  selectDirectory: () => Promise<string | null>
+  
+  // IPC Events
+  on: (channel: string, callback: Function) => void
+  removeAllListeners: (channel: string) => void
+  send: (channel: string, data: any) => void
 }
 
 // Expose secure APIs to renderer process
@@ -191,6 +231,101 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getDataDirectory: (): Promise<string> => 
       ipcRenderer.invoke('storage-get-data-directory'),
   },
+  
+  // Native Export APIs
+  export: {
+    showSaveDialog: (defaultFileName: string, filters: any[]): Promise<string | null> =>
+      ipcRenderer.invoke('export-save-dialog', defaultFileName, filters),
+    exportNoteToFile: (note: Note, filePath: string, options: ExportOptions): Promise<ExportResult> =>
+      ipcRenderer.invoke('export-note-to-file', note, filePath, options),
+    exportNoteToPDF: (note: Note, filePath: string, options: ExportOptions): Promise<ExportResult> =>
+      ipcRenderer.invoke('export-note-to-pdf', note, filePath, options),
+    showItemInFolder: (filePath: string): Promise<void> =>
+      ipcRenderer.invoke('show-item-in-folder', filePath),
+  },
+
+  // Window management
+  openNoteInNewWindow: (noteId: string): Promise<void> =>
+    ipcRenderer.invoke('open-note-in-new-window', noteId),
+  
+  // Context Menu
+  showNoteContextMenu: (note: Note): void => 
+    ipcRenderer.send('show-note-context-menu', note),
+  showContextMenu: (type: string, context?: any): void =>
+    ipcRenderer.send('show-context-menu', { type, context }),
+  
+  // File operations
+  selectDirectory: (): Promise<string | null> =>
+    ipcRenderer.invoke('dialog-select-directory'),
+  
+  // IPC Events - Safe channel whitelist
+  on: (channel: string, callback: Function): void => {
+    const validChannels = [
+      'export-note',
+      'toggle-pin-note',
+      'duplicate-note',
+      'delete-note',
+      'restore-note',
+      'permanent-delete-note',
+      'move-to-notebook',
+      'create-new-note',
+      'open-search',
+      'open-settings-modal',
+      'create-new-notebook',
+      'collapse-all-notebooks',
+      'expand-all-notebooks',
+      'create-note-in-notebook',
+      'rename-notebook',
+      'delete-notebook',
+      'rename-tag',
+      'change-tag-color',
+      'remove-tag',
+      'empty-trash',
+      'note-updated'  // Add note sync channel
+    ]
+    if (validChannels.includes(channel)) {
+      ipcRenderer.on(channel, (event, ...args) => callback(...args))
+    }
+  },
+  
+  removeAllListeners: (channel: string): void => {
+    const validChannels = [
+      'export-note',
+      'toggle-pin-note',
+      'duplicate-note',
+      'delete-note',
+      'restore-note',
+      'permanent-delete-note',
+      'move-to-notebook',
+      'create-new-note',
+      'open-search',
+      'open-settings-modal',
+      'create-new-notebook',
+      'collapse-all-notebooks',
+      'expand-all-notebooks',
+      'create-note-in-notebook',
+      'rename-notebook',
+      'delete-notebook',
+      'rename-tag',
+      'change-tag-color',
+      'remove-tag',
+      'empty-trash',
+      'note-updated'  // Add note sync channel
+    ]
+    if (validChannels.includes(channel)) {
+      ipcRenderer.removeAllListeners(channel)
+    }
+  },
+  
+  // Add a send method for note sync
+  send: (channel: string, data: any): void => {
+    const validSendChannels = [
+      'broadcast-note-update'
+    ]
+    if (validSendChannels.includes(channel)) {
+      ipcRenderer.send(channel, data)
+    }
+  },
 } as ElectronAPI)
 
 // For backward compatibility
@@ -208,4 +343,4 @@ declare global {
   }
 }
 
-export type { ElectronAPI, StorageAPI, StorageInfo, StorageResult, Note, Notebook, Settings }
+export type { ElectronAPI, StorageAPI, StorageInfo, StorageResult, Note, Notebook, Settings, ExportAPI, ExportOptions, ExportResult }

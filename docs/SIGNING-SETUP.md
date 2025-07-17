@@ -31,7 +31,7 @@ security export -k ~/Library/Keychains/login.keychain-db -t identities -f pkcs12
 1. Go to [Apple ID](https://appleid.apple.com)
 2. Sign in and go to "Sign-In and Security"
 3. Under "App-Specific Passwords", click "Generate Password"
-4. Name it "Nototo Notarization"
+4. Name it "Viny Notarization"
 5. Save the password (format: xxxx-xxxx-xxxx-xxxx)
 
 ### 4. Configure GitHub Secrets
@@ -71,8 +71,8 @@ CSC_NAME=Developer ID Application: Your Name (TEAMID)
 npm run build:electron
 
 # Verify signature
-codesign -dv --verbose=4 dist-electron/mac/Nototo.app
-spctl -a -t exec -vvv dist-electron/mac/Nototo.app
+codesign -dv --verbose=4 dist-electron/mac/Viny.app
+spctl -a -t exec -vvv dist-electron/mac/Viny.app
 ```
 
 ## Troubleshooting

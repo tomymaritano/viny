@@ -1,6 +1,6 @@
-# 📦 Nototo Installation
+# 📦 Viny Installation
 
-Welcome to Nototo! This DMG contains everything you need to install the app.
+Welcome to Viny! This DMG contains everything you need to install the app.
 
 ## 🚀 Quick Installation
 
@@ -8,16 +8,16 @@ Welcome to Nototo! This DMG contains everything you need to install the app.
 
 1. **Double-click** the **Install Script** in this DMG
 2. **Follow the prompts** - it will handle everything automatically
-3. **Launch Nototo** from your Applications folder
+3. **Launch Viny** from your Applications folder
 
 ### Option 2: Manual Installation
 
-1. **Drag Nototo.app** to the Applications folder
+1. **Drag Viny.app** to the Applications folder
 2. **Open Terminal** and run:
    ```bash
-   xattr -cr /Applications/Nototo.app
+   xattr -cr /Applications/Viny.app
    ```
-3. **Launch Nototo** from your Applications folder
+3. **Launch Viny** from your Applications folder
 
 ## ⚠️ Why the extra step?
 
@@ -25,10 +25,10 @@ macOS blocks apps that aren't signed by Apple Developer Program certificates. We
 
 ## 🔗 Links
 
-- **GitHub**: https://github.com/tomymaritano/nototo
-- **Issues**: https://github.com/tomymaritano/nototo/issues
-- **Documentation**: https://github.com/tomymaritano/nototo/tree/main/docs
+- **GitHub**: https://github.com/tomymaritano/viny
+- **Issues**: https://github.com/tomymaritano/viny/issues
+- **Documentation**: https://github.com/tomymaritano/viny/tree/main/docs
 
-## 💙 Thank you for using Nototo!
+## 💙 Thank you for using Viny!
 
 Report bugs or request features on our GitHub repository.

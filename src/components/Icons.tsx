@@ -21,6 +21,7 @@ import {
   Copy,
   FolderOpen,
   PanelRight,
+  PanelLeft,
   Check,
   AlertTriangle,
   Info,
@@ -67,6 +68,7 @@ import {
   Briefcase,
   Globe,
   ArrowRight as ArrowRightIcon,
+  ArrowUpRight,
   Loader2,
   ArrowDownAZ,
   ArrowUpAZ,
@@ -85,6 +87,7 @@ import {
   Moon,
   Monitor,
   Palette,
+  Shield,
 } from 'lucide-react'
 
 interface IconProps {
@@ -148,6 +151,10 @@ const Icons = {
     <Trash2 size={size} className={className} />
   ),
 
+  Trash2: ({ size = 16, className = '' }: IconProps) => (
+    <Trash2 size={size} className={className} />
+  ),
+
   Settings: ({ size = 16, className = '' }: IconProps) => (
     <Settings size={size} className={className} />
   ),
@@ -183,6 +190,10 @@ const Icons = {
 
   PanelRight: ({ size = 16, className = '' }: IconProps) => (
     <PanelRight size={size} className={className} />
+  ),
+
+  PanelLeft: ({ size = 16, className = '' }: IconProps) => (
+    <PanelLeft size={size} className={className} />
   ),
 
   Check: ({ size = 16, className = '' }: IconProps) => (
@@ -352,6 +363,10 @@ const Icons = {
     <Layout size={size} className={className} />
   ),
 
+  Layout: ({ size = 16, className = '' }: IconProps) => (
+    <Layout size={size} className={className} />
+  ),
+
   User: ({ size = 16, className = '' }: IconProps) => (
     <User size={size} className={className} />
   ),
@@ -410,6 +425,10 @@ const Icons = {
     <Pin size={size} className={className} />
   ),
 
+  ExternalLink: ({ size = 16, className = '' }: IconProps) => (
+    <ArrowUpRight size={size} className={className} />
+  ),
+
   FileChartLine: ({ size = 16, className = '' }: IconProps) => (
     <FileChartLine size={size} className={className} />
   ),
@@ -458,6 +477,11 @@ const Icons = {
   Palette: ({ size = 16, className = '' }: IconProps) => (
     <Palette size={size} className={className} />
   ),
+
+  // Security icons
+  Shield: ({ size = 16, className = '' }: IconProps) => (
+    <Shield size={size} className={className} />
+  ),
 }
 
-export default Icons
+export { Icons }

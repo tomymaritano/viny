@@ -1,5 +1,5 @@
 import React from 'react'
-import Icons from '../Icons'
+import { Icons } from '../Icons'
 import IconButton from './IconButton'
 import StandardDropdown from './StandardDropdown'
 
@@ -86,6 +86,7 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
           size={16}
           variant="default"
           aria-label="Sort and filter options"
+          data-testid="sort-dropdown-trigger"
         />
       }
       sections={sections}
@@ -93,6 +94,7 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
       selectedValue={getCurrentValue()}
       width={200}
       position="bottom-left"
+      data-testid="sort-dropdown"
     />
   )
 }

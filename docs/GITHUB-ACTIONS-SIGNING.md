@@ -111,8 +111,8 @@ jobs:
 ```json
 {
   "build": {
-    "appId": "com.nototo.app",
-    "productName": "Nototo",
+    "appId": "com.viny.app",
+    "productName": "Viny",
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "public/icon-512.png",
@@ -121,7 +121,7 @@ jobs:
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
       "notarize": {
-        "appBundleId": "com.nototo.app"
+        "appBundleId": "com.viny.app"
       },
       "target": [
         {
@@ -184,8 +184,8 @@ Cuando el release esté listo:
 
 ```bash
 # Descarga y verifica la firma
-codesign -dv --verbose=4 /Applications/Nototo.app
-spctl -a -vvv /Applications/Nototo.app
+codesign -dv --verbose=4 /Applications/Viny.app
+spctl -a -vvv /Applications/Viny.app
 ```
 
 ## 🐛 Troubleshooting

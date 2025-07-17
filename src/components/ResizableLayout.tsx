@@ -5,13 +5,11 @@ const ResizableLayout = ({
   sidebar,
   notesList,
   mainContent,
-  previewPanel,
-  isPreviewVisible = false,
   isSidebarVisible = true,
   isNotesListVisible = true,
   settings,
 }) => {
-  const containerRef = useRef(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const [containerWidth, setContainerWidth] = useState(0)
 
   // Column widths
@@ -27,21 +25,16 @@ const ResizableLayout = ({
     return savedWidth
   })
 
-  const [previewWidth, setPreviewWidth] = useState(() => {
-    const saved = localStorage.getItem('inkrun-preview-width')
-    if (saved) {
-      return parseInt(saved)
-    }
-    // Convert percentage to pixels based on estimated container width
-    const percentage = settings?.previewWidth || 50
-    const estimatedContainerWidth = window.innerWidth * 0.8
-    return Math.max(280, (percentage / 100) * estimatedContainerWidth)
+  // Sidebar width with state for resizing
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    const saved = localStorage.getItem('inkrun-sidebar-width')
+    return saved ? parseInt(saved) : settings?.sidebarWidth || 200
   })
 
-  const sidebarWidth = 200 // Force new width
+  const minSidebarWidth = 160
+  const maxSidebarWidth = 400
   const minNotesListWidth = 220
   const maxNotesListWidth = 500
-  const minPreviewWidth = 280
   const minMainContentWidth = 400
 
   // Update container width on resize
@@ -64,30 +57,15 @@ const ResizableLayout = ({
   }, [notesListWidth])
 
   useEffect(() => {
-    localStorage.setItem('inkrun-preview-width', previewWidth.toString())
-  }, [previewWidth])
+    localStorage.setItem('inkrun-sidebar-width', sidebarWidth.toString())
+  }, [sidebarWidth])
 
-  // Update preview width when settings change
-  useEffect(() => {
-    if (settings?.previewWidth && containerWidth > 0) {
-      const percentage = settings.previewWidth
-      const availableWidth = containerWidth - 
-        (isSidebarVisible ? sidebarWidth : 0) - 
-        (isNotesListVisible ? notesListWidth : 0) - 
-        minMainContentWidth
-      const newPixelWidth = Math.max(minPreviewWidth, Math.min(
-        availableWidth * 0.8, // Max 80% of available space
-        (percentage / 100) * containerWidth
-      ))
-      setPreviewWidth(newPixelWidth)
-    }
-  }, [settings?.previewWidth, containerWidth, isSidebarVisible, isNotesListVisible, notesListWidth])
+
 
   // Calculate available space and constraints
   const getConstraints = useCallback(() => {
     const usedWidth =
-      (isSidebarVisible ? sidebarWidth : 0) +
-      (isPreviewVisible ? previewWidth : 0)
+      (isSidebarVisible ? sidebarWidth : 0)
     const availableForNotesAndMain = containerWidth - usedWidth
     const maxNotesListWidthConstrained = Math.min(
       maxNotesListWidth,
@@ -100,21 +78,26 @@ const ResizableLayout = ({
         minNotesListWidth,
         maxNotesListWidthConstrained
       ),
-      minPreviewWidth,
-      maxPreviewWidth:
-        containerWidth -
-        (isSidebarVisible ? sidebarWidth : 0) -
-        (isNotesListVisible ? minNotesListWidth : 0) -
-        minMainContentWidth,
     }
   }, [
     containerWidth,
-    isPreviewVisible,
-    previewWidth,
     isSidebarVisible,
     isNotesListVisible,
     sidebarWidth,
   ])
+
+  // Handle Sidebar resize
+  const handleSidebarResize = useCallback(
+    (clientX, startX, startWidth) => {
+      const deltaX = clientX - startX
+      const newWidth = Math.max(
+        minSidebarWidth,
+        Math.min(maxSidebarWidth, startWidth + deltaX)
+      )
+      setSidebarWidth(newWidth)
+    },
+    []
+  )
 
   // Handle NotesList resize
   const handleNotesListResize = useCallback(
@@ -130,34 +113,36 @@ const ResizableLayout = ({
     [getConstraints]
   )
 
-  // Handle Preview resize
-  const handlePreviewResize = useCallback(
-    (clientX, startX, startWidth) => {
-      const constraints = getConstraints()
-      const deltaX = startX - clientX // Reverse delta for right-side resize
-      const newWidth = Math.max(
-        constraints.minPreviewWidth,
-        Math.min(constraints.maxPreviewWidth, startWidth + deltaX)
-      )
-      setPreviewWidth(newWidth)
-    },
-    [getConstraints]
-  )
 
   // Calculate main content width
   const mainContentWidth =
     containerWidth -
     (isSidebarVisible ? sidebarWidth : 0) -
-    (isNotesListVisible ? notesListWidth : 0) -
-    (isPreviewVisible ? previewWidth : 0)
+    (isNotesListVisible ? notesListWidth : 0)
 
   // Desktop render
   return (
     <div ref={containerRef} className="flex h-full w-full flex-1">
-      {/* Sidebar - Fixed */}
+      {/* Sidebar - Resizable */}
       {isSidebarVisible && (
-        <div className="flex-shrink-0" style={{ width: sidebarWidth }}>
+        <div className="relative flex-shrink-0 h-full" style={{ width: sidebarWidth }}>
           {sidebar}
+          <ResizeHandle
+            onMouseDown={startX => {
+              const handleMouseMove = e => {
+                handleSidebarResize(e.clientX, startX, sidebarWidth)
+              }
+
+              const handleMouseUp = () => {
+                document.removeEventListener('mousemove', handleMouseMove)
+                document.removeEventListener('mouseup', handleMouseUp)
+              }
+
+              document.addEventListener('mousemove', handleMouseMove)
+              document.addEventListener('mouseup', handleMouseUp)
+            }}
+            position="right"
+          />
         </div>
       )}
 
@@ -195,27 +180,8 @@ const ResizableLayout = ({
         {mainContent}
       </div>
 
-      {/* Preview Panel - Resizable */}
-      {isPreviewVisible && (
-        <div 
-          className="relative flex-shrink-0"
-          style={{ width: `${previewWidth}px` }}
-        >
-          <ResizeHandle
-            onMouseDown={startX => {
-              const startWidth = previewWidth
-              return { startX, startWidth }
-            }}
-            onMouseMove={(data, e) => {
-              handlePreviewResize(e.clientX, data.startX, data.startWidth)
-            }}
-            direction="left"
-          />
-          {previewPanel}
-        </div>
-      )}
     </div>
   )
 }
 
-export default ResizableLayout
+export { ResizableLayout }

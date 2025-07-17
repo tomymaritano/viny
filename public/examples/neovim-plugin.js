@@ -1,9 +1,9 @@
-// Neovim Mode Plugin for Nototo using monaco-vim
+// Neovim Mode Plugin for Viny using monaco-vim
 export default {
   name: 'Neovim Mode',
   version: '1.0.0', 
   description: 'Full Neovim keybindings using monaco-vim library',
-  author: 'Nototo',
+  author: 'Viny',
   
   async activate(api) {
     console.log('🚀 Neovim Mode plugin activated!')

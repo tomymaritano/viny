@@ -1,17 +1,7 @@
 import React from 'react'
-import Icons from '../Icons'
+import { Icons } from '../Icons'
 import NoteMetadata from '../editor/metadata/NoteMetadata'
-
-interface Note {
-  id: string
-  title: string
-  content: string
-  notebook: string
-  tags?: string[]
-  isPinned?: boolean
-  date: string
-  updatedAt?: string
-}
+import { Note } from '../../types'
 
 interface NotePreviewHeaderProps {
   note: Note
@@ -21,7 +11,7 @@ interface NotePreviewHeaderProps {
   showMenu: boolean
   onToggleMenu: () => void
   isTrashView?: boolean
-  menuRef: React.RefObject<HTMLDivElement>
+  menuRef: React.RefObject<HTMLDivElement | null>
 }
 
 const NotePreviewHeader: React.FC<NotePreviewHeaderProps> = ({
@@ -51,7 +41,7 @@ const NotePreviewHeader: React.FC<NotePreviewHeaderProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <div className="flex items-center space-x-3">
-            <h1 className="text-xl font-semibold text-theme-text-primary truncate">
+            <h1 className="text-xl font-semibold text-theme-text-primary truncate" data-testid="note-title">
               {note.title || 'Untitled Note'}
             </h1>
             {note.isPinned && (

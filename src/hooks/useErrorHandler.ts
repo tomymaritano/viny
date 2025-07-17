@@ -1,5 +1,38 @@
 /**
- * React hook for error handling integration
+ * React hook for centralized error handling with toast notifications.
+ * 
+ * @description
+ * This hook provides a unified interface for error handling across the application.
+ * It automatically subscribes to the global error handler and displays toast notifications
+ * based on error severity. Supports different error types including network, validation,
+ * storage, and general application errors.
+ * 
+ * @returns {Object} Error handling utilities
+ * @returns {Function} returns.handleError - Handle any type of error with optional context
+ * @returns {Function} returns.handleNetworkError - Handle network-specific errors
+ * @returns {Function} returns.handleStorageError - Handle storage-related errors
+ * @returns {Function} returns.handleValidationError - Handle validation errors
+ * @returns {Function} returns.clearErrors - Clear all error notifications
+ * @returns {Array<AppError>} returns.errorHistory - Recent error history
+ * 
+ * @example
+ * ```tsx
+ * function MyComponent() {
+ *   const { handleError, handleNetworkError } = useErrorHandler();
+ *   
+ *   const fetchData = async () => {
+ *     try {
+ *       const response = await api.getData();
+ *       // process response
+ *     } catch (error) {
+ *       handleNetworkError(error, { 
+ *         endpoint: '/api/data',
+ *         retry: fetchData 
+ *       });
+ *     }
+ *   };
+ * }
+ * ```
  */
 import { useEffect, useCallback } from 'react'
 import { ErrorHandler, AppError, ErrorType, ErrorSeverity } from '../utils/errorHandler'
@@ -124,8 +157,8 @@ function getToastDuration(severity: ErrorSeverity): number {
   }
 }
 
-function getErrorActions(error: AppError): Array<{ label: string; action: () => void }> {
-  const actions = []
+function getErrorActions(error: AppError): Array<{ label: string; action: () => void | Promise<void> | Window | null }> {
+  const actions: Array<{ label: string; action: () => void | Promise<void> | Window | null }> = []
 
   // Add retry action if available
   if (error.retry) {

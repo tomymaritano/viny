@@ -31,52 +31,33 @@ const ResizeHandle: React.FC<ResizeHandleProps> = ({ onMouseDown, position = 'ri
   return (
     <div
       className={`
-        absolute ${position === 'right' ? 'right-0' : 'left-0'} top-0 h-full w-4
-        cursor-col-resize z-40 group pointer-events-auto
-        ${isHovering || isDragging ? 'bg-theme-accent-primary/30' : 'bg-transparent'}
-        hover:bg-theme-accent-primary/30 transition-colors duration-150
+        absolute ${position === 'right' ? 'right-0' : 'left-0'} top-0 h-full w-1
+        cursor-col-resize z-40 group
+        hover:bg-theme-accent-primary/20 transition-all duration-200
+        ${isDragging ? 'bg-theme-accent-primary/30 w-1' : ''}
       `}
       onMouseDown={handleMouseDown}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       style={{
-        pointerEvents: 'auto',
         userSelect: 'none',
         WebkitUserSelect: 'none',
         MozUserSelect: 'none',
         msUserSelect: 'none',
-        transform:
-          position === 'right' ? 'translateX(2px)' : 'translateX(-2px)',
       }}
-      title={`Drag to resize ${position === 'right' ? 'notes list' : 'preview panel'}`}
+      title="Drag to resize"
     >
-      {/* Visual indicator line */}
+      {/* Subtle line that appears on hover */}
       <div
         className={`
-          absolute ${position === 'right' ? 'right-0' : 'left-0'} top-0 h-full w-0.5
-          ${isHovering || isDragging ? 'bg-theme-accent-primary' : 'bg-transparent'}
-          transition-all duration-150
+          absolute ${position === 'right' ? 'right-0' : 'left-0'} top-0 h-full
+          transition-all duration-200
+          ${isHovering || isDragging 
+            ? 'w-0.5 bg-theme-accent-primary' 
+            : 'w-px bg-theme-border-primary/50'
+          }
         `}
       />
-
-      {/* Grip handle - always visible for testing */}
-      <div
-        className={`
-          absolute top-1/2 transform -translate-y-1/2 
-          ${position === 'right' ? 'right-0.5' : 'left-0.5'}
-          w-3 h-12 rounded-sm flex items-center justify-center
-          ${isHovering || isDragging ? 'bg-theme-accent-primary' : 'bg-theme-bg-tertiary'}
-          transition-all duration-150 opacity-60 group-hover:opacity-100
-          border border-theme-border-primary
-        `}
-      >
-        {/* Grip dots */}
-        <div className="flex flex-col space-y-1">
-          <div className="w-1 h-1 bg-solarized-base5 rounded-full"></div>
-          <div className="w-1 h-1 bg-solarized-base5 rounded-full"></div>
-          <div className="w-1 h-1 bg-solarized-base5 rounded-full"></div>
-        </div>
-      </div>
     </div>
   )
 }

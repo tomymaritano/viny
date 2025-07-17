@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { useSettings } from '../../../hooks/useSettings'
+import { useSettingsService } from '../../../hooks/useSettingsService'
 import { calculateStats } from '../utils/markdownFormatter'
 import { useAppStore } from '../../../stores/newSimpleStore'
 import { logger } from '../../../utils/logger'
@@ -11,7 +11,7 @@ export const useMarkdownEditor = ({
   selectedNote,
   onNotebookChange,
 }) => {
-  const { settings } = useSettings()
+  const { settings } = useSettingsService()
   const { addToast } = useAppStore()
 
   // UI state

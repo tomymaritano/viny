@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import Icons from '../Icons'
+import { Icons } from '../Icons'
 import IconButton from './IconButton'
 import { THEME_COLORS, ANIMATIONS } from '../../constants/theme'
 import { useStyles } from '../../hooks/useStyles'

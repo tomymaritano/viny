@@ -1,6 +1,6 @@
-# Testing Guide for Nototo
+# Testing Guide for Viny
 
-This document outlines the testing strategy and guidelines for Nototo.
+This document outlines the testing strategy and guidelines for Viny.
 
 ## 🎯 Testing Philosophy
 

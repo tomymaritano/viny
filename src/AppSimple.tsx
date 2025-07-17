@@ -1,6 +1,6 @@
 // Refactored App component using Container/Presentational pattern
 import React from 'react'
-import AppContainer from './components/app/AppContainer'
+import { AppContainer } from './components/app/AppContainer'
 import './App.css'
 
 /**
@@ -11,8 +11,6 @@ import './App.css'
  * - Code reusability
  * - Maintainability
  */
-const AppSimple: React.FC = () => {
+export const AppSimple: React.FC = () => {
   return <AppContainer />
 }
-
-export default AppSimple

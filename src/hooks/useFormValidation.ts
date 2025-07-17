@@ -21,9 +21,9 @@ export function useFormValidation<T extends Record<string, any>>({
   const [isValidating, setIsValidating] = useState(false)
 
   // Validate a single field
-  const validateField = useCallback((fieldName: string, value: any) => {
+  const validateField = useCallback((fieldName: string, value: any): FieldValidation => {
     const validator = validationRules[fieldName]
-    if (!validator) return { isValid: true }
+    if (!validator) return { field: fieldName, value, isValid: true, error: undefined, warning: undefined }
 
     const result = validator(value)
     return result

@@ -1,12 +1,16 @@
 import { useState } from 'react'
-import { useSettings } from '../../../hooks/useSettings'
+import { useSettingsService } from '../../../hooks/useSettingsService'
 
 export const useSettingsForm = (initialTab = 'general') => {
-  const { settings, updateSetting, resetSettings } = useSettings()
+  const { settings, setSetting, resetCategory } = useSettingsService()
   const [activeTab, setActiveTab] = useState(initialTab)
 
-  const handleTabChange = tabId => {
+  const handleTabChange = (tabId: string) => {
     setActiveTab(tabId)
+  }
+
+  const updateSetting = (key: string, value: any) => {
+    setSetting(key, value)
   }
 
   const handleResetSettings = () => {
@@ -15,7 +19,7 @@ export const useSettingsForm = (initialTab = 'general') => {
         'Are you sure you want to reset all settings to default? This action cannot be undone.'
       )
     ) {
-      resetSettings()
+      resetCategory()
     }
   }
 
@@ -32,14 +36,14 @@ export const useSettingsForm = (initialTab = 'general') => {
     URL.revokeObjectURL(url)
   }
 
-  const handleImportSettings = event => {
-    const file = event.target.files[0]
+  const handleImportSettings = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
     if (!file) return
 
     const reader = new FileReader()
-    reader.onload = e => {
+    reader.onload = (e) => {
       try {
-        const importedSettings = JSON.parse(e.target.result)
+        const importedSettings = JSON.parse(e.target?.result as string)
 
         // Validate imported settings structure
         if (typeof importedSettings === 'object' && importedSettings !== null) {

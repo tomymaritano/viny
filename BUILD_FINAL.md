@@ -48,10 +48,10 @@ npm run build:electron
 
 ```
 dist-electron/
-├── Nototo-1.1.0.dmg              # Universal Binary
-├── Nototo-1.1.0-arm64.dmg        # Apple Silicon
-├── Nototo-1.1.0.dmg.blockmap     # Update metadata
-├── Nototo-1.1.0-arm64.dmg.blockmap
+├── Viny-1.1.0.dmg              # Universal Binary
+├── Viny-1.1.0-arm64.dmg        # Apple Silicon
+├── Viny-1.1.0.dmg.blockmap     # Update metadata
+├── Viny-1.1.0-arm64.dmg.blockmap
 └── latest-mac.yml               # Auto-updater config
 ```
 
@@ -120,7 +120,7 @@ Después del build exitoso:
 
 ### Auto-Update Testing:
 
-- [ ] Check "Nototo" menu → "Check for Updates"
+- [ ] Check "Viny" menu → "Check for Updates"
 - [ ] Verificar Settings → Updates tab
 - [ ] Crear release v1.1.1 para testing
 - [ ] Verificar notification de update

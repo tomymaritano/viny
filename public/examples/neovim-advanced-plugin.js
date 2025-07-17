@@ -3,7 +3,7 @@ export default {
   name: 'Neovim Advanced',
   version: '2.0.0',
   description: 'Complete Neovim experience with all keybindings, Ex commands, and statusbar',
-  author: 'Nototo Team',
+  author: 'Viny Team',
   
   async activate(api) {
     console.log('🚀 Neovim Advanced plugin activated!')

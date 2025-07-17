@@ -54,10 +54,11 @@ export const createToastSlice: StateCreator<ToastSlice> = (set, get) => ({
       }]
     })),
 
-  removeToast: (toastId) =>
+  removeToast: (toastId) => {
     set((state) => ({
       toasts: state.toasts.filter(toast => toast.id !== toastId)
-    })),
+    }))
+  },
 
   clearAllToasts: () => set({ toasts: [] }),
 
@@ -79,7 +80,14 @@ export const createToastSlice: StateCreator<ToastSlice> = (set, get) => ({
     // Auto-dismiss if duration is set
     if (newToast.duration && newToast.duration > 0) {
       setTimeout(() => {
-        get().removeToast(id)
+        // Check if toast still exists before removing
+        const currentToasts = get().toasts
+        if (currentToasts.some(t => t.id === id)) {
+          // Call set directly to update state
+          set((state) => ({
+            toasts: state.toasts.filter(toast => toast.id !== id)
+          }))
+        }
       }, newToast.duration)
     }
 
@@ -106,14 +114,14 @@ export const createToastSlice: StateCreator<ToastSlice> = (set, get) => ({
 function getDefaultDuration(type: 'success' | 'error' | 'warning' | 'info'): number {
   switch (type) {
     case 'success':
-      return 3000
+      return 2000  // 2 seconds for success
     case 'info':
-      return 4000
+      return 3000  // 3 seconds for info
     case 'warning':
-      return 5000
+      return 4000  // 4 seconds for warning
     case 'error':
-      return 6000
+      return 5000  // 5 seconds for errors (need more time to read)
     default:
-      return 4000
+      return 3000
   }
 }

@@ -1,4 +1,4 @@
-# 🔧 Nototo Plugin API Reference
+# 🔧 Viny Plugin API Reference
 
 ## Quick Reference
 
@@ -765,4 +765,4 @@ deactivate() {
 }
 ```
 
-This API reference provides comprehensive coverage of the Nototo Plugin System. Use it as a reference while developing your plugins!
+This API reference provides comprehensive coverage of the Viny Plugin System. Use it as a reference while developing your plugins!

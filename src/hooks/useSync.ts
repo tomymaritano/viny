@@ -11,16 +11,18 @@ export interface UseSyncOptions {
   autoSync?: boolean
   syncInterval?: number // in milliseconds
   conflictResolutionStrategy?: ConflictResolution['strategy']
+  fetchRemoteData?: () => Promise<{ notes: Note[], notebooks: Notebook[] }>
 }
 
 export function useSync(options: UseSyncOptions = {}) {
   const {
     autoSync = false,
     syncInterval = 30000, // 30 seconds
-    conflictResolutionStrategy = 'merge'
+    // conflictResolutionStrategy = 'merge' // Currently unused
+    fetchRemoteData: customFetchRemoteData
   } = options
 
-  const { notes, notebooks, updateNotes, updateNotebooks, showError, showSuccess } = useAppStore()
+  const { notes, setNotes, showError, showSuccess } = useAppStore()
   const [syncState, setSyncState] = useState<SyncState>(syncManager.getSyncState())
   const [isOnline, setIsOnline] = useState(navigator.onLine)
 
@@ -65,18 +67,19 @@ export function useSync(options: UseSyncOptions = {}) {
     try {
       // Simulate fetching remote data
       // In a real app, this would be an API call
-      const remoteData = await fetchRemoteData()
+      const fetchFn = customFetchRemoteData || fetchRemoteData
+      const remoteData = await fetchFn()
       
       const result = await syncManager.startSync(
         notes,
-        notebooks,
+        [], // notebooks not implemented in store yet
         remoteData.notes,
         remoteData.notebooks
       )
 
       // Update local data with synced versions
-      updateNotes(result.syncedNotes)
-      updateNotebooks(result.syncedNotebooks)
+      setNotes(result.syncedNotes)
+      // updateNotebooks not implemented yet
 
       // Handle conflicts
       if (result.conflicts.length > 0) {
@@ -100,7 +103,7 @@ export function useSync(options: UseSyncOptions = {}) {
       showError('Sync failed. Please try again.')
       return false
     }
-  }, [notes, notebooks, updateNotes, updateNotebooks, showError, showSuccess, isOnline])
+  }, [notes, setNotes, showError, showSuccess, isOnline])
 
   // Resolve conflict manually
   const resolveConflict = useCallback(async (
@@ -117,12 +120,10 @@ export function useSync(options: UseSyncOptions = {}) {
           const updatedNotes = notes.map(note => 
             note.id === conflict.itemId ? resolution.resolvedItem as Note : note
           )
-          updateNotes(updatedNotes)
+          setNotes(updatedNotes)
         } else if (conflict.type === 'notebook') {
-          const updatedNotebooks = notebooks.map(notebook => 
-            notebook.id === conflict.itemId ? resolution.resolvedItem as Notebook : notebook
-          )
-          updateNotebooks(updatedNotebooks)
+          // Notebook management not implemented in store yet
+          // TODO: Implement notebook sync when notebook store is available
         }
       }
 
@@ -131,7 +132,7 @@ export function useSync(options: UseSyncOptions = {}) {
       logger.error('Failed to resolve conflict:', error)
       showError('Failed to resolve conflict')
     }
-  }, [syncState.conflicts, notes, notebooks, updateNotes, updateNotebooks, showError, showSuccess])
+  }, [syncState.conflicts, notes, setNotes, showError, showSuccess])
 
   // Force sync
   const forceSync = useCallback(() => {
@@ -186,7 +187,7 @@ export function useSync(options: UseSyncOptions = {}) {
 }
 
 // Simulate fetching remote data
-async function fetchRemoteData(): Promise<{
+export async function fetchRemoteData(): Promise<{
   notes: Note[]
   notebooks: Notebook[]
 }> {

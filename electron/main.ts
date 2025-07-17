@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, shell, ipcMain, MenuItemConstructorOptions } from 'electron'
+import { app, BrowserWindow, Menu, shell, ipcMain, MenuItemConstructorOptions, dialog, clipboard } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import * as path from 'path'
 import { promises as fs } from 'fs'
@@ -76,6 +76,17 @@ interface MetadataAction {
 interface Metadata {
   created: string
   actions: MetadataAction[]
+}
+
+interface ExportOptions {
+  format: 'html' | 'markdown' | 'pdf'
+  includeMetadata?: boolean
+}
+
+interface ExportResult {
+  success: boolean
+  filePath?: string
+  error?: string
 }
 
 // Global variables
@@ -679,6 +690,580 @@ ipcMain.handle('storage-get-data-directory', async (): Promise<string> => {
   }
 })
 
+// Native Export Handlers
+ipcMain.handle('export-save-dialog', async (event, defaultFileName: string, filters: Electron.FileFilter[]): Promise<string | null> => {
+  const result = await dialog.showSaveDialog(mainWindow!, {
+    defaultPath: defaultFileName,
+    filters: filters
+  })
+  
+  return result.canceled ? null : result.filePath
+})
+
+ipcMain.handle('export-note-to-file', async (event, note: Note, filePath: string, options: ExportOptions): Promise<ExportResult> => {
+  try {
+    let content = ''
+    
+    if (options.format === 'markdown') {
+      // Generate Markdown content
+      if (options.includeMetadata) {
+        content += `# ${note.title}\n\n`
+        content += `**Notebook:** ${note.notebook || 'Uncategorized'}\n`
+        content += `**Created:** ${new Date(note.createdAt).toLocaleDateString()}\n`
+        if (note.updatedAt) {
+          content += `**Updated:** ${new Date(note.updatedAt).toLocaleDateString()}\n`
+        }
+        if (note.tags && note.tags.length > 0) {
+          content += `**Tags:** ${note.tags.join(', ')}\n`
+        }
+        content += '\n---\n\n'
+      }
+      content += note.content || ''
+    } else if (options.format === 'html') {
+      // Generate HTML content
+      const { marked } = await import('marked')
+      const html = marked(note.content || '', { breaks: true, gfm: true })
+      
+      const metadata = options.includeMetadata
+        ? `
+        <div class="note-metadata">
+          <h1>${note.title}</h1>
+          <div class="metadata-info">
+            <span><strong>Notebook:</strong> ${note.notebook || 'Uncategorized'}</span>
+            <span><strong>Created:</strong> ${new Date(note.createdAt).toLocaleDateString()}</span>
+            ${note.updatedAt ? `<span><strong>Updated:</strong> ${new Date(note.updatedAt).toLocaleDateString()}</span>` : ''}
+            ${note.tags && note.tags.length > 0 ? `<span><strong>Tags:</strong> ${note.tags.join(', ')}</span>` : ''}
+          </div>
+        </div>
+        <hr />
+      `
+        : ''
+      
+      content = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>${note.title} - Viny Export</title>
+          <style>
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+              max-width: 800px;
+              margin: 0 auto;
+              padding: 2rem;
+              background: #fff;
+            }
+            .note-metadata {
+              margin-bottom: 2rem;
+              padding: 1rem;
+              background: #f8f9fa;
+              border-radius: 6px;
+              border-left: 4px solid #007acc;
+            }
+            .note-metadata h1 {
+              margin: 0 0 1rem 0;
+              color: #007acc;
+              font-size: 2rem;
+            }
+            .metadata-info {
+              display: flex;
+              flex-direction: column;
+              gap: 0.5rem;
+              font-size: 0.9rem;
+              color: #666;
+            }
+            h1 { color: #007acc; }
+            h2 { color: #2aa198; }
+            h3 { color: #6c71c4; }
+            code {
+              background: #f1f3f4;
+              padding: 0.2rem 0.4rem;
+              border-radius: 3px;
+              font-family: 'Monaco', 'Consolas', monospace;
+            }
+            pre {
+              background: #f8f9fa;
+              border: 1px solid #e9ecef;
+              border-radius: 6px;
+              padding: 1rem;
+              overflow-x: auto;
+            }
+            blockquote {
+              border-left: 4px solid #6c71c4;
+              margin: 1.5rem 0;
+              padding: 1rem 1.5rem;
+              background: #f8f9fa;
+              font-style: italic;
+            }
+          </style>
+        </head>
+        <body>
+          ${metadata}
+          <div class="note-content">
+            ${html}
+          </div>
+        </body>
+        </html>
+      `
+    }
+    
+    // Write the file
+    await fs.writeFile(filePath, content, 'utf-8')
+    
+    return {
+      success: true,
+      filePath: filePath
+    }
+  } catch (error: any) {
+    console.error('[IPC] export-note-to-file failed:', error)
+    return {
+      success: false,
+      error: error.message
+    }
+  }
+})
+
+ipcMain.handle('export-note-to-pdf', async (event, note: Note, filePath: string, options: ExportOptions): Promise<ExportResult> => {
+  try {
+    // Create a hidden window for PDF generation
+    const pdfWindow = new BrowserWindow({
+      show: false,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true
+      }
+    })
+    
+    // Generate HTML content
+    const { marked } = await import('marked')
+    const html = marked(note.content || '', { breaks: true, gfm: true })
+    
+    const metadata = options.includeMetadata
+      ? `
+      <div class="note-metadata">
+        <h1>${note.title}</h1>
+        <div class="metadata-info">
+          <span><strong>Notebook:</strong> ${note.notebook || 'Uncategorized'}</span>
+          <span><strong>Created:</strong> ${new Date(note.createdAt).toLocaleDateString()}</span>
+          ${note.updatedAt ? `<span><strong>Updated:</strong> ${new Date(note.updatedAt).toLocaleDateString()}</span>` : ''}
+          ${note.tags && note.tags.length > 0 ? `<span><strong>Tags:</strong> ${note.tags.join(', ')}</span>` : ''}
+        </div>
+      </div>
+      <hr />
+    `
+      : ''
+    
+    const fullHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 2rem;
+          }
+          .note-metadata {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #007acc;
+          }
+          .note-metadata h1 {
+            margin: 0 0 1rem 0;
+            color: #007acc;
+          }
+          .metadata-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #666;
+          }
+          code {
+            background: #f1f3f4;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: monospace;
+          }
+          pre {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+          }
+          blockquote {
+            border-left: 4px solid #6c71c4;
+            margin: 1.5rem 0;
+            padding: 1rem 1.5rem;
+            background: #f8f9fa;
+          }
+        </style>
+      </head>
+      <body>
+        ${metadata}
+        <div class="note-content">
+          ${html}
+        </div>
+      </body>
+      </html>
+    `
+    
+    // Load the HTML
+    await pdfWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(fullHtml)}`)
+    
+    // Generate PDF
+    const pdfData = await pdfWindow.webContents.printToPDF({
+      pageSize: 'A4',
+      margins: {
+        top: 1,
+        bottom: 1,
+        left: 1,
+        right: 1
+      }
+    })
+    
+    // Save PDF to file
+    await fs.writeFile(filePath, pdfData)
+    
+    // Close the window
+    pdfWindow.close()
+    
+    return {
+      success: true,
+      filePath: filePath
+    }
+  } catch (error: any) {
+    console.error('[IPC] export-note-to-pdf failed:', error)
+    return {
+      success: false,
+      error: error.message
+    }
+  }
+})
+
+// Show item in folder after export
+ipcMain.handle('show-item-in-folder', async (event, filePath: string): Promise<void> => {
+  shell.showItemInFolder(filePath)
+})
+
+ipcMain.handle('open-note-in-new-window', async (event, noteId: string): Promise<void> => {
+  try {
+    const note = await storageService.loadNote(noteId)
+    if (note) {
+      createNoteWindow(note)
+    } else {
+      throw new Error(`Note with ID ${noteId} not found`)
+    }
+  } catch (error) {
+    console.error('Error opening note in new window:', error)
+    throw error
+  }
+})
+
+// Note synchronization between windows
+ipcMain.on('broadcast-note-update', (event, note: Note) => {
+  // Get all windows
+  const windows = BrowserWindow.getAllWindows()
+  
+  // Broadcast to all windows except the sender
+  windows.forEach(window => {
+    if (window.webContents !== event.sender) {
+      window.webContents.send('note-updated', note)
+    }
+  })
+  
+  // Also save to storage
+  storageService.saveNote(note).catch(error => {
+    console.error('[IPC] Failed to save note during broadcast:', error)
+  })
+})
+
+// Generic Context Menu Handler
+ipcMain.on('show-context-menu', (event, data: { type: string, context?: any }) => {
+  let template: MenuItemConstructorOptions[] = []
+  
+  switch (data.type) {
+    case 'general':
+      template = [
+        {
+          label: 'New Note',
+          accelerator: 'CmdOrCtrl+N',
+          click: () => {
+            event.sender.send('create-new-note')
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'Search Notes',
+          accelerator: 'CmdOrCtrl+K',
+          click: () => {
+            event.sender.send('open-search')
+          }
+        },
+        {
+          label: 'Settings',
+          accelerator: 'CmdOrCtrl+,',
+          click: () => {
+            event.sender.send('open-settings-modal')
+          }
+        }
+      ]
+      break
+      
+    case 'editor':
+      template = [
+        {
+          label: 'Cut',
+          accelerator: 'CmdOrCtrl+X',
+          role: 'cut'
+        },
+        {
+          label: 'Copy',
+          accelerator: 'CmdOrCtrl+C',
+          role: 'copy'
+        },
+        {
+          label: 'Paste',
+          accelerator: 'CmdOrCtrl+V',
+          role: 'paste'
+        },
+        { type: 'separator' },
+        {
+          label: 'Select All',
+          accelerator: 'CmdOrCtrl+A',
+          role: 'selectAll'
+        }
+      ]
+      break
+      
+    case 'sidebar':
+      template = [
+        {
+          label: 'New Note',
+          click: () => {
+            event.sender.send('create-new-note')
+          }
+        },
+        {
+          label: 'New Notebook',
+          click: () => {
+            event.sender.send('create-new-notebook')
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'Collapse All',
+          click: () => {
+            event.sender.send('collapse-all-notebooks')
+          }
+        },
+        {
+          label: 'Expand All',
+          click: () => {
+            event.sender.send('expand-all-notebooks')
+          }
+        }
+      ]
+      break
+      
+    case 'notebook':
+      const notebook = data.context
+      template = [
+        {
+          label: 'New Note in Notebook',
+          click: () => {
+            event.sender.send('create-note-in-notebook', notebook.id)
+          }
+        },
+        {
+          label: 'Rename Notebook',
+          click: () => {
+            event.sender.send('rename-notebook', notebook.id)
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'Delete Notebook',
+          click: () => {
+            event.sender.send('delete-notebook', notebook.id)
+          }
+        }
+      ]
+      break
+      
+    case 'tag':
+      const tag = data.context
+      template = [
+        {
+          label: 'Rename Tag',
+          click: () => {
+            event.sender.send('rename-tag', tag.name)
+          }
+        },
+        {
+          label: 'Change Color',
+          click: () => {
+            event.sender.send('change-tag-color', tag.name)
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'Remove Tag',
+          click: () => {
+            event.sender.send('remove-tag', tag.name)
+          }
+        }
+      ]
+      break
+      
+    case 'trash':
+      template = [
+        {
+          label: 'Empty Trash',
+          click: () => {
+            event.sender.send('empty-trash')
+          }
+        }
+      ]
+      break
+      
+    default:
+      return
+  }
+  
+  const menu = Menu.buildFromTemplate(template)
+  menu.popup()
+})
+
+// Context Menu for Notes (keep the existing one for backward compatibility)
+ipcMain.on('show-note-context-menu', (event, note: Note) => {
+  const template: MenuItemConstructorOptions[] = [
+    {
+      label: note.isPinned ? 'Unpin from Top' : 'Pin to Top',
+      click: () => {
+        event.sender.send('toggle-pin-note', note.id)
+      }
+    },
+    { type: 'separator' },
+    {
+      label: 'Open in New Window',
+      click: () => {
+        createNoteWindow(note)
+      }
+    },
+    {
+      label: 'Duplicate Note',
+      click: () => {
+        event.sender.send('duplicate-note', note.id)
+      }
+    },
+    { type: 'separator' },
+    {
+      label: 'Export',
+      submenu: [
+        {
+          label: 'Export as HTML...',
+          click: () => {
+            event.sender.send('export-note', note.id, 'html')
+          }
+        },
+        {
+          label: 'Export as Markdown...',
+          click: () => {
+            event.sender.send('export-note', note.id, 'markdown')
+          }
+        },
+        {
+          label: 'Export as PDF...',
+          click: () => {
+            event.sender.send('export-note', note.id, 'pdf')
+          }
+        }
+      ]
+    },
+    { type: 'separator' },
+    {
+      label: 'Move to Notebook',
+      click: () => {
+        event.sender.send('move-to-notebook', note.id)
+      }
+    },
+    { type: 'separator' },
+    {
+      label: 'Copy Note ID',
+      click: () => {
+        clipboard.writeText(note.id)
+      }
+    },
+    { type: 'separator' },
+    {
+      label: note.isTrashed ? 'Restore Note' : 'Move to Trash',
+      click: () => {
+        if (note.isTrashed) {
+          event.sender.send('restore-note', note.id)
+        } else {
+          event.sender.send('delete-note', note.id)
+        }
+      }
+    }
+  ]
+  
+  // Add permanent delete option if note is already in trash
+  if (note.isTrashed) {
+    template.push({
+      label: 'Delete Permanently',
+      click: () => {
+        event.sender.send('permanent-delete-note', note.id)
+      }
+    })
+  }
+  
+  const menu = Menu.buildFromTemplate(template)
+  menu.popup()
+})
+
+// Create a new window for a specific note
+function createNoteWindow(note: Note): void {
+  const noteWindow = new BrowserWindow({
+    width: 1000,
+    height: 700,
+    titleBarStyle: 'hidden',
+    trafficLightPosition: { x: 15, y: 10 },
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js'),
+    },
+    title: `${note.title} - Viny`,
+    show: false,
+    minWidth: 600,
+    minHeight: 400,
+  })
+
+  const isDev = process.env.NODE_ENV === 'development'
+
+  if (isDev) {
+    const devUrl = process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173'
+    noteWindow.loadURL(`${devUrl}#/note/${note.id}`)
+  } else {
+    noteWindow.loadFile(path.join(__dirname, '../../dist/index.html'), {
+      hash: `/note/${note.id}`,
+    })
+  }
+
+  noteWindow.once('ready-to-show', () => {
+    noteWindow.show()
+  })
+}
+
 app.whenReady().then(() => {
   createWindow()
   setupAutoUpdater()
@@ -706,7 +1291,7 @@ function setupAutoUpdater(): void {
     autoUpdater.setFeedURL({
       provider: 'github',
       owner: 'tomymaritano',
-      repo: 'nototo',
+      repo: 'viny',
       private: true,
       token: token
     })
@@ -855,7 +1440,7 @@ function createMenu(): void {
           label: 'Report Issue',
           click: () => {
             shell.openExternal(
-              'https://github.com/tomymaritano/nototo/issues'
+              'https://github.com/tomymaritano/viny/issues'
             )
           },
         },

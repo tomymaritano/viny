@@ -4,7 +4,7 @@ import { storageService } from '../../../lib/storage'
 import { Note } from '../../../types'
 
 export const useEditorState = (selectedNote: Note | null) => {
-  const { addNote, removeNote, addToast } = useAppStore()
+  const { addNote, removeNote, updateNote, addToast, showSuccess, showError, setModal } = useAppStore()
   // Tag modal state
   const [isTagModalOpen, setIsTagModalOpen] = useState(false)
 
@@ -76,10 +76,10 @@ export const useEditorState = (selectedNote: Note | null) => {
       try {
         addNote(duplicatedNote)
         storageService.saveNote(duplicatedNote)
-        addToast({ type: 'success', message: 'Note duplicated successfully' })
+        showSuccess('Note duplicated successfully')
       } catch (error) {
         console.error('Error duplicating note:', error)
-        addToast({ type: 'error', message: 'Failed to duplicate note' })
+        showError('Failed to duplicate note')
       }
       handleCloseOptionsModal()
     }
@@ -97,11 +97,56 @@ export const useEditorState = (selectedNote: Note | null) => {
         removeNote(selectedNote.id)
         addNote(trashedNote) // Add back as trashed
         storageService.saveNote(trashedNote)
-        addToast({ type: 'success', message: 'Note moved to trash' })
+        showSuccess('Note moved to trash')
       } catch (error) {
         console.error('Error deleting note:', error)
-        addToast({ type: 'error', message: 'Failed to delete note' })
+        showError('Failed to delete note')
       }
+      handleCloseOptionsModal()
+    }
+  }
+
+  const handlePinNote = () => {
+    if (selectedNote) {
+      try {
+        const updatedNote = {
+          ...selectedNote,
+          isPinned: !selectedNote.isPinned,
+          updatedAt: new Date().toISOString(),
+        }
+        updateNote(updatedNote)
+        storageService.saveNote(updatedNote)
+        showSuccess(updatedNote.isPinned ? 'Note pinned' : 'Note unpinned')
+      } catch (error) {
+        console.error('Error toggling pin:', error)
+        showError('Failed to toggle pin')
+      }
+      handleCloseOptionsModal()
+    }
+  }
+
+  const handleExportNote = () => {
+    if (selectedNote) {
+      setModal('export', true)
+      handleCloseOptionsModal()
+    }
+  }
+
+  const handleOpenInNewWindow = () => {
+    if (selectedNote && window.electronAPI?.isElectron) {
+      window.electronAPI.openNoteInNewWindow(selectedNote.id)
+      handleCloseOptionsModal()
+    }
+  }
+
+  const handleCopyLink = () => {
+    if (selectedNote) {
+      const link = `viny://note/${selectedNote.id}`
+      navigator.clipboard.writeText(link).then(() => {
+        showSuccess('Link copied to clipboard')
+      }).catch(() => {
+        showError('Failed to copy link')
+      })
       handleCloseOptionsModal()
     }
   }
@@ -125,5 +170,9 @@ export const useEditorState = (selectedNote: Note | null) => {
     handleCloseOptionsModal,
     handleDuplicateNote,
     handleDeleteNote,
+    handlePinNote,
+    handleExportNote,
+    handleOpenInNewWindow,
+    handleCopyLink,
   }
 }

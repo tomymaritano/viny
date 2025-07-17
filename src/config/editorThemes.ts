@@ -163,7 +163,7 @@ export const createSyntaxHighlighting = () => {
     // Other elements
     { tag: t.emphasis, fontStyle: 'italic', color: getEditorColor('text') },
     { tag: t.quote, color: getEditorColor('quote'), fontStyle: 'italic' },
-    { tag: t.list, color: getEditorColor('text') },
+    { tag: t.list, color: getEditorColor('list') },
   ])
 
   return syntaxHighlighting(highlightStyle)
@@ -263,20 +263,22 @@ export const createDynamicThemeExtensions = () => {
       },
       // Selection styling
       '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
-        backgroundColor: '#4a90e2 !important',
-        opacity: '0.6 !important',
+        backgroundColor: 'var(--color-blue)',
+        opacity: '0.3',
       },
       '&.cm-editor .cm-selectionBackground': {
-        backgroundColor: '#4a90e2 !important',
-        opacity: '0.6 !important',
+        backgroundColor: 'var(--color-blue)',
+        opacity: '0.3',
       },
       '.cm-content ::selection': {
-        backgroundColor: '#4a90e2 !important',
+        backgroundColor: 'var(--color-blue)',
         color: 'inherit !important',
+        opacity: '0.3',
       },
       '.cm-content ::-moz-selection': {
-        backgroundColor: '#4a90e2 !important',
+        backgroundColor: 'var(--color-blue)',
         color: 'inherit !important',
+        opacity: '0.3',
       },
       '.cm-selectionLayer': {
         zIndex: '100 !important',
@@ -294,6 +296,16 @@ export const createDynamicThemeExtensions = () => {
  * @returns {Array} CodeMirror extensions
  */
 export const getThemeExtensions = (themeName = 'default') => {
-  // Always use dynamic theme that responds to CSS variables
+  // Pass the theme name to the dynamic extensions creator
+  return createDynamicThemeExtensionsForTheme(themeName)
+}
+
+/**
+ * Create dynamic theme extensions for a specific theme
+ * @param {string} themeName - Theme name ('light', 'dark', 'solarized')
+ * @returns {Array} CodeMirror extensions
+ */
+export const createDynamicThemeExtensionsForTheme = (themeName) => {
+  // Since we're using CSS variables, we don't need to check theme anymore
   return createDynamicThemeExtensions()
 }

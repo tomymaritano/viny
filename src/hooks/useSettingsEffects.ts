@@ -90,13 +90,19 @@ export const useSettingsEffects = () => {
     const interfaceFontSize = settings.interfaceFontSize || 14
     root.style.setProperty('--font-size-ui', `${interfaceFontSize}px`)
     
-    // Usar editorFontSize para markdown también (son el mismo contexto)
-    const markdownFontSize = settings.editorFontSize || 14
-    root.style.setProperty('--font-size-markdown', `${markdownFontSize}px`)
+    // El preview tiene su propia configuración de font size
+    const previewFontSize = settings.previewFontSize || 16
+    root.style.setProperty('--font-size-preview', `${previewFontSize}px`)
+    root.style.setProperty('--font-size-markdown', `${previewFontSize}px`) // Por compatibilidad
     
-    // Aplicar line height (con valor por defecto)
-    const lineHeight = settings.lineHeight || 1.6
-    root.style.setProperty('--line-height', lineHeight.toString())
+    // Line height para el editor
+    const editorLineHeight = settings.lineHeight || 1.6
+    root.style.setProperty('--line-height-editor', editorLineHeight.toString())
+    
+    // Line height para el preview (separado)
+    const previewLineHeight = settings.previewLineHeight || 1.7
+    root.style.setProperty('--line-height-preview', previewLineHeight.toString())
+    root.style.setProperty('--line-height', previewLineHeight.toString()) // Por compatibilidad con preview
     
     // Aplicar font family (con valor por defecto)
     const fontFamily = settings.fontFamily || 'default'
@@ -113,7 +119,7 @@ export const useSettingsEffects = () => {
     
     const resolvedFontFamily = fontFamilyMap[fontFamily] || fontFamilyMap['default']
     root.style.setProperty('--font-family-editor', resolvedFontFamily)
-  }, [settings.interfaceFontSize, settings.editorFontSize, settings.lineHeight, settings.fontFamily])
+  }, [settings.interfaceFontSize, settings.editorFontSize, settings.lineHeight, settings.fontFamily, settings.previewFontSize, settings.previewLineHeight])
 
   // Aplicar configuraciones adicionales del editor
   useEffect(() => {
@@ -124,13 +130,6 @@ export const useSettingsEffects = () => {
     }
   }, [settings.tabSize])
 
-  // Aplicar configuraciones de preview  
-  useEffect(() => {
-    const root = document.documentElement
-    
-    const previewWidth = settings.previewWidth || 50
-    root.style.setProperty('--preview-width', `${previewWidth}%`)
-  }, [settings.previewWidth])
 
   // Aplicar configuraciones de syntax highlighting
   useEffect(() => {

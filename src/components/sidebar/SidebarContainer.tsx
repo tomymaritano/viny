@@ -15,6 +15,7 @@ const SidebarContainer: React.FC<SidebarContainerProps> = ({
 }) => {
   return (
     <nav 
+      data-testid="sidebar"
       className="w-full sidebar-modern flex flex-col h-full ui-font bg-theme-bg-secondary border-r border-theme-border-primary"
       onClick={(e) => {
         // Don't close context menus if clicking on context menu items
@@ -22,6 +23,21 @@ const SidebarContainer: React.FC<SidebarContainerProps> = ({
           onContextMenuClose()
         }
       }}
+      onContextMenu={(e) => {
+        // Check if right-click is on empty area of sidebar
+        const target = e.target as HTMLElement
+        const isEmptyArea = target.classList.contains('sidebar-modern') || 
+                           target.classList.contains('sidebar-content') ||
+                           (!target.closest('[data-context-menu]') && 
+                            !target.closest('.notebook-item') && 
+                            !target.closest('.tag-item'))
+        
+        if (isEmptyArea && window.electronAPI?.isElectron) {
+          e.preventDefault()
+          window.electronAPI.showContextMenu('sidebar')
+        }
+      }}
+      data-context-menu="sidebar"
     >
       {children}
     </nav>

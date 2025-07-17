@@ -24,8 +24,9 @@ export const useKeyboardShortcuts = ({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Check if user is typing in an input field
-      const isTyping = ['input', 'textarea'].includes(
-        (e.target as HTMLElement).tagName.toLowerCase()
+      const target = e.target as HTMLElement
+      const isTyping = target && ['input', 'textarea'].includes(
+        target.tagName.toLowerCase()
       )
       
       // Cmd/Ctrl + K - Search

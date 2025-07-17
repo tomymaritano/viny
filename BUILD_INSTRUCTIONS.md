@@ -64,8 +64,8 @@ chmod +x build-optimized.sh
 
 El build generará:
 
-- `dist-electron/Nototo-1.0.0.dmg` (Universal Binary - 89.2 MB)
-- `dist-electron/Nototo-1.0.0-arm64.dmg` (Apple Silicon - 87.1 MB)
+- `dist-electron/Viny-1.0.0.dmg` (Universal Binary - 89.2 MB)
+- `dist-electron/Viny-1.0.0-arm64.dmg` (Apple Silicon - 87.1 MB)
 
 ## ✅ Verificación del Build
 

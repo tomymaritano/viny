@@ -1,5 +1,5 @@
 import React, { ErrorInfo, ReactNode } from 'react'
-import Icons from './Icons'
+import { Icons } from './Icons'
 import StyledButton from './ui/StyledButton'
 import { logComponentError } from '../services/errorLogger'
 
@@ -16,7 +16,7 @@ interface ErrorBoundaryState {
   errorInfo: ErrorInfo | null
 }
 
-class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props)
     this.state = {
@@ -154,7 +154,6 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 
 // Default props - using static defaultProps for class components
 
-export default ErrorBoundary
 
 // Hook version for functional components
 export const useErrorHandler = () => {
@@ -177,3 +176,5 @@ export const useErrorHandler = () => {
 
   return { captureError, resetError }
 }
+
+export default ErrorBoundary

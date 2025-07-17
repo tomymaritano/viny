@@ -1,5 +1,5 @@
 import React from 'react'
-import Icons from '../Icons'
+import { Icons } from '../Icons'
 import { NotebookWithCounts } from '../../types/notebook'
 
 interface NotebookTreeProps {
@@ -47,7 +47,14 @@ const NotebookTree: React.FC<NotebookTreeProps> = ({
                 : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary'
             }`}
             onClick={() => onSectionClick(`notebook-${notebook.name.toLowerCase()}`)}
-            onContextMenu={(e) => onNotebookRightClick(e, notebook)}
+            onContextMenu={(e) => {
+              if (window.electronAPI?.isElectron) {
+                e.preventDefault()
+                window.electronAPI.showContextMenu('notebook', notebook)
+              } else {
+                onNotebookRightClick(e, notebook)
+              }
+            }}
             style={{
               paddingLeft: `${paddingLeft}px`,
               paddingRight: '12px',

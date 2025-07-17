@@ -1,11 +1,11 @@
-// Nototo Plugin: Emoji Picker
+// Viny Plugin: Emoji Picker
 // Adds emoji picker and autocompletion to the editor
 
 export default {
   name: 'emoji-picker',
   version: '1.5.0',
   description: 'Add emojis to your notes with a visual picker and smart autocompletion',
-  author: 'Nototo Community',
+  author: 'Viny Community',
   
   config: {
     enabled: true,
@@ -897,7 +897,7 @@ This comprehensive emoji plugin provides:
 ✅ Quick emoji shortcuts (Ctrl+Shift+1-5)
 
 ## UI Features:
-- Beautiful dark theme matching Nototo
+- Beautiful dark theme matching Viny
 - Category tabs for easy navigation
 - Hover effects and tooltips
 - Responsive grid layout

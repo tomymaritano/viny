@@ -68,15 +68,7 @@ export function useInkdropEditor({
       const extensions = createEditorExtensions({
         placeholder,
         showLineNumbers,
-        theme: currentTheme,
-        preset: preset || {
-          includeCore: true,
-          includeKeyboard: true,
-          includeFeatures: true,
-          includeBehavior: true,
-          lineNumbers: showLineNumbers,
-          theme: currentTheme
-        }
+        theme: currentTheme
       })
 
       const state = EditorState.create({
@@ -105,7 +97,7 @@ export function useInkdropEditor({
       viewRef.current = view
 
       // Attach format selection functionality
-      attachFormatSelection(view)
+      attachFormatSelection(view, formatSelection)
 
       editorLogger.debug('Editor initialized successfully')
     } catch (error) {

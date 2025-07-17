@@ -19,6 +19,14 @@ export const LazyExportDialog = lazy(() =>
   import('../ExportDialog').then(module => ({ default: module.default }))
 )
 
+export const LazySettingsModal = lazy(() => 
+  import('../settings/SettingsModal').then(module => ({ default: module.default }))
+)
+
+export const LazyTagModal = lazy(() => 
+  import('../editor/tags/TagModal').then(module => ({ default: module.default }))
+)
+
 
 // HOC for wrapping lazy components with Suspense and ErrorBoundary
 export function withSuspense<P extends object>(
@@ -47,5 +55,6 @@ export function withSuspense<P extends object>(
 // Pre-wrapped components ready to use
 export const MarkdownEditor = withSuspense(LazyMarkdownEditor, undefined, 'MarkdownEditor')
 export const SearchModal = withSuspense(LazySearchModal, undefined, 'SearchModal')
-// NotebookManager eliminado
 export const ExportDialog = withSuspense(LazyExportDialog, undefined, 'ExportDialog')
+export const SettingsModal = withSuspense(LazySettingsModal, undefined, 'SettingsModal')
+export const TagModal = withSuspense(LazyTagModal, undefined, 'TagModal')

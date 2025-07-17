@@ -1,5 +1,5 @@
 import React, { useEffect, ReactNode } from 'react'
-import Icons from '../Icons'
+import { Icons } from '../Icons'
 import IconButton from './IconButton'
 
 type ModalSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'large' | 'full'
@@ -19,6 +19,7 @@ interface StandardModalProps {
   className?: string
   overlayClassName?: string
   preventBodyScroll?: boolean
+  'data-testid'?: string
 }
 
 const StandardModal: React.FC<StandardModalProps> = ({
@@ -34,7 +35,8 @@ const StandardModal: React.FC<StandardModalProps> = ({
   footer,
   className = '',
   overlayClassName = '',
-  preventBodyScroll = true
+  preventBodyScroll = true,
+  'data-testid': testId = 'modal'
 }) => {
   // Handle body scroll prevention
   useEffect(() => {
@@ -92,11 +94,13 @@ const StandardModal: React.FC<StandardModalProps> = ({
 
   return (
     <div
+      data-testid="modal-overlay"
       className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex justify-center 
         ${getPositionClass()} transition-all duration-200 animate-in fade-in ${overlayClassName}`}
       onClick={handleBackdropClick}
     >
       <div
+        data-testid={testId}
         className={`bg-theme-bg-secondary border border-theme-border-primary rounded-lg shadow-xl 
           ${getSizeClass()} w-full m-4 max-h-[90vh] flex flex-col
           animate-in zoom-in-95 duration-200 ${className}`}
@@ -120,6 +124,7 @@ const StandardModal: React.FC<StandardModalProps> = ({
                 size={16}
                 variant="ghost"
                 aria-label="Close modal"
+                data-testid="modal-close"
               />
             )}
           </div>
@@ -141,4 +146,4 @@ const StandardModal: React.FC<StandardModalProps> = ({
   )
 }
 
-export default StandardModal
+export { StandardModal }

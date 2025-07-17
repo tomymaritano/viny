@@ -19,7 +19,7 @@ const EditorSettings: React.FC = () => {
             </label>
             <select
               value={settings.defaultEditorMode || 'markdown'}
-              onChange={(e) => updateSettings({ defaultEditorMode: e.target.value })}
+              onChange={(e) => updateSettings({ defaultEditorMode: e.target.value as 'markdown' | 'monaco' })}
               className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-theme-text-primary"
             >
               <option value="markdown">Markdown</option>
@@ -94,7 +94,7 @@ const EditorSettings: React.FC = () => {
             </label>
             <select
               value={settings.previewPosition || 'right'}
-              onChange={(e) => updateSettings({ previewPosition: e.target.value })}
+              onChange={(e) => updateSettings({ previewPosition: e.target.value as 'right' | 'bottom' | 'hidden' })}
               className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-theme-text-primary"
             >
               <option value="right">Right</option>

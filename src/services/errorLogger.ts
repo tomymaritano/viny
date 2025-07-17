@@ -365,4 +365,3 @@ export const logComponentError = errorLogger.logComponentError.bind(errorLogger)
 export const logStorageError = errorLogger.logStorageError.bind(errorLogger)
 export const logSearchError = errorLogger.logSearchError.bind(errorLogger)
 
-export default errorLogger

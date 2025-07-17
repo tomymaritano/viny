@@ -14,6 +14,9 @@
 
 /* Apply theme variables dynamically through TypeScript */
 @import './styles/themes.css'; /* Keep only for CSS variables */
+@import './styles/typography.css'; /* Keep for prose-theme styles */
+@import './styles/syntax-highlighting.css'; /* Syntax highlighting for code blocks */
+@import './styles/preview-features.css'; /* Preview features styles */
 
 @tailwind base;
 @tailwind components;
@@ -92,218 +95,8 @@ body,
   color: inherit;
 }
 
-/* Markdown content styles */
-.markdown-content {
-  color: #cccccc !important;
-  line-height: 1.6;
-}
-
-.markdown-content h1,
-.markdown-content h2,
-.markdown-content h3,
-.markdown-content h4,
-.markdown-content h5,
-.markdown-content h6 {
-  color: #ffffff !important;
-  font-weight: 600;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-}
-
-.markdown-content h1 {
-  font-size: 2rem;
-  border-bottom: 1px solid #3a3a3a;
-  padding-bottom: 0.5rem;
-}
-
-.markdown-content h2 {
-  font-size: 1.5rem;
-}
-
-.markdown-content h3 {
-  font-size: 1.25rem;
-}
-
-.markdown-content p {
-  color: #cccccc !important;
-  margin-bottom: 1rem;
-}
-
-.markdown-content a {
-  color: #4fc3f7 !important;
-  text-decoration: none;
-}
-
-.markdown-content a:hover {
-  text-decoration: underline;
-}
-
-.markdown-content code {
-  background-color: #2a2a2a !important;
-  color: #ff8a65 !important;
-  padding: 0.2rem 0.4rem;
-  border-radius: 0.25rem;
-  font-size: 0.875em;
-}
-
-.markdown-content pre {
-  background-color: #2a2a2a !important;
-  border: 1px solid #3a3a3a;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  overflow-x: auto;
-  margin: 1rem 0;
-}
-
-.markdown-content pre code {
-  background-color: transparent !important;
-  color: #cccccc !important;
-  padding: 0;
-}
-
-.markdown-content blockquote {
-  border-left: 4px solid #4fc3f7;
-  padding-left: 1rem;
-  margin: 1rem 0;
-  color: #888888 !important;
-  font-style: italic;
-}
-
-.markdown-content ul,
-.markdown-content ol {
-  color: #cccccc !important;
-  padding-left: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.markdown-content li {
-  color: #cccccc !important;
-  margin-bottom: 0.5rem;
-  position: relative;
-}
-
-/* Nested lists */
-.markdown-content ul ul,
-.markdown-content ol ol,
-.markdown-content ul ol,
-.markdown-content ol ul {
-  margin-top: 0.25rem;
-  margin-bottom: 0.25rem;
-  padding-left: 1.5rem;
-}
-
-/* List markers */
-.markdown-content ul {
-  list-style-type: disc;
-}
-
-.markdown-content ul ul {
-  list-style-type: circle;
-}
-
-.markdown-content ul ul ul {
-  list-style-type: square;
-}
-
-.markdown-content ol {
-  list-style-type: decimal;
-}
-
-.markdown-content ol ol {
-  list-style-type: lower-alpha;
-}
-
-.markdown-content ol ol ol {
-  list-style-type: lower-roman;
-}
-
-/* Task lists (checkboxes) */
-.markdown-content li input[type='checkbox'] {
-  margin-right: 0.5rem;
-  accent-color: #4fc3f7;
-}
-
-.markdown-content li input[type='checkbox']:checked + * {
-  text-decoration: line-through;
-  color: #888888 !important;
-}
-
-/* Definition lists */
-.markdown-content dl {
-  margin: 1rem 0;
-}
-
-.markdown-content dt {
-  color: #ffffff !important;
-  font-weight: 600;
-  margin-top: 1rem;
-  margin-bottom: 0.25rem;
-}
-
-.markdown-content dd {
-  color: #cccccc !important;
-  margin-left: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
-/* List spacing improvements */
-.markdown-content li p {
-  margin-bottom: 0.5rem;
-}
-
-.markdown-content li p:last-child {
-  margin-bottom: 0;
-}
-
-/* Compact lists */
-.markdown-content ul li:only-child,
-.markdown-content ol li:only-child {
-  margin-bottom: 0;
-}
-
-/* Multi-paragraph list items */
-.markdown-content li > p + p {
-  margin-top: 0.5rem;
-}
-
-.markdown-content table {
-  border-collapse: collapse;
-  width: 100%;
-  margin: 1rem 0;
-}
-
-.markdown-content th,
-.markdown-content td {
-  border: 1px solid #3a3a3a;
-  padding: 0.5rem;
-  text-align: left;
-}
-
-.markdown-content th {
-  background-color: #2a2a2a;
-  color: #ffffff !important;
-  font-weight: 600;
-}
-
-.markdown-content td {
-  color: #cccccc !important;
-}
-
-.markdown-content hr {
-  border: none;
-  border-top: 1px solid #3a3a3a;
-  margin: 2rem 0;
-}
-
-.markdown-content strong {
-  color: #ffffff !important;
-  font-weight: 600;
-}
-
-.markdown-content em {
-  color: #ffffff !important;
-  font-style: italic;
-}
+/* Removed hardcoded .markdown-content styles that conflicted with theme system */
+/* All markdown styling is now handled by .prose-theme in typography.css */
 
 /* Mobile-specific styles */
 @media (max-width: 768px) {
@@ -425,4 +218,92 @@ body,
 
 .border-theme-accent-primary-5 {
   border-color: rgba(79, 195, 247, 0.05);
+}
+
+/* Preview panel width control */
+.preview-panel {
+  width: var(--preview-width, 50%) !important;
+  min-width: 280px;
+  max-width: 80%;
+}
+
+/* High specificity overrides to ensure prose-theme styles work correctly */
+.prose-theme,
+.prose-theme * {
+  color: var(--color-base2) !important;
+  font-size: var(--font-size-preview) !important;
+  line-height: var(--line-height-preview) !important;
+}
+
+.prose-theme h1,
+.prose-theme h2,
+.prose-theme h3,
+.prose-theme h4,
+.prose-theme h5,
+.prose-theme h6 {
+  color: var(--color-base3) !important;
+  border-bottom-color: var(--color-base01) !important;
+}
+
+.prose-theme a {
+  color: var(--color-blue) !important;
+}
+
+.prose-theme a:hover {
+  color: var(--color-cyan) !important;
+}
+
+.prose-theme strong,
+.prose-theme b {
+  color: var(--color-base3) !important;
+}
+
+.prose-theme em,
+.prose-theme i {
+  color: var(--color-violet) !important;
+}
+
+.prose-theme code:not(.hljs) {
+  background-color: var(--color-base02) !important;
+  color: var(--color-base3) !important;
+  padding: 0.1em 0.3em !important;
+  border-radius: 3px !important;
+  font-size: 0.9em !important;
+  font-family: var(--font-family-editor) !important;
+}
+
+.prose-theme pre {
+  background-color: var(--color-base02) !important;
+  color: var(--color-base2) !important;
+  padding: 1em !important;
+  border-radius: 6px !important;
+  overflow-x: auto !important;
+  margin: 1.5em 0 !important;
+}
+
+.prose-theme pre code {
+  background-color: transparent !important;
+  padding: 0 !important;
+  color: inherit !important;
+}
+
+/* Ensure syntax highlighting takes precedence */
+.prose-theme .hljs {
+  background: var(--color-base02) !important;
+  color: var(--color-base2) !important;
+  font-family: var(--font-family-editor) !important;
+}
+
+.prose-theme blockquote {
+  border-left-color: var(--color-base01) !important;
+  color: var(--color-base1) !important;
+}
+
+.prose-theme table th {
+  background-color: var(--color-base02) !important;
+  color: var(--color-base3) !important;
+}
+
+.prose-theme table td {
+  color: var(--color-base2) !important;
 }

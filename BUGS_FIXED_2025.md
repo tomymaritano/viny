@@ -2,7 +2,7 @@
 
 ## 📋 **Resumen de Issues Resueltos**
 
-Este documento detalla todos los bugs críticos y mejoras implementadas que han llevado a Nototo desde un estado "no listo para producción" hasta un **MVP completamente funcional**.
+Este documento detalla todos los bugs críticos y mejoras implementadas que han llevado a Viny desde un estado "no listo para producción" hasta un **MVP completamente funcional**.
 
 ---
 
@@ -259,7 +259,7 @@ Este documento detalla todos los bugs críticos y mejoras implementadas que han 
 
 ### **Resultado**
 
-**Nototo ha pasado de ser un prototipo inestable a una aplicación de calidad profesional lista para distribución y uso en producción.**
+**Viny ha pasado de ser un prototipo inestable a una aplicación de calidad profesional lista para distribución y uso en producción.**
 
 ---
 

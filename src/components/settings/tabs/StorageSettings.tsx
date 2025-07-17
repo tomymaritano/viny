@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAppStore } from '../../../stores/newSimpleStore'
-import Icons from '../../Icons'
+import { Icons } from '../../Icons'
 import { StorageInfo, ElectronAPI, isElectronAPI } from '../../../types/settings'
 
 const StorageSettings: React.FC = () => {

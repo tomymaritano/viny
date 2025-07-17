@@ -28,7 +28,7 @@ export interface NotesSlice {
   renameTagInAllNotes: (oldTagName: string, newTagName: string) => number
 }
 
-export const createNotesSlice: StateCreator<NotesSlice> = (set) => ({
+export const createNotesSlice: StateCreator<NotesSlice> = (set, get) => ({
   // Initial state
   notes: [],
   currentNote: null,
@@ -92,39 +92,45 @@ export const createNotesSlice: StateCreator<NotesSlice> = (set) => ({
       isEditorOpen: state.currentNote?.id === noteId ? false : state.isEditorOpen
     })),
 
-  removeTagFromAllNotes: (tagName) =>
-    set((state) => {
-      let modifiedCount = 0
-      
-      const updatedNotes = state.notes.map(note => {
-        if (note.tags && note.tags.includes(tagName)) {
-          modifiedCount++
-          return {
-            ...note,
-            tags: note.tags.filter(tag => tag !== tagName),
-            updatedAt: new Date().toISOString()
-          }
+  removeTagFromAllNotes: (tagName) => {
+    const state = get()
+    let modifiedCount = 0
+    
+    const updatedNotes = state.notes.map(note => {
+      if (note.tags && note.tags.includes(tagName)) {
+        modifiedCount++
+        return {
+          ...note,
+          tags: note.tags.filter(tag => tag !== tagName),
+          updatedAt: new Date().toISOString()
         }
-        return note
-      })
-      
-      // Update current note if it was affected
-      const updatedCurrentNote = state.currentNote && state.currentNote.tags?.includes(tagName)
-        ? {
-            ...state.currentNote,
-            tags: state.currentNote.tags.filter(tag => tag !== tagName),
-            updatedAt: new Date().toISOString()
-          }
-        : state.currentNote
-      
-      // Save to storage
-      storageService.saveNotes(updatedNotes)
-      
-      return { 
-        notes: updatedNotes,
-        currentNote: updatedCurrentNote
       }
-    }),
+      return note
+    })
+    
+    // Update current note if it was affected
+    const updatedCurrentNote = state.currentNote && state.currentNote.tags?.includes(tagName)
+      ? {
+          ...state.currentNote,
+          tags: state.currentNote.tags.filter(tag => tag !== tagName),
+          updatedAt: new Date().toISOString()
+        }
+      : state.currentNote
+    
+    // Save to storage
+    storageService.saveNotes(updatedNotes)
+    
+    // Update state
+    set({ 
+      notes: updatedNotes,
+      currentNote: updatedCurrentNote
+    })
+    
+    // Show success notification
+    state.showSuccess(`Tag "${tagName}" removed from all notes`)
+    
+    return modifiedCount
+  },
 
   renameTagInAllNotes: (oldTagName, newTagName) =>
     set((state) => {

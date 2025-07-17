@@ -6,20 +6,20 @@ services:
     build:
       context: ./server
       target: production
-    container_name: nototo-backend
+    container_name: viny-backend
     restart: unless-stopped
     ports:
       - "3001:3001"
     volumes:
       # Persistent database and uploads
-      - nototo_data:/app/data
-      - nototo_db:/app/prisma
+      - viny_data:/app/data
+      - viny_db:/app/prisma
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - DATABASE_URL=file:./nototo.db
+      - DATABASE_URL=file:./viny.db
     networks:
-      - nototo-network
+      - viny-network
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
       interval: 30s
@@ -37,12 +37,12 @@ services:
     build:
       context: .
       target: production
-    container_name: nototo-frontend
+    container_name: viny-frontend
     restart: unless-stopped
     ports:
       - "80:80"
     networks:
-      - nototo-network
+      - viny-network
     depends_on:
       backend:
         condition: service_healthy
@@ -61,7 +61,7 @@ services:
   # Optional: Reverse proxy for HTTPS (uncomment for production)
   # reverse-proxy:
   #   image: traefik:v2.10
-  #   container_name: nototo-proxy
+  #   container_name: viny-proxy
   #   restart: unless-stopped
   #   ports:
   #     - "80:80"
@@ -70,9 +70,9 @@ services:
   #   volumes:
   #     - /var/run/docker.sock:/var/run/docker.sock:ro
   #     - ./traefik:/etc/traefik:ro
-  #     - nototo_ssl:/etc/ssl/traefik
+  #     - viny_ssl:/etc/ssl/traefik
   #   networks:
-  #     - nototo-network
+  #     - viny-network
   #   labels:
   #     - "traefik.enable=true"
   #     - "traefik.http.routers.api.rule=Host(`traefik.localhost`)"
@@ -80,13 +80,13 @@ services:
 
 volumes:
   # Persistent data storage
-  nototo_data:
+  viny_data:
     driver: local
-  nototo_db:
+  viny_db:
     driver: local
-  # nototo_ssl:
+  # viny_ssl:
   #   driver: local
 
 networks:
-  nototo-network:
+  viny-network:
     driver: bridge

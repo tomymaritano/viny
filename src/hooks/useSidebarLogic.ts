@@ -2,7 +2,7 @@ import { useMemo, useCallback } from 'react'
 import { useAppStore } from '../stores/newSimpleStore'
 import { useNotebooks } from './useNotebooks'
 import { getNotebookWithCounts } from '../utils/notebookTree'
-import { getStats } from './useSimpleLogic' // Import existing stats function
+import { getStats } from '../utils/statsUtils' // Import from utils to avoid circular dependency
 
 
 /**
@@ -111,7 +111,7 @@ export const useSidebarLogic = () => {
    */
   const handleSectionClick = useCallback((sectionId: string) => {
     if (sectionId === 'settings') {
-      // Always open settings as modal
+      // Open settings modal
       setModal('settings', true)
     } else {
       setActiveSection(sectionId)
@@ -130,14 +130,8 @@ export const useSidebarLogic = () => {
    * Dedicated settings handler
    */
   const handleSettingsClick = useCallback(() => {
-    // Check if we're in Electron
-    if ((window as any).electronAPI?.isElectron) {
-      // Open settings in new window
-      (window as any).electronAPI.openSettings()
-    } else {
-      // Fallback to modal for web version
-      setModal('settings', true)
-    }
+    // Open settings modal
+    setModal('settings', true)
   }, [setModal])
 
   /**

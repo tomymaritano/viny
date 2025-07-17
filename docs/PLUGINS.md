@@ -1,4 +1,4 @@
-# 🧩 Nototo Plugin System Documentation
+# 🧩 Viny Plugin System Documentation
 
 ## Table of Contents
 
@@ -13,7 +13,7 @@
 
 ## Overview
 
-The Nototo Plugin System allows you to extend the functionality of your note-taking application with custom features, UI enhancements, and workflow automations. Plugins are JavaScript modules that integrate seamlessly with Nototo's core functionality.
+The Viny Plugin System allows you to extend the functionality of your note-taking application with custom features, UI enhancements, and workflow automations. Plugins are JavaScript modules that integrate seamlessly with Viny's core functionality.
 
 ### 🌟 Key Features
 
@@ -41,7 +41,7 @@ The Nototo Plugin System allows you to extend the functionality of your note-tak
 
 ### Plugin Structure
 
-Every Nototo plugin follows this basic structure:
+Every Viny plugin follows this basic structure:
 
 ```javascript
 export default {
@@ -60,7 +60,7 @@ export default {
     // Plugin initialization code
     console.log('Plugin activated!')
 
-    // Use the API to extend Nototo
+    // Use the API to extend Viny
     api.ui.showToast('Hello from my plugin!', 'success')
   },
 
@@ -480,7 +480,7 @@ async activate(api) {
    }
    ```
 
-3. **Test in Nototo**:
+3. **Test in Viny**:
    - Install via Plugin Manager
    - Check browser console for errors
    - Use `console.log()` for debugging
@@ -540,7 +540,7 @@ activate(api) {
 
 ### 🎨 User Experience
 
-- **Consistent UI**: Match Nototo's design language
+- **Consistent UI**: Match Viny's design language
 - **Keyboard Accessible**: Support keyboard navigation
 - **Responsive Feedback**: Show loading states and confirmations
 - **Progressive Enhancement**: Core features work without plugins
@@ -602,19 +602,19 @@ deactivate() {
 
 - **Documentation**: Check this guide and API reference
 - **Console Logs**: Look for error messages in browser console
-- **Community**: Ask questions in Nototo community forums
+- **Community**: Ask questions in Viny community forums
 - **Examples**: Study the example plugins for common patterns
 
 ## Plugin Registry
 
 ### Available Plugins
 
-| Plugin           | Description                          | Version | Author      |
-| ---------------- | ------------------------------------ | ------- | ----------- |
-| **Vim Mode**     | Complete Vim editing experience      | 2.0.0   | Nototo Team |
-| **Emoji Picker** | Visual emoji picker with search      | 1.5.0   | Community   |
-| **Note Counter** | Productivity statistics and tracking | 1.2.0   | Community   |
-| **Hello World**  | Basic plugin template and examples   | 1.0.0   | Nototo Team |
+| Plugin           | Description                          | Version | Author    |
+| ---------------- | ------------------------------------ | ------- | --------- |
+| **Vim Mode**     | Complete Vim editing experience      | 2.0.0   | Viny Team |
+| **Emoji Picker** | Visual emoji picker with search      | 1.5.0   | Community |
+| **Note Counter** | Productivity statistics and tracking | 1.2.0   | Community |
+| **Hello World**  | Basic plugin template and examples   | 1.0.0   | Viny Team |
 
 ### Contributing Plugins
 
@@ -630,6 +630,6 @@ To share your plugin with the community:
 
 **Happy Plugin Development! 🚀**
 
-The Nototo Plugin System is designed to be powerful yet simple. Start with the basic examples and gradually explore more advanced features as you become comfortable with the API.
+The Viny Plugin System is designed to be powerful yet simple. Start with the basic examples and gradually explore more advanced features as you become comfortable with the API.
 
-For questions or contributions, please visit our [GitHub repository](https://github.com/nototo/plugins) or join our community discussions.
+For questions or contributions, please visit our [GitHub repository](https://github.com/viny/plugins) or join our community discussions.

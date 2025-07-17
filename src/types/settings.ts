@@ -78,7 +78,6 @@ export interface EditingSettingsData {
 // Preview settings data interface
 export interface PreviewSettingsData {
   previewFontSize: number
-  previewPosition: 'right' | 'bottom' | 'hidden'
   livePreview: boolean
   mathJax: boolean
   mermaidDiagrams: boolean
