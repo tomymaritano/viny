@@ -6,6 +6,76 @@ module.exports = {
   ],
   theme: {
     extend: {
+      animation: {
+        "in": "fadeIn 0.2s ease-in-out",
+        "out": "fadeOut 0.2s ease-in-out",
+        "spin-slow": "spin 3s linear infinite",
+        "float": "float 6s ease-in-out infinite",
+        "pulse-slow": "pulse 4s ease-in-out infinite",
+        "slide-in-from-top": "slideInFromTop 0.3s ease-out",
+        "slide-in-from-left": "slideInFromLeft 0.3s ease-out",
+        "slide-in-from-right": "slideInFromRight 0.3s ease-out",
+        "slide-out-to-top": "slideOutToTop 0.3s ease-in",
+        "slide-out-to-left": "slideOutToLeft 0.3s ease-in",
+        "slide-out-to-right": "slideOutToRight 0.3s ease-in",
+        "zoom-in": "zoomIn 0.3s ease-out",
+        "zoom-out": "zoomOut 0.3s ease-in",
+      },
+      keyframes: {
+        fadeIn: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        fadeOut: {
+          "0%": { opacity: "1" },
+          "100%": { opacity: "0" },
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+        slideInFromTop: {
+          "0%": { transform: "translateY(-100%)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
+        },
+        slideInFromLeft: {
+          "0%": { transform: "translateX(-100%)", opacity: "0" },
+          "100%": { transform: "translateX(0)", opacity: "1" },
+        },
+        slideInFromRight: {
+          "0%": { transform: "translateX(100%)", opacity: "0" },
+          "100%": { transform: "translateX(0)", opacity: "1" },
+        },
+        slideOutToTop: {
+          "0%": { transform: "translateY(0)", opacity: "1" },
+          "100%": { transform: "translateY(-100%)", opacity: "0" },
+        },
+        slideOutToLeft: {
+          "0%": { transform: "translateX(0)", opacity: "1" },
+          "100%": { transform: "translateX(-100%)", opacity: "0" },
+        },
+        slideOutToRight: {
+          "0%": { transform: "translateX(0)", opacity: "1" },
+          "100%": { transform: "translateX(100%)", opacity: "0" },
+        },
+        zoomIn: {
+          "0%": { transform: "scale(0.95)", opacity: "0" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
+        zoomOut: {
+          "0%": { transform: "scale(1)", opacity: "1" },
+          "100%": { transform: "scale(0.95)", opacity: "0" },
+        },
+      },
+      backdropBlur: {
+        xs: "2px",
+        sm: "4px",
+        md: "8px",
+        lg: "12px",
+        xl: "16px",
+        "2xl": "24px",
+        "3xl": "32px",
+      },
       colors: {
         'theme': {
           'bg-primary': 'var(--color-base03)',
@@ -105,10 +175,14 @@ module.exports = {
         }
       },
       fontFamily: {
-        'sans': ['Inter', 'system-ui', 'sans-serif'],
+        'sans': ['Open Sans', 'system-ui', 'sans-serif'],
         'mono': ['JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', 'monospace'],
+        'heading': ['M PLUS Rounded 1c', 'Open Sans', 'system-ui', 'sans-serif'],
+        'body': ['Open Sans', 'system-ui', 'sans-serif'],
       }
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms'),
+  ],
 }
