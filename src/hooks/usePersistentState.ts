@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { logger } from '../utils/logger'
+import { AppSettings, defaultAppSettings } from '../types/settings'
 
 /**
  * Hook for managing persistent state in localStorage with TypeScript support
@@ -78,23 +79,14 @@ export function usePersistentState<T>(
 
 /**
  * Specialized hook for settings persistence with CSS variable updates
+ * @deprecated Use settingsStore or settingsSlice instead for unified settings management
  */
 export function usePersistentSettings() {
   const [settings, setSettings, { clear, isLoading }] = usePersistentState(
     'viny-settings',
+    defaultAppSettings,
     {
-      theme: 'dark',
-      fontSize: 14,
-      fontFamily: 'Inter',
-      autoSave: true,
-      autoSaveInterval: 2000,
-      sidebarWidth: 280,
-      showLineNumbers: false,
-      wordWrap: true,
-      customColors: {}
-    },
-    {
-      validateSchema: (value): value is any => {
+      validateSchema: (value): value is AppSettings => {
         return typeof value === 'object' && value !== null
       }
     }

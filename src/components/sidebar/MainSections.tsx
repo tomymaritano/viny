@@ -29,7 +29,7 @@ const MainSections: React.FC<MainSectionsProps> = memo(({
 
   return (
     <>
-      {sections.map((section) => {
+      {sections?.map((section) => {
         const isActive = activeSection === section.id
 
         return (

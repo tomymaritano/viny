@@ -18,6 +18,7 @@ class FileSystemStorageService {
     this.settingsFile = path.join(this.dataDir, 'settings.json')
     this.tagColorsFile = path.join(this.dataDir, 'tag-colors.json')
 
+    this.lastBackupTime = new Map()
     this.initializeDirectories()
   }
 
@@ -40,10 +41,19 @@ class FileSystemStorageService {
     return path.join(this.backupDir, `${name}-${timestamp}${ext}`)
   }
 
-  // Create backup before modifying file
+  // Create backup before modifying file (throttled)
   async createFileBackup(filePath) {
     try {
       if (fsSync.existsSync(filePath)) {
+        const now = Date.now()
+        const lastBackup = this.lastBackupTime.get(filePath) || 0
+
+        // Only create backup if last one was more than 5 seconds ago
+        if (now - lastBackup < 5000) {
+          return null
+        }
+
+        this.lastBackupTime.set(filePath, now)
         const backupPath = this.generateBackupPath(path.basename(filePath))
         await fs.copyFile(filePath, backupPath)
         console.log('[StorageService] Created backup:', backupPath)

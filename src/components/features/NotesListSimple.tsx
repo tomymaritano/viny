@@ -46,53 +46,63 @@ const NotesListSimple: React.FC<NotesListSimpleProps> = memo(({
   const { sortBy, sortDirection, setSortBy, setSortDirection } = useAppStore()
   const [searchTerm, setSearchTerm] = useState('')
 
-  // Filter and sort notes based on search term and sort criteria
-  const filteredAndSortedNotes = useMemo(() => {
-    // First filter by search term
-    let filtered = notes
-    if (searchTerm.trim()) {
-      const searchLower = searchTerm.toLowerCase()
-      filtered = notes.filter(note => 
-        note.title.toLowerCase().includes(searchLower) ||
-        note.content.toLowerCase().includes(searchLower) ||
-        note.tags.some(tag => tag.toLowerCase().includes(searchLower))
-      )
-    }
+  // Memoized filter function to avoid recreating on every render
+  const filteredNotes = useMemo(() => {
+    if (!searchTerm.trim()) return notes
     
-    // Then sort the filtered results
-    const sorted = [...filtered].sort((a, b) => {
-      let aValue: string | number | Date
-      let bValue: string | number | Date
+    const searchLower = searchTerm.toLowerCase()
+    return notes.filter(note => {
+      // Early return optimizations
+      if (note.title.toLowerCase().includes(searchLower)) return true
+      if (note.content.toLowerCase().includes(searchLower)) return true
+      return note.tags.some(tag => tag.toLowerCase().includes(searchLower))
+    })
+  }, [notes, searchTerm])
+
+  // Optimized sort function with cached date parsing
+  const filteredAndSortedNotes = useMemo(() => {
+    // Create a copy to sort
+    const notesToSort = [...filteredNotes]
+    
+    // Pre-calculate sort values to avoid repeated calculations
+    const sortValueCache = new Map()
+    
+    const getSortValue = (note: Note) => {
+      if (sortValueCache.has(note.id)) {
+        return sortValueCache.get(note.id)
+      }
       
+      let value: string | number
       switch (sortBy) {
         case 'title':
-          aValue = a.title.toLowerCase()
-          bValue = b.title.toLowerCase()
+          value = note.title.toLowerCase()
           break
         case 'date':
-          aValue = new Date(a.createdAt)
-          bValue = new Date(b.createdAt)
+          value = new Date(note.createdAt).getTime()
           break
         case 'updated':
-          aValue = new Date(a.updatedAt)
-          bValue = new Date(b.updatedAt)
+          value = new Date(note.updatedAt).getTime()
           break
         case 'notebook':
-          aValue = a.notebook?.toLowerCase() || ''
-          bValue = b.notebook?.toLowerCase() || ''
+          value = note.notebook?.toLowerCase() || ''
           break
         default:
-          aValue = new Date(a.updatedAt)
-          bValue = new Date(b.updatedAt)
+          value = new Date(note.updatedAt).getTime()
       }
+      
+      sortValueCache.set(note.id, value)
+      return value
+    }
+    
+    return notesToSort.sort((a, b) => {
+      const aValue = getSortValue(a)
+      const bValue = getSortValue(b)
       
       if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
       if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
       return 0
     })
-    
-    return sorted
-  }, [notes, searchTerm, sortBy, sortDirection])
+  }, [filteredNotes, sortBy, sortDirection])
 
   // Performance settings
   const VIRTUALIZATION_THRESHOLD = 100 // Use virtualization when more than 100 notes

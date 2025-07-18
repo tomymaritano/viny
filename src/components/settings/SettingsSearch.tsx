@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { useSettingsService } from '../../hooks/useSettingsService'
+import { useSettings } from '../../hooks/useSettings'
 import { Icons } from '../Icons'
 import type { SettingsSchema } from '../../services/settings/types'
 
@@ -18,7 +18,7 @@ interface SearchResult {
 export const SettingsSearch: React.FC<SettingsSearchProps> = ({ onNavigate, onClose, isModal = false }) => {
   const [query, setQuery] = useState('')
   const [isOpen, setIsOpen] = useState(false)
-  const { schemas } = useSettingsService()
+  const { schemas } = useSettings()
 
   const searchResults = useMemo(() => {
     if (!query.trim()) return []

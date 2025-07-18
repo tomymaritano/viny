@@ -12,6 +12,7 @@ import LoadingSpinner from '../LoadingSpinner'
 
 // Lazy components
 import { MarkdownEditor } from '../features/LazyComponents'
+// Removed PluginPanel - plugins only in settings
 
 interface AppLayoutProps {
   // Data

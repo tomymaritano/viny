@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react'
 import { useAppStore } from '../../../stores/newSimpleStore'
-import { storageService } from '../../../lib/storage'
 import { Note } from '../../../types'
 
 export const useEditorState = (selectedNote: Note | null) => {
@@ -72,10 +71,9 @@ export const useEditorState = (selectedNote: Note | null) => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }
-      // Add duplicated note to store/database
+      // Add duplicated note via store (automatically persists)
       try {
         addNote(duplicatedNote)
-        storageService.saveNote(duplicatedNote)
         showSuccess('Note duplicated successfully')
       } catch (error) {
         console.error('Error duplicating note:', error)
@@ -95,8 +93,7 @@ export const useEditorState = (selectedNote: Note | null) => {
           trashedAt: new Date().toISOString(),
         }
         removeNote(selectedNote.id)
-        addNote(trashedNote) // Add back as trashed
-        storageService.saveNote(trashedNote)
+        addNote(trashedNote) // Add back as trashed (automatically persists)
         showSuccess('Note moved to trash')
       } catch (error) {
         console.error('Error deleting note:', error)
@@ -114,8 +111,7 @@ export const useEditorState = (selectedNote: Note | null) => {
           isPinned: !selectedNote.isPinned,
           updatedAt: new Date().toISOString(),
         }
-        updateNote(updatedNote)
-        storageService.saveNote(updatedNote)
+        updateNote(updatedNote) // Automatically persists via repository
         showSuccess(updatedNote.isPinned ? 'Note pinned' : 'Note unpinned')
       } catch (error) {
         console.error('Error toggling pin:', error)

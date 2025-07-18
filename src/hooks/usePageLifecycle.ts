@@ -2,7 +2,6 @@
  * Custom hook for managing page lifecycle events (unload, visibility changes)
  */
 import { useEffect, useRef } from 'react'
-import { storageService } from '../lib/storage'
 import { Note } from '../types'
 
 interface UsePageLifecycleProps {
@@ -20,11 +19,7 @@ export const usePageLifecycle = ({ currentNote }: UsePageLifecycleProps) => {
   
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      try {
-        storageService.flushPendingSaves()
-      } catch (error) {
-        console.error('Failed to flush pending saves:', error)
-      }
+      // Repository pattern handles auto-save, no manual flush needed
       
       // If there are unsaved changes, warn the user
       if (currentNoteRef.current) {
@@ -37,11 +32,7 @@ export const usePageLifecycle = ({ currentNote }: UsePageLifecycleProps) => {
     
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        try {
-          storageService.flushPendingSaves()
-        } catch (error) {
-          console.error('Failed to flush pending saves:', error)
-        }
+        // Repository pattern handles auto-save, no manual flush needed
       }
     }
     
@@ -49,11 +40,7 @@ export const usePageLifecycle = ({ currentNote }: UsePageLifecycleProps) => {
     document.addEventListener('visibilitychange', handleVisibilityChange)
     
     return () => {
-      try {
-        storageService.flushPendingSaves()
-      } catch (error) {
-        console.error('Failed to flush pending saves:', error)
-      }
+      // Repository pattern handles cleanup automatically
       window.removeEventListener('beforeunload', handleBeforeUnload)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }

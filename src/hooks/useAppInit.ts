@@ -1,6 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useAppStore } from '../stores/newSimpleStore'
 import { useServices } from '../services/ServiceProvider'
+import { initLogger } from '../utils/logger'
 
 /**
  * Hook responsible for application initialization coordination.
@@ -33,10 +34,9 @@ import { useServices } from '../services/ServiceProvider'
  */
 export const useAppInit = () => {
   const storeState = useAppStore()
-  const { appInitializationService, themeService } = useServices()
+  const { appInitializationService } = useServices()
+  const initializationAttempted = useRef(false)
   
-  console.log('useAppInit store state keys:', Object.keys(storeState))
-  console.log('setLoading function:', storeState.setLoading)
   
   const { 
     setNotes, 
@@ -49,17 +49,24 @@ export const useAppInit = () => {
     updateSettings
   } = storeState
 
-  // Initialize data using the injected service
+  // Initialize data using the injected service - only once
   useEffect(() => {
-    console.log('useAppInit useEffect triggered')
+    if (initializationAttempted.current) {
+      return
+    }
+
+    initializationAttempted.current = true
     
     const initializeApp = async () => {
-      console.log('initializeApp starting via injected service')
+      initLogger.debug('Starting app initialization via injected service')
       
       const dependencies = {
-        setNotes,
+        loadNotes: storeState.loadNotes,
+        loadSettings: storeState.loadSettings,
         setLoading,
         setError,
+        // Legacy compatibility (will be removed)
+        setNotes,
         loadTagColors,
         updateSettings
       }
@@ -67,20 +74,17 @@ export const useAppInit = () => {
       const result = await appInitializationService.initialize(dependencies)
       
       if (!result.success) {
-        console.log('Initialization failed:', result.error)
+        initLogger.error('Initialization failed:', result.error)
       } else {
-        console.log('Initialization completed successfully')
+        initLogger.info('Initialization completed successfully')
       }
     }
     
     initializeApp()
-  }, [setNotes, setLoading, setError, loadTagColors, updateSettings, appInitializationService])
+  }, [appInitializationService, setNotes, setLoading, setError, loadTagColors, updateSettings])
 
-  // Apply theme settings using the injected service
-  useEffect(() => {
-    const themeDependencies = { setTheme }
-    themeService.applyTheme(settings, currentTheme, themeDependencies)
-  }, [settings?.uiTheme, currentTheme, setTheme, themeService])
+  // Theme initialization removed - now handled by useSettingsEffects
+  // to prevent race conditions and multiple theme applications
 
   return {
     // Expose initialization status for components that need it

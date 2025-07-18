@@ -2,6 +2,7 @@ import React from 'react'
 import { useSidebarContext } from './SidebarLogicProvider'
 import { useSidebarState } from '../../hooks/useSidebarState'
 import { useAppStore } from '../../stores/newSimpleStore'
+import { sidebarLogger } from '../../utils/logger'
 import { Icons } from '../Icons'
 import IconButton from '../ui/IconButton'
 import SidebarSection from './SidebarSection'
@@ -12,6 +13,7 @@ import SidebarModals from './SidebarModals'
 import SidebarContextMenuManager from './SidebarContextMenuManager'
 import SidebarContainer from './SidebarContainer'
 import SettingsButton from './SettingsButton'
+import RenameModal from '../modals/RenameModal'
 
 const SidebarContent: React.FC = () => {
   const {
@@ -31,6 +33,7 @@ const SidebarContent: React.FC = () => {
     updateNotebook,
     createNotebook,
     deleteNotebook,
+    getNotebook,
     handleEmptyTrash
   } = useSidebarContext()
   
@@ -43,11 +46,13 @@ const SidebarContent: React.FC = () => {
     trashContextMenu,
     tagSettingsModal,
     createNotebookModal,
+    renameNotebookModal,
     editingNotebook,
     editValue,
     expandedNotebooks,
     setTagSettingsModal,
     setCreateNotebookModal,
+    setRenameNotebookModal,
     setEditValue,
     handleTagRightClick,
     handleNotebookRightClick,
@@ -97,6 +102,8 @@ const SidebarContent: React.FC = () => {
         />
       </SidebarSection>
 
+      {/* Plugin Section removed - plugins only in settings */}
+
       {/* Notebooks Section */}
       <SidebarSection
         title="Notebooks"
@@ -125,8 +132,11 @@ const SidebarContent: React.FC = () => {
           onEditValueChange={setEditValue}
           onSaveNotebookName={(notebookId: string) => {
             if (editValue.trim()) {
-              updateNotebook(notebookId, { name: editValue.trim() })
-              cancelEditingNotebook()
+              const notebook = getNotebook(notebookId)
+              if (notebook) {
+                updateNotebook({ ...notebook, name: editValue.trim() })
+                cancelEditingNotebook()
+              }
             }
           }}
           onCancelEdit={cancelEditingNotebook}
@@ -197,7 +207,11 @@ const SidebarContent: React.FC = () => {
         }}
         onNotebookRename={() => {
           if (notebookContextMenu.notebook) {
-            startEditingNotebook(notebookContextMenu.notebook.id, notebookContextMenu.notebook.name)
+            setRenameNotebookModal({
+              show: true,
+              notebookId: notebookContextMenu.notebook.id,
+              notebookName: notebookContextMenu.notebook.name
+            })
             closeAllContextMenus()
           }
         }}
@@ -224,8 +238,8 @@ const SidebarContent: React.FC = () => {
             closeAllContextMenus()
           }
         }}
-        onEmptyTrash={() => {
-          handleEmptyTrash()
+        onEmptyTrash={async () => {
+          await handleEmptyTrash()
           closeAllContextMenus()
         }}
       />
@@ -242,21 +256,50 @@ const SidebarContent: React.FC = () => {
         }}
         createNotebookModal={createNotebookModal}
         onCreateNotebookClose={() => setCreateNotebookModal(false)}
-        onCreateNotebook={(name: string, color: string, parentId?: string | null) => {
-          console.log('📝 SidebarContent: Creating notebook with data:', { name, color, parentId })
-          const result = createNotebook({ name, color, parentId })
-          console.log('📝 SidebarContent: Create notebook result:', result)
+        onCreateNotebook={async (name: string, color: string, parentId?: string | null) => {
+          sidebarLogger.group('Create Notebook from UI')
+          sidebarLogger.debug('UI create notebook called with:', { name, color, parentId })
           
-          if (result === null) {
-            console.error('❌ Failed to create notebook - validation failed')
-          } else {
-            console.log('✅ Notebook created successfully:', result.name)
+          try {
+            const result = await createNotebook({ name, color, parentId })
+            sidebarLogger.debug('Create notebook result:', result)
+            
+            if (result === null) {
+              sidebarLogger.error('Failed to create notebook - validation failed')
+              showError('Failed to create notebook - validation failed')
+            } else {
+              sidebarLogger.info('Notebook created successfully:', result.name)
+              showSuccess(`Notebook "${result.name}" created successfully`)
+            }
+          } catch (error) {
+            sidebarLogger.error('Create notebook error:', error)
+            showError('Failed to create notebook')
           }
           
+          sidebarLogger.groupEnd()
           setCreateNotebookModal(false)
         }}
         existingNotebookNames={notebooksWithCounts.map(n => n.name)}
         availableParents={notebooksWithCounts}
+      />
+
+      {/* Rename Notebook Modal */}
+      <RenameModal
+        isOpen={renameNotebookModal.show}
+        onClose={() => setRenameNotebookModal({ show: false, notebookId: '', notebookName: '' })}
+        currentName={renameNotebookModal.notebookName}
+        title="Rename Notebook"
+        onRename={async (newName: string) => {
+          const notebook = getNotebook(renameNotebookModal.notebookId)
+          if (notebook) {
+            try {
+              await updateNotebook({ ...notebook, name: newName })
+              showSuccess(`Notebook renamed to "${newName}"`)
+            } catch (error) {
+              showError('Failed to rename notebook')
+            }
+          }
+        }}
       />
 
     </SidebarContainer>

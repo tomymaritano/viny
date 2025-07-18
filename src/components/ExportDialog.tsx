@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Icons } from './Icons'
 import { useElectronExport } from '../hooks/useElectronExport'
-import { useSettingsService } from '../hooks/useSettingsService'
+import { useSettings } from '../hooks/useSettings'
 import { Note } from '../types' // Use the proper Note type instead of local interface
 
 interface ExportDialogProps {
@@ -32,7 +32,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
 }) => {
   const { exportToHTML, exportToPDF, exportToMarkdown, exportMultipleNotes, isElectron } =
     useElectronExport()
-  const { settings } = useSettingsService()
+  const { settings } = useSettings()
 
   const [exportFormat, setExportFormat] = useState<ExportFormat>(
     (settings.exportFormat as ExportFormat) || 'pdf'

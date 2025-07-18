@@ -240,6 +240,27 @@ export const preloadPopularLanguages = async (): Promise<void> => {
 const renderCache = new Map<string, string>()
 const CACHE_SIZE_LIMIT = 100 // Maximum cache entries
 
+// Plugin hook types for markdown processing
+export interface MarkdownHook {
+  beforeMarkdown?: (content: string) => string
+  afterHTML?: (html: string, content: string) => string
+  customRenderer?: (token: any, md: MarkdownIt) => string | null
+}
+
+// Plugin registration for markdown hooks
+const markdownPluginHooks: MarkdownHook[] = []
+
+export const registerMarkdownPlugin = (hook: MarkdownHook): () => void => {
+  markdownPluginHooks.push(hook)
+  // Return unregister function
+  return () => {
+    const index = markdownPluginHooks.indexOf(hook)
+    if (index > -1) {
+      markdownPluginHooks.splice(index, 1)
+    }
+  }
+}
+
 // MarkdownProcessor class for backward compatibility
 export class MarkdownProcessor {
   private static md = createOptimizedMarkdown()
@@ -252,6 +273,7 @@ export class MarkdownProcessor {
     renderMermaid?: boolean
     tableOfContents?: boolean
     tocPosition?: string
+    enablePlugins?: boolean
   } = {}): string {
     if (!content.trim()) {
       return '<div class="empty-state">Start typing to see your markdown rendered here...</div>'
@@ -266,11 +288,28 @@ export class MarkdownProcessor {
       renderMermaid: true,
       tableOfContents: false,
       tocPosition: 'top',
+      enablePlugins: true,
       ...options
     }
 
-    // Check cache first for performance
-    const cacheKey = this.generateCacheKey(content + JSON.stringify(finalOptions))
+    // Apply plugin beforeMarkdown hooks if enabled
+    let processedContent = content
+    if (finalOptions.enablePlugins) {
+      try {
+        for (const hook of markdownPluginHooks) {
+          if (hook.beforeMarkdown) {
+            processedContent = hook.beforeMarkdown(processedContent)
+          }
+        }
+      } catch (error) {
+        console.warn('Plugin beforeMarkdown hook failed:', error)
+        // Continue with original content if plugin fails
+        processedContent = content
+      }
+    }
+
+    // Check cache first for performance (include processed content in cache key)
+    const cacheKey = this.generateCacheKey(processedContent + JSON.stringify(finalOptions))
     const cached = renderCache.get(cacheKey)
     if (cached) {
       return cached
@@ -284,7 +323,7 @@ export class MarkdownProcessor {
       }
       
       // Render markdown with all enhancements
-      let rendered = this.md.render(content)
+      let rendered = this.md.render(processedContent)
       
       // Restore original highlight function
       this.md.options.highlight = originalHighlight
@@ -300,6 +339,23 @@ export class MarkdownProcessor {
       
       if (finalOptions.tableOfContents) {
         rendered = this.addTableOfContents(rendered, content, finalOptions.tocPosition)
+      }
+      
+      // Process viny:// image references and blocked images
+      rendered = this.processImageReferences(rendered)
+      
+      // Apply plugin afterHTML hooks if enabled
+      if (finalOptions.enablePlugins) {
+        try {
+          for (const hook of markdownPluginHooks) {
+            if (hook.afterHTML) {
+              rendered = hook.afterHTML(rendered, processedContent)
+            }
+          }
+        } catch (error) {
+          console.warn('Plugin afterHTML hook failed:', error)
+          // Continue with current rendered content if plugin fails
+        }
       }
       
       // Cache the result with size limit
@@ -464,6 +520,108 @@ export class MarkdownProcessor {
     const words = this.getWordCount(content)
     const wordsPerMinute = 200
     return Math.ceil(words / wordsPerMinute)
+  }
+
+  // Image processing method
+  private static processImageReferences(html: string): string {
+    return html.replace(
+      /<img([^>]*?)src=["']([^"']+)["']([^>]*?)>/g,
+      (match, before, src, after) => {
+        // Handle viny:// image references
+        if (src.startsWith('viny://image:')) {
+          const imageId = src.replace('viny://image:', '')
+
+          // Try to get from memory first
+          let dataUri = null
+          if (typeof window !== 'undefined' && (window as any).vinyImageStore && (window as any).vinyImageStore.has(imageId)) {
+            dataUri = (window as any).vinyImageStore.get(imageId)
+          } else if (typeof window !== 'undefined') {
+            // Try to load from localStorage
+            try {
+              const storedImages = JSON.parse(
+                localStorage.getItem('viny-images') || '{}'
+              )
+              if (storedImages[imageId]) {
+                dataUri = storedImages[imageId]
+                // Cache in memory for next time
+                if (!(window as any).vinyImageStore) {
+                  (window as any).vinyImageStore = new Map()
+                }
+                (window as any).vinyImageStore.set(imageId, dataUri)
+              }
+            } catch (error) {
+              console.error('Failed to load image from storage:', error)
+            }
+          }
+
+          if (dataUri) {
+            return `<img${before}src="${dataUri}"${after}>`
+          } else {
+            // Image reference not found
+            const altMatch = match.match(/alt=["']([^"']*?)["']/)
+            const altText = altMatch ? altMatch[1] : 'Missing image'
+            return `<div class="missing-image-placeholder" style="
+            border: 2px dashed #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 16px 0;
+            text-align: center;
+            background-color: #f8fafc;
+            color: #64748b;
+          ">
+            <div style="margin-bottom: 8px;">⚠️</div>
+            <div style="font-weight: 500; margin-bottom: 4px;">Image Not Found</div>
+            <div style="font-size: 0.875rem; opacity: 0.8;">${altText}</div>
+            <div style="font-size: 0.75rem; opacity: 0.6;">Reference: ${imageId}</div>
+          </div>`
+          }
+        }
+
+        // Check if external URL is allowed (this preserves existing security)
+        if (src.startsWith('http://') || src.startsWith('https://')) {
+          // For now, we'll allow them through and let DOMPurify handle security
+          // This preserves the existing behavior while fixing viny:// references
+          return match
+        }
+
+        return match // Return original if it's a data URI, relative path, etc.
+      }
+    )
+  }
+
+  // Plugin support methods
+  static injectPluginCSS(css: string, pluginId: string): () => void {
+    const styleId = `plugin-css-${pluginId}`
+    let styleElement = document.getElementById(styleId) as HTMLStyleElement
+    
+    if (!styleElement) {
+      styleElement = document.createElement('style')
+      styleElement.id = styleId
+      styleElement.setAttribute('data-plugin', pluginId)
+      document.head.appendChild(styleElement)
+    }
+    
+    styleElement.textContent = css
+    
+    // Return cleanup function
+    return () => {
+      const element = document.getElementById(styleId)
+      if (element) {
+        element.remove()
+      }
+    }
+  }
+
+  static removePluginCSS(pluginId: string): void {
+    const styleId = `plugin-css-${pluginId}`
+    const element = document.getElementById(styleId)
+    if (element) {
+      element.remove()
+    }
+  }
+
+  static getRegisteredPlugins(): number {
+    return markdownPluginHooks.length
   }
 }
 

@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import ThemesSettings from '../ThemesSettings'
-import { useSettingsService } from '../../../../hooks/useSettingsService'
+import { useSettings } from '../../../../hooks/useSettings'
 
-// Mock the useSettingsService hook
-vi.mock('../../../../hooks/useSettingsService')
+// Mock the useSettings hook
+vi.mock('../../../../hooks/useSettings')
 
 describe('ThemesSettings', () => {
-  const mockUseSettingsService = vi.mocked(useSettingsService)
+  const mockUseSettingsService = vi.mocked(useSettings)
   
   const defaultMockReturn = {
     settings: {

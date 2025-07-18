@@ -3,6 +3,7 @@
  */
 import { useState, useCallback } from 'react'
 import { ToastAction } from '../components/ui/Toast'
+import { generateToastId } from '../utils/idUtils'
 
 export interface ToastData {
   id: string
@@ -27,7 +28,7 @@ export function useToast() {
   const [toasts, setToasts] = useState<ToastData[]>([])
 
   const showToast = useCallback((options: ShowToastOptions) => {
-    const id = `toast_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const id = generateToastId()
     
     const newToast: ToastData = {
       id,

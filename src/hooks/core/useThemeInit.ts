@@ -1,6 +1,12 @@
 import { useEffect } from 'react'
 import { useAppStore } from '../../stores/newSimpleStore'
 import { initLogger as logger } from '../../utils/logger'
+import { 
+  resolveSystemTheme, 
+  applyThemeToDOM, 
+  createSystemThemeListener,
+  type ThemeValue 
+} from '../../utils/themeUtils'
 
 /**
  * Hook responsible for theme initialization and management
@@ -10,41 +16,34 @@ import { initLogger as logger } from '../../utils/logger'
  */
 export const useThemeInit = () => {
   const { 
-    theme: currentTheme, 
     setTheme,
     settings
   } = useAppStore()
 
   useEffect(() => {
-    const finalTheme = settings?.uiTheme || currentTheme || 'dark'
-    const resolvedTheme = finalTheme === 'system'
-      ? window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-      : finalTheme
+    const finalTheme = settings?.theme || 'dark'
+    const resolvedTheme = resolveSystemTheme(finalTheme as ThemeValue)
     
-    // Apply theme to DOM
-    document.documentElement.setAttribute('data-theme', resolvedTheme)
-    setTheme(resolvedTheme)
+    // Apply theme to DOM using centralized utility
+    applyThemeToDOM(finalTheme as ThemeValue)
     
     logger.debug('Theme applied:', resolvedTheme)
-  }, [settings?.uiTheme, currentTheme, setTheme])
+  }, [settings?.theme])
 
   // Handle system theme changes
   useEffect(() => {
-    if (settings?.uiTheme !== 'system') return
+    if (settings?.theme !== 'system') return
 
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    const handleChange = (e: MediaQueryListEvent) => {
-      const newTheme = e.matches ? 'dark' : 'light'
-      document.documentElement.setAttribute('data-theme', newTheme)
-      setTheme(newTheme)
+    const cleanup = createSystemThemeListener(async (isDark, newTheme) => {
+      applyThemeToDOM(newTheme as ThemeValue)
+      await setTheme(newTheme)
       logger.debug('System theme changed to:', newTheme)
-    }
+    })
 
-    mediaQuery.addEventListener('change', handleChange)
-    return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [settings?.uiTheme, setTheme])
+    return cleanup
+  }, [settings?.theme, setTheme])
 
   return {
-    currentTheme: useAppStore(state => state.theme)
+    currentTheme: useAppStore(state => state.settings.theme)
   }
 }

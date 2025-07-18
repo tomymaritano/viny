@@ -4,8 +4,8 @@ import React from 'react'
 import PrivacySettings from '../PrivacySettings'
 
 // Mock the new settings service
-vi.mock('../../../../hooks/useSettingsService', () => ({
-  useSettingsService: () => ({
+vi.mock('../../../../hooks/useSettings', () => ({
+  useSettings: () => ({
     settings: {
       telemetryEnabled: false,
       crashReporting: true,

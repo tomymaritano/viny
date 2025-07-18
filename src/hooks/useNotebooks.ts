@@ -1,390 +1,429 @@
-import { useState, useEffect, useCallback } from 'react'
-import { logger } from '../utils/logger'
-import { electronStorageService } from '../lib/electronStorage'
-import { useAppStore } from '../stores/newSimpleStore'
-import { 
-  Notebook, 
-  NotebookWithCounts, 
-  CreateNotebookData, 
-  UpdateNotebookData,
-  NOTEBOOK_COLORS 
-} from '../types/notebook'
+// Modern notebooks hook using repository pattern
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { createDocumentRepository, IDocumentRepository } from '../lib/repositories/RepositoryFactory'
+import { Notebook } from '../types'
+import { generateNotebookId } from '../utils/idUtils'
+import { getCurrentTimestamp } from '../utils/dateUtils'
+import { buildNotebookTree as buildTreeFromUtils } from '../utils/notebookTree'
+import { notebookLogger } from '../utils/logger'
 
-// Legacy type for migration
-interface LegacyNotebook {
-  id: string
-  name: string
-  color: string
-  description?: string
-  createdAt: string
-}
-import { validateNotebookName, validateNotebookNesting, validateNotebookMove } from '../utils/notebookValidation'
-import { 
-  buildNotebookTree, 
-  flattenNotebookTree, 
-  getNotebookWithCounts,
-  deleteNotebookAndChildren,
-  moveNotebookWithChildren
-} from '../utils/notebookTree'
+// Shared cache to prevent multiple concurrent loads
+let isLoading = false
+let cachedNotebooks: Notebook[] | null = null
 
-const generateId = (): string => {
-  return 'notebook_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
-}
-
-const defaultNotebooks: Notebook[] = [
-  {
-    id: 'inbox',
-    name: 'inbox',
-    color: 'purple',
-    description: 'Quick notes and ideas to process later',
-    parentId: null,
-    children: [],
-    level: 0,
-    path: 'inbox',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 'learn',
-    name: 'learn',
-    color: 'blue',
-    description: 'Learning resources and guides',
-    parentId: null,
-    children: [],
-    level: 0,
-    path: 'learn',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 'personal',
-    name: 'personal',
-    color: 'teal',
-    description: 'Personal notes and thoughts',
-    parentId: null,
-    children: [],
-    level: 0,
-    path: 'personal',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 'projects',
-    name: 'projects',
-    color: 'orange',
-    description: 'Development projects and ideas',
-    parentId: null,
-    children: [],
-    level: 0,
-    path: 'projects',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 'work',
-    name: 'work',
-    color: 'green',
-    description: 'Work-related notes and projects',
-    parentId: null,
-    children: [],
-    level: 0,
-    path: 'work',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-]
-
-export const useNotebooks = () => {
-  const [notebooks, setNotebooks] = useState<Notebook[]>(() => {
-    // For initial state, use defaults - async loading will happen in useEffect
-    console.log('🚀 Initializing notebooks with defaults during SSR/initial render')
-    return buildNotebookTree(defaultNotebooks)
-  })
+interface UseNotebooksResult {
+  notebooks: Notebook[]
+  loading: boolean
+  error: string | null
   
-  // Get notes and updateNote from store for moving notes to trash
-  const { notes, updateNote } = useAppStore()
+  // CRUD operations
+  createNotebook: (notebook: Omit<Notebook, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Notebook>
+  updateNotebook: (notebook: Notebook) => Promise<Notebook>
+  deleteNotebook: (id: string) => Promise<void>
+  getNotebook: (id: string) => Notebook | undefined
+  
+  // Bulk operations
+  refreshNotebooks: () => Promise<void>
+  
+  // Tree operations
+  getRootNotebooks: () => Notebook[]
+  getNotebookChildren: (parentId: string) => Notebook[]
+  getNotebookPath: (id: string) => string[]
+  
+  // Validation
+  isNameAvailable: (name: string, excludeId?: string) => boolean
+  canMoveNotebook: (notebookId: string, targetParentId: string | null) => boolean
+  
+  // Helpers
+  getNotebookByName: (name: string) => Notebook | undefined
+  getFlattenedNotebooks: () => Notebook[]
+  buildNotebookTree: (notebooks?: Notebook[]) => Notebook[]
+}
 
-  // Load notebooks from storage (async)
-  useEffect(() => {
-    const loadNotebooks = async () => {
-      try {
-        console.log('🚀 Loading notebooks from storage...')
+export const useNotebooks = (): UseNotebooksResult => {
+  const [notebooks, setNotebooks] = useState<Notebook[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Build notebook tree structure  
+  const buildNotebookTree = useCallback((notebooksList: Notebook[]): Notebook[] => {
+    notebookLogger.group('Build Notebook Tree')
+    notebookLogger.debug('Input notebooks list:', notebooksList.length, notebooksList)
+    
+    const notebookMap = new Map<string, Notebook>()
+    
+    // Create a map of notebooks with reset children
+    notebooksList.forEach(notebook => {
+      notebookMap.set(notebook.id, {
+        ...notebook,
+        children: [],
+        level: 0,
+        path: notebook.name
+      })
+    })
+    
+    notebookLogger.debug('Notebook map created:', notebookMap.size, Array.from(notebookMap.values()))
+
+    const rootNotebooks: Notebook[] = []
+
+    // Build tree structure
+    notebookMap.forEach(notebook => {
+      if (notebook.parentId) {
+        const parent = notebookMap.get(notebook.parentId)
+        notebookLogger.debug(`Processing child notebook ${notebook.name} with parentId ${notebook.parentId}`, {
+          notebook: notebook.name,
+          parentId: notebook.parentId,
+          parentFound: !!parent,
+          parentName: parent?.name
+        })
         
-        let parsed: Notebook[] = []
-        
-        if (electronStorageService.isElectronEnvironment) {
-          console.log('🚀 Using ElectronStorage to load notebooks')
-          parsed = await electronStorageService.getNotebooks()
+        if (parent) {
+          // Set level and path
+          notebook.level = parent.level + 1
+          notebook.path = `${parent.path}/${notebook.name}`
+          parent.children.push(notebook)
+          notebookLogger.debug(`Added ${notebook.name} as child of ${parent.name}`, {
+            parentChildrenCount: parent.children.length,
+            childLevel: notebook.level
+          })
         } else {
-          console.log('🚀 Using localStorage to load notebooks')
-          const saved = localStorage.getItem('viny_notebooks')
-          if (saved) {
-            parsed = JSON.parse(saved)
-          }
+          // Parent not found, treat as root
+          notebookLogger.warn(`Parent not found for ${notebook.name}, treating as root`)
+          rootNotebooks.push(notebook)
         }
-        
-        if (parsed.length === 0) {
-          console.log('🚀 No notebooks found, using defaults')
-          parsed = defaultNotebooks
-          // Save defaults
-          if (electronStorageService.isElectronEnvironment) {
-            await electronStorageService.saveNotebooks(defaultNotebooks)
-          } else {
-            localStorage.setItem('viny_notebooks', JSON.stringify(defaultNotebooks))
-          }
-        }
-        
-        console.log('🚀 Loaded notebooks from storage:', parsed.length, 'notebooks')
-        
-        // Migrate old notebooks to new structure if needed
-        const migrated = parsed.map((notebook: any) => ({
-          ...notebook,
-          parentId: notebook.parentId || null,
-          children: notebook.children || [],
-          level: notebook.level || 0,
-          path: notebook.path || notebook.name,
-          updatedAt: notebook.updatedAt || new Date().toISOString(),
-        }))
-        
-        const result = buildNotebookTree(migrated)
-        console.log('🚀 Built notebook tree:', result.length, 'notebooks')
-        setNotebooks(result)
-      } catch (error) {
-        logger.warn('Failed to load notebooks:', error)
-        console.log('🚀 Error loading notebooks, using defaults')
-        const defaultResult = buildNotebookTree(defaultNotebooks)
-        setNotebooks(defaultResult)
+      } else {
+        notebookLogger.debug(`Adding root notebook: ${notebook.name}`)
+        rootNotebooks.push(notebook)
       }
+    })
+
+    notebookLogger.debug('Root notebooks before sorting:', rootNotebooks.length, rootNotebooks.map(n => ({
+      name: n.name,
+      childrenCount: n.children.length,
+      children: n.children.map(c => c.name)
+    })))
+
+    // Sort children
+    const sortNotebooks = (notebooks: Notebook[]): Notebook[] => {
+      return notebooks.sort((a, b) => {
+        return a.name.localeCompare(b.name)
+      }).map(notebook => ({
+        ...notebook,
+        children: sortNotebooks(notebook.children)
+      }))
     }
 
-    loadNotebooks()
+    const sortedTree = sortNotebooks(rootNotebooks)
+    
+    notebookLogger.debug('Final sorted tree:', sortedTree.length, sortedTree.map(n => ({
+      name: n.name,
+      childrenCount: n.children.length,
+      children: n.children.map(c => c.name)
+    })))
+    
+    notebookLogger.groupEnd()
+    return sortedTree
   }, [])
 
-  // Save to storage whenever notebooks change (debounced to avoid excessive saves)
-  useEffect(() => {
-    // Skip saving if we're still in the initial loading state (only defaults)
-    if (notebooks.length === 5 && notebooks.every(nb => ['inbox', 'learn', 'personal', 'projects', 'work'].includes(nb.name))) {
-      console.log('💾 useEffect: Skipping save - using default notebooks during initialization')
+  // Load initial notebooks using repository
+  const loadNotebooks = useCallback(async () => {
+    // Prevent multiple concurrent loads
+    if (isLoading) {
+      notebookLogger.debug('Already loading notebooks, skipping...')
       return
     }
+
+    // Use cached data if available
+    if (cachedNotebooks) {
+      notebookLogger.debug('Using cached notebooks:', cachedNotebooks.length)
+      const treeNotebooks = buildNotebookTree(cachedNotebooks)
+      setNotebooks(treeNotebooks)
+      setLoading(false)
+      return
+    }
+
+    const timerId = `notebook-loading-${Date.now()}`
+    notebookLogger.group('Load Notebooks from Repository')
+    notebookLogger.time(timerId)
     
-    console.log('💾 useEffect: Triggered with', notebooks.length, 'notebooks:', notebooks.map(n => n.name))
-    
-    const saveNotebooks = async () => {
-      try {
-        if (electronStorageService.isElectronEnvironment) {
-          console.log('💾 useEffect: Saving to ElectronStorage')
-          await electronStorageService.saveNotebooks(notebooks)
-          console.log('💾 useEffect: Successfully saved to ElectronStorage')
-        } else {
-          console.log('💾 useEffect: Saving to localStorage')
-          localStorage.setItem('viny_notebooks', JSON.stringify(notebooks))
-          console.log('💾 useEffect: Successfully saved to localStorage')
-        }
-      } catch (error) {
-        console.error('💾 useEffect: Error saving notebooks:', error)
-        logger.warn('Failed to save notebooks:', error)
-      }
-    }
-
-    saveNotebooks()
-  }, [notebooks])
-
-  const createNotebook = useCallback((data: CreateNotebookData): Notebook | null => {
-    console.log('🔵 Creating notebook:', data)
-    console.log('🔵 Current notebooks before validation:', notebooks.map(n => n.name))
-    
-    const nameValidation = validateNotebookName(data.name, notebooks)
-    if (!nameValidation.isValid) {
-      console.error('❌ Name validation failed:', nameValidation.error)
-      // Show user-friendly error
-      alert(`Cannot create notebook: ${nameValidation.error}`)
-      return null
-    }
-
-    const nestingValidation = validateNotebookNesting(data.parentId || null, notebooks)
-    if (!nestingValidation.isValid) {
-      console.error('❌ Nesting validation failed:', nestingValidation.error)
-      alert(`Cannot create notebook: ${nestingValidation.error}`)
-      return null
-    }
-
-    const newNotebook: Notebook = {
-      id: generateId(),
-      name: data.name.trim(),
-      color: data.color || 'blue',
-      description: data.description || '',
-      parentId: data.parentId || null,
-      children: [],
-      level: 0, // Will be recalculated by buildNotebookTree
-      path: '', // Will be recalculated by buildNotebookTree
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }
-    
-    console.log('✅ New notebook created:', newNotebook)
-    
-    setNotebooks(prev => {
-      console.log('🔵 Previous notebooks count:', prev.length)
-      const updated = [...prev, newNotebook]
-      console.log('🔵 Updated notebooks count:', updated.length)
-      const result = buildNotebookTree(updated)
-      console.log('🔵 Final result count:', result.length)
-      return result
-    })
-
-    return newNotebook
-  }, [notebooks])
-
-  const updateNotebook = useCallback((notebookId: string, updates: UpdateNotebookData): boolean => {
-    const notebook = notebooks.find(n => n.id === notebookId)
-    if (!notebook) {
-      logger.warn('Notebook not found:', notebookId)
-      return false
-    }
-
-    // Validate name if being updated
-    if (updates.name !== undefined) {
-      const nameValidation = validateNotebookName(updates.name, notebooks, notebookId)
-      if (!nameValidation.isValid) {
-        logger.warn('Invalid notebook name:', nameValidation.error)
-        return false
-      }
-    }
-
-    // Validate parent change if being updated
-    if (updates.parentId !== undefined) {
-      const moveValidation = validateNotebookMove(notebookId, updates.parentId, notebooks)
-      if (!moveValidation.isValid) {
-        logger.warn('Invalid move:', moveValidation.error)
-        return false
-      }
-    }
-
-    setNotebooks(prev => {
-      const updated = prev.map(notebook =>
-        notebook.id === notebookId
-          ? { 
-              ...notebook, 
-              ...updates, 
-              updatedAt: new Date().toISOString() 
-            }
-          : notebook
-      )
+    try {
+      isLoading = true
+      setLoading(true)
+      const repository: IDocumentRepository = createDocumentRepository()
+      await repository.initialize()
       
-      // If parent changed, rebuild tree
-      if (updates.parentId !== undefined) {
-        return moveNotebookWithChildren(notebookId, updates.parentId, updated)
-      }
+      const loadedNotebooks = await repository.getNotebooks()
+      notebookLogger.debug('Raw notebooks from repository:', loadedNotebooks.length, loadedNotebooks)
       
-      return buildNotebookTree(updated)
-    })
-
-    return true
-  }, [notebooks])
-
-  const deleteNotebook = useCallback((notebookId: string): boolean => {
-    // Don't allow deleting if it's the last root notebook
-    const rootNotebooks = notebooks.filter(n => n.parentId === null)
-    const notebookToDelete = notebooks.find(n => n.id === notebookId)
-    
-    if (rootNotebooks.length <= 1 && notebookToDelete?.parentId === null) {
-      logger.warn('Cannot delete the last root notebook')
-      return false
+      // Cache the raw data
+      cachedNotebooks = loadedNotebooks
+      
+      const treeNotebooks = buildNotebookTree(loadedNotebooks)
+      notebookLogger.debug('Tree notebooks after building:', treeNotebooks.length, treeNotebooks)
+      
+      setNotebooks(treeNotebooks)
+      setError(null)
+      
+      notebookLogger.timeEnd(timerId)
+      notebookLogger.info('Notebooks loaded successfully:', treeNotebooks.length)
+      notebookLogger.groupEnd()
+    } catch (err) {
+      notebookLogger.error('Error loading notebooks:', err)
+      notebookLogger.timeEnd(timerId)
+      notebookLogger.groupEnd()
+      
+      setError(err instanceof Error ? err.message : 'Failed to load notebooks')
+    } finally {
+      isLoading = false
+      setLoading(false)
     }
+  }, [buildNotebookTree])
 
-    // Get all notebook IDs to delete (including children)
-    const idsToDelete = deleteNotebookAndChildren(notebookId, notebooks)
-    
-    // Move all notes from these notebooks to trash
-    const notesToTrash = notes.filter(note => 
-      note.notebook && idsToDelete.includes(note.notebook)
-    )
-    
-    notesToTrash.forEach(note => {
-      const updatedNote = { ...note, isTrashed: true, trashedAt: new Date().toISOString() }
-      updateNote(updatedNote)
-    })
-    
-    // Delete the notebooks
-    setNotebooks(prev => {
-      const updated = prev.filter(notebook => !idsToDelete.includes(notebook.id))
-      return buildNotebookTree(updated)
-    })
+  // Initialize on mount
+  useEffect(() => {
+    loadNotebooks()
+  }, [loadNotebooks])
 
-    logger.info(`Deleted notebook ${notebookId} and moved ${notesToTrash.length} notes to trash`)
-    return true
-  }, [notebooks, notes, updateNote])
-
-  const moveNotebook = useCallback((notebookId: string, newParentId: string | null): boolean => {
-    const moveValidation = validateNotebookMove(notebookId, newParentId, notebooks)
-    if (!moveValidation.isValid) {
-      console.warn('Invalid move:', moveValidation.error)
-      return false
-    }
-
-    setNotebooks(prev => moveNotebookWithChildren(notebookId, newParentId, prev))
-    return true
-  }, [notebooks])
-
-  const getNotebook = useCallback((notebookId: string): Notebook | undefined => {
-    return notebooks.find(notebook => notebook.id === notebookId)
-  }, [notebooks])
-
-  const getNotebookByName = useCallback((name: string): Notebook | undefined => {
-    return notebooks.find(
-      notebook => notebook.name.toLowerCase() === name.toLowerCase()
-    )
-  }, [notebooks])
-
-  const getNotebooksByParent = useCallback((parentId: string | null): Notebook[] => {
-    return notebooks.filter(notebook => notebook.parentId === parentId)
-  }, [notebooks])
-
-  const getRootNotebooks = useCallback((): Notebook[] => {
-    return getNotebooksByParent(null)
-  }, [getNotebooksByParent])
-
-  const getNotebookChildren = useCallback((notebookId: string): Notebook[] => {
-    return getNotebooksByParent(notebookId)
-  }, [getNotebooksByParent])
-
+  // Get flattened notebooks
   const getFlattenedNotebooks = useCallback((): Notebook[] => {
-    return flattenNotebookTree(notebooks)
+    const flatten = (notebooks: Notebook[]): Notebook[] => {
+      const result: Notebook[] = []
+      for (const notebook of notebooks) {
+        result.push(notebook)
+        if (notebook.children.length > 0) {
+          result.push(...flatten(notebook.children))
+        }
+      }
+      return result
+    }
+    
+    return flatten(notebooks)
   }, [notebooks])
 
-  const getColorClass = useCallback((color: string): string => {
-    const colorObj = NOTEBOOK_COLORS.find(c => c.value === color)
-    return colorObj?.class || 'text-solarized-blue'
-  }, [])
+  // Create new notebook
+  const createNotebook = useCallback(async (notebookData: Omit<Notebook, 'id' | 'createdAt' | 'updatedAt'>): Promise<Notebook> => {
+    const timerId = `notebook-creation-${Date.now()}`
+    notebookLogger.group('Create Notebook Operation')
+    notebookLogger.debug('Input data:', notebookData)
+    notebookLogger.time(timerId)
+    
+    try {
+      const newNotebook: Notebook = {
+        ...notebookData,
+        id: generateNotebookId(),
+        children: [],
+        level: 0,
+        path: notebookData.name,
+        createdAt: getCurrentTimestamp(),
+        updatedAt: getCurrentTimestamp()
+      }
+      
+      notebookLogger.debug('New notebook object created:', newNotebook)
 
-  const getAvailableColors = useCallback(() => NOTEBOOK_COLORS, [])
+      const repository: IDocumentRepository = createDocumentRepository()
+      await repository.initialize()
+      
+      const savedNotebook = await repository.saveNotebook(newNotebook)
+      notebookLogger.debug('Notebook saved to repository:', savedNotebook)
+      
+      // Invalidate cache
+      cachedNotebooks = null
+      
+      // Rebuild tree
+      const flatNotebooks = getFlattenedNotebooks()
+      notebookLogger.debug('Current flat notebooks before adding:', flatNotebooks.length)
+      
+      const updatedNotebooks = [...flatNotebooks, savedNotebook]
+      notebookLogger.debug('Updated notebooks array length:', updatedNotebooks.length)
+      
+      const treeNotebooks = buildNotebookTree(updatedNotebooks)
+      notebookLogger.debug('Tree notebooks after rebuild:', treeNotebooks.length)
+      
+      setNotebooks(treeNotebooks)
+      setError(null)
+      
+      notebookLogger.timeEnd(timerId)
+      notebookLogger.debug('Notebook creation completed successfully')
+      notebookLogger.groupEnd()
+      
+      return savedNotebook
+    } catch (err) {
+      notebookLogger.error('Error in createNotebook:', err)
+      notebookLogger.timeEnd(timerId)
+      notebookLogger.groupEnd()
+      
+      const error = err instanceof Error ? err.message : 'Failed to create notebook'
+      setError(error)
+      throw new Error(error)
+    }
+  }, [getFlattenedNotebooks, buildNotebookTree])
 
-  // Computed values
-  const notebooksTree = buildNotebookTree(notebooks)
-  const flatNotebooks = flattenNotebookTree(notebooksTree)
+  // Update existing notebook
+  const updateNotebook = useCallback(async (notebook: Notebook): Promise<Notebook> => {
+    try {
+      const updatedNotebook = {
+        ...notebook,
+        updatedAt: getCurrentTimestamp()
+      }
+
+      const repository: IDocumentRepository = createDocumentRepository()
+      await repository.initialize()
+      
+      const savedNotebook = await repository.saveNotebook(updatedNotebook)
+      
+      // Rebuild tree
+      // Get all notebooks (flat) and update the specific one
+      const flatNotebooks = getFlattenedNotebooks()
+      const updatedNotebooks = flatNotebooks.map(n => n.id === notebook.id ? savedNotebook : n)
+      const treeNotebooks = buildNotebookTree(updatedNotebooks)
+      setNotebooks(treeNotebooks)
+      setError(null)
+      
+      return savedNotebook
+    } catch (err) {
+      const error = err instanceof Error ? err.message : 'Failed to update notebook'
+      setError(error)
+      throw new Error(error)
+    }
+  }, [notebooks, buildNotebookTree])
+
+  // Delete notebook
+  const deleteNotebook = useCallback(async (id: string): Promise<void> => {
+    try {
+      const repository: IDocumentRepository = createDocumentRepository()
+      await repository.initialize()
+      
+      await repository.deleteNotebook(id)
+      
+      // Remove notebook and its children
+      const removeNotebookAndChildren = (notebookId: string, list: Notebook[]): Notebook[] => {
+        return list.filter(notebook => {
+          if (notebook.id === notebookId) {
+            return false
+          }
+          if (notebook.parentId === notebookId) {
+            return false
+          }
+          return true
+        })
+      }
+
+      const flatNotebooks = getFlattenedNotebooks()
+      const updatedNotebooks = removeNotebookAndChildren(id, flatNotebooks)
+      const treeNotebooks = buildNotebookTree(updatedNotebooks)
+      setNotebooks(treeNotebooks)
+      setError(null)
+    } catch (err) {
+      const error = err instanceof Error ? err.message : 'Failed to delete notebook'
+      setError(error)
+      throw new Error(error)
+    }
+  }, [notebooks, buildNotebookTree])
+
+  // Get single notebook
+  const getNotebook = useCallback((id: string): Notebook | undefined => {
+    const findNotebook = (notebooks: Notebook[]): Notebook | undefined => {
+      for (const notebook of notebooks) {
+        if (notebook.id === id) {
+          return notebook
+        }
+        const found = findNotebook(notebook.children)
+        if (found) {
+          return found
+        }
+      }
+      return undefined
+    }
+    
+    return findNotebook(notebooks)
+  }, [notebooks])
+
+  // Refresh notebooks from storage
+  const refreshNotebooks = useCallback(async (): Promise<void> => {
+    await loadNotebooks()
+  }, [loadNotebooks])
+
+  // Get root notebooks
+  const getRootNotebooks = useCallback((): Notebook[] => {
+    return notebooks.filter(notebook => !notebook.parentId)
+  }, [notebooks])
+
+  // Get notebook children
+  const getNotebookChildren = useCallback((parentId: string): Notebook[] => {
+    const notebook = getNotebook(parentId)
+    return notebook ? notebook.children : []
+  }, [getNotebook])
+
+  // Get notebook path
+  const getNotebookPath = useCallback((id: string): string[] => {
+    const notebook = getNotebook(id)
+    if (!notebook) return []
+    
+    const path = notebook.path.split('/')
+    return path
+  }, [getNotebook])
+
+  // Check if name is available
+  const isNameAvailable = useCallback((name: string, excludeId?: string): boolean => {
+    const flatNotebooks = getFlattenedNotebooks()
+    return !flatNotebooks.some(notebook => 
+      notebook.name.toLowerCase() === name.toLowerCase() && 
+      notebook.id !== excludeId
+    )
+  }, [notebooks])
+
+  // Check if notebook can be moved
+  const canMoveNotebook = useCallback((notebookId: string, targetParentId: string | null): boolean => {
+    // Can't move to itself
+    if (notebookId === targetParentId) {
+      return false
+    }
+    
+    // Can't move to one of its children
+    if (targetParentId) {
+      const targetNotebook = getNotebook(targetParentId)
+      if (targetNotebook && targetNotebook.path.includes(notebookId)) {
+        return false
+      }
+    }
+    
+    return true
+  }, [getNotebook])
+
+  // Get notebook by name
+  const getNotebookByName = useCallback((name: string): Notebook | undefined => {
+    const flatNotebooks = getFlattenedNotebooks()
+    return flatNotebooks.find(notebook => 
+      notebook.name.toLowerCase() === name.toLowerCase()
+    )
+  }, [notebooks])
 
   return {
-    // State
-    notebooks: notebooksTree,
-    flatNotebooks,
+    notebooks,
+    loading,
+    error,
     
     // CRUD operations
     createNotebook,
     updateNotebook,
     deleteNotebook,
-    moveNotebook,
-    
-    // Getters
     getNotebook,
-    getNotebookByName,
-    getNotebooksByParent,
+    
+    // Bulk operations
+    refreshNotebooks,
+    
+    // Tree operations
     getRootNotebooks,
     getNotebookChildren,
-    getFlattenedNotebooks,
+    getNotebookPath,
+    
+    // Validation
+    isNameAvailable,
+    canMoveNotebook,
     
     // Helpers
-    getColorClass,
-    getAvailableColors,
+    getNotebookByName,
+    getFlattenedNotebooks,
+    buildNotebookTree
   }
 }

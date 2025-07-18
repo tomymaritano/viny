@@ -3,20 +3,20 @@ import { devtools } from 'zustand/middleware'
 import { NotesSlice, createNotesSlice } from './slices/notesSlice'
 import { UiSlice, createUiSlice } from './slices/uiSlice'
 import { TemplatesSlice, createTemplatesSlice } from './slices/templatesSlice'
-import { ThemeSlice, createThemeSlice } from './slices/themeSlice'
 import { ModalSlice, createModalSlice } from './slices/modalSlice'
 import { ToastSlice, createToastSlice } from './slices/toastSlice'
 import { NavigationSlice, createNavigationSlice } from './slices/navigationSlice'
 import { SearchSlice, createSearchSlice } from './slices/searchSlice'
 import { EditorSlice, createEditorSlice } from './slices/editorSlice'
 import { AppStateSlice, createAppStateSlice } from './slices/appStateSlice'
-import { SettingsSlice, createSettingsSlice } from './slices/settingsSlice'
+import { SettingsSlice, createSettingsSlice, initializeSettings } from './slices/settingsSlice'
+import { initializeNotes } from './slices/notesSlice'
+import { initializeTemplates } from './slices/templatesSlice'
 
 // Combined store interface with all specialized slices
 type AppStore = NotesSlice & 
   UiSlice & 
   TemplatesSlice & 
-  ThemeSlice & 
   ModalSlice & 
   ToastSlice & 
   NavigationSlice & 
@@ -32,7 +32,6 @@ export const useAppStore = create<AppStore>()(
       ...createNotesSlice(...args),
       ...createUiSlice(...args),
       ...createTemplatesSlice(...args),
-      ...createThemeSlice(...args),
       ...createModalSlice(...args),
       ...createToastSlice(...args),
       ...createNavigationSlice(...args),
@@ -44,6 +43,12 @@ export const useAppStore = create<AppStore>()(
     { name: 'app-store' }
   )
 )
+
+// Initialize all slices after store creation
+const storeState = useAppStore.getState()
+initializeSettings(storeState)
+initializeNotes(storeState)
+initializeTemplates(storeState)
 
 // Store reference for storage service (needed for Electron sync compatibility)
 // Only expose in development or Electron environment for debugging
@@ -60,13 +65,13 @@ export type {
   NotesSlice, 
   UiSlice, 
   TemplatesSlice, 
-  ThemeSlice, 
   ModalSlice,
   ToastSlice,
   NavigationSlice,
   SearchSlice,
   EditorSlice,
   AppStateSlice,
+  SettingsSlice,
   AppStore 
 }
 export type { Template } from './slices/templatesSlice'

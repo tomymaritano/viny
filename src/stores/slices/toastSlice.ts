@@ -1,4 +1,6 @@
 import { StateCreator } from 'zustand'
+import { generateToastId } from '../../utils/idUtils'
+import { getCurrentTimestamp } from '../../utils/dateUtils'
 
 export interface ToastAction {
   label: string
@@ -48,8 +50,8 @@ export const createToastSlice: StateCreator<ToastSlice> = (set, get) => ({
   addToast: (toast) =>
     set((state) => ({
       toasts: [...state.toasts, {
-        id: Date.now().toString(),
-        timestamp: new Date().toISOString(),
+        id: generateToastId(),
+        timestamp: getCurrentTimestamp(),
         ...toast
       }]
     })),
@@ -63,11 +65,11 @@ export const createToastSlice: StateCreator<ToastSlice> = (set, get) => ({
   clearAllToasts: () => set({ toasts: [] }),
 
   showToast: (options) => {
-    const id = `toast_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const id = generateToastId()
     
     const newToast: Toast = {
       id,
-      timestamp: new Date().toISOString(),
+      timestamp: getCurrentTimestamp(),
       duration: options.duration ?? getDefaultDuration(options.type),
       dismissible: options.dismissible ?? true,
       ...options

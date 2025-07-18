@@ -5,7 +5,7 @@
 
 export const FEATURES = {
   // Plugin system - disabled for production security
-  PLUGINS_ENABLED: false, // TODO: Enable when secure plugin store is ready
+  PLUGINS_ENABLED: false,
   PLUGIN_STORE_ENABLED: false,
 
   // Future features

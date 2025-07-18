@@ -134,7 +134,7 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-theme-border">
           <h2 className="text-xl font-semibold text-theme-text-primary">
-            🧩 Plugin Manager
+            Plugin Manager
           </h2>
           <button
             onClick={onClose}
@@ -147,9 +147,9 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
         {/* Tabs */}
         <div className="flex border-b border-theme-border">
           {[
-            { id: 'installed', label: 'Installed Plugins', icon: '📦' },
-            { id: 'install', label: 'Install Plugin', icon: '⬇️' },
-            { id: 'security', label: 'Security', icon: '🔒' }
+            { id: 'installed', label: 'Installed Plugins', icon: 'PKG' },
+            { id: 'install', label: 'Install Plugin', icon: 'DL' },
+            { id: 'security', label: 'Security', icon: 'SEC' }
           ].map(tab => (
             <button
               key={tab.id}
@@ -172,7 +172,7 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
               <div className="space-y-4">
                 {plugins.length === 0 ? (
                   <div className="text-center py-12 text-theme-text-secondary">
-                    <div className="text-4xl mb-4">🧩</div>
+                    <div className="text-4xl mb-4 text-theme-text-muted">[ ]</div>
                     <p>No plugins installed</p>
                     <p className="text-sm mt-2">Install your first plugin to get started</p>
                   </div>
@@ -313,7 +313,7 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
                         onChange={(e) => setInstallation({ ...installation, method: 'file' as const })}
                         className="mr-2"
                       />
-                      📁 Upload File
+                      Upload File
                     </label>
                     <label className="flex items-center">
                       <input
@@ -324,7 +324,7 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
                         onChange={(e) => setInstallation({ ...installation, method: 'url' as const })}
                         className="mr-2"
                       />
-                      🌐 From URL
+                      From URL
                     </label>
                   </div>
                 </div>
@@ -367,7 +367,7 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
                         className="mr-2"
                       />
                       <span className="text-sm">
-                        🔓 Trusted Plugin (grants additional permissions)
+                        Trusted Plugin (grants additional permissions)
                       </span>
                     </label>
                   </div>
@@ -419,7 +419,7 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
 
                 {/* Plugin Examples */}
                 <div className="mt-8 p-4 bg-theme-bg-secondary rounded-lg">
-                  <h4 className="font-medium text-theme-text-primary mb-3">📚 Example Plugins</h4>
+                  <h4 className="font-medium text-theme-text-primary mb-3">Example Plugins</h4>
                   <div className="space-y-2 text-sm">
                     <div>
                       <strong>Hello World:</strong> public/examples/hello-world-plugin.js
@@ -442,7 +442,7 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
           {activeTab === 'security' && (
             <div className="h-full overflow-y-auto p-6">
               <h3 className="text-lg font-semibold text-theme-text-primary mb-6">
-                🔒 Security Monitor
+                Security Monitor
               </h3>
 
               {/* Security Overview */}
@@ -503,7 +503,7 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
                   ))}
                   {violations.length === 0 && (
                     <div className="text-center py-8 text-theme-text-secondary">
-                      <div className="text-4xl mb-2">🛡️</div>
+                      <div className="text-4xl mb-2">[ ]</div>
                       <p>No security violations detected</p>
                     </div>
                   )}
@@ -534,7 +534,7 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
                   ))}
                   {errors.length === 0 && (
                     <div className="text-center py-8 text-theme-text-secondary">
-                      <div className="text-4xl mb-2">✅</div>
+                      <div className="text-4xl mb-2">[ ]</div>
                       <p>No plugin errors</p>
                     </div>
                   )}

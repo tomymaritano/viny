@@ -14,7 +14,7 @@ vi.mock('../../stores/newSimpleStore', () => ({
       isLoading: false,
       error: null,
       notes: [],
-      settings: { uiTheme: 'dark' },
+      settings: { theme: 'dark' },
       theme: 'dark',
       tagColors: {},
       setNotes: vi.fn(),

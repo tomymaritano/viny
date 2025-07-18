@@ -97,7 +97,7 @@ const TagModal: React.FC<TagModalProps> = ({
   const handleTagNameChange = (oldName: string, newName: string) => {
     // Update the tag name in available tags list and notify parent
     // This would typically update all notes that use this tag
-    console.log('Tag name change:', oldName, '->', newName)
+    // Tag name change operation
   }
 
   // Handler for deleting tags

@@ -1,23 +1,21 @@
 import { useAppStore } from '../stores/newSimpleStore'
 import { THEME_CONFIG, ThemeType, DIRECT_COLORS } from './themeConstants'
+import { 
+  resolveSystemTheme, 
+  applyThemeCompletely, 
+  createSystemThemeListener,
+  type ThemeValue 
+} from '../utils/themeUtils'
 
 /**
  * Enhanced theme hook that provides theme utilities
  * Can be used independently or with ThemeProvider
  */
 export const useTheme = () => {
-  const { theme, setTheme, getTagColor, setTagColor } = useAppStore()
+  const { settings, setTheme, getTagColor, setTagColor } = useAppStore()
 
-  // Resolve system theme
-  const resolveTheme = (themeName: string): string => {
-    if (themeName === 'system') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-    }
-    return themeName
-  }
-
-  const currentTheme = theme || THEME_CONFIG.DEFAULT
-  const resolvedTheme = resolveTheme(currentTheme)
+  const currentTheme = settings.theme || THEME_CONFIG.DEFAULT
+  const resolvedTheme = resolveSystemTheme(currentTheme as ThemeValue)
   
   // Theme state helpers
   const isDark = resolvedTheme === 'dark' || resolvedTheme === 'solarized'
@@ -37,38 +35,22 @@ export const useTheme = () => {
 
   // Advanced theme utilities
   const applyTheme = (themeName: ThemeType) => {
-    const resolved = resolveTheme(themeName)
-    
-    // Apply to DOM
-    document.documentElement.setAttribute('data-theme', resolved)
-    document.body.setAttribute('data-theme', resolved)
-    
-    // Update store
-    setTheme(themeName)
-    
-    // Persist to localStorage
-    localStorage.setItem('theme', themeName)
-    
-    // Update meta theme-color for mobile
-    updateMetaThemeColor(resolved)
+    applyThemeCompletely(themeName as ThemeValue, {
+      updateMetaColor: true,
+      persistToStorage: true,
+      updateStore: setTheme
+    })
   }
 
   // System theme change listener
   const watchSystemTheme = (callback: (isDark: boolean) => void) => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    
-    const handleChange = (e: MediaQueryListEvent) => {
-      if (theme === 'system') {
-        callback(e.matches)
+    return createSystemThemeListener((isDark, newTheme) => {
+      if (settings.theme === 'system') {
+        callback(isDark)
         // Re-apply theme if currently using system
         applyTheme('system')
       }
-    }
-
-    mediaQuery.addEventListener('change', handleChange)
-    
-    // Return cleanup function
-    return () => mediaQuery.removeEventListener('change', handleChange)
+    })
   }
 
   // Tag color management with theme awareness
@@ -95,7 +77,7 @@ export const useTheme = () => {
 
     // Theme management
     setTheme: applyTheme,
-    resolveTheme,
+    resolveTheme: resolveSystemTheme,
 
     // Utilities
     getThemeValue,
@@ -112,21 +94,7 @@ export const useTheme = () => {
   }
 }
 
-/**
- * Update meta theme-color for mobile browsers
- */
-const updateMetaThemeColor = (theme: string) => {
-  const metaThemeColor = document.querySelector('meta[name="theme-color"]')
-  if (metaThemeColor) {
-    const colorMap = {
-      dark: '#1a1a1a',
-      light: '#ffffff', 
-      solarized: '#00141a'
-    }
-    const color = colorMap[theme as keyof typeof colorMap] || colorMap.dark
-    metaThemeColor.setAttribute('content', color)
-  }
-}
+// updateMetaThemeColor function removed - now using centralized utility from themeUtils
 
 /**
  * Utility hook for theme-aware styling

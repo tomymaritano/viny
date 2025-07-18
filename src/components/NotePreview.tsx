@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, memo, Suspense } from 'react'
 import { ExportDialog } from './features/LazyComponents'
-import { useSettingsService } from '../hooks/useSettingsService'
+import { useSettings } from '../hooks/useSettings'
 import { useAppStore } from '../stores/newSimpleStore'
 import EmptyNoteState from './preview/EmptyNoteState'
 import NotePreviewHeader from './preview/NotePreviewHeader'
@@ -36,7 +36,7 @@ const NotePreview: React.FC<NotePreviewProps> = ({
   onPermanentDelete,
   onExport,
 }) => {
-  const { settings } = useSettingsService()
+  const { settings } = useSettings()
   const { getTagColor } = useAppStore()
   const [showMenu, setShowMenu] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)

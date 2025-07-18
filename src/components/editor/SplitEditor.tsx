@@ -5,6 +5,7 @@ import {
   useImperativeHandle,
   forwardRef,
   useEffect,
+  useMemo,
 } from 'react'
 import { Note } from '../../types'
 import InkdropEditor from '../InkdropEditor'
@@ -131,38 +132,63 @@ const SplitEditor = forwardRef<unknown, SplitEditorProps>(
       document.body.style.userSelect = 'none'
     }, [splitRatio])
 
-    const getPreviewHtml = useCallback(() => {
-      if (!value) {
+    // Debounced markdown processing state
+    const [debouncedValue, setDebouncedValue] = useState(value)
+    const debounceTimeoutRef = useRef<NodeJS.Timeout>()
+
+    // Debounce the value updates for preview
+    useEffect(() => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current)
+      }
+      
+      debounceTimeoutRef.current = setTimeout(() => {
+        setDebouncedValue(value)
+      }, 300) // 300ms debounce for preview updates
+
+      return () => {
+        if (debounceTimeoutRef.current) {
+          clearTimeout(debounceTimeoutRef.current)
+        }
+      }
+    }, [value])
+
+    // Memoized DOMPurify configuration (constant across renders)
+    const domPurifyConfig = useMemo(() => ({
+      ALLOWED_TAGS: [
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+        'p', 'br', 'div', 'span',
+        'strong', 'b', 'em', 'i', 'u', 'code', 'pre',
+        'blockquote',
+        'ul', 'ol', 'li',
+        'a', 'img',
+        'table', 'thead', 'tbody', 'tr', 'th', 'td',
+        'hr', 'del', 'ins'
+      ],
+      ALLOWED_ATTR: [
+        'href', 'src', 'alt', 'title', 'class', 'id',
+        'target', 'rel'
+      ],
+      ALLOW_DATA_ATTR: false,
+      ADD_TAGS: ['span'],
+      ALLOWED_SCHEMES: ['http', 'https', 'mailto', 'tel'],
+      // Allow highlight.js classes and enhanced highlighting
+      ALLOWED_CLASSES: {
+        'pre': ['hljs', /^language-/],
+        'code': ['hljs', /^language-/, /^hljs-/],
+        'span': [/^hljs-/, 'env-var', /^js-/]
+      }
+    }), [])
+
+    // Memoized HTML generation (only recalculates on debounced value change)
+    const previewHtml = useMemo(() => {
+      if (!debouncedValue) {
         return '<p class="text-theme-text-muted">Start writing to see preview...</p>'
       }
-      const rawHtml = MarkdownProcessor.render(value)
-      // Sanitize to prevent XSS attacks
-      return DOMPurify.sanitize(rawHtml, {
-        ALLOWED_TAGS: [
-          'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-          'p', 'br', 'div', 'span',
-          'strong', 'b', 'em', 'i', 'u', 'code', 'pre',
-          'blockquote',
-          'ul', 'ol', 'li',
-          'a', 'img',
-          'table', 'thead', 'tbody', 'tr', 'th', 'td',
-          'hr', 'del', 'ins'
-        ],
-        ALLOWED_ATTR: [
-          'href', 'src', 'alt', 'title', 'class', 'id',
-          'target', 'rel'
-        ],
-        ALLOW_DATA_ATTR: false,
-        ADD_TAGS: ['span'],
-        ALLOWED_SCHEMES: ['http', 'https', 'mailto', 'tel'],
-        // Allow highlight.js classes and enhanced highlighting
-        ALLOWED_CLASSES: {
-          'pre': ['hljs', /^language-/],
-          'code': ['hljs', /^language-/, /^hljs-/],
-          'span': [/^hljs-/, 'env-var', /^js-/]
-        }
-      })
-    }, [value])
+      
+      const rawHtml = MarkdownProcessor.render(debouncedValue)
+      return DOMPurify.sanitize(rawHtml, domPurifyConfig)
+    }, [debouncedValue, domPurifyConfig])
 
     const renderEditor = () => (
       <div className="flex-1 flex flex-col overflow-hidden" data-testid="note-editor">
@@ -214,7 +240,7 @@ const SplitEditor = forwardRef<unknown, SplitEditorProps>(
         >
           <div
             className="prose-theme max-w-none break-words overflow-wrap-anywhere"
-            dangerouslySetInnerHTML={{ __html: getPreviewHtml() }}
+            dangerouslySetInnerHTML={{ __html: previewHtml }}
           />
         </div>
       </div>
@@ -273,7 +299,7 @@ const SplitEditor = forwardRef<unknown, SplitEditorProps>(
           >
             <div
               className="prose-theme max-w-none break-words overflow-wrap-anywhere"
-              dangerouslySetInnerHTML={{ __html: getPreviewHtml() }}
+              dangerouslySetInnerHTML={{ __html: previewHtml }}
             />
           </div>
         </div>

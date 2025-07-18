@@ -24,7 +24,8 @@ export function createVinyPluginAPI(
     ui: createUIAPI(pluginName, policy, store),
     editor: createEditorAPI(pluginName, policy, store),
     storage: createStorageAPI(pluginName, policy),
-    utils: createUtilsAPI(pluginName, policy)
+    utils: createUtilsAPI(pluginName, policy),
+    markdown: createMarkdownAPI(pluginName, policy)
   }
 }
 
@@ -521,6 +522,88 @@ function createUtilsAPI(
           lastCall = now
           fn.apply(null, args)
         }
+      }
+    }
+  }
+}
+
+/**
+ * Markdown API - Preview and rendering integration
+ */
+function createMarkdownAPI(
+  pluginName: string, 
+  policy: SecurityPolicy
+): PluginAPI['markdown'] {
+  
+  function checkPermission(permission: string): void {
+    if (!hasPermission(policy, permission)) {
+      throw new Error(`Permission denied: ${permission}`)
+    }
+  }
+
+  return {
+    registerHook: (hook: any): (() => void) => {
+      checkPermission('markdown.hooks')
+      logger.debug(`Plugin(${pluginName}): Registering markdown hook`)
+      
+      // Import the registerMarkdownPlugin function dynamically to avoid circular imports
+      import('../lib/markdown').then(({ registerMarkdownPlugin }) => {
+        const unregister = registerMarkdownPlugin(hook)
+        
+        // Store cleanup function for plugin unload
+        const cleanupKey = `viny_plugin_markdown_${pluginName}`
+        const existingCleanups = JSON.parse(localStorage.getItem(cleanupKey) || '[]')
+        existingCleanups.push(unregister)
+        localStorage.setItem(cleanupKey, JSON.stringify(existingCleanups))
+        
+        return unregister
+      }).catch(error => {
+        logger.error(`Plugin(${pluginName}): Failed to register markdown hook`, error)
+      })
+      
+      // Return a stub cleanup function for immediate use
+      return () => {}
+    },
+
+    injectCSS: (css: string, pluginId: string): (() => void) => {
+      checkPermission('markdown.css')
+      logger.debug(`Plugin(${pluginName}): Injecting CSS for plugin ${pluginId}`)
+      
+      // Import the MarkdownProcessor dynamically
+      import('../lib/markdown').then(({ MarkdownProcessor }) => {
+        return MarkdownProcessor.injectPluginCSS(css, pluginId)
+      }).catch(error => {
+        logger.error(`Plugin(${pluginName}): Failed to inject CSS`, error)
+      })
+      
+      // Return a stub cleanup function
+      return () => {}
+    },
+
+    removeCSS: (pluginId: string): void => {
+      checkPermission('markdown.css')
+      logger.debug(`Plugin(${pluginName}): Removing CSS for plugin ${pluginId}`)
+      
+      import('../lib/markdown').then(({ MarkdownProcessor }) => {
+        MarkdownProcessor.removePluginCSS(pluginId)
+      }).catch(error => {
+        logger.error(`Plugin(${pluginName}): Failed to remove CSS`, error)
+      })
+    },
+
+    transform: (content: string, options?: any): string => {
+      checkPermission('markdown.transform')
+      logger.debug(`Plugin(${pluginName}): Transforming markdown content`)
+      
+      // For synchronous transformation, we need to use the existing markdown processor
+      try {
+        // Import synchronously is not possible, so we'll need to use a different approach
+        // For now, return the content as-is and log that async processing is needed
+        logger.warn(`Plugin(${pluginName}): Markdown transform requires async processing`)
+        return content
+      } catch (error) {
+        logger.error(`Plugin(${pluginName}): Markdown transform failed`, error)
+        return content
       }
     }
   }

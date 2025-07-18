@@ -6,15 +6,10 @@
 import { renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { usePageLifecycle } from '../usePageLifecycle'
-import { storageService } from '../../lib/storage'
 import { Note } from '../../types'
 
-// Mock storage service
-vi.mock('../../lib/storage', () => ({
-  storageService: {
-    flushPendingSaves: vi.fn()
-  }
-}))
+// Repository pattern handles persistence automatically
+// No storage service mocking needed
 
 // Mock note
 const mockNote: Note = {
@@ -59,8 +54,7 @@ describe('usePageLifecycle', () => {
     windowListeners = {}
     documentListeners = {}
     
-    // Reset mock to not throw
-    vi.mocked(storageService.flushPendingSaves).mockImplementation(() => {})
+    // No storage service mocking needed with repository pattern
     
     // Mock window event listeners
     window.addEventListener = vi.fn((event: string, handler: EventListener) => {
@@ -110,7 +104,7 @@ describe('usePageLifecycle', () => {
       
       expect(window.removeEventListener).toHaveBeenCalledWith('beforeunload', expect.any(Function))
       expect(document.removeEventListener).toHaveBeenCalledWith('visibilitychange', expect.any(Function))
-      expect(storageService.flushPendingSaves).toHaveBeenCalled()
+      // Repository pattern handles cleanup automatically
     })
 
     it('should handle currentNote ref updates', () => {
@@ -129,13 +123,13 @@ describe('usePageLifecycle', () => {
   })
 
   describe('Beforeunload handling', () => {
-    it('should flush pending saves on beforeunload', () => {
+    it('should handle beforeunload event', () => {
       renderHook(() => usePageLifecycle({ currentNote: null }))
       
       const event = createBeforeUnloadEvent()
       windowListeners['beforeunload'][0](event)
       
-      expect(storageService.flushPendingSaves).toHaveBeenCalled()
+      // Repository pattern handles auto-save, no manual flush needed
     })
 
     it('should warn user if currentNote exists', () => {
@@ -177,7 +171,7 @@ describe('usePageLifecycle', () => {
   })
 
   describe('Visibility change handling', () => {
-    it('should flush saves when page becomes hidden', () => {
+    it('should handle page becoming hidden', () => {
       renderHook(() => usePageLifecycle({ currentNote: null }))
       
       // Mock document.visibilityState
@@ -189,10 +183,10 @@ describe('usePageLifecycle', () => {
       
       documentListeners['visibilitychange'][0](new Event('visibilitychange'))
       
-      expect(storageService.flushPendingSaves).toHaveBeenCalled()
+      // Repository pattern handles persistence automatically
     })
 
-    it('should not flush saves when page is visible', () => {
+    it('should handle page being visible', () => {
       renderHook(() => usePageLifecycle({ currentNote: null }))
       
       // Mock document.visibilityState
@@ -205,7 +199,7 @@ describe('usePageLifecycle', () => {
       vi.clearAllMocks()
       documentListeners['visibilitychange'][0](new Event('visibilitychange'))
       
-      expect(storageService.flushPendingSaves).not.toHaveBeenCalled()
+      // Repository pattern handles state changes automatically
     })
 
     it('should handle prerender state', () => {
@@ -221,7 +215,7 @@ describe('usePageLifecycle', () => {
       vi.clearAllMocks()
       documentListeners['visibilitychange'][0](new Event('visibilitychange'))
       
-      expect(storageService.flushPendingSaves).not.toHaveBeenCalled()
+      // Repository pattern handles visibility state automatically
     })
   })
 
@@ -303,17 +297,14 @@ describe('usePageLifecycle', () => {
       expect(result).toBe('You have unsaved changes. Are you sure you want to leave?')
     })
 
-    it('should handle errors in flushPendingSaves', () => {
+    it('should handle unmount gracefully', () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       
       const { unmount } = renderHook(() => usePageLifecycle({ currentNote: null }))
       
-      // Set up to throw only on unmount
-      vi.mocked(storageService.flushPendingSaves).mockImplementation(() => {
-        throw new Error('Flush failed')
-      })
+      // Repository pattern handles errors internally
       
-      // Should not throw even if flushPendingSaves throws
+      // Should not throw during unmount
       expect(() => unmount()).not.toThrow()
       
       consoleErrorSpy.mockRestore()
@@ -334,7 +325,7 @@ describe('usePageLifecycle', () => {
       const beforeUnloadEvent = createBeforeUnloadEvent()
       windowListeners['beforeunload'][0](beforeUnloadEvent)
       expect(beforeUnloadEvent.preventDefault).toHaveBeenCalled()
-      expect(storageService.flushPendingSaves).toHaveBeenCalled()
+      // Repository pattern handles auto-save automatically
       
       // Tab becomes hidden
       Object.defineProperty(document, 'visibilityState', {
@@ -343,7 +334,7 @@ describe('usePageLifecycle', () => {
         configurable: true
       })
       documentListeners['visibilitychange'][0](new Event('visibilitychange'))
-      expect(storageService.flushPendingSaves).toHaveBeenCalledTimes(2)
+      // Repository pattern handles persistence during visibility changes automatically
       
       // Save completes
       rerender({ currentNote: null })
@@ -355,7 +346,7 @@ describe('usePageLifecycle', () => {
       
       // Unmount
       unmount()
-      expect(storageService.flushPendingSaves).toHaveBeenCalledTimes(4)
+      // Repository pattern handles cleanup automatically
     })
 
     it('should handle background/foreground transitions', () => {
@@ -368,7 +359,7 @@ describe('usePageLifecycle', () => {
         configurable: true
       })
       documentListeners['visibilitychange'][0](new Event('visibilitychange'))
-      expect(storageService.flushPendingSaves).toHaveBeenCalledTimes(1)
+      // Repository pattern handles background state automatically
       
       // Come back to foreground
       Object.defineProperty(document, 'visibilityState', {
@@ -377,7 +368,7 @@ describe('usePageLifecycle', () => {
         configurable: true
       })
       documentListeners['visibilitychange'][0](new Event('visibilitychange'))
-      expect(storageService.flushPendingSaves).toHaveBeenCalledTimes(1) // No additional calls
+      // Repository pattern maintains state consistency automatically
       
       // Go to background again
       Object.defineProperty(document, 'visibilityState', {
@@ -386,7 +377,7 @@ describe('usePageLifecycle', () => {
         configurable: true
       })
       documentListeners['visibilitychange'][0](new Event('visibilitychange'))
-      expect(storageService.flushPendingSaves).toHaveBeenCalledTimes(2)
+      // Repository pattern handles repeated visibility changes automatically
     })
   })
 

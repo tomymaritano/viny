@@ -15,7 +15,6 @@ interface SidebarContextType {
   systemSections: any[]
   notebooksWithCounts: any[]
   tagsWithCounts: any[]
-  getColorClass: (color: string) => string
   handleSectionClick: (section: string) => void
   handleToggleSection: (section: string) => void
   handleSettingsClick: () => void
@@ -25,6 +24,7 @@ interface SidebarContextType {
   moveNotebook: any
   getRootNotebooks: () => any[]
   getNotebookChildren: (parentId: string) => any[]
+  getNotebook: (id: string) => any
   
   // Actions
   createNewNote: () => void

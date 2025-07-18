@@ -48,17 +48,17 @@
 
 import React, { createContext, useContext, ReactNode } from 'react'
 import { AppInitializationService, appInitializationService } from './AppInitializationService'
-import { ThemeService, themeService } from './ThemeService'
+// import { ThemeService, themeService } from './ThemeService' // removed - now using settingsStore
 
 export interface ServiceContainer {
   appInitializationService: AppInitializationService
-  themeService: ThemeService
+  // themeService: ThemeService // removed - now using settingsStore
 }
 
 // Default production services
 const defaultServices: ServiceContainer = {
   appInitializationService,
-  themeService
+  // themeService // removed - now using settingsStore
 }
 
 const ServiceContext = createContext<ServiceContainer>(defaultServices)
@@ -105,6 +105,6 @@ export const useServices = (): ServiceContainer => {
 export const createTestServices = (overrides: Partial<ServiceContainer> = {}): ServiceContainer => {
   return {
     appInitializationService: overrides.appInitializationService || new AppInitializationService(),
-    themeService: overrides.themeService || new ThemeService(),
+    // themeService: overrides.themeService || new ThemeService(), // removed - now using settingsStore
   }
 }

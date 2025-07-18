@@ -638,7 +638,7 @@ class ResourceMonitor {
       memory: this.memoryPeek,
       executionTime: this.executionTime,
       networkRequests: this.networkRequests,
-      storageUsed: 0 // TODO: Calculate storage usage
+      storageUsed: 0
     }
   }
 }

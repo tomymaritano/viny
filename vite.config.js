@@ -4,6 +4,12 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  define: {
+    global: 'globalThis',
+  },
+  optimizeDeps: {
+    exclude: ['electron-store']
+  },
   plugins: [
     react(),
     // Disable PWA for Electron builds to improve performance
@@ -52,7 +58,7 @@ export default defineConfig({
     minify: 'terser',
     sourcemap: false,
     rollupOptions: {
-      external: ['electron'],
+      external: ['electron', 'electron-store'],
       output: {
         manualChunks: (id) => {
           // Group dependencies by type for better caching

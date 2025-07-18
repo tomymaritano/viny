@@ -1,6 +1,6 @@
 import React from 'react'
 import { useAppStore } from '../../../stores/newSimpleStore'
-import { useSettingsService } from '../../../hooks/useSettingsService'
+import { useSettings } from '../../../hooks/useSettings'
 import { useNotebooks } from '../../../hooks/useNotebooks'
 import { getSettingsService } from '../../../services/settings'
 import { Icons } from '../../Icons'
@@ -18,15 +18,34 @@ const GeneralSettings: React.FC = () => {
   const {
     settings,
     setSetting,
-    schemas,
-    errors,
-    exportSettings,
-    importSettings
-  } = useSettingsService({ category: 'general' })
+    updateSettings,
+    resetSettings,
+    loading,
+    error
+  } = useSettings()
 
-  // Get language options from schema
-  const languageSchema = schemas.find(s => s.key === 'language')
-  const languages = languageSchema?.options?.map(opt => {
+  // Export and import functions
+  const exportSettings = () => {
+    return JSON.stringify(settings, null, 2)
+  }
+
+  const importSettings = async (jsonData: string) => {
+    try {
+      const parsedSettings = JSON.parse(jsonData)
+      updateSettings(parsedSettings)
+      return true
+    } catch (err) {
+      return false
+    }
+  }
+
+  // Define language options directly
+  const languages = [
+    { value: 'en', label: 'English' },
+    { value: 'es', label: 'Español' },
+    { value: 'fr', label: 'Français' },
+    { value: 'de', label: 'Deutsch' }
+  ].map(opt => {
     const flags: Record<string, string> = {
       'en': '🇺🇸',
       'es': '🇪🇸',
@@ -117,7 +136,7 @@ const GeneralSettings: React.FC = () => {
               value={stringValue(settings.defaultNotebook) || 'inbox'}
               onChange={(e) => setSetting('defaultNotebook', e.target.value)}
               className={`w-full px-3 py-2 bg-theme-bg-secondary border rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary ${
-                errors.defaultNotebook ? 'border-red-500' : 'border-theme-border-primary'
+                'border-theme-border-primary'
               }`}
             >
               {notebooks.map((notebook) => (
@@ -126,14 +145,11 @@ const GeneralSettings: React.FC = () => {
                 </option>
               ))}
             </select>
-            {errors.defaultNotebook && (
-              <p className="mt-1 text-xs text-red-500">{errors.defaultNotebook}</p>
-            )}
-            {!errors.defaultNotebook && (
+            {
               <p className="mt-1 text-xs text-theme-text-muted">
                 New notes will be saved to this notebook by default
               </p>
-            )}
+            }
           </div>
 
           {/* Language */}
@@ -144,9 +160,7 @@ const GeneralSettings: React.FC = () => {
             <select
               value={stringValue(settings.language) || 'en'}
               onChange={(e) => setSetting('language', e.target.value)}
-              className={`w-full px-3 py-2 bg-theme-bg-secondary border rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary ${
-                errors.language ? 'border-red-500' : 'border-theme-border-primary'
-              }`}
+              className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
             >
               {languages.map((lang) => (
                 <option key={lang.value} value={lang.value} className="bg-theme-bg-secondary text-theme-text-primary">
@@ -154,14 +168,11 @@ const GeneralSettings: React.FC = () => {
                 </option>
               ))}
             </select>
-            {errors.language && (
-              <p className="mt-1 text-xs text-red-500">{errors.language}</p>
-            )}
-            {!errors.language && (
+            {
               <p className="mt-1 text-xs text-theme-text-muted">
                 Choose your preferred language for the interface
               </p>
-            )}
+            }
           </div>
         </div>
       </div>
@@ -201,22 +212,17 @@ const GeneralSettings: React.FC = () => {
               <select
                 value={stringValue(settings.updateChannel) || 'stable'}
                 onChange={(e) => setSetting('updateChannel', e.target.value)}
-                className={`w-full px-3 py-2 bg-theme-bg-secondary border rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary ${
-                  errors.updateChannel ? 'border-red-500' : 'border-theme-border-primary'
-                }`}
+                className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
               >
                 <option value="stable">Stable</option>
                 <option value="beta">Beta</option>
                 <option value="alpha">Alpha</option>
               </select>
-              {errors.updateChannel && (
-                <p className="mt-1 text-xs text-red-500">{errors.updateChannel}</p>
-              )}
-              {!errors.updateChannel && (
+              {
                 <p className="mt-1 text-xs text-theme-text-muted">
                   Choose which type of updates to receive
                 </p>
-              )}
+              }
             </div>
           )}
         </div>

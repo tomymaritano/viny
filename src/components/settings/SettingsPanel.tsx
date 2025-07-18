@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react'
-import { useSettingsService } from '../../hooks/useSettingsService'
+import { useSettings } from '../../hooks/useSettings'
 import { SettingsSchema, SettingValue } from '../../services/settings/types'
 import { LivePreviewControls } from './LivePreview'
 import { Icons } from '../Icons'
@@ -19,7 +19,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ categoryId }) => {
     loading,
     previewSetting,
     revertPreview
-  } = useSettingsService({ category: categoryId })
+  } = useSettings({ category: categoryId })
   
   // Mock categories data for now
   const categories = [

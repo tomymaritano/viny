@@ -449,6 +449,34 @@ p {
   color: var(--color-base2) !important;
 }
 
+/* Image styling for markdown preview */
+.prose-theme img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1.5em 0;
+  border: 1px solid var(--color-base01);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.prose-theme img:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Dark theme adjustments for images */
+[data-theme='dark'] .prose-theme img,
+[data-theme='hacklab'] .prose-theme img,
+[data-theme='solarized'] .prose-theme img {
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .prose-theme img:hover,
+[data-theme='hacklab'] .prose-theme img:hover,
+[data-theme='solarized'] .prose-theme img:hover {
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
+}
+
 .prose-theme hr {
   border: none;
   border-top: 1px solid var(--color-base01);

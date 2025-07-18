@@ -1,38 +1,34 @@
 import React from 'react'
-import { useSettingsService } from '../../../hooks/useSettingsService'
+import { useSettings } from '../../../hooks/useSettings'
 import { Icons } from '../../Icons'
 
 const EditingSettings: React.FC = () => {
-  const editorService = useSettingsService({ category: 'editor' })
-  const themesService = useSettingsService({ category: 'themes' })
+  const { settings, setSetting } = useSettings()
 
-  // Merge settings from both categories
-  const settings = { ...editorService.settings, ...themesService.settings }
-  const schemas = [...editorService.schemas, ...themesService.schemas]
-  const errors = { ...editorService.errors, ...themesService.errors }
+  // Helper function to convert setting values to appropriate types
+  const stringValue = (value: any): string => typeof value === 'string' ? value : ''
+  const booleanValue = (value: any): boolean => typeof value === 'boolean' ? value : false
+  const numberValue = (value: any): number => typeof value === 'number' ? value : 0
 
-  // Function to set setting in the correct category
-  const setSetting = (key: string, value: any) => {
-    const editorSchema = editorService.schemas.find(s => s.key === key)
-    const themesSchema = themesService.schemas.find(s => s.key === key)
-    
-    if (editorSchema) {
-      editorService.setSetting(key, value)
-    } else if (themesSchema) {
-      themesService.setSetting(key, value)
-    }
-  }
+  // Define font family options
+  const fontFamilies = [
+    { value: 'Inter', label: 'Inter' },
+    { value: 'Monaco', label: 'Monaco' },
+    { value: 'Menlo', label: 'Menlo' },
+    { value: 'Consolas', label: 'Consolas' },
+    { value: 'Courier New', label: 'Courier New' },
+    { value: 'monospace', label: 'Monospace' }
+  ]
 
-  // Get schema options
-  const fontFamilySchema = schemas.find(s => s.key === 'fontFamily')
-  const fontFamilies = fontFamilySchema?.options || []
-
-  const editorModeSchema = schemas.find(s => s.key === 'editorMode')
-  const editorModes = editorModeSchema?.options || []
+  // Define editor mode options
+  const editorModes = [
+    { value: 'wysiwyg', label: 'WYSIWYG' },
+    { value: 'markdown', label: 'Markdown' },
+    { value: 'split', label: 'Split View' }
+  ]
 
   const renderToggle = (key: string, label: string, description: string, testId?: string) => {
-    const schema = schemas.find(s => s.key === key)
-    const value = settings[key] ?? schema?.defaultValue ?? false
+    const value = booleanValue(settings[key as keyof typeof settings])
     
     return (
       <div className="flex items-center justify-between">
@@ -48,7 +44,7 @@ const EditingSettings: React.FC = () => {
           <input
             type="checkbox"
             checked={value as boolean}
-            onChange={(e) => setSetting(key, e.target.checked)}
+            onChange={(e) => setSetting(key as keyof typeof settings, e.target.checked)}
             className="sr-only peer"
             data-testid={testId}
           />
@@ -59,8 +55,17 @@ const EditingSettings: React.FC = () => {
   }
 
   const renderNumberInput = (key: string, label: string, testId?: string) => {
-    const schema = schemas.find(s => s.key === key)
-    const value = settings[key] ?? schema?.defaultValue ?? 0
+    const value = numberValue(settings[key as keyof typeof settings])
+    
+    // Define min/max values for different settings
+    const ranges = {
+      editorFontSize: { min: 10, max: 24 },
+      lineHeight: { min: 1.0, max: 2.0 },
+      tabSize: { min: 2, max: 8 },
+      previewFontSize: { min: 10, max: 24 }
+    }
+    
+    const range = ranges[key as keyof typeof ranges] || { min: 0, max: 100 }
     
     return (
       <div>
@@ -68,25 +73,22 @@ const EditingSettings: React.FC = () => {
           {label}
         </label>
         <div className="flex items-center space-x-4">
-          <span className="text-xs text-theme-text-muted">{schema?.min}</span>
+          <span className="text-xs text-theme-text-muted">{range.min}</span>
           <input
             type="range"
-            min={schema?.min}
-            max={schema?.max}
-            step={schema?.step}
+            min={range.min}
+            max={range.max}
+            step={key === 'lineHeight' ? 0.1 : 1}
             value={value as number}
-            onChange={(e) => setSetting(key, parseFloat(e.target.value))}
+            onChange={(e) => setSetting(key as keyof typeof settings, parseFloat(e.target.value))}
             className="flex-1 h-2 bg-theme-bg-tertiary rounded-lg appearance-none cursor-pointer"
             data-testid={testId}
           />
-          <span className="text-xs text-theme-text-muted">{schema?.max}</span>
+          <span className="text-xs text-theme-text-muted">{range.max}</span>
           <span className="text-sm font-medium text-theme-text-primary w-12">
-            {schema?.step && schema.step < 1 ? (value as number).toFixed(1) : String(value)}
+            {key === 'lineHeight' ? (value as number).toFixed(1) : String(value)}
           </span>
         </div>
-        {errors[key] && (
-          <p className="mt-1 text-xs text-red-500">{errors[key]}</p>
-        )}
       </div>
     )
   }
@@ -105,8 +107,8 @@ const EditingSettings: React.FC = () => {
               Choose Editor
             </label>
             <select
-              value={settings.editorMode || 'markdown'}
-              onChange={(e) => setSetting('editorMode', e.target.value)}
+              value={stringValue(settings.editorMode) || 'markdown'}
+              onChange={(e) => setSetting('editorMode' as keyof typeof settings, e.target.value)}
               className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
             >
               {editorModes.map((mode) => (
@@ -151,8 +153,8 @@ const EditingSettings: React.FC = () => {
               Font Family
             </label>
             <select
-              value={settings.fontFamily || 'default'}
-              onChange={(e) => setSetting('fontFamily', e.target.value)}
+              value={stringValue(settings.editorFontFamily) || 'Inter'}
+              onChange={(e) => setSetting('editorFontFamily' as keyof typeof settings, e.target.value)}
               className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
             >
               {fontFamilies.map((font) => (
@@ -208,8 +210,8 @@ const EditingSettings: React.FC = () => {
             </label>
             <input
               type="number"
-              value={settings.autoSaveDelay || 2000}
-              onChange={(e) => setSetting('autoSaveDelay', parseInt(e.target.value))}
+              value={numberValue(settings.autoSaveDelay) || 2000}
+              onChange={(e) => setSetting('autoSaveDelay' as keyof typeof settings, parseInt(e.target.value))}
               min={500}
               max={10000}
               step={500}

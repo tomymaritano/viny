@@ -142,7 +142,7 @@ class I18nService {
     // Aplicar configuraciones regionales
     this.applyRegionalSettings(config)
 
-    console.log(`Language changed to: ${config.name}`)
+    // Language changed successfully
   }
 
   /**

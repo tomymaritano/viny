@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { SettingsBackupManager, type SettingsBackup } from '../../services/settings/backup'
-import { useSettingsService } from '../../hooks/useSettingsService'
+import { useSettings } from '../../hooks/useSettings'
 import { Icons } from '../Icons'
 
 export const BackupManager: React.FC = () => {
@@ -8,7 +8,7 @@ export const BackupManager: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const { exportSettings, importSettings } = useSettingsService()
+  const { exportSettings, importSettings } = useSettings()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const loadBackups = async () => {

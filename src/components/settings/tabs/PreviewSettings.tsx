@@ -1,31 +1,41 @@
 import React from 'react'
-import { useSettingsService } from '../../../hooks/useSettingsService'
+import { useSettings } from '../../../hooks/useSettings'
 import { Icons } from '../../Icons'
 
 const PreviewSettings: React.FC = () => {
   const {
     settings,
     setSetting,
-    schemas,
-    errors
-  } = useSettingsService({ category: 'preview' })
+    error
+  } = useSettings()
 
-  // Get schema options
-  const previewThemeSchema = schemas.find(s => s.key === 'previewTheme')
-  const previewThemes = previewThemeSchema?.options || []
+  // Static schema options (temporary fix)
+  const previewThemes = [
+    { value: 'github', label: 'GitHub' },
+    { value: 'github-dark', label: 'GitHub Dark' },
+    { value: 'default', label: 'Default' }
+  ]
 
-  const codeThemeSchema = schemas.find(s => s.key === 'codeTheme')
-  const codeThemes = codeThemeSchema?.options || []
+  const codeThemes = [
+    { value: 'github', label: 'GitHub' },
+    { value: 'monokai', label: 'Monokai' },
+    { value: 'dracula', label: 'Dracula' },
+    { value: 'nord', label: 'Nord' }
+  ]
 
-  const mathEngineSchema = schemas.find(s => s.key === 'mathEngine')
-  const mathEngines = mathEngineSchema?.options || []
+  const mathEngines = [
+    { value: 'katex', label: 'KaTeX' },
+    { value: 'mathjax', label: 'MathJax' }
+  ]
 
-  const tocPositionSchema = schemas.find(s => s.key === 'tocPosition')
-  const tocPositions = tocPositionSchema?.options || []
+  const tocPositions = [
+    { value: 'left', label: 'Left' },
+    { value: 'right', label: 'Right' },
+    { value: 'none', label: 'None' }
+  ]
 
   const renderToggle = (key: string, label: string, description: string) => {
-    const schema = schemas.find(s => s.key === key)
-    const value = settings[key] ?? schema?.defaultValue ?? false
+    const value = settings[key] ?? false
     
     return (
       <div className="flex items-center justify-between">
@@ -51,20 +61,7 @@ const PreviewSettings: React.FC = () => {
   }
 
   const renderNumberInput = (key: string, label: string, description?: string) => {
-    const schema = schemas.find(s => s.key === key)
-    const value = settings[key] ?? schema?.defaultValue ?? 0
-    
-    if (!schema) {
-      return (
-        <div>
-          <label className="block text-sm font-medium text-theme-text-secondary mb-2">
-            {label}
-          </label>
-          <p className="text-xs text-red-500">Schema not found for key: {key}</p>
-          <p className="text-xs text-theme-text-muted">Available: {schemas.map(s => s.key).join(', ')}</p>
-        </div>
-      )
-    }
+    const value = settings[key] ?? 0
     
     return (
       <div>
@@ -75,23 +72,23 @@ const PreviewSettings: React.FC = () => {
           <p className="text-xs text-theme-text-muted mb-2">{description}</p>
         )}
         <div className="flex items-center space-x-4">
-          <span className="text-xs text-theme-text-muted">{schema?.min}</span>
+          <span className="text-xs text-theme-text-muted">0</span>
           <input
             type="range"
-            min={schema?.min}
-            max={schema?.max}
-            step={schema?.step}
+            min={0}
+            max={100}
+            step={1}
             value={value as number}
             onChange={(e) => setSetting(key, parseFloat(e.target.value))}
             className="flex-1 h-2 bg-theme-bg-tertiary rounded-lg appearance-none cursor-pointer"
           />
-          <span className="text-xs text-theme-text-muted">{schema?.max}</span>
+          <span className="text-xs text-theme-text-muted">100</span>
           <span className="text-sm font-medium text-theme-text-primary w-12">
             {value}
           </span>
         </div>
-        {errors[key] && (
-          <p className="mt-1 text-xs text-red-500">{errors[key]}</p>
+        {error && (
+          <p className="mt-1 text-xs text-red-500">{error}</p>
         )}
       </div>
     )

@@ -77,7 +77,6 @@ export const MARKDOWN_EDITOR_CONFIG = {
   },
 }
 
-// TODO plugin specific styles
 export const TODO_STYLES = {
   checkbox: {
     pending: {

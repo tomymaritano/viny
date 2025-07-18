@@ -1,4 +1,4 @@
-import { storageService } from '../lib/storage'
+import { createSettingsRepository, createDocumentRepository } from '../lib/repositories/RepositoryFactory'
 
 interface UsageData {
   sessionStart: string
@@ -63,7 +63,7 @@ class PrivacyService {
         )
       }
       
-      console.log('[PrivacyService] Usage data cleared successfully')
+      // Usage data cleared successfully
     } catch (error) {
       console.error('[PrivacyService] Error clearing usage data:', error)
       throw new Error('Failed to clear usage data')
@@ -75,19 +75,30 @@ class PrivacyService {
    */
   async downloadUserData(includeMetadata: boolean = true, includeHistory: boolean = false): Promise<void> {
     try {
+      const settingsRepo = createSettingsRepository()
+      const docRepo = createDocumentRepository()
+      await docRepo.initialize()
+      
+      const [notes, notebooks, settings, tagColors] = await Promise.all([
+        docRepo.getNotes(),
+        docRepo.getNotebooks(),
+        settingsRepo.getSettings(),
+        settingsRepo.getTagColors()
+      ])
+      
       const exportData: PrivacyExportData = {
         userData: {
-          notes: storageService.getNotes(),
-          notebooks: storageService.getNotebooks(),
-          settings: storageService.getSettings(),
-          tagColors: storageService.getTagColors()
+          notes,
+          notebooks,
+          settings,
+          tagColors
         },
         usageData: this.getUsageData(),
         metadata: {
           exportedAt: new Date().toISOString(),
           version: '1.0.0', // App version
-          totalNotes: storageService.getNotes().length,
-          totalNotebooks: storageService.getNotebooks().length
+          totalNotes: notes.length,
+          totalNotebooks: notebooks.length
         }
       }
 
@@ -125,7 +136,7 @@ class PrivacyService {
       
       URL.revokeObjectURL(url)
       
-      console.log('[PrivacyService] User data downloaded successfully')
+      // User data downloaded successfully
     } catch (error) {
       console.error('[PrivacyService] Error downloading user data:', error)
       throw new Error('Failed to download user data')
@@ -150,24 +161,32 @@ class PrivacyService {
    */
   async clearSpecificData(dataTypes: string[]): Promise<void> {
     try {
+      const settingsRepo = createSettingsRepository()
+      const docRepo = createDocumentRepository()
+      await docRepo.initialize()
+      
       for (const dataType of dataTypes) {
         switch (dataType) {
           case 'notes':
-            storageService.saveNotes([])
+            // Clear all notes by destroying and reinitializing database
+            await docRepo.destroy()
             break
           case 'notebooks':
-            storageService.saveNotebooks([])
+            const notebooks = await docRepo.getNotebooks()
+            for (const notebook of notebooks) {
+              await docRepo.deleteNotebook(notebook.id)
+            }
             break
           case 'settings':
             // Keep essential settings, clear personal preferences
-            const essentialSettings = {
+            await settingsRepo.resetSettings()
+            await settingsRepo.saveSettings({
               theme: 'dark',
               language: 'en'
-            }
-            storageService.saveSettings(essentialSettings)
+            })
             break
           case 'tagColors':
-            storageService.saveTagColors({})
+            await settingsRepo.saveTagColors({})
             break
           case 'usage':
             await this.clearUsageData()
@@ -176,7 +195,7 @@ class PrivacyService {
             console.warn(`[PrivacyService] Unknown data type: ${dataType}`)
         }
       }
-      console.log('[PrivacyService] Specific data cleared:', dataTypes)
+      // Specific data cleared successfully
     } catch (error) {
       console.error('[PrivacyService] Error clearing specific data:', error)
       throw new Error('Failed to clear specific data types')

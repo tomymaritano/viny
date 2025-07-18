@@ -1,4 +1,4 @@
-import { storageService } from '../lib/storage'
+import { createSettingsRepository, createDocumentRepository } from '../lib/repositories/RepositoryFactory'
 import { resetToDefaultData } from './defaultDataInitializer'
 
 /**
@@ -30,23 +30,60 @@ export function setupDevHelpers(): void {
       console.log('✅ Reset complete! Refresh the page to see changes.')
     },
     
-    clearAllData: () => {
+    clearAllData: async () => {
       console.log('🧹 Clearing all data...')
-      storageService.clearAll()
-      localStorage.removeItem('viny-initialized')
-      console.log('✅ All data cleared! Refresh the page.')
+      try {
+        const settingsRepo = createSettingsRepository()
+        const docRepo = createDocumentRepository()
+        
+        await settingsRepo.resetSettings()
+        await docRepo.destroy()
+        
+        localStorage.removeItem('viny-initialized')
+        console.log('✅ All data cleared! Refresh the page.')
+      } catch (error) {
+        console.error('❌ Failed to clear data:', error)
+      }
     },
     
-    exportData: () => {
-      const data = storageService.export()
-      console.log('📤 Current data:', data)
-      return data
+    exportData: async () => {
+      try {
+        const settingsRepo = createSettingsRepository()
+        const docRepo = createDocumentRepository()
+        
+        const [settings, documents] = await Promise.all([
+          settingsRepo.export(),
+          docRepo.exportAll()
+        ])
+        
+        const data = JSON.stringify({ settings: JSON.parse(settings), documents: JSON.parse(documents) }, null, 2)
+        console.log('📤 Current data:', data)
+        return data
+      } catch (error) {
+        console.error('❌ Failed to export data:', error)
+        return '{}'
+      }
     },
     
-    importData: (data: string) => {
+    importData: async (data: string) => {
       console.log('📥 Importing data...')
-      storageService.import(data)
-      console.log('✅ Data imported! Refresh the page.')
+      try {
+        const parsedData = JSON.parse(data)
+        const settingsRepo = createSettingsRepository()
+        const docRepo = createDocumentRepository()
+        
+        if (parsedData.settings) {
+          await settingsRepo.import(JSON.stringify(parsedData.settings))
+        }
+        
+        if (parsedData.documents) {
+          await docRepo.importAll(JSON.stringify(parsedData.documents))
+        }
+        
+        console.log('✅ Data imported! Refresh the page.')
+      } catch (error) {
+        console.error('❌ Failed to import data:', error)
+      }
     }
   }
 

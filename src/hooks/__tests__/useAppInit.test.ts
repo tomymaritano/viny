@@ -18,7 +18,7 @@ vi.mock('../../stores/newSimpleStore', () => ({
       theme: 'dark',
       setTheme: vi.fn(),
       loadTagColors: vi.fn(),
-      settings: { uiTheme: 'dark' },
+      settings: { theme: 'dark' },
       updateSettings: vi.fn(),
       isLoading: false,
       error: null
@@ -130,7 +130,7 @@ describe('useAppInit', () => {
         theme: 'dark',
         setTheme: mockSetTheme,
         loadTagColors: mockLoadTagColors,
-        settings: { uiTheme: 'dark' },
+        settings: { theme: 'dark' },
         updateSettings: mockUpdateSettings,
         isLoading: false,
         error: null

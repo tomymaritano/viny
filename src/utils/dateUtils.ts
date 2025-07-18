@@ -94,3 +94,56 @@ export const formatRelativeDate = (date: Date): string => {
     return `${diffYears} years ago`
   }
 }
+
+/**
+ * Generates current ISO timestamp
+ * Standardizes timestamp generation across the application
+ */
+export const getCurrentTimestamp = (): string => {
+  return new Date().toISOString()
+}
+
+/**
+ * Generates timestamps for create operations
+ */
+export const generateCreateTimestamps = () => {
+  const now = getCurrentTimestamp()
+  return {
+    createdAt: now,
+    updatedAt: now
+  }
+}
+
+/**
+ * Generates timestamp for update operations
+ */
+export const generateUpdateTimestamp = () => {
+  return {
+    updatedAt: getCurrentTimestamp()
+  }
+}
+
+/**
+ * Checks if a timestamp is valid
+ */
+export const isValidTimestamp = (timestamp: string): boolean => {
+  try {
+    const date = new Date(timestamp)
+    return !isNaN(date.getTime())
+  } catch (error) {
+    return false
+  }
+}
+
+/**
+ * Gets time difference in milliseconds
+ */
+export const getTimeDifference = (timestamp1: string, timestamp2: string): number => {
+  try {
+    const date1 = new Date(timestamp1)
+    const date2 = new Date(timestamp2)
+    return Math.abs(date2.getTime() - date1.getTime())
+  } catch (error) {
+    return 0
+  }
+}

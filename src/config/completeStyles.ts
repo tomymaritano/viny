@@ -461,7 +461,6 @@ export const EDITOR_STYLES = {
     }
   },
   
-  // TODO plugin styles
   todo: {
     checkbox: {
       pending: 'text-gray-500 font-bold',

@@ -9,7 +9,7 @@ import TagColorModal from './modals/TagColorModal'
 
 const GlobalContextMenu: React.FC = () => {
   const { setModal, setActiveSection, removeTagFromAllNotes, notes } = useAppStore()
-  const { createNewNote, handlePermanentDelete } = useNoteActions()
+  const { createNewNote, handlePermanentDelete, handleEmptyTrash: handleEmptyTrashAction } = useNoteActions()
   const { showToast } = useToast()
   const { updateNotebook, deleteNotebook, getNotebook } = useNotebooks()
   const navStore = useAppStore()
@@ -150,10 +150,8 @@ const GlobalContextMenu: React.FC = () => {
         message: `Are you sure you want to permanently delete ${trashedNotes.length} notes in trash? This action cannot be undone.`,
         type: 'danger',
         onConfirm: async () => {
-          for (const note of trashedNotes) {
-            await handlePermanentDelete(note)
-          }
-          showToast(`${trashedNotes.length} notes permanently deleted`, 'success')
+          // Use the centralized empty trash function
+          await handleEmptyTrashAction()
         }
       })
     }
@@ -193,12 +191,23 @@ const GlobalContextMenu: React.FC = () => {
   }, [createNewNote, setModal, setActiveSection, showToast, removeTagFromAllNotes])
   
   // Handle rename submission
-  const handleRenameSubmit = (newName: string) => {
+  const handleRenameSubmit = async (newName: string) => {
     if (renameModal.type === 'notebook') {
-      const success = updateNotebook(renameModal.id, { name: newName })
-      if (success) {
-        showToast(`Notebook renamed to "${newName}"`, 'success')
-      } else {
+      // Rename operation
+      try {
+        const notebook = getNotebook(renameModal.id)
+        if (notebook) {
+          const updatedNotebook = { ...notebook, name: newName }
+          await updateNotebook(updatedNotebook)
+          // Rename successful
+          showToast(`Notebook renamed to "${newName}"`, 'success')
+          setRenameModal({ isOpen: false, type: '', id: '', currentName: '' })
+        } else {
+          // Notebook not found
+          showToast('Notebook not found', 'error')
+        }
+      } catch (error) {
+        // Rename failed
         showToast('Failed to rename notebook', 'error')
       }
     } else if (renameModal.type === 'tag') {

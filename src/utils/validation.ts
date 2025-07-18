@@ -130,10 +130,10 @@ export const SettingsValidation = {
   },
 
   themes: {
-    uiTheme: (value: string): FieldValidation => {
-      const validThemes = ['light', 'dark', 'solarized', 'system']
+    theme: (value: string): FieldValidation => {
+      const validThemes = ['light', 'dark', 'solarized', 'hacklab', 'system']
       return {
-        field: 'uiTheme',
+        field: 'theme',
         value,
         isValid: !value || validThemes.includes(value),
         error: value && !validThemes.includes(value) ? 'Invalid theme selected' : undefined

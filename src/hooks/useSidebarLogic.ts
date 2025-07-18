@@ -3,6 +3,7 @@ import { useAppStore } from '../stores/newSimpleStore'
 import { useNotebooks } from './useNotebooks'
 import { getNotebookWithCounts } from '../utils/notebookTree'
 import { getStats } from '../utils/statsUtils' // Import from utils to avoid circular dependency
+// Removed pluginService import - plugins only in settings
 
 
 /**
@@ -21,13 +22,13 @@ export const useSidebarLogic = () => {
   
   const { 
     notebooks, 
-    getColorClass, 
     createNotebook, 
     updateNotebook, 
     deleteNotebook, 
     moveNotebook, 
     getRootNotebooks, 
-    getNotebookChildren 
+    getNotebookChildren,
+    getNotebook
   } = useNotebooks()
 
   // Calculate stats for section counts
@@ -39,18 +40,27 @@ export const useSidebarLogic = () => {
       .sort((a, b) => a.name.localeCompare(b.name))
   }, [notes, notebooks])
 
-  // Calculate tags with counts (top 10)
+  // Optimized tag calculation with early filtering and batch processing
   const tagsWithCounts = useMemo(() => {
-    const tagCounts = notes.reduce((acc, note) => {
-      if (!note.isTrashed && !['completed', 'archived'].includes(note.status) && note.tags) {
-        note.tags.forEach(tag => {
-          acc[tag] = (acc[tag] || 0) + 1
-        })
+    // Pre-filter notes to reduce iteration
+    const activeNotes = notes.filter(note => 
+      !note.isTrashed && 
+      !['completed', 'archived'].includes(note.status) && 
+      note.tags?.length > 0
+    )
+    
+    // Use Map for O(1) lookups instead of object property access
+    const tagCountsMap = new Map<string, number>()
+    
+    // Batch process tags
+    for (const note of activeNotes) {
+      for (const tag of note.tags) {
+        tagCountsMap.set(tag, (tagCountsMap.get(tag) || 0) + 1)
       }
-      return acc
-    }, {} as Record<string, number>)
+    }
 
-    return Object.entries(tagCounts)
+    // Convert to array and sort only once
+    return Array.from(tagCountsMap.entries())
       .map(([tag, count]) => ({ tag, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 10)
@@ -100,6 +110,8 @@ export const useSidebarLogic = () => {
       color: 'text-theme-accent-red' 
     },
   ], [stats])
+
+  // Plugin sections - REMOVED: plugins should only be in settings, not main sidebar
 
   // System sections (trash, etc.)
   const systemSections = useMemo(() => [
@@ -151,9 +163,6 @@ export const useSidebarLogic = () => {
     notebooksWithCounts,
     tagsWithCounts,
 
-    // Utilities
-    getColorClass,
-
     // Actions
     handleSectionClick,
     handleToggleSection,
@@ -166,6 +175,7 @@ export const useSidebarLogic = () => {
     moveNotebook,
     getRootNotebooks,
     getNotebookChildren,
+    getNotebook,
 
     // Stats for external use
     stats

@@ -45,6 +45,15 @@ export const useSidebarState = () => {
   })
 
   const [createNotebookModal, setCreateNotebookModal] = useState(false)
+  const [renameNotebookModal, setRenameNotebookModal] = useState<{
+    show: boolean
+    notebookId: string
+    notebookName: string
+  }>({ 
+    show: false, 
+    notebookId: '', 
+    notebookName: '' 
+  })
 
   // Editing states
   const [editingNotebook, setEditingNotebook] = useState<string | null>(null)
@@ -122,6 +131,7 @@ export const useSidebarState = () => {
     trashContextMenu,
     tagSettingsModal,
     createNotebookModal,
+    renameNotebookModal,
     editingNotebook,
     editValue,
     expandedNotebooks,
@@ -129,6 +139,7 @@ export const useSidebarState = () => {
     // Setters
     setTagSettingsModal,
     setCreateNotebookModal,
+    setRenameNotebookModal,
     setEditValue,
 
     // Handlers

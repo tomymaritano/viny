@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
-import { useSettingsService } from '../useSettingsService'
+import { useSettings } from '../useSettings'
 import { SettingsService } from '../../services/settings/SettingsService'
 import type { SettingValue } from '../../services/settings/types'
 
 // Mock the SettingsService
 vi.mock('../../services/settings/SettingsService')
 
-describe('useSettingsService', () => {
+describe('useSettings', () => {
   let mockService: vi.Mocked<SettingsService>
 
   beforeEach(() => {
@@ -102,7 +102,7 @@ describe('useSettingsService', () => {
 
   describe('Basic Hook Usage', () => {
     it('should initialize and load all settings', async () => {
-      const { result } = renderHook(() => useSettingsService())
+      const { result } = renderHook(() => useSettings())
 
       expect(result.current.loading).toBe(true)
       
@@ -121,7 +121,7 @@ describe('useSettingsService', () => {
     })
 
     it('should load settings for specific category', async () => {
-      const { result } = renderHook(() => useSettingsService({ category: 'general' }))
+      const { result } = renderHook(() => useSettings({ category: 'general' }))
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -135,7 +135,7 @@ describe('useSettingsService', () => {
     })
 
     it('should provide schemas for category', async () => {
-      const { result } = renderHook(() => useSettingsService({ category: 'general' }))
+      const { result } = renderHook(() => useSettings({ category: 'general' }))
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -148,7 +148,7 @@ describe('useSettingsService', () => {
     })
 
     it('should provide all schemas when no category specified', async () => {
-      const { result } = renderHook(() => useSettingsService())
+      const { result } = renderHook(() => useSettings())
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -161,7 +161,7 @@ describe('useSettingsService', () => {
   describe('Setting Operations', () => {
     it('should set a setting value', async () => {
       mockService.set.mockReturnValue(true)
-      const { result } = renderHook(() => useSettingsService())
+      const { result } = renderHook(() => useSettings())
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -176,7 +176,7 @@ describe('useSettingsService', () => {
 
     it('should handle set operation failure', async () => {
       mockService.set.mockReturnValue(false)
-      const { result } = renderHook(() => useSettingsService())
+      const { result } = renderHook(() => useSettings())
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -194,7 +194,7 @@ describe('useSettingsService', () => {
         appName: true,
         theme: true
       })
-      const { result } = renderHook(() => useSettingsService())
+      const { result } = renderHook(() => useSettings())
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -213,7 +213,7 @@ describe('useSettingsService', () => {
     })
 
     it('should reset a setting', async () => {
-      const { result } = renderHook(() => useSettingsService())
+      const { result } = renderHook(() => useSettings())
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -227,7 +227,7 @@ describe('useSettingsService', () => {
     })
 
     it('should reset category', async () => {
-      const { result } = renderHook(() => useSettingsService({ category: 'general' }))
+      const { result } = renderHook(() => useSettings({ category: 'general' }))
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -243,7 +243,7 @@ describe('useSettingsService', () => {
 
   describe('Preview Functionality', () => {
     it('should preview a setting', async () => {
-      const { result } = renderHook(() => useSettingsService())
+      const { result } = renderHook(() => useSettings())
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -257,7 +257,7 @@ describe('useSettingsService', () => {
     })
 
     it('should commit preview', async () => {
-      const { result } = renderHook(() => useSettingsService())
+      const { result } = renderHook(() => useSettings())
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -271,7 +271,7 @@ describe('useSettingsService', () => {
     })
 
     it('should clear preview', async () => {
-      const { result } = renderHook(() => useSettingsService())
+      const { result } = renderHook(() => useSettings())
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -285,7 +285,7 @@ describe('useSettingsService', () => {
     })
 
     it('should clear all previews', async () => {
-      const { result } = renderHook(() => useSettingsService())
+      const { result } = renderHook(() => useSettings())
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -308,7 +308,7 @@ describe('useSettingsService', () => {
       }
       mockService.export.mockReturnValue(mockExportData)
 
-      const { result } = renderHook(() => useSettingsService())
+      const { result } = renderHook(() => useSettings())
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -324,7 +324,7 @@ describe('useSettingsService', () => {
     })
 
     it('should export category settings', async () => {
-      const { result } = renderHook(() => useSettingsService({ category: 'general' }))
+      const { result } = renderHook(() => useSettings({ category: 'general' }))
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -344,7 +344,7 @@ describe('useSettingsService', () => {
         errors: {}
       })
 
-      const { result } = renderHook(() => useSettingsService())
+      const { result } = renderHook(() => useSettings())
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -373,7 +373,7 @@ describe('useSettingsService', () => {
         }
       })
 
-      const { result } = renderHook(() => useSettingsService())
+      const { result } = renderHook(() => useSettings())
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -407,7 +407,7 @@ describe('useSettingsService', () => {
         }
       })
 
-      const { result } = renderHook(() => useSettingsService())
+      const { result } = renderHook(() => useSettings())
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -449,7 +449,7 @@ describe('useSettingsService', () => {
       }
       mockService.getValidator.mockReturnValue(mockValidator)
 
-      const { result } = renderHook(() => useSettingsService({ validateOnChange: true }))
+      const { result } = renderHook(() => useSettings({ validateOnChange: true }))
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -467,7 +467,7 @@ describe('useSettingsService', () => {
       }
       mockService.getValidator.mockReturnValue(mockValidator)
 
-      const { result } = renderHook(() => useSettingsService({ validateOnChange: true }))
+      const { result } = renderHook(() => useSettings({ validateOnChange: true }))
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -484,14 +484,14 @@ describe('useSettingsService', () => {
 
   describe('Loading States', () => {
     it('should show loading state during initialization', () => {
-      const { result } = renderHook(() => useSettingsService())
+      const { result } = renderHook(() => useSettings())
 
       expect(result.current.loading).toBe(true)
       expect(result.current.settings).toEqual({})
     })
 
     it('should clear loading state after initialization', async () => {
-      const { result } = renderHook(() => useSettingsService())
+      const { result } = renderHook(() => useSettings())
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -505,7 +505,7 @@ describe('useSettingsService', () => {
         new Promise(resolve => setTimeout(() => resolve({ success: true, imported: 1, errors: {} }), 100))
       )
 
-      const { result } = renderHook(() => useSettingsService())
+      const { result } = renderHook(() => useSettings())
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -533,7 +533,7 @@ describe('useSettingsService', () => {
 
   describe('Cleanup', () => {
     it('should remove event listeners on unmount', async () => {
-      const { unmount } = renderHook(() => useSettingsService())
+      const { unmount } = renderHook(() => useSettings())
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -551,7 +551,7 @@ describe('useSettingsService', () => {
       mockService.init.mockRejectedValue(new Error('Init failed'))
       const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
 
-      const { result } = renderHook(() => useSettingsService())
+      const { result } = renderHook(() => useSettings())
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -571,7 +571,7 @@ describe('useSettingsService', () => {
       }
       mockService.getRegistry.mockReturnValue(mockRegistry)
 
-      const { result } = renderHook(() => useSettingsService({ category: 'nonexistent' }))
+      const { result } = renderHook(() => useSettings({ category: 'nonexistent' }))
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -586,7 +586,7 @@ describe('useSettingsService', () => {
         throw new Error('Singleton error')
       })
 
-      const { result } = renderHook(() => useSettingsService())
+      const { result } = renderHook(() => useSettings())
 
       expect(result.current.loading).toBe(false)
       expect(result.current.settings).toEqual({})

@@ -73,6 +73,12 @@ export interface PluginAPI {
     debounce: (fn: Function, delay: number) => Function
     throttle: (fn: Function, delay: number) => Function
   }
+  markdown: {
+    registerHook: (hook: any) => () => void
+    injectCSS: (css: string, pluginId: string) => () => void
+    removeCSS: (pluginId: string) => void
+    transform: (content: string, options?: any) => string
+  }
 }
 
 export interface PluginError {
@@ -171,11 +177,11 @@ export class PluginService {
           throw new Error(`Failed to fetch plugin: ${response.statusText}`)
         }
         pluginCode = await response.text()
-        manifest = this.extractManifest(pluginCode, source)
+        manifest = await this.extractManifest(pluginCode, source)
       } else {
         // Load from File
         pluginCode = await this.readFileAsText(source)
-        manifest = this.extractManifest(pluginCode, source.name)
+        manifest = await this.extractManifest(pluginCode, source.name)
       }
 
       // Validate plugin
@@ -408,7 +414,7 @@ export class PluginService {
 
   // Private helper methods
 
-  private extractManifest(code: string, source: string): PluginManifest {
+  private async extractManifest(code: string, source: string): Promise<PluginManifest> {
     // Extract manifest from plugin code comments or export
     const manifestMatch = code.match(/export\s+default\s+({[\s\S]*?})/);
     if (!manifestMatch) {
@@ -416,9 +422,9 @@ export class PluginService {
     }
 
     try {
-      // Safe evaluation of manifest object
+      // CSP-safe manifest parsing using dynamic module evaluation
       const manifestCode = manifestMatch[1]
-      const manifest = this.safeEvaluate(`(${manifestCode})`)
+      const manifest = await this.parseManifestSafely(manifestCode)
       
       if (!manifest.name || !manifest.version) {
         throw new Error('Plugin manifest missing required fields (name, version)')
@@ -469,16 +475,9 @@ export class PluginService {
     const sandbox = this.createSandbox(pluginName, policy)
     
     try {
-      // Execute plugin code in sandbox
-      const wrappedCode = `
-        (function() {
-          'use strict';
-          ${code}
-        })()
-      `
-      
+      // CSP-safe plugin execution using dynamic module import
       return this.executeWithTimeout(
-        () => this.safeEvaluate(wrappedCode, sandbox),
+        () => this.executePluginSafely(code, sandbox, pluginName),
         policy.resourceLimits.executionTimeout,
         `Plugin '${pluginName}' execution timeout`
       )
@@ -534,14 +533,47 @@ export class PluginService {
     })
   }
 
-  private safeEvaluate(code: string, context: any = {}): any {
-    // Create a function with restricted context
-    const keys = Object.keys(context)
-    const values = Object.values(context)
-    
-    const fn = new Function(...keys, `return ${code}`)
-    return fn(...values)
+  private async parseManifestSafely(manifestCode: string): Promise<any> {
+    try {
+      // For plugins with functions, we need to use dynamic import to parse them
+      // This is CSP-safe as it uses ES modules instead of eval
+      const moduleCode = `
+        const manifest = ${manifestCode};
+        export default manifest;
+      `
+      
+      const dataUrl = 'data:text/javascript;base64,' + btoa(moduleCode)
+      const module = await import(dataUrl)
+      return module.default
+    } catch (error) {
+      throw new Error(`Failed to parse manifest: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
   }
+
+  private async executePluginSafely(code: string, sandbox: any, pluginName: string): Promise<any> {
+    try {
+      // Create a data URL with the plugin code as ES module
+      const moduleCode = `
+        const sandbox = ${JSON.stringify(sandbox, null, 2)};
+        const api = sandbox.api;
+        const storage = sandbox.storage;
+        const console = sandbox.console;
+        
+        // Plugin code execution
+        ${code}
+        
+        // Return the default export
+        export default typeof exports !== 'undefined' ? exports : window.pluginExport;
+      `
+      
+      const dataUrl = 'data:text/javascript;base64,' + btoa(moduleCode)
+      const module = await import(dataUrl)
+      return module.default
+    } catch (error) {
+      throw new Error(`Plugin execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
 
   private async readFileAsText(file: File): Promise<string> {
     return new Promise((resolve, reject) => {

@@ -1,11 +1,11 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { useSettingsService } from '../../../hooks/useSettingsService'
+import { useSettings } from '../../../hooks/useSettings'
 
 export const useScrollSync = viewMode => {
   const [isScrollSyncing, setIsScrollSyncing] = useState(false)
   const editorContainerRef = useRef(null)
   const previewContainerRef = useRef(null)
-  const { settings } = useSettingsService({ category: 'preview' })
+  const { settings } = useSettings()
   const syncScrollEnabled = settings.syncScrolling !== false // Default to true
 
   const syncScroll = useCallback(

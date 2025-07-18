@@ -228,11 +228,22 @@ body,
 }
 
 /* High specificity overrides to ensure prose-theme styles work correctly */
-.prose-theme,
-.prose-theme * {
-  color: var(--color-base2) !important;
-  font-size: var(--font-size-preview) !important;
-  line-height: var(--line-height-preview) !important;
+.prose-theme {
+  color: var(--color-base2);
+  font-size: var(--font-size-preview);
+  line-height: var(--line-height-preview);
+}
+
+/* Apply base text styling to paragraphs and other text elements, but NOT headings */
+.prose-theme p,
+.prose-theme span,
+.prose-theme div:not(.code-block-wrapper),
+.prose-theme li,
+.prose-theme td,
+.prose-theme th {
+  color: var(--color-base2);
+  font-size: inherit;
+  line-height: inherit;
 }
 
 .prose-theme h1,

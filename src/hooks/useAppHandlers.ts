@@ -5,6 +5,7 @@ import { useCallback } from 'react'
 import { useAppStore } from '../stores/newSimpleStore'
 import { noteLogger as logger } from '../utils/logger'
 import { Note } from '../types'
+import { getCurrentTimestamp } from '../utils/dateUtils'
 
 interface UseAppHandlersProps {
   filteredNotes: Note[]
@@ -43,7 +44,7 @@ export const useAppHandlers = ({
       const updatedNote = { 
         ...latestCurrentNote, 
         content: newContent,
-        updatedAt: new Date().toISOString()
+        updatedAt: getCurrentTimestamp()
       }
       logger.debug('Content change - updating note', { title: updatedNote.title, id: updatedNote.id })
       setCurrentNote(updatedNote)

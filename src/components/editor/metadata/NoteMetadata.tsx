@@ -47,7 +47,8 @@ const NoteMetadata = ({
   })
   const [tagSettingsModal, setTagSettingsModal] = useState({ show: false, tagName: '', tagIndex: null })
   const { setTagColor, setModal, notes } = useAppStore()
-  const { flatNotebooks } = useNotebooks()
+  const { getFlattenedNotebooks } = useNotebooks()
+  const flatNotebooks = getFlattenedNotebooks()
   
   // Get all unique tags from all notes for suggestions
   const allTags = useMemo(() => {

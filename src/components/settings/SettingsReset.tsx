@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useSettingsService } from '../../hooks/useSettingsService'
+import { useSettings } from '../../hooks/useSettings'
 import { getSettingsService } from '../../services/settings'
 import { Icons } from '../Icons'
 

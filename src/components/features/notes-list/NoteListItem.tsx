@@ -2,7 +2,7 @@ import React, { memo } from 'react'
 import { Note } from '../../../types'
 import { Icons } from '../../Icons'
 import CustomTag from '../../ui/CustomTag'
-import TaskProgress from '../../ui/TaskProgress'
+// import TaskProgress from '../../ui/TaskProgress' // removed
 import NoteActionsDropdown from '../../ui/NoteActionsDropdown'
 import { STATUS_BG_COLORS, THEME_CLASSES, CSS_THEME_VARS } from '../../../theme/themeConstants'
 
@@ -136,7 +136,7 @@ const NoteListItem: React.FC<NoteListItemProps> = memo(({
         
         {/* Task progress */}
         <div className="mb-2">
-          <TaskProgress content={note.content} size="xs" />
+          {/* <TaskProgress content={note.content} size="xs" /> */}
         </div>
         
         {/* Footer with tags and date */}

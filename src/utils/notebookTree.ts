@@ -25,15 +25,13 @@ export const calculateNotebookLevel = (
 }
 
 export const buildNotebookTree = (notebooks: Notebook[]): Notebook[] => {
-  console.log('🌳 buildNotebookTree input:', notebooks.length, 'notebooks')
-  
   // Create a map for quick lookup
   const notebookMap = new Map(notebooks.map(n => [n.id, { ...n }]))
-  console.log('🌳 Created notebook map with', notebookMap.size, 'entries')
   
-  // Calculate paths and levels
+  // Reset children arrays before building
   notebooks.forEach(notebook => {
     const updated = notebookMap.get(notebook.id)!
+    updated.children = []
     updated.path = generateNotebookPath(notebook.id, notebooks)
     updated.level = calculateNotebookLevel(notebook.id, notebooks)
   })
@@ -49,8 +47,6 @@ export const buildNotebookTree = (notebooks: Notebook[]): Notebook[] => {
   })
   
   const result = Array.from(notebookMap.values())
-  console.log('🌳 buildNotebookTree output:', result.length, 'notebooks')
-  
   return result
 }
 
@@ -79,7 +75,11 @@ export const getNotebookWithCounts = (
   notebooks: Notebook[],
   notes: Note[]
 ): NotebookWithCounts[] => {
-  return notebooks.map(notebook => {
+  // Create a map for quick lookup
+  const notebookMap = new Map<string, NotebookWithCounts>()
+  
+  // First pass: create NotebookWithCounts objects
+  notebooks.forEach(notebook => {
     // Direct notes in this notebook
     const directNotes = notes.filter(note => 
       note.notebook === notebook.name && 
@@ -108,13 +108,28 @@ export const getNotebookWithCounts = (
     const childrenNotes = getAllChildrenNotes(notebook.id)
     const totalNotes = [...directNotes, ...childrenNotes]
     
-    return {
+    const notebookWithCounts: NotebookWithCounts = {
       ...notebook,
       directCount: directNotes.length,
       totalCount: totalNotes.length,
       count: totalNotes.length // backward compatibility
     }
+    
+    notebookMap.set(notebook.id, notebookWithCounts)
   })
+  
+  // Second pass: build the tree structure by converting children IDs to objects
+  notebookMap.forEach(notebook => {
+    if (notebook.children && Array.isArray(notebook.children)) {
+      // Convert children IDs to actual NotebookWithCounts objects
+      notebook.children = notebook.children
+        .map(childId => typeof childId === 'string' ? notebookMap.get(childId) : childId)
+        .filter((child): child is NotebookWithCounts => child !== undefined)
+    }
+  })
+  
+  // Return only root notebooks (those without parentId) - children are nested within them
+  return Array.from(notebookMap.values()).filter(notebook => !notebook.parentId)
 }
 
 export const deleteNotebookAndChildren = (

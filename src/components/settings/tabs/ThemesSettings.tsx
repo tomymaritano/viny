@@ -1,110 +1,94 @@
-import React, { useState } from 'react'
-import { useSettingsService, useSetting } from '../../../hooks/useSettingsService'
+import React, { useState, useEffect } from 'react'
+import { useAppStore } from '../../../stores/newSimpleStore'
 import { Icons } from '../../Icons'
-import { LivePreviewControls } from '../LivePreview'
+import { applyThemeCompletely, type ThemeValue } from '../../../utils/themeUtils'
+import { themeLogger } from '../../../utils/logger'
 
 const ThemesSettings: React.FC = () => {
-  const {
-    settings,
-    setSetting,
-    previewSetting,
-    clearPreview,
-    schemas,
-    errors
-  } = useSettingsService({ category: 'themes' })
+  const { setTheme, updateSettings, settings, loading } = useAppStore()
+  const [localSettings, setLocalSettings] = useState<any>({})
 
-  const [previewingKeys, setPreviewingKeys] = useState<Set<string>>(new Set())
-  const [pendingChanges, setPendingChanges] = useState<Record<string, any>>({})
+  // Sync store settings with local state
+  useEffect(() => {
+    setLocalSettings(settings)
+  }, [settings])
 
-  // Get schema options for themes - usando los nombres correctos del schema
-  const themeSchema = schemas.find(s => s.key === 'theme')
-  const themes = themeSchema?.options || []
+  // Define theme options directly
+  const themes = [
+    { value: 'light', label: 'Light', icon: 'Sun' },
+    { value: 'dark', label: 'Dark', icon: 'Moon' },
+    { value: 'solarized', label: 'Solarized', icon: 'Palette' },
+    { value: 'hacklab', label: 'Hacklab', icon: 'Monitor' },
+    { value: 'system', label: 'System', icon: 'Monitor' }
+  ]
 
-  const syntaxThemeSchema = schemas.find(s => s.key === 'syntaxTheme')
-  const syntaxThemes = syntaxThemeSchema?.options || []
+  const syntaxThemes = [
+    { value: 'default', label: 'Default (follows theme)' },
+    { value: 'default-dark', label: 'Default Dark' },
+    { value: 'default-light', label: 'Default Light' },
+    { value: 'github', label: 'GitHub' },
+    { value: 'monokai', label: 'Monokai' },
+    { value: 'solarized', label: 'Solarized' },
+    { value: 'dracula', label: 'Dracula' },
+    { value: 'nord', label: 'Nord' },
+    { value: 'one-dark', label: 'One Dark' },
+    { value: 'gruvbox', label: 'Gruvbox' }
+  ]
 
-  const previewThemeSchema = schemas.find(s => s.key === 'previewTheme')
-  const previewThemes = previewThemeSchema?.options || []
+  const previewThemes = [
+    { value: 'default', label: 'Default (follows theme)' },
+    { value: 'default-light', label: 'Default Light' },
+    { value: 'default-dark', label: 'Default Dark' },
+    { value: 'github', label: 'GitHub' },
+    { value: 'minimal', label: 'Minimal' },
+    { value: 'academic', label: 'Academic' },
+    { value: 'modern', label: 'Modern' }
+  ]
+
+  if (loading) {
+    return <div className="p-4">Loading theme settings...</div>
+  }
 
   const getIcon = (iconName: string) => {
     const Icon = Icons[iconName as keyof typeof Icons]
     return Icon ? <Icon size={16} /> : null
   }
 
-  const handleThemeChange = async (key: string, value: any, preview = true) => {
+  const handleThemeChange = async (key: string, value: any) => {
     try {
-      if (preview && (key === 'theme' || key === 'editorFontSize' || key === 'lineHeight')) {
-        await previewSetting(key, value)
-        setPreviewingKeys(prev => new Set(prev).add(key))
-        setPendingChanges(prev => ({ ...prev, [key]: value }))
+      themeLogger.group('Theme Change Debug')
+      themeLogger.debug('Theme change initiated:', { key, value })
+      
+      // Update local state immediately for UI responsiveness
+      setLocalSettings(prev => ({ ...prev, [key]: value }))
+      
+      // Update store if it's theme
+      if (key === 'theme') {
+        themeLogger.debug('Applying theme to DOM and store')
+        // Apply theme using centralized utility
+        applyThemeCompletely(value as ThemeValue, {
+          updateMetaColor: true,
+          updateStore: async (theme) => await setTheme(theme)
+        })
       } else {
-        await setSetting(key, value)
+        // For non-theme settings, use updateSettings
+        await updateSettings({ [key]: value })
       }
+      
+      themeLogger.info('Theme change completed successfully:', { key, value })
+      themeLogger.groupEnd()
+      
     } catch (error) {
-      console.error(`Failed to update ${key}:`, error)
+      themeLogger.error('Failed to update theme setting:', { key, value, error })
+      themeLogger.groupEnd()
     }
   }
 
-  const applyPreview = async (key: string) => {
-    if (pendingChanges[key] !== undefined) {
-      await setSetting(key, pendingChanges[key])
-      setPreviewingKeys(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(key)
-        return newSet
-      })
-      setPendingChanges(prev => {
-        const newChanges = { ...prev }
-        delete newChanges[key]
-        return newChanges
-      })
-    }
-  }
-
-  const cancelPreview = async (key: string) => {
-    await clearPreview(key)
-    setPreviewingKeys(prev => {
-      const newSet = new Set(prev)
-      newSet.delete(key)
-      return newSet
-    })
-    setPendingChanges(prev => {
-      const newChanges = { ...prev }
-      delete newChanges[key]
-      return newChanges
-    })
-  }
+  // Removed complex preview functions - simplified for desktop app
 
   return (
     <div className="space-y-8">
-      {/* Live Preview Controls */}
-      {previewingKeys.size > 0 && (
-        <div className="mb-6 p-4 bg-theme-accent-primary/10 rounded-lg">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-theme-text-secondary">
-              {previewingKeys.size} settings in preview mode
-            </span>
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  previewingKeys.forEach(key => applyPreview(key))
-                }}
-                className="px-3 py-1 text-xs bg-theme-accent-primary text-white rounded hover:opacity-90"
-              >
-                Apply All
-              </button>
-              <button
-                onClick={() => {
-                  previewingKeys.forEach(key => cancelPreview(key))
-                }}
-                className="px-3 py-1 text-xs bg-theme-bg-secondary text-theme-text-primary rounded hover:bg-theme-bg-tertiary"
-              >
-                Cancel All
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Removed complex preview controls - simplified for desktop app */}
 
       {/* UI Theme */}
       <div>
@@ -121,19 +105,14 @@ const ThemesSettings: React.FC = () => {
               className={`
                 p-4 rounded-lg border transition-all flex flex-col items-center space-y-2
                 ${
-                  (pendingChanges.theme || settings.theme) === theme.value
+                  localSettings.theme === theme.value
                     ? 'border-theme-accent-primary bg-theme-accent-primary/10'
                     : 'border-theme-border-primary hover:border-theme-border-secondary'
-                }
-                ${
-                  previewingKeys.has('theme') && pendingChanges.theme === theme.value
-                    ? 'ring-2 ring-blue-500 ring-opacity-50'
-                    : ''
                 }
               `}
             >
               <div className={`w-6 h-6 ${
-                (pendingChanges.theme || settings.theme) === theme.value ? 'text-theme-accent-primary' : 'text-theme-text-muted'
+                localSettings.theme === theme.value ? 'text-theme-accent-primary' : 'text-theme-text-muted'
               }`}>
                 {getIcon(theme.icon)}
               </div>
@@ -157,11 +136,11 @@ const ThemesSettings: React.FC = () => {
           {syntaxThemes.map((theme) => (
             <button
               key={theme.value}
-              onClick={() => handleThemeChange('syntaxTheme', theme.value, false)}
+              onClick={() => handleThemeChange('syntaxTheme', theme.value)}
               className={`
                 p-3 rounded-lg border transition-all text-left
                 ${
-                  settings.syntaxTheme === theme.value
+                  localSettings.syntaxTheme === theme.value
                     ? 'border-theme-accent-primary bg-theme-accent-primary/10'
                     : 'border-theme-border-primary hover:border-theme-border-secondary'
                 }
@@ -189,11 +168,11 @@ const ThemesSettings: React.FC = () => {
           {previewThemes.map((theme) => (
             <button
               key={theme.value}
-              onClick={() => handleThemeChange('previewTheme', theme.value, false)}
+              onClick={() => handleThemeChange('previewTheme', theme.value)}
               className={`
                 p-3 rounded-lg border transition-all text-left
                 ${
-                  settings.previewTheme === theme.value
+                  localSettings.previewTheme === theme.value
                     ? 'border-theme-accent-primary bg-theme-accent-primary/10'
                     : 'border-theme-border-primary hover:border-theme-border-secondary'
                 }
@@ -227,23 +206,15 @@ const ThemesSettings: React.FC = () => {
                 type="range"
                 min="12"
                 max="20"
-                value={pendingChanges.editorFontSize !== undefined ? pendingChanges.editorFontSize : (settings.editorFontSize || 14)}
+                value={localSettings.editorFontSize || 14}
                 onChange={(e) => handleThemeChange('editorFontSize', parseInt(e.target.value))}
                 className="flex-1 h-2 bg-theme-bg-tertiary rounded-lg appearance-none cursor-pointer"
               />
               <span className="text-xs text-theme-text-muted">20px</span>
               <span className="text-sm font-medium text-theme-text-primary w-12">
-                {pendingChanges.editorFontSize !== undefined ? pendingChanges.editorFontSize : (settings.editorFontSize || 14)}px
+                {localSettings.editorFontSize || 14}px
               </span>
             </div>
-            {previewingKeys.has('editorFontSize') && (
-              <LivePreviewControls
-                isActive={true}
-                onApply={() => applyPreview('editorFontSize')}
-                onRevert={() => cancelPreview('editorFontSize')}
-                className="mt-2"
-              />
-            )}
           </div>
 
           {/* Line Height */}
@@ -258,23 +229,15 @@ const ThemesSettings: React.FC = () => {
                 min="1.2"
                 max="2.0"
                 step="0.1"
-                value={pendingChanges.lineHeight !== undefined ? pendingChanges.lineHeight : (settings.lineHeight || 1.6)}
+                value={localSettings.lineHeight || 1.6}
                 onChange={(e) => handleThemeChange('lineHeight', parseFloat(e.target.value))}
                 className="flex-1 h-2 bg-theme-bg-tertiary rounded-lg appearance-none cursor-pointer"
               />
               <span className="text-xs text-theme-text-muted">2.0</span>
               <span className="text-sm font-medium text-theme-text-primary w-12">
-                {pendingChanges.lineHeight !== undefined ? pendingChanges.lineHeight : (settings.lineHeight || 1.6)}
+                {localSettings.lineHeight || 1.6}
               </span>
             </div>
-            {previewingKeys.has('lineHeight') && (
-              <LivePreviewControls
-                isActive={true}
-                onApply={() => applyPreview('lineHeight')}
-                onRevert={() => cancelPreview('lineHeight')}
-                className="mt-2"
-              />
-            )}
           </div>
         </div>
       </div>
@@ -298,22 +261,22 @@ const ThemesSettings: React.FC = () => {
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                checked={settings.customCSSEnabled || false}
-                onChange={(e) => handleThemeChange('customCSSEnabled', e.target.checked, false)}
+                checked={localSettings.customCSSEnabled || false}
+                onChange={(e) => handleThemeChange('customCSSEnabled', e.target.checked)}
                 className="sr-only peer"
               />
               <div className="w-11 h-6 bg-theme-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent-primary"></div>
             </label>
           </div>
 
-          {settings.customCSSEnabled && (
+          {localSettings.customCSSEnabled && (
             <div>
               <label className="block text-sm font-medium text-theme-text-secondary mb-2">
                 Custom CSS
               </label>
               <textarea
-                value={settings.customCSS || ''}
-                onChange={(e) => handleThemeChange('customCSS', e.target.value, false)}
+                value={localSettings.customCSS || ''}
+                onChange={(e) => handleThemeChange('customCSS', e.target.value)}
                 placeholder="/* Add your custom CSS here */\n.note-content {\n  /* Custom styles */\n}"
                 className="w-full h-32 px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm font-mono focus:outline-none focus:ring-2 focus:ring-theme-accent-primary resize-none"
               />

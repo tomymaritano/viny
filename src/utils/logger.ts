@@ -101,15 +101,29 @@ class Logger {
   }
 
   // Performance logging
+  private activeTimers = new Set<string>()
+  
   time(label: string): void {
     if (this.isDev && this.shouldLog('debug')) {
-      console.time(this.formatMessage(`Timer: ${label}`))
+      const timerKey = this.formatMessage(`Timer: ${label}`)
+      if (this.activeTimers.has(timerKey)) {
+        console.warn(`${timerKey} already exists`)
+        return
+      }
+      this.activeTimers.add(timerKey)
+      console.time(timerKey)
     }
   }
 
   timeEnd(label: string): void {
     if (this.isDev && this.shouldLog('debug')) {
-      console.timeEnd(this.formatMessage(`Timer: ${label}`))
+      const timerKey = this.formatMessage(`Timer: ${label}`)
+      if (!this.activeTimers.has(timerKey)) {
+        console.warn(`${timerKey} does not exist`)
+        return
+      }
+      this.activeTimers.delete(timerKey)
+      console.timeEnd(timerKey)
     }
   }
 
@@ -141,6 +155,7 @@ export const initLogger = logger.child('Init')
 export const storageLogger = logger.child('Storage')
 export const noteLogger = logger.child('Notes')
 export const sidebarLogger = logger.child('Sidebar')
+export const notebookLogger = logger.child('Notebooks')
 export const themeLogger = logger.child('Theme')
 export const searchLogger = logger.child('Search')
 export const editorLogger = logger.child('Editor')

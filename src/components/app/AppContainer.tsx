@@ -3,7 +3,7 @@ import React, { useRef, useMemo, useEffect } from 'react'
 import { useAppLogic, useNoteActions } from '../../hooks/useSimpleLogic'
 import { Note } from '../../types'
 import { useAppStore } from '../../stores/newSimpleStore'
-import { useSettingsService } from '../../hooks/useSettingsService'
+import { useSettings } from '../../hooks/useSettings'
 import { useNotebooks } from '../../hooks/useNotebooks'
 import { useAutoSave } from '../../hooks/useAutoSave'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
@@ -14,8 +14,8 @@ import { useErrorHandler } from '../../hooks/useErrorHandler'
 import { useNoteSync } from '../../hooks/useNoteSync'
 import { setupGlobalErrorHandler } from '../../utils/errorHandler'
 import { i18nService } from '../../services/i18nService'
-import { initializeSettings } from '../../services/settings/initialize'
-import { getSettingsService } from '../../services/settings'
+// import { initializeSettings } from '../../services/settings/initialize' - removed
+// import { getSettingsService } from '../../services/settings' - removed
 import { ToastContainer } from '../ui/ToastContainer'
 import ElectronExportHandler from '../ElectronExportHandler'
 import GlobalContextMenu from '../GlobalContextMenu'
@@ -61,13 +61,12 @@ export const AppContainer: React.FC = () => {
   // Error handling
   const errorHandler = useErrorHandler()
 
-  // Setup global error handler and initialize settings
+  // Setup global error handler
   useEffect(() => {
     setupGlobalErrorHandler()
-    initializeSettings()
   }, [])
 
-  const { settings } = useSettingsService()
+  const { settings } = useSettings()
   const { notebooks } = useNotebooks()
 
   // Apply settings effects
@@ -118,42 +117,31 @@ export const AppContainer: React.FC = () => {
   // Page lifecycle management
   usePageLifecycle({ currentNote })
 
-  // Initialize settings service on startup
-  useEffect(() => {
-    const initSettings = async () => {
-      try {
-        await initializeSettings()
-        console.log('Settings service initialized')
-      } catch (error) {
-        console.error('Failed to initialize settings service:', error)
-      }
-    }
-    initSettings()
-  }, [])
+  // Settings initialization is now handled by the storage service automatically
 
-  // Memoized props to prevent unnecessary re-renders
-  const appProps = useMemo(() => ({
-    // Data
+  // Split memoized props for better performance
+  const dataProps = useMemo(() => ({
     currentNote,
     selectedNote: selectedNote || null,
     filteredNotes,
     notebooks,
-    settings: settings || {},
-    
-    // UI State
+    settings: settings || {}
+  }), [currentNote, selectedNote, filteredNotes, notebooks, settings])
+
+  const uiStateProps = useMemo(() => ({
     isEditorOpen,
     isLoading,
     activeSection,
     modals,
-    toasts,
-    
-    // Auto-save state
-    autoSaveState: {
-      isSaving: autoSaving,
-      hasUnsavedChanges
-    },
-    
-    // Handlers
+    toasts
+  }), [isEditorOpen, isLoading, activeSection, modals, toasts])
+
+  const autoSaveState = useMemo(() => ({
+    isSaving: autoSaving,
+    hasUnsavedChanges
+  }), [autoSaving, hasUnsavedChanges])
+
+  const handlerProps = useMemo(() => ({
     handleOpenNote,
     handleContentChange,
     handleNotebookChange,
@@ -169,18 +157,6 @@ export const AppContainer: React.FC = () => {
     removeToast,
     sortNotes
   }), [
-    currentNote,
-    selectedNote,
-    filteredNotes,
-    notebooks,
-    settings,
-    isEditorOpen,
-    isLoading,
-    activeSection,
-    modals,
-    toasts,
-    autoSaving,
-    hasUnsavedChanges,
     handleOpenNote,
     handleContentChange,
     handleNotebookChange,
@@ -196,6 +172,13 @@ export const AppContainer: React.FC = () => {
     removeToast,
     sortNotes
   ])
+
+  const appProps = useMemo(() => ({
+    ...dataProps,
+    ...uiStateProps,
+    autoSaveState,
+    ...handlerProps
+  }), [dataProps, uiStateProps, autoSaveState, handlerProps])
 
   return (
     <>

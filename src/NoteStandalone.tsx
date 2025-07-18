@@ -7,7 +7,6 @@ import EditorToolbar from './components/editor/toolbar/EditorToolbar'
 import LoadingSpinner from './components/LoadingSpinner'
 import { Icons } from './components/Icons'
 import IconButton from './components/ui/IconButton'
-import { storageService } from './lib/storage'
 import { useAppInit } from './hooks/useAppInit'
 import { useSettingsEffects } from './hooks/useSettingsEffects'
 import { useNotebooks } from './hooks/useNotebooks'
@@ -78,18 +77,7 @@ const NoteStandaloneContent: React.FC = () => {
   // Extract note ID from URL hash
   const noteId = window.location.hash.replace('#/note/', '')
   
-  // Debug logging
-  useEffect(() => {
-    console.log('NoteStandalone state:', {
-      noteId,
-      isLoading,
-      isAppLoading,
-      isInitializing,
-      notesCount: notes.length,
-      notebooksCount: notebooks.length,
-      initError
-    })
-  }, [noteId, isLoading, isAppLoading, isInitializing, notes.length, notebooks.length, initError])
+  // Debug logging removed for production
   
   useEffect(() => {
     const loadNote = async () => {

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import TaskProgress from '../ui/TaskProgress'
+// import TaskProgress from '../ui/TaskProgress' // removed
 import { MarkdownProcessor } from '../../lib/markdown'
 import DOMPurify from 'dompurify'
-import { useSettingsService } from '../../hooks/useSettingsService'
+import { useSettings } from '../../hooks/useSettings'
 import { useDebounce } from '../../hooks/useDebounce'
 import { Note } from '../../types'
 
@@ -22,7 +22,7 @@ const NotePreviewContent: React.FC<NotePreviewContentProps> = ({
   settings,
   getTagColor
 }) => {
-  const { settings: previewSettings } = useSettingsService({ category: 'preview' })
+  const { settings: previewSettings } = useSettings({ category: 'preview' })
   const previewMode = previewSettings.previewMode || 'live'
   const previewDelay = previewSettings.previewDelay || 300
   
@@ -169,7 +169,7 @@ const NotePreviewContent: React.FC<NotePreviewContentProps> = ({
       <div className="p-6">
         {/* Task Progress */}
         <div className="mb-6">
-          <TaskProgress content={note.content} />
+          {/* <TaskProgress content={note.content} /> */}
         </div>
         
         {/* Tags */}

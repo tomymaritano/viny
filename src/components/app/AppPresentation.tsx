@@ -91,7 +91,7 @@ const AppPresentation: React.FC<AppPresentationProps> = ({
         <StorageErrorBoundary
           clearStorageOnRetry={true}
           onError={(error) => {
-            console.error('Storage service error:', error)
+            // Error is handled by ErrorBoundary
           }}
           onRetry={() => {
             window.location.reload()

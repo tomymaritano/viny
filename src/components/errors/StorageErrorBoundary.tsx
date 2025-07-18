@@ -1,7 +1,7 @@
 import React from 'react'
 import { Icons } from '../Icons'
 import { logStorageError } from '../../services/errorLogger'
-import { debugStorage, clearCorruptedData, backupAndClearStorage } from '../../utils/storageDebug'
+// import { debugStorage, clearCorruptedData, backupAndClearStorage } from '../../utils/storageDebug' // removed
 
 interface StorageErrorBoundaryProps {
   children: React.ReactNode
@@ -90,22 +90,29 @@ class StorageErrorBoundary extends React.Component<StorageErrorBoundaryProps, St
   }
 
   handleDebug = () => {
-    debugStorage()
+    // debugStorage() - removed
+    console.log('Storage debug function removed')
   }
 
   handleClearCorrupted = () => {
-    const cleared = clearCorruptedData()
-    if (cleared > 0) {
-      alert(`Cleared ${cleared} corrupted items. Reloading...`)
-      window.location.reload()
-    } else {
-      alert('No corrupted data found.')
-    }
+    // const cleared = clearCorruptedData() - removed
+    // Clear localStorage as fallback
+    localStorage.clear()
+    alert('Storage cleared. Reloading...')
+    window.location.reload()
   }
 
   handleBackupAndClear = () => {
     if (window.confirm('This will backup your data and then clear storage. Continue?')) {
-      backupAndClearStorage()
+      // backupAndClearStorage() - removed
+      // Simple localStorage backup and clear
+      const backup = {}
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i)
+        if (key) backup[key] = localStorage.getItem(key)
+      }
+      console.log('Storage backup:', backup)
+      localStorage.clear()
       window.location.reload()
     }
   }

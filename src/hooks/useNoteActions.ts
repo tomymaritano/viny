@@ -1,9 +1,10 @@
 import { useCallback } from 'react'
 import { flushSync } from 'react-dom'
 import { useAppStore } from '../stores/newSimpleStore'
-import { storageService } from '../lib/storage'
 import { MarkdownProcessor } from '../lib/markdown'
 import { Note } from '../types'
+import { generateNoteId } from '../utils/idUtils'
+import { getCurrentTimestamp } from '../utils/dateUtils'
 
 import { noteLogger as logger } from '../utils/logger'
 
@@ -41,7 +42,7 @@ export const useNoteActions = () => {
       : 'personal'
     
     const newNote: Note = {
-      id: Date.now().toString(),
+      id: generateNoteId(),
       title: 'Untitled Note',
       content: '',
       notebook,
@@ -49,23 +50,17 @@ export const useNoteActions = () => {
       status,
       isPinned,
       isTrashed: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt: getCurrentTimestamp(),
+      updatedAt: getCurrentTimestamp()
     }
 
     logger.debug('Creating new note with ID:', newNote.id)
     
+    // Add note via store (automatically persists via repository)
     addNote(newNote)
     setCurrentNote(newNote)
     setSelectedNoteId(newNote.id)
     setIsEditorOpen(true)
-
-    try {
-      storageService.saveNote(newNote)
-    } catch (error) {
-      logger.error('Error saving new note:', error)
-      showError('Failed to save note')
-    }
 
     return newNote
   }, [activeSection, addNote, setCurrentNote, setSelectedNoteId, setIsEditorOpen, showSuccess, showError])
@@ -112,7 +107,7 @@ export const useNoteActions = () => {
         ...note,
         title,
         tags: existingTags,
-        updatedAt: new Date().toISOString()
+        updatedAt: getCurrentTimestamp()
       }
 
       logger.debug('Prepared note for saving:', {
@@ -122,40 +117,11 @@ export const useNoteActions = () => {
         updatedAt: updatedNote.updatedAt
       })
 
-      // Update in-memory state first
+      // Update note via store (automatically persists via repository)
       updateNote(updatedNote)
-      logger.debug('Updated in-memory state')
+      logger.debug('Note updated via store')
       
-      // Then persist to storage
-      try {
-        storageService.saveNote(updatedNote)
-        logger.debug('Storage service saveNote called')
-        
-        // Force immediate save and wait for completion
-        await storageService.flushPendingSaves()
-        logger.debug('Pending saves flushed')
-        
-        // In Electron environment, trust the async save operation
-        // Verification happens at the file system level
-        const isElectron = typeof window !== 'undefined' && window.electronAPI
-        if (!isElectron) {
-          // Only verify for localStorage (non-Electron)
-          const savedNotes = storageService.getNotes()
-          const foundNote = savedNotes.find(n => n.id === updatedNote.id)
-          
-          if (!foundNote) {
-            logger.error('Note not found after save. Notes in storage:', savedNotes.length)
-            throw new Error('Save verification failed - note not found')
-          }
-        }
-        
-        logger.debug('Note save completed successfully')
-      } catch (saveError) {
-        logger.error('Storage service error:', saveError)
-        throw saveError
-      }
-      
-      logger.info('Successfully saved and verified note:', updatedNote.title)
+      logger.info('Successfully saved note:', updatedNote.title)
       return updatedNote
     } catch (error) {
       logger.error('Error saving note:', error)
@@ -172,7 +138,7 @@ export const useNoteActions = () => {
     const trashedNote = {
       ...note,
       isTrashed: true,
-      trashedAt: new Date().toISOString(),
+      trashedAt: getCurrentTimestamp(),
     }
     console.log('Updating note to trashed:', trashedNote.id, trashedNote.isTrashed)
     
@@ -182,11 +148,7 @@ export const useNoteActions = () => {
         updateNote(trashedNote)
       })
       
-      // Wait for storage operation to complete
-      await storageService.saveNote(trashedNote)
-      
-      // Force flush any pending saves to ensure completion
-      await storageService.flushPendingSaves()
+      // Note is automatically persisted via store's updateNote method
       
       showSuccess('Note moved to trash')
       console.log('Note moved to trash successfully:', trashedNote.id)
@@ -204,7 +166,7 @@ export const useNoteActions = () => {
     const updatedNote = {
       ...note,
       isPinned: !note.isPinned,
-      updatedAt: new Date().toISOString(),
+      updatedAt: getCurrentTimestamp(),
     }
     
     try {
@@ -213,9 +175,7 @@ export const useNoteActions = () => {
         updateNote(updatedNote)
       })
       
-      // Wait for storage operation to complete
-      await storageService.saveNote(updatedNote)
-      await storageService.flushPendingSaves()
+      // Note is automatically persisted via store's updateNote method
       
       showSuccess(updatedNote.isPinned ? 'Note pinned' : 'Note unpinned')
     } catch (error) {
@@ -231,10 +191,10 @@ export const useNoteActions = () => {
   const handleDuplicateNote = useCallback(async (note: Note) => {
     const duplicatedNote: Note = {
       ...note,
-      id: Date.now().toString(),
+      id: generateNoteId(),
       title: `${note.title} (Copy)`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: getCurrentTimestamp(),
+      updatedAt: getCurrentTimestamp(),
       isPinned: false
     }
 
@@ -244,9 +204,7 @@ export const useNoteActions = () => {
         addNote(duplicatedNote)
       })
       
-      // Wait for storage operation to complete
-      await storageService.saveNote(duplicatedNote)
-      await storageService.flushPendingSaves()
+      // Note is automatically persisted via store's addNote method
       
       showSuccess('Note duplicated successfully')
       return duplicatedNote
@@ -260,25 +218,61 @@ export const useNoteActions = () => {
   /**
    * Permanently deletes all trashed notes
    */
-  const handleEmptyTrash = useCallback(() => {
+  const handleEmptyTrash = useCallback(async () => {
+    logger.group('Empty Trash Operation')
     const trashedNotes = notes.filter(note => note.isTrashed)
     
+    logger.debug('Found trashed notes:', trashedNotes.length, trashedNotes.map(n => ({ id: n.id, title: n.title })))
+    
+    if (trashedNotes.length === 0) {
+      logger.info('No trashed notes to delete')
+      showSuccess('Trash is already empty')
+      logger.groupEnd()
+      return
+    }
+    
     try {
-      // Permanently delete all trashed notes
-      trashedNotes.forEach(note => {
-        removeNote(note.id)
+      logger.debug('Starting deletion of', trashedNotes.length, 'notes')
+      
+      // Delete from storage first, then update UI
+      const deletePromises = trashedNotes.map(async (note) => {
         try {
-          storageService.deleteNote(note.id)
+          await removeNote(note.id)
+          logger.debug('Deleted via store:', note.id)
+          return note.id
         } catch (error) {
           logger.error(`Error deleting note ${note.id} from storage:`, error)
+          throw error
         }
       })
       
-      showSuccess(`Permanently deleted ${trashedNotes.length} note(s)`)
+      // Wait for all storage deletions to complete
+      const deletedIds = await Promise.allSettled(deletePromises)
+      logger.debug('Storage deletion results:', deletedIds)
+      
+      // Remove from UI state
+      trashedNotes.forEach(note => {
+        removeNote(note.id)
+        logger.debug('Removed from UI state:', note.id)
+      })
+      
+      const successCount = deletedIds.filter(result => result.status === 'fulfilled').length
+      const failureCount = deletedIds.filter(result => result.status === 'rejected').length
+      
+      if (failureCount > 0) {
+        logger.warn(`${failureCount} notes failed to delete from storage`)
+        showError(`Deleted ${successCount} notes, but ${failureCount} failed`)
+      } else {
+        logger.info('All notes deleted successfully')
+        showSuccess(`Permanently deleted ${successCount} note(s)`)
+      }
+      
     } catch (error) {
       logger.error('Error emptying trash:', error)
       showError('Failed to empty trash')
     }
+    
+    logger.groupEnd()
   }, [notes, removeNote, showSuccess, showError])
 
   /**
@@ -289,7 +283,7 @@ export const useNoteActions = () => {
       ...note,
       isTrashed: false,
       trashedAt: undefined,
-      updatedAt: new Date().toISOString(),
+      updatedAt: getCurrentTimestamp(),
     }
     
     try {
@@ -298,9 +292,7 @@ export const useNoteActions = () => {
         updateNote(restoredNote)
       })
       
-      // Wait for storage operation to complete
-      await storageService.saveNote(restoredNote)
-      await storageService.flushPendingSaves()
+      // Note is automatically persisted via store's updateNote method
       
       showSuccess('Note restored')
     } catch (error) {
@@ -315,17 +307,8 @@ export const useNoteActions = () => {
    */
   const handlePermanentDelete = useCallback(async (note: Note) => {
     try {
-      // First remove from state
-      removeNote(note.id)
-      
-      // Then try to delete from storage (might fail if file doesn't exist)
-      try {
-        await storageService.deleteNote(note.id)
-      } catch (storageError) {
-        // Log the error but don't fail the operation
-        // The note might already be deleted from file system
-        logger.warn('Note file might already be deleted:', storageError)
-      }
+      // Remove note via store (automatically deletes via repository)
+      await removeNote(note.id)
       
       showSuccess('Note permanently deleted')
     } catch (error) {
@@ -346,15 +329,11 @@ export const useNoteActions = () => {
         const updatedNote = {
           ...note,
           tags: note.tags?.filter(tag => tag !== tagName) || [],
-          updatedAt: new Date().toISOString(),
+          updatedAt: getCurrentTimestamp(),
         }
         updateNote(updatedNote)
         
-        try {
-          storageService.saveNote(updatedNote)
-        } catch (error) {
-          logger.error(`Error updating note ${note.id}:`, error)
-        }
+        // Note is automatically persisted via store's updateNote method
       })
       
       showSuccess(`Removed tag "${tagName}" from ${notesWithTag.length} note(s)`)

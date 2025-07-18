@@ -29,12 +29,10 @@ const NotebookTree: React.FC<NotebookTreeProps> = ({
   onSaveNotebookName,
   onCancelEdit
 }) => {
-  const renderNotebookTree = (parentId: string | null = null, level = 0): React.ReactNode[] => {
-    const childNotebooks = notebooks.filter(n => n.parentId === parentId)
-    
-    return childNotebooks.map(notebook => {
+  const renderNotebookTree = (notebookList: NotebookWithCounts[], level = 0): React.ReactNode[] => {
+    return notebookList.map(notebook => {
       const isExpanded = expandedNotebooks.has(notebook.id)
-      const hasChildren = notebooks.some(n => n.parentId === notebook.id)
+      const hasChildren = notebook.children && notebook.children.length > 0
       const isActive = activeSection === `notebook-${notebook.name.toLowerCase()}`
       const paddingLeft = 12 + (level * 20)
 
@@ -129,7 +127,7 @@ const NotebookTree: React.FC<NotebookTreeProps> = ({
           {/* Children (recursive) */}
           {hasChildren && isExpanded && (
             <div className="relative">
-              {renderNotebookTree(notebook.id, level + 1)}
+              {renderNotebookTree(notebook.children as NotebookWithCounts[], level + 1)}
             </div>
           )}
         </div>
@@ -139,7 +137,7 @@ const NotebookTree: React.FC<NotebookTreeProps> = ({
 
   return (
     <div>
-      {renderNotebookTree()}
+      {renderNotebookTree(notebooks)}
     </div>
   )
 }

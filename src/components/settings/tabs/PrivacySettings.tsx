@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useSettingsService } from '../../../hooks/useSettingsService'
+import { useSettings } from '../../../hooks/useSettings'
 import { useSettingsErrorHandler } from '../../../hooks/useSettingsErrorHandler'
 import { privacyService } from '../../../services/privacyService'
 import SettingsErrorBoundary from '../SettingsErrorBoundary'
@@ -11,7 +11,7 @@ const PrivacySettingsContent: React.FC = () => {
     setSetting,
     schemas,
     errors: serviceErrors
-  } = useSettingsService({ category: 'privacy' })
+  } = useSettings({ category: 'privacy' })
   
   const {
     errors: localErrors,

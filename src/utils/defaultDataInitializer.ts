@@ -1,7 +1,8 @@
-import { storageService } from '../lib/storage'
+import { createDocumentRepository } from '../lib/repositories/RepositoryFactory'
 import { defaultNotes } from '../data/defaultNotes'
 import { logger } from './logger'
 import { Notebook } from '../types/notebook'
+import { getCurrentTimestamp } from './dateUtils'
 
 const defaultNotebooks: Notebook[] = [
   {
@@ -13,8 +14,8 @@ const defaultNotebooks: Notebook[] = [
     children: [],
     level: 0,
     path: 'inbox',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: getCurrentTimestamp(),
+    updatedAt: getCurrentTimestamp(),
   },
   {
     id: 'learn',
@@ -25,8 +26,8 @@ const defaultNotebooks: Notebook[] = [
     children: [],
     level: 0,
     path: 'learn',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: getCurrentTimestamp(),
+    updatedAt: getCurrentTimestamp(),
   },
   {
     id: 'personal',
@@ -37,8 +38,8 @@ const defaultNotebooks: Notebook[] = [
     children: [],
     level: 0,
     path: 'personal',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: getCurrentTimestamp(),
+    updatedAt: getCurrentTimestamp(),
   },
   {
     id: 'projects',
@@ -49,8 +50,8 @@ const defaultNotebooks: Notebook[] = [
     children: [],
     level: 0,
     path: 'projects',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: getCurrentTimestamp(),
+    updatedAt: getCurrentTimestamp(),
   },
   {
     id: 'work',
@@ -61,8 +62,8 @@ const defaultNotebooks: Notebook[] = [
     children: [],
     level: 0,
     path: 'work',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: getCurrentTimestamp(),
+    updatedAt: getCurrentTimestamp(),
   },
 ]
 
@@ -80,7 +81,10 @@ export async function initializeDefaultData(): Promise<void> {
     }
     
     // Check if default notes already exist
-    const existingNotes = await storageService.loadNotes()
+    const repository = createDocumentRepository()
+    await repository.initialize()
+    
+    const existingNotes = await repository.getNotes()
     const hasDefaultNotes = existingNotes && existingNotes.some(note => 
       defaultNotes.some(defaultNote => defaultNote.id === note.id)
     )
@@ -94,7 +98,9 @@ export async function initializeDefaultData(): Promise<void> {
     
     // Initialize default notebooks first
     try {
-      await storageService.saveNotebooks(defaultNotebooks)
+      for (const notebook of defaultNotebooks) {
+        await repository.saveNotebook(notebook)
+      }
       logger.info('Default notebooks initialized successfully')
     } catch (error) {
       logger.error('Failed to initialize default notebooks:', error)
@@ -103,7 +109,7 @@ export async function initializeDefaultData(): Promise<void> {
     // Initialize default notes
     for (const note of defaultNotes) {
       try {
-        await storageService.saveNote(note)
+        await repository.saveNote(note)
       } catch (error) {
         logger.error('Failed to save default note:', note.id, error)
       }
@@ -123,16 +129,17 @@ export async function initializeDefaultData(): Promise<void> {
 /**
  * Resets the app to default state (useful for testing or reset functionality)
  */
-export function resetToDefaultData(): void {
+export async function resetToDefaultData(): Promise<void> {
   try {
     // Clear existing data
-    storageService.clearAll()
+    const repository = createDocumentRepository()
+    await repository.destroy()
     
     // Remove initialization flag
     localStorage.removeItem('viny-initialized')
     
     // Re-initialize
-    initializeDefaultData()
+    await initializeDefaultData()
     
     logger.info('App reset to default state')
   } catch (error) {
