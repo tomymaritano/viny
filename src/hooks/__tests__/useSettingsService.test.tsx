@@ -35,7 +35,7 @@ describe('useSettings', () => {
       once: vi.fn(),
       emit: vi.fn(),
       getValidator: vi.fn(),
-      getRegistry: vi.fn()
+      getRegistry: vi.fn(),
     } as any
 
     // Mock static getInstance method
@@ -45,10 +45,10 @@ describe('useSettings', () => {
     mockService.getAll.mockReturnValue({
       appName: 'Test App',
       theme: 'dark',
-      language: 'en'
+      language: 'en',
     })
 
-    mockService.getByCategory.mockImplementation((category) => {
+    mockService.getByCategory.mockImplementation(category => {
       if (category === 'general') {
         return { appName: 'Test App', language: 'en' }
       }
@@ -59,15 +59,27 @@ describe('useSettings', () => {
     })
 
     const mockRegistry = {
-      getCategory: vi.fn().mockImplementation((id) => {
+      getCategory: vi.fn().mockImplementation(id => {
         if (id === 'general') {
           return {
             id: 'general',
             label: 'General',
             schemas: [
-              { key: 'appName', type: 'string', defaultValue: 'Viny', label: 'App Name', category: 'general' },
-              { key: 'language', type: 'string', defaultValue: 'en', label: 'Language', category: 'general' }
-            ]
+              {
+                key: 'appName',
+                type: 'string',
+                defaultValue: 'Viny',
+                label: 'App Name',
+                category: 'general',
+              },
+              {
+                key: 'language',
+                type: 'string',
+                defaultValue: 'en',
+                label: 'Language',
+                category: 'general',
+              },
+            ],
           }
         }
         if (id === 'themes') {
@@ -75,21 +87,45 @@ describe('useSettings', () => {
             id: 'themes',
             label: 'Themes',
             schemas: [
-              { key: 'theme', type: 'string', defaultValue: 'system', label: 'Theme', category: 'themes' }
-            ]
+              {
+                key: 'theme',
+                type: 'string',
+                defaultValue: 'system',
+                label: 'Theme',
+                category: 'themes',
+              },
+            ],
           }
         }
         return null
       }),
       getAllSchemas: vi.fn().mockReturnValue([
-        { key: 'appName', type: 'string', defaultValue: 'Viny', label: 'App Name', category: 'general' },
-        { key: 'language', type: 'string', defaultValue: 'en', label: 'Language', category: 'general' },
-        { key: 'theme', type: 'string', defaultValue: 'system', label: 'Theme', category: 'themes' }
-      ])
+        {
+          key: 'appName',
+          type: 'string',
+          defaultValue: 'Viny',
+          label: 'App Name',
+          category: 'general',
+        },
+        {
+          key: 'language',
+          type: 'string',
+          defaultValue: 'en',
+          label: 'Language',
+          category: 'general',
+        },
+        {
+          key: 'theme',
+          type: 'string',
+          defaultValue: 'system',
+          label: 'Theme',
+          category: 'themes',
+        },
+      ]),
     }
 
     const mockValidator = {
-      validateAll: vi.fn().mockReturnValue({ isValid: true, errors: {} })
+      validateAll: vi.fn().mockReturnValue({ isValid: true, errors: {} }),
     }
 
     mockService.getRegistry.mockReturnValue(mockRegistry)
@@ -105,7 +141,7 @@ describe('useSettings', () => {
       const { result } = renderHook(() => useSettings())
 
       expect(result.current.loading).toBe(true)
-      
+
       // Wait for initialization
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -116,7 +152,7 @@ describe('useSettings', () => {
       expect(result.current.settings).toEqual({
         appName: 'Test App',
         theme: 'dark',
-        language: 'en'
+        language: 'en',
       })
     })
 
@@ -130,7 +166,7 @@ describe('useSettings', () => {
       expect(mockService.getByCategory).toHaveBeenCalledWith('general')
       expect(result.current.settings).toEqual({
         appName: 'Test App',
-        language: 'en'
+        language: 'en',
       })
     })
 
@@ -142,8 +178,20 @@ describe('useSettings', () => {
       })
 
       expect(result.current.schemas).toEqual([
-        { key: 'appName', type: 'string', defaultValue: 'Viny', label: 'App Name', category: 'general' },
-        { key: 'language', type: 'string', defaultValue: 'en', label: 'Language', category: 'general' }
+        {
+          key: 'appName',
+          type: 'string',
+          defaultValue: 'Viny',
+          label: 'App Name',
+          category: 'general',
+        },
+        {
+          key: 'language',
+          type: 'string',
+          defaultValue: 'en',
+          label: 'Language',
+          category: 'general',
+        },
       ])
     })
 
@@ -192,7 +240,7 @@ describe('useSettings', () => {
     it('should batch set multiple settings', async () => {
       mockService.batchSet.mockReturnValue({
         appName: true,
-        theme: true
+        theme: true,
       })
       const { result } = renderHook(() => useSettings())
 
@@ -202,7 +250,7 @@ describe('useSettings', () => {
 
       const updates = {
         appName: 'Batch App',
-        theme: 'light'
+        theme: 'light',
       }
 
       act(() => {
@@ -304,7 +352,7 @@ describe('useSettings', () => {
       const mockExportData = {
         version: '1.0.0',
         timestamp: '2023-01-01T00:00:00.000Z',
-        settings: { appName: 'Exported' }
+        settings: { appName: 'Exported' },
       }
       mockService.export.mockReturnValue(mockExportData)
 
@@ -341,7 +389,7 @@ describe('useSettings', () => {
       mockService.import.mockResolvedValue({
         success: true,
         imported: 2,
-        errors: {}
+        errors: {},
       })
 
       const { result } = renderHook(() => useSettings())
@@ -353,7 +401,7 @@ describe('useSettings', () => {
       const importData = {
         version: '1.0.0',
         timestamp: '2023-01-01T00:00:00.000Z',
-        settings: { appName: 'Imported' }
+        settings: { appName: 'Imported' },
       }
 
       await act(async () => {
@@ -383,13 +431,13 @@ describe('useSettings', () => {
       const changeEvent = {
         key: 'theme',
         value: 'light',
-        previousValue: 'dark'
+        previousValue: 'dark',
       }
 
       mockService.getAll.mockReturnValue({
         appName: 'Test App',
         theme: 'light',
-        language: 'en'
+        language: 'en',
       })
 
       act(() => {
@@ -417,14 +465,14 @@ describe('useSettings', () => {
       const batchChangeEvent = {
         changes: [
           { key: 'appName', value: 'New App' },
-          { key: 'theme', value: 'light' }
-        ]
+          { key: 'theme', value: 'light' },
+        ],
       }
 
       mockService.getAll.mockReturnValue({
         appName: 'New App',
         theme: 'light',
-        language: 'en'
+        language: 'en',
       })
 
       act(() => {
@@ -443,13 +491,15 @@ describe('useSettings', () => {
           isValid: false,
           errors: {
             appName: 'Name too short',
-            theme: 'Invalid theme'
-          }
-        })
+            theme: 'Invalid theme',
+          },
+        }),
       }
       mockService.getValidator.mockReturnValue(mockValidator)
 
-      const { result } = renderHook(() => useSettings({ validateOnChange: true }))
+      const { result } = renderHook(() =>
+        useSettings({ validateOnChange: true })
+      )
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -457,17 +507,19 @@ describe('useSettings', () => {
 
       expect(result.current.errors).toEqual({
         appName: 'Name too short',
-        theme: 'Invalid theme'
+        theme: 'Invalid theme',
       })
     })
 
     it('should validate on change when enabled', async () => {
       const mockValidator = {
-        validateAll: vi.fn().mockReturnValue({ isValid: true, errors: {} })
+        validateAll: vi.fn().mockReturnValue({ isValid: true, errors: {} }),
       }
       mockService.getValidator.mockReturnValue(mockValidator)
 
-      const { result } = renderHook(() => useSettings({ validateOnChange: true }))
+      const { result } = renderHook(() =>
+        useSettings({ validateOnChange: true })
+      )
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))
@@ -501,8 +553,14 @@ describe('useSettings', () => {
     })
 
     it('should show loading during async operations', async () => {
-      mockService.import.mockImplementation(() => 
-        new Promise(resolve => setTimeout(() => resolve({ success: true, imported: 1, errors: {} }), 100))
+      mockService.import.mockImplementation(
+        () =>
+          new Promise(resolve =>
+            setTimeout(
+              () => resolve({ success: true, imported: 1, errors: {} }),
+              100
+            )
+          )
       )
 
       const { result } = renderHook(() => useSettings())
@@ -516,7 +574,7 @@ describe('useSettings', () => {
         result.current.importSettings({
           version: '1.0.0',
           timestamp: '2023-01-01T00:00:00.000Z',
-          settings: {}
+          settings: {},
         })
       })
 
@@ -541,15 +599,23 @@ describe('useSettings', () => {
 
       unmount()
 
-      expect(mockService.off).toHaveBeenCalledWith('change', expect.any(Function))
-      expect(mockService.off).toHaveBeenCalledWith('batchChange', expect.any(Function))
+      expect(mockService.off).toHaveBeenCalledWith(
+        'change',
+        expect.any(Function)
+      )
+      expect(mockService.off).toHaveBeenCalledWith(
+        'batchChange',
+        expect.any(Function)
+      )
     })
   })
 
   describe('Edge Cases', () => {
     it('should handle service initialization failure', async () => {
       mockService.init.mockRejectedValue(new Error('Init failed'))
-      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
 
       const { result } = renderHook(() => useSettings())
 
@@ -567,11 +633,13 @@ describe('useSettings', () => {
       mockService.getByCategory.mockReturnValue({})
       const mockRegistry = {
         getCategory: vi.fn().mockReturnValue(null),
-        getAllSchemas: vi.fn().mockReturnValue([])
+        getAllSchemas: vi.fn().mockReturnValue([]),
       }
       mockService.getRegistry.mockReturnValue(mockRegistry)
 
-      const { result } = renderHook(() => useSettings({ category: 'nonexistent' }))
+      const { result } = renderHook(() =>
+        useSettings({ category: 'nonexistent' })
+      )
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0))

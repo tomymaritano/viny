@@ -19,7 +19,7 @@ interface SidebarContextMenusProps {
   onDeleteTag: (tagName: string) => void
   onShowTagSettings: (tagName: string) => void
 
-  // Notebook context menu  
+  // Notebook context menu
   notebookContextMenu: ContextMenuState
   onCloseNotebookContextMenu: () => void
   onEditNotebook: (notebookId: string) => void
@@ -48,7 +48,7 @@ const SidebarContextMenus: React.FC<SidebarContextMenusProps> = ({
   onCloseTagSettings,
   createNotebookModal,
   onCloseCreateNotebook,
-  onCreateNotebook
+  onCreateNotebook,
 }) => {
   return (
     <>

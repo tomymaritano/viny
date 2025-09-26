@@ -2,8 +2,8 @@
  * Validates a tag name against existing tags
  */
 export const validateTagName = (
-  newTag: string, 
-  currentTag: string | null, 
+  newTag: string,
+  currentTag: string | null,
   existingTags: string[]
 ): boolean => {
   const trimmedTag = newTag?.trim()
@@ -39,7 +39,11 @@ export const addTag = (tagName: string, currentTags: string[]): string[] => {
 /**
  * Updates a tag name in an array
  */
-export const updateTag = (newTag: string, tagIndex: number, currentTags: string[]): string[] => {
+export const updateTag = (
+  newTag: string,
+  tagIndex: number,
+  currentTags: string[]
+): string[] => {
   const currentTag = currentTags[tagIndex]
   const otherTags = currentTags.filter((_, index) => index !== tagIndex)
 
@@ -55,6 +59,9 @@ export const updateTag = (newTag: string, tagIndex: number, currentTags: string[
 /**
  * Removes a tag from an array
  */
-export const removeTag = (tagIndex: number, currentTags: string[]): string[] => {
+export const removeTag = (
+  tagIndex: number,
+  currentTags: string[]
+): string[] => {
   return currentTags.filter((_, index) => index !== tagIndex)
 }

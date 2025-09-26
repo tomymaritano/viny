@@ -43,18 +43,34 @@ export interface ElectronAPI {
 export interface AppSettings {
   // General
   defaultNotebook: string
-  language: 'en' | 'en-gb' | 'es' | 'es-mx' | 'fr' | 'de' | 'it' | 'pt-br' | 'zh-cn' | 'ja' | 'ko'
+  language:
+    | 'en'
+    | 'en-gb'
+    | 'es'
+    | 'es-mx'
+    | 'fr'
+    | 'de'
+    | 'it'
+    | 'pt-br'
+    | 'zh-cn'
+    | 'ja'
+    | 'ko'
   autoUpdates: boolean
   developmentMode: boolean
-  
+
   // Theme & UI
   theme: 'light' | 'dark' | 'solarized' | 'hacklab' | 'system'
-  syntaxTheme: 'default-dark' | 'default-light' | 'github' | 'monokai' | 'solarized'
+  syntaxTheme:
+    | 'default-dark'
+    | 'default-light'
+    | 'github'
+    | 'monokai'
+    | 'solarized'
   previewTheme: 'github' | 'gitlab' | 'minimal' | 'academic'
   customCSS: string
   customCSSEnabled: boolean
   autoToggleLightDark: boolean
-  
+
   // Editor preferences
   fontSize: number
   fontFamily: string
@@ -72,7 +88,7 @@ export interface AppSettings {
   cursorScrollMargin: number
   pasteURLAsLink: boolean
   vimMode: boolean
-  
+
   // Preview preferences
   previewFontSize: number
   previewPosition: 'right' | 'bottom' | 'hidden'
@@ -81,40 +97,40 @@ export interface AppSettings {
   mermaidDiagrams: boolean
   syntaxHighlighting: boolean
   isPreviewOpen: boolean
-  
+
   // Keybindings
   keymapPreset: 'default' | 'vim' | 'vscode' | 'sublime'
   customKeybindings: Record<string, string>
   enableCustomKeybindings: boolean
   showKeybindingsInTooltips: boolean
   enableGlobalShortcuts: boolean
-  
+
   // UI Layout
   sidebarWidth: number
   notesListWidth: number
-  
+
   // Plugins
   enabledPlugins: string[]
   pluginSettings: PluginSettings
-  
+
   // Sync
   syncProvider: 'none' | 'viny-sync' | 'custom'
   syncUrl: string
   syncEncryption: boolean
   autoSync: boolean
-  
+
   // Backup
   autoBackup: boolean
   backupLocation: string
   backupRetentionDays: number
   backupFrequency: 'hourly' | 'daily' | 'weekly'
-  
+
   // Behavior
   autoSave: boolean
   autoSaveInterval: number
   spellCheck: boolean
   defaultEditorMode: 'markdown' | 'monaco'
-  
+
   // Privacy & Security
   analyticsEnabled: boolean
   crashReporting: boolean
@@ -134,7 +150,7 @@ export interface AppSettings {
   inactivityTimeoutMinutes: number
   requirePasswordOnStart: boolean
   biometricUnlock: boolean
-  
+
   // Window state (Electron only)
   windowBounds: {
     x: number
@@ -143,10 +159,24 @@ export interface AppSettings {
     height: number
   }
   isMaximized: boolean
-  
+
   // Tag customization
   tagColors: Record<string, string>
   customColors: Record<string, string>
+  
+  // AI & Semantic Search
+  ai?: {
+    enableSemanticSearch?: boolean
+    enableAIAssistant?: boolean
+    embeddingModel?: string
+    provider?: 'ollama' | 'webllm' | 'openai' | 'anthropic'
+    apiKey?: string
+    ollamaModel?: string
+    webllmModel?: string
+    onboardingCompleted?: boolean
+    skipInstallation?: boolean
+    autoSelectProvider?: boolean
+  }
 }
 
 // Default settings - consolidated from all sources
@@ -156,7 +186,7 @@ export const defaultAppSettings: AppSettings = {
   language: 'en',
   autoUpdates: true,
   developmentMode: false,
-  
+
   // Theme & UI
   theme: 'hacklab',
   syntaxTheme: 'default-dark',
@@ -164,7 +194,7 @@ export const defaultAppSettings: AppSettings = {
   customCSS: '',
   customCSSEnabled: false,
   autoToggleLightDark: false,
-  
+
   // Editor preferences
   fontSize: 14,
   fontFamily: 'SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace',
@@ -182,7 +212,7 @@ export const defaultAppSettings: AppSettings = {
   cursorScrollMargin: 100,
   pasteURLAsLink: true,
   vimMode: false,
-  
+
   // Preview preferences
   previewFontSize: 16,
   previewPosition: 'right',
@@ -191,40 +221,40 @@ export const defaultAppSettings: AppSettings = {
   mermaidDiagrams: true,
   syntaxHighlighting: true,
   isPreviewOpen: true,
-  
+
   // Keybindings
   keymapPreset: 'default',
   customKeybindings: {},
   enableCustomKeybindings: false,
   showKeybindingsInTooltips: false,
   enableGlobalShortcuts: false,
-  
+
   // UI Layout
   sidebarWidth: 250,
   notesListWidth: 300,
-  
+
   // Plugins
   enabledPlugins: [],
   pluginSettings: {},
-  
+
   // Sync
   syncProvider: 'none',
   syncUrl: '',
   syncEncryption: true,
   autoSync: false,
-  
+
   // Backup
   autoBackup: true,
   backupLocation: '',
   backupRetentionDays: 7,
   backupFrequency: 'daily',
-  
+
   // Behavior
   autoSave: true,
   autoSaveInterval: 2000,
   spellCheck: true,
   defaultEditorMode: 'markdown',
-  
+
   // Privacy & Security
   analyticsEnabled: false,
   crashReporting: true,
@@ -244,21 +274,33 @@ export const defaultAppSettings: AppSettings = {
   inactivityTimeoutMinutes: 15,
   requirePasswordOnStart: false,
   biometricUnlock: false,
-  
+
   // Window state (Electron only)
   windowBounds: {
     x: 0,
     y: 0,
     width: 1200,
-    height: 800
+    height: 800,
   },
   isMaximized: false,
-  
+
   // Tag customization
   tagColors: {},
-  customColors: {}
+  customColors: {},
+  
+  // AI & Semantic Search
+  ai: {
+    enableSemanticSearch: true,
+    enableAIAssistant: false,
+    embeddingModel: 'Xenova/all-MiniLM-L6-v2',
+    provider: 'ollama',
+    ollamaModel: 'llama3.2:latest',
+    webllmModel: 'Llama-3.2-1B-Instruct-q4f32_1-MLC',
+    onboardingCompleted: false,
+    skipInstallation: false,
+    autoSelectProvider: true,
+  },
 }
-
 
 // Editing settings data interface
 export interface EditingSettingsData {

@@ -1,6 +1,10 @@
 import React from 'react'
 import { Icons } from '../Icons'
-import DropdownMenu, { DropdownMenuItem, DropdownHeader, DropdownDivider } from './DropdownMenu'
+import DropdownMenu, {
+  DropdownMenuItem,
+  DropdownHeader,
+  DropdownDivider,
+} from './DropdownMenu'
 
 interface NotebookContextMenuProps {
   isVisible: boolean
@@ -35,18 +39,13 @@ const NotebookContextMenu: React.FC<NotebookContextMenuProps> = ({
         left: position.x,
         top: position.y,
       }}
-      onClick={(e) => e.stopPropagation()}
+      onClick={e => e.stopPropagation()}
     >
       {/* Header */}
-      <DropdownHeader>
-        {notebookName}
-      </DropdownHeader>
+      <DropdownHeader>{notebookName}</DropdownHeader>
 
       {/* Rename */}
-      <DropdownMenuItem
-        onClick={onRename}
-        icon={<Icons.Edit size={10} />}
-      >
+      <DropdownMenuItem onClick={onRename} icon={<Icons.Edit size={10} />}>
         Rename
       </DropdownMenuItem>
 

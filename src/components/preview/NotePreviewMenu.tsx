@@ -1,10 +1,17 @@
 import React from 'react'
 import { Icons } from '../Icons'
-import { Note } from '../../types'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../ui/DropdownMenuRadix'
+import type { Note } from '../../types'
 
 interface NotePreviewMenuProps {
   note: Note
-  showMenu: boolean
+  children: React.ReactNode // Trigger element
   onTogglePin?: (note: Note) => void
   onDuplicate?: (note: Note) => void
   onDelete?: (note: Note) => void
@@ -18,7 +25,7 @@ interface NotePreviewMenuProps {
 
 const NotePreviewMenu: React.FC<NotePreviewMenuProps> = ({
   note,
-  showMenu,
+  children,
   onTogglePin,
   onDuplicate,
   onDelete,
@@ -27,10 +34,8 @@ const NotePreviewMenu: React.FC<NotePreviewMenuProps> = ({
   isTrashView = false,
   onRestoreNote,
   onPermanentDelete,
-  onSetShowExportDialog
+  onSetShowExportDialog,
 }) => {
-  if (!showMenu) return null
-
   const handleEdit = () => {
     if (onEdit) {
       onEdit(note)
@@ -72,77 +77,73 @@ const NotePreviewMenu: React.FC<NotePreviewMenuProps> = ({
   }
 
   return (
-    <div className="absolute right-0 top-full mt-2 w-48 bg-theme-bg-primary border border-theme-border-primary rounded-lg shadow-lg z-50">
-      <div className="py-1">
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
         {!isTrashView ? (
           <>
-            <button
+            <DropdownMenuItem
               onClick={handleEdit}
-              className="w-full text-left px-4 py-2 text-sm text-theme-text-primary hover:bg-theme-bg-tertiary flex items-center space-x-2"
+              icon={<Icons.Edit size={16} />}
             >
-              <Icons.Edit size={16} />
-              <span>Edit Note</span>
-            </button>
-            
-            <button
+              Edit Note
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
               onClick={handleTogglePin}
-              className="w-full text-left px-4 py-2 text-sm text-theme-text-primary hover:bg-theme-bg-tertiary flex items-center space-x-2"
+              icon={<Icons.Pin size={16} />}
             >
-              <Icons.Pin size={16} />
-              <span>{note.isPinned ? 'Unpin Note' : 'Pin Note'}</span>
-            </button>
-            
-            <button
+              {note.isPinned ? 'Unpin Note' : 'Pin Note'}
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
               onClick={handleDuplicate}
-              className="w-full text-left px-4 py-2 text-sm text-theme-text-primary hover:bg-theme-bg-tertiary flex items-center space-x-2"
+              icon={<Icons.Copy size={16} />}
             >
-              <Icons.Copy size={16} />
-              <span>Duplicate</span>
-            </button>
-            
-            <div className="border-t border-theme-border-primary my-1"></div>
-            
-            <button
+              Duplicate
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem
               onClick={handleExport}
-              className="w-full text-left px-4 py-2 text-sm text-theme-text-primary hover:bg-theme-bg-tertiary flex items-center space-x-2"
+              icon={<Icons.Download size={16} />}
             >
-              <Icons.Download size={16} />
-              <span>Export</span>
-            </button>
-            
-            <div className="border-t border-theme-border-primary my-1"></div>
-            
-            <button
+              Export
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem
               onClick={handleDelete}
-              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center space-x-2"
+              className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20"
+              icon={<Icons.Trash2 size={16} />}
             >
-              <Icons.Trash2 size={16} />
-              <span>Move to Trash</span>
-            </button>
+              Move to Trash
+            </DropdownMenuItem>
           </>
         ) : (
           <>
-            <button
+            <DropdownMenuItem
               onClick={handleRestore}
-              className="w-full text-left px-4 py-2 text-sm text-theme-text-primary hover:bg-theme-bg-tertiary flex items-center space-x-2"
+              icon={<Icons.RotateCcw size={16} />}
             >
-              <Icons.RotateCcw size={16} />
-              <span>Restore Note</span>
-            </button>
-            
-            <div className="border-t border-theme-border-primary my-1"></div>
-            
-            <button
+              Restore Note
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem
               onClick={handlePermanentDelete}
-              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center space-x-2"
+              className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20"
+              icon={<Icons.Trash2 size={16} />}
             >
-              <Icons.Trash2 size={16} />
-              <span>Delete Permanently</span>
-            </button>
+              Delete Permanently
+            </DropdownMenuItem>
           </>
         )}
-      </div>
-    </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 

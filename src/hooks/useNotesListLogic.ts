@@ -1,6 +1,6 @@
 // Hook for notes list logic and utilities
 import { useMemo, useCallback } from 'react'
-import { Note } from '../types'
+import type { Note } from '../types'
 import { formatDate as utilFormatDate } from '../utils/dateUtils'
 
 export const useNotesListLogic = (notes: Note[] | null | undefined) => {
@@ -18,7 +18,7 @@ export const useNotesListLogic = (notes: Note[] | null | undefined) => {
       .replace(/```[\s\S]*?```/g, match => match.replace(/```/g, '')) // Remove code block markers
       .replace(/ +/g, ' ') // Normalize multiple spaces (but not newlines)
       .trim()
-    
+
     if (stripped.length <= maxLength) {
       return stripped + '...'
     }
@@ -35,6 +35,6 @@ export const useNotesListLogic = (notes: Note[] | null | undefined) => {
     isEmpty,
     notesCount,
     formatDate,
-    getPreviewText
+    getPreviewText,
   }
 }

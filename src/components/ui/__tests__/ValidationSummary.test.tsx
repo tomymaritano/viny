@@ -5,17 +5,25 @@ import ValidationSummary from '../ValidationSummary'
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({
   AlertTriangle: ({ className }: { className?: string }) => (
-    <div data-testid="alert-triangle" className={className}>AlertTriangle</div>
+    <div data-testid="alert-triangle" className={className}>
+      AlertTriangle
+    </div>
   ),
   AlertCircle: ({ className }: { className?: string }) => (
-    <div data-testid="alert-circle" className={className}>AlertCircle</div>
+    <div data-testid="alert-circle" className={className}>
+      AlertCircle
+    </div>
   ),
   CheckCircle: ({ className }: { className?: string }) => (
-    <div data-testid="check-circle" className={className}>CheckCircle</div>
+    <div data-testid="check-circle" className={className}>
+      CheckCircle
+    </div>
   ),
   Info: ({ className }: { className?: string }) => (
-    <div data-testid="info" className={className}>Info</div>
-  )
+    <div data-testid="info" className={className}>
+      Info
+    </div>
+  ),
 }))
 
 describe('ValidationSummary', () => {
@@ -25,12 +33,12 @@ describe('ValidationSummary', () => {
     errorCount: 0,
     warningCount: 0,
     errors: [],
-    warnings: []
+    warnings: [],
   }
 
   it('renders success state when no errors or warnings', () => {
     render(<ValidationSummary {...defaultProps} />)
-    
+
     expect(screen.getByText('All settings are valid')).toBeInTheDocument()
     expect(screen.getByTestId('check-circle')).toBeInTheDocument()
   })
@@ -40,11 +48,11 @@ describe('ValidationSummary', () => {
       ...defaultProps,
       hasErrors: true,
       errorCount: 2,
-      errors: ['Name is required', 'Email is invalid']
+      errors: ['Name is required', 'Email is invalid'],
     }
 
     render(<ValidationSummary {...props} />)
-    
+
     expect(screen.getByText('2 errors')).toBeInTheDocument()
     expect(screen.getByTestId('alert-circle')).toBeInTheDocument()
   })
@@ -54,11 +62,11 @@ describe('ValidationSummary', () => {
       ...defaultProps,
       hasWarnings: true,
       warningCount: 1,
-      warnings: ['Font size is very small']
+      warnings: ['Font size is very small'],
     }
 
     render(<ValidationSummary {...props} />)
-    
+
     expect(screen.getByText('1 warning')).toBeInTheDocument()
     expect(screen.getByTestId('alert-triangle')).toBeInTheDocument()
   })
@@ -71,11 +79,11 @@ describe('ValidationSummary', () => {
       errorCount: 1,
       warningCount: 2,
       errors: ['Name is required'],
-      warnings: ['Font size is small', 'Line height is tight']
+      warnings: ['Font size is small', 'Line height is tight'],
     }
 
     render(<ValidationSummary {...props} />)
-    
+
     expect(screen.getByText('1 error, 2 warnings')).toBeInTheDocument()
   })
 
@@ -85,11 +93,11 @@ describe('ValidationSummary', () => {
       hasErrors: true,
       errorCount: 1,
       errors: ['Name is required'],
-      showDetails: true
+      showDetails: true,
     }
 
     render(<ValidationSummary {...props} />)
-    
+
     expect(screen.getByText('Errors:')).toBeInTheDocument()
     expect(screen.getByText('Name is required')).toBeInTheDocument()
   })
@@ -100,11 +108,11 @@ describe('ValidationSummary', () => {
       hasWarnings: true,
       warningCount: 1,
       warnings: ['Font size is very small'],
-      showDetails: true
+      showDetails: true,
     }
 
     render(<ValidationSummary {...props} />)
-    
+
     expect(screen.getByText('Warnings:')).toBeInTheDocument()
     expect(screen.getByText('Font size is very small')).toBeInTheDocument()
   })
@@ -117,14 +125,14 @@ describe('ValidationSummary', () => {
       errorCount: 1,
       errors: ['Name is required'],
       showDetails: false,
-      onToggleDetails
+      onToggleDetails,
     }
 
     render(<ValidationSummary {...props} />)
-    
+
     const toggleButton = screen.getByText('Show details')
     fireEvent.click(toggleButton)
-    
+
     expect(onToggleDetails).toHaveBeenCalledTimes(1)
   })
 
@@ -136,11 +144,11 @@ describe('ValidationSummary', () => {
       errorCount: 1,
       errors: ['Name is required'],
       showDetails: true,
-      onToggleDetails
+      onToggleDetails,
     }
 
     render(<ValidationSummary {...props} />)
-    
+
     expect(screen.getByText('Hide details')).toBeInTheDocument()
   })
 
@@ -150,12 +158,12 @@ describe('ValidationSummary', () => {
       hasErrors: true,
       errorCount: 1,
       errors: ['Name is required'],
-      className: 'custom-class'
+      className: 'custom-class',
     }
 
     const { container } = render(<ValidationSummary {...props} />)
     const summaryElement = container.querySelector('.custom-class')
-    
+
     expect(summaryElement).toBeInTheDocument()
   })
 
@@ -165,7 +173,7 @@ describe('ValidationSummary', () => {
       ...defaultProps,
       hasErrors: true,
       errorCount: 1,
-      errors: ['Single error']
+      errors: ['Single error'],
     }
 
     const { rerender } = render(<ValidationSummary {...singleErrorProps} />)
@@ -176,7 +184,7 @@ describe('ValidationSummary', () => {
       ...defaultProps,
       hasErrors: true,
       errorCount: 3,
-      errors: ['Error 1', 'Error 2', 'Error 3']
+      errors: ['Error 1', 'Error 2', 'Error 3'],
     }
 
     rerender(<ValidationSummary {...multipleErrorProps} />)
@@ -188,11 +196,11 @@ describe('ValidationSummary', () => {
       ...defaultProps,
       hasErrors: true,
       errorCount: 1,
-      errors: ['Name is required']
+      errors: ['Name is required'],
     }
 
     render(<ValidationSummary {...props} />)
-    
+
     expect(screen.queryByText('Show details')).not.toBeInTheDocument()
   })
 
@@ -203,11 +211,11 @@ describe('ValidationSummary', () => {
       errorCount: 0,
       warningCount: 0,
       errors: [],
-      warnings: []
+      warnings: [],
     }
 
     const { container } = render(<ValidationSummary {...props} />)
-    
+
     // Should render the success state
     expect(screen.getByText('All settings are valid')).toBeInTheDocument()
   })

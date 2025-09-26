@@ -96,3 +96,7 @@ yarn.lock.backup
 # Temporary files
 *.tmp
 *.temp
+
+# AI Models (downloaded by Transformers.js)
+public/models/*
+!public/models/README.md

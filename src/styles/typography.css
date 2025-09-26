@@ -269,6 +269,7 @@ p {
   text-decoration-color: var(--color-blue);
   text-underline-offset: 3px;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .prose a:hover,
@@ -276,6 +277,16 @@ p {
 .markdown-preview a:hover {
   color: var(--color-cyan);
   text-decoration-color: var(--color-cyan);
+}
+
+/* External link indicator */
+.prose a.external-link::after,
+.prose-theme a.external-link::after,
+.markdown-preview a.external-link::after {
+  content: ' ↗';
+  font-size: 0.8em;
+  opacity: 0.6;
+  vertical-align: super;
 }
 
 /* Text formatting */

@@ -2,6 +2,7 @@ import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import { getEditorColor } from '../config/editorColors'
 import { isImageUrlAllowed } from './imageUtils'
+import { editorLogger } from './logger'
 
 /**
  * Processes images in HTML and replaces blocked ones with informative placeholders
@@ -25,7 +26,7 @@ const processBlockedImages = html => {
           // Try to load from localStorage
           try {
             const storedImages = JSON.parse(
-              localStorage.getItem('viny-images') || '{}'
+              storageService.getItem(StorageService.KEYS.IMAGES) || '{}'
             )
             if (storedImages[imageId]) {
               dataUri = storedImages[imageId]
@@ -36,7 +37,7 @@ const processBlockedImages = html => {
               window.vinyImageStore.set(imageId, dataUri)
             }
           } catch (error) {
-            console.error('Failed to load image from storage:', error)
+            editorLogger.error('Failed to load image from storage:', error)
           }
         }
 

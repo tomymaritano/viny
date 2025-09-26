@@ -1,5 +1,5 @@
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { type ClassValue, clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -7,9 +7,9 @@ export function cn(...inputs: ClassValue[]) {
 
 // Utility for creating glassmorphism effects
 export function createGlassmorphism(
-  opacity: number = 0.1,
-  blur: number = 12,
-  borderOpacity: number = 0.2
+  opacity = 0.1,
+  blur = 12,
+  borderOpacity = 0.2
 ) {
   return {
     backgroundColor: `rgba(var(--theme-bg-secondary-rgb), ${opacity})`,
@@ -26,18 +26,18 @@ export function createGlassmorphism(
 
 // Utility for creating gradient backgrounds
 export function createGradient(
-  direction: string = "135deg",
-  colors: string[] = ["var(--theme-accent-primary)", "var(--theme-accent-cyan)"]
+  direction = '135deg',
+  colors: string[] = ['var(--theme-accent-primary)', 'var(--theme-accent-cyan)']
 ) {
-  return `linear-gradient(${direction}, ${colors.join(", ")})`
+  return `linear-gradient(${direction}, ${colors.join(', ')})`
 }
 
 // Utility for creating shadow effects
 export function createShadow(
-  color: string = "var(--theme-accent-primary-rgb)",
-  opacity: number = 0.2,
-  blur: number = 25,
-  spread: number = -5
+  color = 'var(--theme-accent-primary-rgb)',
+  opacity = 0.2,
+  blur = 25,
+  spread = -5
 ) {
   return `0 10px ${blur}px ${spread}px rgba(${color}, ${opacity})`
 }

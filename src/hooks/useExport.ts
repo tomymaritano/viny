@@ -1,6 +1,7 @@
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import type { Note } from '../types'
+import { noteLogger } from '../utils/logger'
 
 interface ExportOptions {
   includeMetadata?: boolean
@@ -37,7 +38,7 @@ export const useExport = () => {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${note.title} - Inkrun Export</title>
+        <title>${note.title} - Viny Export</title>
         <style>
           body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
@@ -189,7 +190,10 @@ export const useExport = () => {
     URL.revokeObjectURL(url)
   }
 
-  const exportToPDF = async (note: Note, options: ExportOptions = {}): Promise<void> => {
+  const exportToPDF = async (
+    note: Note,
+    options: ExportOptions = {}
+  ): Promise<void> => {
     const { includeMetadata = true, filename } = options
 
     try {
@@ -221,7 +225,7 @@ export const useExport = () => {
         printWindow.close()
       }, 1000)
     } catch (error) {
-      console.error('PDF export failed:', error)
+      noteLogger.error('PDF export failed:', error)
       throw error
     }
   }
@@ -258,11 +262,15 @@ export const useExport = () => {
     URL.revokeObjectURL(url)
   }
 
-  const exportMultipleNotes = (notes: Note[], format: 'html' | 'markdown' = 'html', options: ExportOptions = {}): void => {
-    const { includeMetadata = true, filename = 'inkrun_export' } = options
+  const exportMultipleNotes = (
+    notes: Note[],
+    format: 'html' | 'markdown' = 'html',
+    options: ExportOptions = {}
+  ): void => {
+    const { includeMetadata = true, filename = 'viny_export' } = options
 
     if (format === 'markdown') {
-      let combinedContent = '# Inkrun Notes Export\n\n'
+      let combinedContent = '# Viny Notes Export\n\n'
       combinedContent += `Exported on: ${new Date().toLocaleDateString()}\n`
       combinedContent += `Total notes: ${notes.length}\n\n`
       combinedContent += '---\n\n'
@@ -302,7 +310,7 @@ export const useExport = () => {
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Inkrun Notes Export</title>
+          <title>Viny Notes Export</title>
           <style>
             body {
               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
@@ -425,7 +433,7 @@ export const useExport = () => {
         </head>
         <body>
           <div class="export-header">
-            <h1>Inkrun Notes Export</h1>
+            <h1>Viny Notes Export</h1>
             <p>Exported on: ${new Date().toLocaleDateString()}</p>
             <p>Total notes: ${notes.length}</p>
           </div>

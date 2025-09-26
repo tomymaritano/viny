@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import { createSettingsSlice, SettingsSlice } from '../settingsSlice'
+import type { SettingsSlice } from '../settingsSlice'
+import { createSettingsSlice } from '../settingsSlice'
 import { defaultAppSettings } from '../../../types/settings'
 
 // Mock the entire storage service module to avoid PouchDB initialization
@@ -8,21 +9,21 @@ jest.mock('../../../lib/storageService', () => ({
     saveSettings: jest.fn(),
     getTagColors: jest.fn(() => ({})),
     saveTagColors: jest.fn(),
-    loadTagColors: jest.fn(() => Promise.resolve({}))
-  }
+    loadTagColors: jest.fn(() => Promise.resolve({})),
+  },
 }))
 
 // Mock documentStore to prevent PouchDB initialization
 jest.mock('../../../lib/documentStore', () => ({
-  documentStore: {}
+  documentStore: {},
 }))
 
 // Mock logger
 jest.mock('../../../utils/logger', () => ({
   storageLogger: {
     debug: jest.fn(),
-    error: jest.fn()
-  }
+    error: jest.fn(),
+  },
 }))
 
 // Mock localStorage
@@ -41,7 +42,7 @@ describe('SettingsSlice - Consolidated Theme Management', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     localStorageMock.getItem.mockReturnValue(null)
-    
+
     store = create<SettingsSlice>()(createSettingsSlice)
   })
 
@@ -53,18 +54,18 @@ describe('SettingsSlice - Consolidated Theme Management', () => {
 
     it('should update theme correctly via setTheme', () => {
       const { setTheme } = store.getState()
-      
+
       setTheme('light')
-      
+
       const state = store.getState()
       expect(state.settings.theme).toBe('light')
     })
 
     it('should update theme correctly via updateSettings', () => {
       const { updateSettings } = store.getState()
-      
+
       updateSettings({ theme: 'dark' })
-      
+
       const state = store.getState()
       expect(state.settings.theme).toBe('dark')
     })
@@ -72,9 +73,9 @@ describe('SettingsSlice - Consolidated Theme Management', () => {
     it('should persist theme changes through storage service', () => {
       const { storageService } = require('../../../lib/storageService')
       const { setTheme } = store.getState()
-      
+
       setTheme('solarized')
-      
+
       expect(storageService.saveSettings).toHaveBeenCalledWith(
         expect.objectContaining({ theme: 'solarized' })
       )
@@ -84,41 +85,41 @@ describe('SettingsSlice - Consolidated Theme Management', () => {
   describe('Tag Color Management', () => {
     it('should set tag colors correctly', () => {
       const { setTagColor } = store.getState()
-      
+
       setTagColor('work', 'blue')
-      
+
       const state = store.getState()
       expect(state.settings.tagColors).toEqual({ work: 'blue' })
     })
 
     it('should get predefined tag colors', () => {
       const { getTagColor } = store.getState()
-      
+
       const color = getTagColor('project')
-      
+
       expect(color).toBe('ocean') // Predefined color for 'project'
     })
 
     it('should generate consistent hash colors for unknown tags', () => {
       const { getTagColor } = store.getState()
-      
+
       const color1 = getTagColor('unknown-tag')
       const color2 = getTagColor('unknown-tag')
-      
+
       expect(color1).toBe(color2) // Should be consistent
       expect(color1).toBeTruthy() // Should return a valid color
     })
 
     it('should reset tag colors', () => {
       const { setTagColor, resetTagColors } = store.getState()
-      
+
       // Set some colors first
       setTagColor('tag1', 'red')
       setTagColor('tag2', 'blue')
-      
+
       // Reset
       resetTagColors()
-      
+
       const state = store.getState()
       expect(state.settings.tagColors).toEqual({})
     })
@@ -130,16 +131,16 @@ describe('SettingsSlice - Consolidated Theme Management', () => {
       storageService.saveSettings.mockImplementationOnce(() => {
         throw new Error('Storage failed')
       })
-      
+
       const { setTheme } = store.getState()
-      
+
       // Should not throw
       expect(() => setTheme('light')).not.toThrow()
-      
+
       // Theme should still be updated in state
       const state = store.getState()
       expect(state.settings.theme).toBe('light')
-      
+
       // Should fallback to localStorage
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
         'viny-settings',
@@ -149,13 +150,13 @@ describe('SettingsSlice - Consolidated Theme Management', () => {
 
     it('should update multiple settings at once', () => {
       const { updateSettings } = store.getState()
-      
+
       updateSettings({
         theme: 'dark',
         fontSize: 16,
-        wordWrap: false
+        wordWrap: false,
       })
-      
+
       const state = store.getState()
       expect(state.settings.theme).toBe('dark')
       expect(state.settings.fontSize).toBe(16)

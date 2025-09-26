@@ -1,22 +1,62 @@
+import type React from 'react'
 import { useEffect } from 'react'
 import { useElectronExport } from '../hooks/useElectronExport'
 import { useAppStore } from '../stores/newSimpleStore'
 import { useNoteActions } from '../hooks/useNoteActions'
+import {
+  useActiveNotesQueryV2,
+  useUpdateNoteMutationV2,
+  useTogglePinMutationV2,
+  useMoveToTrashMutationV2,
+  useRestoreNoteMutationV2,
+  useDeleteNotePermanentlyMutationV2,
+} from '../hooks/queries/useNotesServiceQueryV2'
+import { useConfirmDialog } from '../hooks/useConfirmDialog'
+import type { Note } from '../types'
 
 const ElectronExportHandler: React.FC = () => {
   const { exportToHTML, exportToPDF, exportToMarkdown } = useElectronExport()
-  const { notes, updateNote, removeNote, setModal, showSuccess, showInfo } = useAppStore()
+  const { setModal, showSuccess, showInfo } = useAppStore()
   const { handleDuplicateNote } = useNoteActions()
-  
+
+  // TanStack Query V2 hooks
+  const { data: notes = [] } = useActiveNotesQueryV2()
+  const updateNoteMutation = useUpdateNoteMutationV2()
+  const togglePinMutation = useTogglePinMutationV2()
+  const moveToTrashMutation = useMoveToTrashMutationV2()
+  const restoreNoteMutation = useRestoreNoteMutationV2()
+  const deletePermanentlyMutation = useDeleteNotePermanentlyMutationV2()
+  const { showConfirm } = useConfirmDialog()
+
   useEffect(() => {
-    const electronAPI = window.electronAPI as any
+    const electronAPI = window.electronAPI
     if (!electronAPI?.isElectron) return
-    
-    const handleExportNote = (noteId: string, format: 'html' | 'markdown' | 'pdf') => {
-      const note = notes.find(n => n.id === noteId)
-      if (!note) return
+
+    const handleExportNote = (
+      noteIdOrData: string | { note: Note; format: 'html' | 'markdown' | 'pdf' },
+      format?: 'html' | 'markdown' | 'pdf'
+    ) => {
+      let note: Note | undefined
+      let exportFormat: 'html' | 'markdown' | 'pdf'
       
-      switch (format) {
+      // Handle both formats: legacy (noteId, format) and new ({note, format})
+      if (typeof noteIdOrData === 'string') {
+        // Legacy format: (noteId, format)
+        note = notes.find(n => n.id === noteIdOrData)
+        exportFormat = format!
+      } else if (noteIdOrData && typeof noteIdOrData === 'object' && 'note' in noteIdOrData) {
+        // New format: {note, format}
+        note = noteIdOrData.note
+        exportFormat = noteIdOrData.format
+      } else {
+        return
+      }
+      
+      if (!note) {
+        return
+      }
+
+      switch (exportFormat) {
         case 'html':
           exportToHTML(note)
           break
@@ -28,58 +68,47 @@ const ElectronExportHandler: React.FC = () => {
           break
       }
     }
-    
+
     const handleTogglePin = (noteId: string) => {
+      togglePinMutation.mutate(noteId)
+    }
+
+    const handleDuplicate = async (noteId: string) => {
       const note = notes.find(n => n.id === noteId)
       if (!note) return
-      
-      const updatedNote = { ...note, isPinned: !note.isPinned }
-      updateNote(updatedNote)
-      showSuccess(updatedNote.isPinned ? 'Note pinned' : 'Note unpinned')
+
+      await handleDuplicateNote(note)
     }
-    
-    const handleDuplicate = (noteId: string) => {
-      const note = notes.find(n => n.id === noteId)
-      if (!note) return
-      
-      handleDuplicateNote(note)
-      showSuccess('Note duplicated')
-    }
-    
+
     const handleDelete = (noteId: string) => {
-      const note = notes.find(n => n.id === noteId)
-      if (!note) return
-      
-      const updatedNote = { ...note, isTrashed: true }
-      updateNote(updatedNote)
-      showInfo('Note moved to trash')
+      moveToTrashMutation.mutate(noteId)
     }
-    
+
     const handleRestore = (noteId: string) => {
-      const note = notes.find(n => n.id === noteId)
-      if (!note) return
-      
-      const updatedNote = { ...note, isTrashed: false }
-      updateNote(updatedNote)
-      showSuccess('Note restored')
+      restoreNoteMutation.mutate(noteId)
     }
-    
-    const handlePermanentDelete = (noteId: string) => {
-      if (confirm('Are you sure you want to permanently delete this note? This action cannot be undone.')) {
-        removeNote(noteId)
-        showInfo('Note permanently deleted')
-      }
+
+    const handlePermanentDelete = async (noteId: string) => {
+      await showConfirm({
+        title: 'Delete Note Permanently',
+        message: 'Are you sure you want to permanently delete this note? This action cannot be undone.',
+        type: 'danger',
+        confirmText: 'Delete Permanently',
+        onConfirm: () => {
+          deletePermanentlyMutation.mutate(noteId)
+        }
+      })
     }
-    
+
     const handleMoveToNotebook = (noteId: string) => {
       const note = notes.find(n => n.id === noteId)
       if (!note) return
-      
+
       // Store the note ID for the modal to use
       window.localStorage.setItem('temp-move-note-id', noteId)
       setModal('notebookManager', true)
     }
-    
+
     // Listen for all events from context menu
     electronAPI.on('export-note', handleExportNote)
     electronAPI.on('toggle-pin-note', handleTogglePin)
@@ -88,7 +117,7 @@ const ElectronExportHandler: React.FC = () => {
     electronAPI.on('restore-note', handleRestore)
     electronAPI.on('permanent-delete-note', handlePermanentDelete)
     electronAPI.on('move-to-notebook', handleMoveToNotebook)
-    
+
     return () => {
       if (electronAPI) {
         electronAPI.removeAllListeners('export-note')
@@ -100,8 +129,20 @@ const ElectronExportHandler: React.FC = () => {
         electronAPI.removeAllListeners('move-to-notebook')
       }
     }
-  }, [notes, updateNote, removeNote, setModal, exportToHTML, exportToPDF, exportToMarkdown, handleDuplicateNote, showSuccess, showInfo])
-  
+  }, [
+    notes,
+    setModal,
+    exportToHTML,
+    exportToPDF,
+    exportToMarkdown,
+    handleDuplicateNote,
+    togglePinMutation,
+    moveToTrashMutation,
+    restoreNoteMutation,
+    deletePermanentlyMutation,
+    showConfirm,
+  ])
+
   return null
 }
 

@@ -1,8 +1,20 @@
 import React, { useState, useCallback } from 'react'
 import { useSettings } from '../../hooks/useSettings'
-import { SettingsSchema, SettingValue } from '../../services/settings/types'
+import type {
+  SettingsSchema,
+  SettingValue,
+} from '../../services/settings/types'
 import { LivePreviewControls } from './LivePreview'
 import { Icons } from '../Icons'
+import { SliderWithLabels } from '../ui/SliderRadix'
+import { settingsLogger } from '../../utils/logger'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/SelectRadix'
 
 interface SettingsPanelProps {
   categoryId?: string
@@ -18,60 +30,75 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ categoryId }) => {
     errors,
     loading,
     previewSetting,
-    revertPreview
+    revertPreview,
   } = useSettings({ category: categoryId })
-  
+
   // Mock categories data for now
   const categories = [
     { id: 'general', label: 'General', description: 'General settings' },
     { id: 'themes', label: 'Themes', description: 'Theme settings' },
-    { id: 'editor', label: 'Editor', description: 'Editor settings' }
+    { id: 'editor', label: 'Editor', description: 'Editor settings' },
   ]
 
-  const [activeCategory, setActiveCategory] = useState(categoryId || categories[0]?.id)
+  const [activeCategory, setActiveCategory] = useState(
+    categoryId || categories[0]?.id
+  )
   const [previewingKeys, setPreviewingKeys] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState('')
 
-  const handleSettingChange = useCallback(async (key: string, value: SettingValue, preview = false) => {
-    try {
-      if (preview) {
-        previewSetting(key, value)
-        setPreviewingKeys(prev => new Set(prev).add(key))
-      } else {
-        setSetting(key, value)
-        setPreviewingKeys(prev => {
-          const newSet = new Set(prev)
-          newSet.delete(key)
-          return newSet
-        })
+  const handleSettingChange = useCallback(
+    async (key: string, value: SettingValue, preview = false) => {
+      try {
+        if (preview) {
+          previewSetting(key, value)
+          setPreviewingKeys(prev => new Set(prev).add(key))
+        } else {
+          setSetting(key, value)
+          setPreviewingKeys(prev => {
+            const newSet = new Set(prev)
+            newSet.delete(key)
+            return newSet
+          })
+        }
+      } catch (error) {
+        settingsLogger.error(
+          `Failed to ${preview ? 'preview' : 'update'} setting:`,
+          error
+        )
       }
-    } catch (error) {
-      console.error(`Failed to ${preview ? 'preview' : 'update'} setting:`, error)
-    }
-  }, [setSetting, previewSetting])
+    },
+    [setSetting, previewSetting]
+  )
 
-  const handleApplyPreview = useCallback(async (key: string, value: SettingValue) => {
-    setSetting(key, value)
-    setPreviewingKeys(prev => {
-      const newSet = new Set(prev)
-      newSet.delete(key)
-      return newSet
-    })
-  }, [setSetting])
+  const handleApplyPreview = useCallback(
+    async (key: string, value: SettingValue) => {
+      setSetting(key, value)
+      setPreviewingKeys(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(key)
+        return newSet
+      })
+    },
+    [setSetting]
+  )
 
-  const handleRevertPreview = useCallback(async (key: string) => {
-    revertPreview(key)
-    setPreviewingKeys(prev => {
-      const newSet = new Set(prev)
-      newSet.delete(key)
-      return newSet
-    })
-  }, [revertPreview])
+  const handleRevertPreview = useCallback(
+    async (key: string) => {
+      revertPreview(key)
+      setPreviewingKeys(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(key)
+        return newSet
+      })
+    },
+    [revertPreview]
+  )
 
-  const filteredSchemas = schemas.filter(schema => 
-    !searchQuery || 
-    schema.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    schema.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredSchemas = schemas.filter(
+    schema =>
+      !searchQuery ||
+      schema.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      schema.description?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   const renderSetting = (schema: SettingsSchema) => {
@@ -86,11 +113,15 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ categoryId }) => {
             <label className="block text-sm font-medium text-theme-text-primary">
               {schema.label}
               {schema.experimental && (
-                <span className="ml-2 text-xs text-theme-accent-yellow">Experimental</span>
+                <span className="ml-2 text-xs text-theme-accent-yellow">
+                  Experimental
+                </span>
               )}
             </label>
             {schema.description && (
-              <p className="text-xs text-theme-text-muted mt-1">{schema.description}</p>
+              <p className="text-xs text-theme-text-muted mt-1">
+                {schema.description}
+              </p>
             )}
           </div>
           {schema.defaultValue !== value && (
@@ -105,9 +136,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ categoryId }) => {
 
         {renderControl(schema, value, isPreviewing)}
 
-        {error && (
-          <p className="text-xs text-theme-accent-red mt-1">{error}</p>
-        )}
+        {error && <p className="text-xs text-theme-accent-red mt-1">{error}</p>}
 
         {isPreviewing && (
           <LivePreviewControls
@@ -121,7 +150,11 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ categoryId }) => {
     )
   }
 
-  const renderControl = (schema: SettingsSchema, value: SettingValue, isPreviewing: boolean) => {
+  const renderControl = (
+    schema: SettingsSchema,
+    value: SettingValue,
+    isPreviewing: boolean
+  ) => {
     const shouldPreview = !isPreviewing
 
     switch (schema.type) {
@@ -131,7 +164,9 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ categoryId }) => {
             <input
               type="checkbox"
               checked={value as boolean}
-              onChange={(e) => handleSettingChange(schema.key, e.target.checked, shouldPreview)}
+              onChange={e =>
+                handleSettingChange(schema.key, e.target.checked, shouldPreview)
+              }
               className="sr-only peer"
             />
             <div className="w-11 h-6 bg-theme-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent-primary"></div>
@@ -140,20 +175,19 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ categoryId }) => {
 
       case 'number':
         return (
-          <div className="flex items-center space-x-4">
-            <input
-              type="range"
-              min={schema.min}
-              max={schema.max}
-              step={schema.step}
-              value={value as number}
-              onChange={(e) => handleSettingChange(schema.key, Number(e.target.value), shouldPreview)}
-              className="flex-1 h-2 bg-theme-bg-tertiary rounded-lg appearance-none cursor-pointer"
-            />
-            <span className="text-sm font-medium text-theme-text-primary w-12">
-              {String(value)}
-            </span>
-          </div>
+          <SliderWithLabels
+            value={[value as number]}
+            min={schema.min}
+            max={schema.max}
+            step={schema.step}
+            showValue={true}
+            showRange={true}
+            formatValue={val => String(val)}
+            onValueChange={values =>
+              handleSettingChange(schema.key, Number(values[0]), shouldPreview)
+            }
+            className="w-full"
+          />
         )
 
       case 'string':
@@ -161,7 +195,9 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ categoryId }) => {
           <input
             type="text"
             value={value as string}
-            onChange={(e) => handleSettingChange(schema.key, e.target.value, shouldPreview)}
+            onChange={e =>
+              handleSettingChange(schema.key, e.target.value, shouldPreview)
+            }
             placeholder={schema.placeholder}
             className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
           />
@@ -169,26 +205,40 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ categoryId }) => {
 
       case 'select':
         return (
-          <select
+          <Select
             value={value as string}
-            onChange={(e) => handleSettingChange(schema.key, e.target.value, shouldPreview)}
-            className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
+            onValueChange={newValue =>
+              handleSettingChange(schema.key, newValue, shouldPreview)
+            }
           >
-            {schema.options?.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-theme-accent-primary">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {schema.options?.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         )
 
       default:
-        return <div className="text-sm text-theme-text-muted">Unsupported setting type</div>
+        return (
+          <div className="text-sm text-theme-text-muted">
+            Unsupported setting type
+          </div>
+        )
     }
   }
 
   if (loading) {
-    return <div className="flex items-center justify-center p-8">Loading settings...</div>
+    return (
+      <div className="flex items-center justify-center p-8">
+        Loading settings...
+      </div>
+    )
   }
 
   return (
@@ -200,13 +250,15 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ categoryId }) => {
             type="text"
             placeholder="Search settings..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
             className="w-full px-3 py-2 bg-theme-bg-primary border border-theme-border-primary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
           />
         </div>
         <nav className="px-2">
           {categories.map((category: any) => {
-            const Icon = category.icon ? Icons[category.icon as keyof typeof Icons] : null
+            const Icon = category.icon
+              ? Icons[category.icon as keyof typeof Icons]
+              : null
             return (
               <button
                 key={category.id}
@@ -233,7 +285,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ categoryId }) => {
               {categories.find((c: any) => c.id === activeCategory)?.label}
             </h2>
             <p className="text-sm text-theme-text-muted mt-1">
-              {categories.find((c: any) => c.id === activeCategory)?.description}
+              {
+                categories.find((c: any) => c.id === activeCategory)
+                  ?.description
+              }
             </p>
           </div>
 

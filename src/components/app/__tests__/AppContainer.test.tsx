@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 
 // Create mock functions with vi.hoisted
-const { 
+const {
   mockCreateNewNote,
   mockHandleSaveNote,
   mockHandleDeleteNote,
@@ -20,7 +20,7 @@ const {
   mockSetupGlobalErrorHandler,
   mockI18nInitialize,
   mockAppPresentation,
-  mockToastContainer
+  mockToastContainer,
 } = vi.hoisted(() => {
   return {
     mockCreateNewNote: vi.fn(),
@@ -42,7 +42,9 @@ const {
     mockAppPresentation: vi.fn((props: any) => (
       <div data-testid="app-presentation">
         App Presentation
-        {props.currentNote && <div data-testid="current-note">{props.currentNote.title}</div>}
+        {props.currentNote && (
+          <div data-testid="current-note">{props.currentNote.title}</div>
+        )}
         {props.isLoading && <div data-testid="loading">Loading...</div>}
       </div>
     )),
@@ -55,7 +57,7 @@ const {
           </div>
         ))}
       </div>
-    ))
+    )),
   }
 })
 
@@ -66,15 +68,15 @@ vi.mock('../../../hooks/useSimpleLogic', () => ({
     selectedNote: null,
     isEditorOpen: false,
     isLoading: false,
-    filteredNotes: []
+    filteredNotes: [],
   })),
   useNoteActions: vi.fn(() => ({
     createNewNote: mockCreateNewNote,
     handleSaveNote: mockHandleSaveNote,
     handleDeleteNote: mockHandleDeleteNote,
     handleTogglePin: mockHandleTogglePin,
-    handleDuplicateNote: mockHandleDuplicateNote
-  }))
+    handleDuplicateNote: mockHandleDuplicateNote,
+  })),
 }))
 
 vi.mock('../../../stores/newSimpleStore', () => ({
@@ -86,37 +88,37 @@ vi.mock('../../../stores/newSimpleStore', () => ({
     setModal: mockSetModal,
     removeToast: mockRemoveToast,
     setIsPreviewVisible: mockSetIsPreviewVisible,
-    sortNotes: mockSortNotes
-  }))
+    sortNotes: mockSortNotes,
+  })),
 }))
 
 vi.mock('../../../hooks/useSettings', () => ({
   useSettings: vi.fn(() => ({
     settings: {
       theme: 'light',
-      language: 'en'
-    }
-  }))
+      language: 'en',
+    },
+  })),
 }))
 
 vi.mock('../../../hooks/useNotebooks', () => ({
   useNotebooks: vi.fn(() => ({
-    notebooks: []
-  }))
+    notebooks: [],
+  })),
 }))
 
 vi.mock('../../../hooks/useAutoSave', () => ({
   useAutoSave: vi.fn(() => ({
-    debouncedAutoSave: mockDebouncedAutoSave
-  }))
+    debouncedAutoSave: mockDebouncedAutoSave,
+  })),
 }))
 
 vi.mock('../../../hooks/useKeyboardShortcuts', () => ({
-  useKeyboardShortcuts: vi.fn()
+  useKeyboardShortcuts: vi.fn(),
 }))
 
 vi.mock('../../../hooks/usePageLifecycle', () => ({
-  usePageLifecycle: vi.fn()
+  usePageLifecycle: vi.fn(),
 }))
 
 vi.mock('../../../hooks/useAppHandlers', () => ({
@@ -124,34 +126,34 @@ vi.mock('../../../hooks/useAppHandlers', () => ({
     handleOpenNote: mockHandleOpenNote,
     handleContentChange: mockHandleContentChange,
     handleNotebookChange: mockHandleNotebookChange,
-    handleMetadataChange: mockHandleMetadataChange
-  }))
+    handleMetadataChange: mockHandleMetadataChange,
+  })),
 }))
 
 vi.mock('../../../hooks/useSettingsEffects', () => ({
-  useSettingsEffects: vi.fn()
+  useSettingsEffects: vi.fn(),
 }))
 
 vi.mock('../../../hooks/useErrorHandler', () => ({
-  useErrorHandler: vi.fn(() => ({}))
+  useErrorHandler: vi.fn(() => ({})),
 }))
 
 vi.mock('../../../utils/errorHandler', () => ({
-  setupGlobalErrorHandler: mockSetupGlobalErrorHandler
+  setupGlobalErrorHandler: mockSetupGlobalErrorHandler,
 }))
 
 vi.mock('../../../services/i18nService', () => ({
   i18nService: {
-    initialize: mockI18nInitialize
-  }
+    initialize: mockI18nInitialize,
+  },
 }))
 
 vi.mock('../AppPresentation', () => ({
-  default: mockAppPresentation
+  default: mockAppPresentation,
 }))
 
 vi.mock('../../ui/ToastContainer', () => ({
-  default: mockToastContainer
+  default: mockToastContainer,
 }))
 
 // Import mocked hooks
@@ -172,16 +174,15 @@ import AppContainer from '../AppContainer'
 describe('AppContainer', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    
+
     // Reset all mocks to their default return values
     ;(useAppLogic as any).mockReturnValue({
       currentNote: null,
       selectedNote: null,
       isEditorOpen: false,
       isLoading: false,
-      filteredNotes: []
+      filteredNotes: [],
     })
-    
     ;(useAppStore as any).mockReturnValue({
       modals: {},
       toasts: [],
@@ -190,37 +191,35 @@ describe('AppContainer', () => {
       setModal: mockSetModal,
       removeToast: mockRemoveToast,
       setIsPreviewVisible: mockSetIsPreviewVisible,
-      sortNotes: mockSortNotes
+      sortNotes: mockSortNotes,
     })
-    
     ;(useSettings as any).mockReturnValue({
       settings: {
         theme: 'light',
-        language: 'en'
-      }
+        language: 'en',
+      },
     })
-    
     ;(useNotebooks as any).mockReturnValue({
-      notebooks: []
+      notebooks: [],
     })
   })
 
   it('renders AppPresentation and ToastContainer', () => {
     render(<AppContainer />)
-    
+
     expect(screen.getByTestId('app-presentation')).toBeInTheDocument()
     expect(screen.getByTestId('toast-container')).toBeInTheDocument()
   })
 
   it('initializes i18n service on mount', () => {
     render(<AppContainer />)
-    
+
     expect(mockI18nInitialize).toHaveBeenCalled()
   })
 
   it('sets up global error handler on mount', () => {
     render(<AppContainer />)
-    
+
     expect(mockSetupGlobalErrorHandler).toHaveBeenCalled()
   })
 
@@ -231,11 +230,11 @@ describe('AppContainer', () => {
       selectedNote: null,
       isEditorOpen: false,
       isLoading: false,
-      filteredNotes: []
+      filteredNotes: [],
     })
-    
+
     render(<AppContainer />)
-    
+
     expect(screen.getByTestId('current-note')).toHaveTextContent('Test Note')
   })
 
@@ -245,18 +244,18 @@ describe('AppContainer', () => {
       selectedNote: null,
       isEditorOpen: false,
       isLoading: true,
-      filteredNotes: []
+      filteredNotes: [],
     })
-    
+
     render(<AppContainer />)
-    
+
     expect(screen.getByTestId('loading')).toBeInTheDocument()
   })
 
   it('renders toasts from store', () => {
     const mockToasts = [
       { id: '1', message: 'Success!', type: 'success' },
-      { id: '2', message: 'Error!', type: 'error' }
+      { id: '2', message: 'Error!', type: 'error' },
     ]
     ;(useAppStore as any).mockReturnValue({
       modals: {},
@@ -266,40 +265,40 @@ describe('AppContainer', () => {
       setModal: mockSetModal,
       removeToast: mockRemoveToast,
       setIsPreviewVisible: mockSetIsPreviewVisible,
-      sortNotes: mockSortNotes
+      sortNotes: mockSortNotes,
     })
-    
+
     render(<AppContainer />)
-    
+
     expect(screen.getByTestId('toast-1')).toHaveTextContent('Success!')
     expect(screen.getByTestId('toast-2')).toHaveTextContent('Error!')
   })
 
   it('configures keyboard shortcuts', () => {
     render(<AppContainer />)
-    
+
     expect(useKeyboardShortcuts).toHaveBeenCalledWith({
       currentNote: null,
       onCreateNew: mockCreateNewNote,
       onSave: expect.any(Function),
       onSearch: expect.any(Function),
       onExport: expect.any(Function),
-      onSettings: expect.any(Function)
+      onSettings: expect.any(Function),
     })
   })
 
   it('configures auto-save with debounce', () => {
     render(<AppContainer />)
-    
+
     expect(useAutoSave).toHaveBeenCalledWith({
       onSave: expect.any(Function),
-      debounceMs: 1000
+      debounceMs: 1000,
     })
   })
 
   it('applies settings effects', () => {
     render(<AppContainer />)
-    
+
     expect(useSettingsEffects).toHaveBeenCalled()
   })
 
@@ -310,19 +309,19 @@ describe('AppContainer', () => {
       selectedNote: null,
       isEditorOpen: false,
       isLoading: false,
-      filteredNotes: []
+      filteredNotes: [],
     })
-    
+
     render(<AppContainer />)
-    
+
     expect(usePageLifecycle).toHaveBeenCalledWith({ currentNote: mockNote })
   })
 
   it('passes all required props to AppPresentation', () => {
     render(<AppContainer />)
-    
+
     const callArgs = mockAppPresentation.mock.calls[0][0]
-    
+
     expect(callArgs).toMatchObject({
       currentNote: null,
       selectedNote: null,
@@ -347,9 +346,9 @@ describe('AppContainer', () => {
       setModal: mockSetModal,
       removeToast: mockRemoveToast,
       setIsPreviewVisible: mockSetIsPreviewVisible,
-      sortNotes: mockSortNotes
+      sortNotes: mockSortNotes,
     })
-    
+
     expect(callArgs.previewRef).toBeDefined()
     expect(callArgs.previewRef.current).toBe(null)
   })
@@ -361,36 +360,36 @@ describe('AppContainer', () => {
       selectedNote: null,
       isEditorOpen: false,
       isLoading: false,
-      filteredNotes: mockFilteredNotes
+      filteredNotes: mockFilteredNotes,
     })
-    
+
     render(<AppContainer />)
-    
+
     expect(useAppHandlers).toHaveBeenCalledWith({
       filteredNotes: mockFilteredNotes,
       onSaveNote: expect.any(Function),
-      debouncedAutoSave: mockDebouncedAutoSave
+      debouncedAutoSave: mockDebouncedAutoSave,
     })
   })
 
   it('passes notebooks from useNotebooks hook', () => {
     const mockNotebooks = [
       { id: '1', name: 'Work' },
-      { id: '2', name: 'Personal' }
+      { id: '2', name: 'Personal' },
     ]
     ;(useNotebooks as any).mockReturnValue({
-      notebooks: mockNotebooks
+      notebooks: mockNotebooks,
     })
-    
+
     render(<AppContainer />)
-    
+
     const callArgs = mockAppPresentation.mock.calls[0][0]
     expect(callArgs.notebooks).toEqual(mockNotebooks)
   })
 
   it('handles error handler initialization', () => {
     render(<AppContainer />)
-    
+
     expect(useErrorHandler).toHaveBeenCalled()
   })
 
@@ -404,17 +403,17 @@ describe('AppContainer', () => {
       setModal: mockSetModal,
       removeToast: mockRemoveToast,
       setIsPreviewVisible: mockSetIsPreviewVisible,
-      sortNotes: mockSortNotes
+      sortNotes: mockSortNotes,
     })
-    
+
     render(<AppContainer />)
-    
+
     const callArgs = mockToastContainer.mock.calls[0][0]
     expect(callArgs).toEqual({
       toasts: mockToasts,
       onDismiss: mockRemoveToast,
       position: 'top-right',
-      maxToasts: 5
+      maxToasts: 5,
     })
   })
 })

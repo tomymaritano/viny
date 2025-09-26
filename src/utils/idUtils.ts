@@ -58,11 +58,11 @@ export const isValidId = (id: string, prefix?: string): boolean => {
   if (!id || typeof id !== 'string') {
     return false
   }
-  
+
   if (prefix) {
     return id.startsWith(`${prefix}_`) && id.split('_').length === 3
   }
-  
+
   // Check for any valid format (prefix_timestamp_random)
   const parts = id.split('_')
   return parts.length === 3 && !isNaN(Number(parts[1]))

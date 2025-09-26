@@ -5,7 +5,12 @@ declare global {
   interface Window {
     electronAPI: {
       startWindowDrag: (data: { startX?: number; startY?: number }) => void
-      continueWindowDrag: (data: { currentX?: number; currentY?: number; deltaX?: number; deltaY?: number }) => void
+      continueWindowDrag: (data: {
+        currentX?: number
+        currentY?: number
+        deltaX?: number
+        deltaY?: number
+      }) => void
       endWindowDrag: () => void
     }
   }
@@ -15,7 +20,9 @@ interface TitleBarCompactProps {
   title?: string
 }
 
-const TitleBarCompact: React.FC<TitleBarCompactProps> = ({ title = 'Viny' }) => {
+const TitleBarCompact: React.FC<TitleBarCompactProps> = ({
+  title = 'Viny',
+}) => {
   // Don't render anything if not in Electron
   if (typeof window === 'undefined' || !window.electronAPI) {
     return null
@@ -27,36 +34,45 @@ const TitleBarCompact: React.FC<TitleBarCompactProps> = ({ title = 'Viny' }) => 
 
   const handleMouseDown = (e: React.MouseEvent) => {
     // Only start drag if clicking on empty area (not buttons)
-    if ((e.target as Element).closest('button') || (e.target as Element).closest('a')) {
+    if (
+      (e.target as Element).closest('button') ||
+      (e.target as Element).closest('a')
+    ) {
       return
     }
-    
+
     isDragging = true
     startX = e.screenX
     startY = e.screenY
-    
-    // Start window dragging via IPC
-    window.electronAPI.startWindowDrag({
-      startX: e.screenX,
-      startY: e.screenY
-    })
-    
+
+    // Start window dragging via IPC (only in Electron)
+    if (window.electronAPI?.startWindowDrag) {
+      window.electronAPI.startWindowDrag({
+        startX: e.screenX,
+        startY: e.screenY,
+      })
+    }
+
     // Add temporary listeners
     const handleMouseMove = (event: MouseEvent) => {
       if (!isDragging) return
-      
-      window.electronAPI.continueWindowDrag({
-        currentX: event.screenX,
-        currentY: event.screenY,
-        deltaX: event.screenX - startX,
-        deltaY: event.screenY - startY
-      })
+
+      if (window.electronAPI?.continueWindowDrag) {
+        window.electronAPI.continueWindowDrag({
+          currentX: event.screenX,
+          currentY: event.screenY,
+          deltaX: event.screenX - startX,
+          deltaY: event.screenY - startY,
+        })
+      }
     }
 
     const handleMouseUp = () => {
       if (isDragging) {
         isDragging = false
-        window.electronAPI.endWindowDrag()
+        if (window.electronAPI?.endWindowDrag) {
+          window.electronAPI.endWindowDrag()
+        }
         document.removeEventListener('mousemove', handleMouseMove)
         document.removeEventListener('mouseup', handleMouseUp)
       }

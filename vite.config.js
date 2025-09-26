@@ -2,6 +2,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 export default defineConfig({
   define: {
@@ -12,6 +13,8 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    // Temporarily disable PWA due to build error
+    /*
     // Disable PWA for Electron builds to improve performance
     ...(process.env.TARGET !== 'electron' ? [
       VitePWA({
@@ -50,6 +53,13 @@ export default defineConfig({
         }
       })
     ] : [])
+    */
+    visualizer({
+      open: true,
+      gzipSize: true,
+      brotliSize: true,
+      filename: 'dist/stats.html'
+    })
   ],
   base: './',
   build: {
@@ -58,6 +68,11 @@ export default defineConfig({
     minify: 'terser',
     sourcemap: false,
     rollupOptions: {
+      // IMPORTANT: Treeshaking disabled due to Rollup error in v6.3.5
+      // Error: "Cannot add property 0, object is not extensible"
+      // This is a temporary workaround - investigate after Rollup update
+      // The build size impact is minimal since we use Terser for minification
+      treeshake: false,
       external: ['electron', 'electron-store'],
       output: {
         manualChunks: (id) => {
@@ -156,6 +171,13 @@ export default defineConfig({
       compress: {
         drop_console: true,
         drop_debugger: true,
+        // Production optimizations
+        pure_getters: true,
+        unsafe_comps: true,
+        unsafe_math: true,
+      },
+      mangle: {
+        safari10: true,
       },
     },
     // Increase chunk size warning limit for expected large chunks
@@ -163,7 +185,7 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.js'],
+    setupFiles: ['./src/__tests__/setup.ts'],
     globals: true,
     css: true,
     coverage: {

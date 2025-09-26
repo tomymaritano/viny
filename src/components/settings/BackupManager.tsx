@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { SettingsBackupManager, type SettingsBackup } from '../../services/settings/backup'
+import {
+  SettingsBackupManager,
+  type SettingsBackup,
+} from '../../services/settings/backup'
 import { useSettings } from '../../hooks/useSettings'
 import { Icons } from '../Icons'
 
@@ -28,13 +31,16 @@ export const BackupManager: React.FC = () => {
     setLoading(true)
     setError(null)
     setSuccess(null)
-    
+
     try {
       const settingsData = exportSettings()
-      const backupId = await SettingsBackupManager.createBackup(settingsData.settings, {
-        description: 'Manual backup'
-      })
-      
+      const backupId = await SettingsBackupManager.createBackup(
+        settingsData.settings,
+        {
+          description: 'Manual backup',
+        }
+      )
+
       setSuccess(`Backup created: ${backupId}`)
       await loadBackups()
     } catch (err) {
@@ -52,7 +58,7 @@ export const BackupManager: React.FC = () => {
     setLoading(true)
     setError(null)
     setSuccess(null)
-    
+
     try {
       const settings = await SettingsBackupManager.restoreBackup(backupId)
       if (settings) {
@@ -98,19 +104,21 @@ export const BackupManager: React.FC = () => {
       a.download = `viny-backup-${backupId}.json`
       a.click()
       URL.revokeObjectURL(url)
-      
+
       setSuccess('Backup exported')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to export backup')
     }
   }
 
-  const handleImportBackup = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportBackup = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0]
     if (!file) return
 
     const reader = new FileReader()
-    reader.onload = async (e) => {
+    reader.onload = async e => {
       try {
         const backupData = e.target?.result as string
         const backupId = await SettingsBackupManager.importBackup(backupData)
@@ -121,7 +129,7 @@ export const BackupManager: React.FC = () => {
       }
     }
     reader.readAsText(file)
-    
+
     // Reset the input
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
@@ -149,7 +157,7 @@ export const BackupManager: React.FC = () => {
             Create and manage settings backups
           </p>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <label className="px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md hover:bg-theme-bg-tertiary transition-colors cursor-pointer text-sm">
             <Icons.Upload size={16} className="inline mr-2" />
@@ -162,7 +170,7 @@ export const BackupManager: React.FC = () => {
               className="hidden"
             />
           </label>
-          
+
           <button
             onClick={handleCreateBackup}
             disabled={loading}
@@ -180,7 +188,7 @@ export const BackupManager: React.FC = () => {
           <p className="text-sm text-red-800">{error}</p>
         </div>
       )}
-      
+
       {success && (
         <div className="p-3 bg-green-50 border border-green-200 rounded-md">
           <p className="text-sm text-green-800">{success}</p>
@@ -196,7 +204,7 @@ export const BackupManager: React.FC = () => {
             <p className="text-sm">Create your first backup to get started</p>
           </div>
         ) : (
-          backups.map((backup) => (
+          backups.map(backup => (
             <div
               key={backup.id}
               className="p-4 bg-theme-bg-secondary border border-theme-border-primary rounded-lg"
@@ -211,7 +219,7 @@ export const BackupManager: React.FC = () => {
                       v{backup.version}
                     </span>
                   </div>
-                  
+
                   <div className="mt-2 text-xs text-theme-text-muted space-y-1">
                     <p>Created: {formatDate(backup.timestamp)}</p>
                     <p>Size: {formatSize(backup.settings)}</p>
@@ -220,7 +228,7 @@ export const BackupManager: React.FC = () => {
                     )}
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-2 ml-4">
                   <button
                     onClick={() => handleExportBackup(backup.id)}
@@ -229,7 +237,7 @@ export const BackupManager: React.FC = () => {
                   >
                     <Icons.Download size={16} />
                   </button>
-                  
+
                   <button
                     onClick={() => handleRestoreBackup(backup.id)}
                     disabled={loading}
@@ -238,7 +246,7 @@ export const BackupManager: React.FC = () => {
                   >
                     <Icons.RotateCcw size={16} />
                   </button>
-                  
+
                   <button
                     onClick={() => handleDeleteBackup(backup.id)}
                     className="p-2 text-red-500 hover:text-red-600 transition-colors"
@@ -258,9 +266,12 @@ export const BackupManager: React.FC = () => {
         <div className="flex items-start space-x-3">
           <Icons.Info size={20} className="text-theme-accent-primary mt-0.5" />
           <div>
-            <h4 className="text-sm font-medium text-theme-text-primary">Auto Backup</h4>
+            <h4 className="text-sm font-medium text-theme-text-primary">
+              Auto Backup
+            </h4>
             <p className="text-xs text-theme-text-muted mt-1">
-              Backups are automatically created daily. A maximum of 10 backups are kept.
+              Backups are automatically created daily. A maximum of 10 backups
+              are kept.
             </p>
           </div>
         </div>

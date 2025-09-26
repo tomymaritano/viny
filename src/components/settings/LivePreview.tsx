@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { SettingValue } from '../../services/settings/types'
+import type { SettingValue } from '../../services/settings/types'
 import { getSettingsService } from '../../services/settings'
+import { editorLogger } from '../../utils/logger'
 
 interface LivePreviewProps {
   settingKey: string
@@ -15,7 +16,7 @@ export const useLivePreview = ({
   value,
   onApply,
   onCancel,
-  previewDelay = 300
+  previewDelay = 300,
 }) => {
   const [isPreviewActive, setIsPreviewActive] = useState(false)
   const [previewValue, setPreviewValue] = useState(value)
@@ -30,26 +31,29 @@ export const useLivePreview = ({
     }
   }, [previewTimer])
 
-  const startPreview = useCallback((newValue: SettingValue) => {
-    // Clear existing timer
-    if (previewTimer) {
-      clearTimeout(previewTimer)
-    }
-
-    // Set new timer
-    const timer = setTimeout(async () => {
-      try {
-        const settingsService = getSettingsService()
-        settingsService.preview(settingKey, newValue)
-        setIsPreviewActive(true)
-        setPreviewValue(newValue)
-      } catch (error) {
-        console.error('Preview failed:', error)
+  const startPreview = useCallback(
+    (newValue: SettingValue) => {
+      // Clear existing timer
+      if (previewTimer) {
+        clearTimeout(previewTimer)
       }
-    }, previewDelay)
 
-    setPreviewTimer(timer)
-  }, [settingKey, previewDelay, previewTimer])
+      // Set new timer
+      const timer = setTimeout(async () => {
+        try {
+          const settingsService = getSettingsService()
+          settingsService.preview(settingKey, newValue)
+          setIsPreviewActive(true)
+          setPreviewValue(newValue)
+        } catch (error) {
+          editorLogger.error('Preview failed:', error)
+        }
+      }, previewDelay)
+
+      setPreviewTimer(timer)
+    },
+    [settingKey, previewDelay, previewTimer]
+  )
 
   const applyPreview = useCallback(() => {
     if (isPreviewActive) {
@@ -62,13 +66,13 @@ export const useLivePreview = ({
     if (previewTimer) {
       clearTimeout(previewTimer)
     }
-    
+
     if (isPreviewActive) {
       const settingsService = getSettingsService()
       settingsService.clearPreview(settingKey)
       setIsPreviewActive(false)
     }
-    
+
     onCancel()
   }, [settingKey, isPreviewActive, previewTimer, onCancel])
 
@@ -77,7 +81,7 @@ export const useLivePreview = ({
     previewValue,
     startPreview,
     applyPreview,
-    cancelPreview
+    cancelPreview,
   }
 }
 
@@ -92,12 +96,14 @@ export const LivePreviewControls: React.FC<LivePreviewControlsProps> = ({
   isActive,
   onApply,
   onRevert,
-  className = ''
+  className = '',
 }) => {
   if (!isActive) return null
 
   return (
-    <div className={`flex items-center gap-2 p-2 bg-theme-accent-primary/10 rounded-md ${className}`}>
+    <div
+      className={`flex items-center gap-2 p-2 bg-theme-accent-primary/10 rounded-md ${className}`}
+    >
       <span className="text-sm text-theme-text-secondary">Preview active</span>
       <button
         onClick={onApply}

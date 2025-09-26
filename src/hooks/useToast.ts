@@ -2,7 +2,7 @@
  * Toast notification hook
  */
 import { useState, useCallback } from 'react'
-import { ToastAction } from '../components/ui/Toast'
+import type { ToastAction } from '../components/ui/Toast'
 import { generateToastId } from '../utils/idUtils'
 
 export interface ToastData {
@@ -29,12 +29,12 @@ export function useToast() {
 
   const showToast = useCallback((options: ShowToastOptions) => {
     const id = generateToastId()
-    
+
     const newToast: ToastData = {
       id,
       ...options,
       duration: options.duration ?? getDefaultDuration(options.type),
-      dismissible: options.dismissible ?? true
+      dismissible: options.dismissible ?? true,
     }
 
     setToasts(prev => [...prev, newToast])
@@ -58,21 +58,33 @@ export function useToast() {
   }, [])
 
   // Convenience methods
-  const showSuccess = useCallback((message: string, options?: Partial<ShowToastOptions>) => {
-    return showToast({ type: 'success', message, ...options })
-  }, [showToast])
+  const showSuccess = useCallback(
+    (message: string, options?: Partial<ShowToastOptions>) => {
+      return showToast({ type: 'success', message, ...options })
+    },
+    [showToast]
+  )
 
-  const showError = useCallback((message: string, options?: Partial<ShowToastOptions>) => {
-    return showToast({ type: 'error', message, ...options })
-  }, [showToast])
+  const showError = useCallback(
+    (message: string, options?: Partial<ShowToastOptions>) => {
+      return showToast({ type: 'error', message, ...options })
+    },
+    [showToast]
+  )
 
-  const showWarning = useCallback((message: string, options?: Partial<ShowToastOptions>) => {
-    return showToast({ type: 'warning', message, ...options })
-  }, [showToast])
+  const showWarning = useCallback(
+    (message: string, options?: Partial<ShowToastOptions>) => {
+      return showToast({ type: 'warning', message, ...options })
+    },
+    [showToast]
+  )
 
-  const showInfo = useCallback((message: string, options?: Partial<ShowToastOptions>) => {
-    return showToast({ type: 'info', message, ...options })
-  }, [showToast])
+  const showInfo = useCallback(
+    (message: string, options?: Partial<ShowToastOptions>) => {
+      return showToast({ type: 'info', message, ...options })
+    },
+    [showToast]
+  )
 
   return {
     toasts,
@@ -82,11 +94,13 @@ export function useToast() {
     showSuccess,
     showError,
     showWarning,
-    showInfo
+    showInfo,
   }
 }
 
-function getDefaultDuration(type: 'success' | 'error' | 'warning' | 'info'): number {
+function getDefaultDuration(
+  type: 'success' | 'error' | 'warning' | 'info'
+): number {
   switch (type) {
     case 'success':
       return 3000

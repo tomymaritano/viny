@@ -17,7 +17,8 @@
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Content Security Policy for Electron -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; connect-src 'self' http://localhost:* ws://localhost:* https://api.viny.app; font-src 'self' https://fonts.gstatic.com;">
+    <!-- Note: 'unsafe-eval' removed for security. If any functionality breaks, see CSP_MIGRATION.md -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; connect-src 'self' http://localhost:3001 http://localhost:11434 ws://localhost:* https://api.viny.app; font-src 'self' https://fonts.gstatic.com;">
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#002B36">

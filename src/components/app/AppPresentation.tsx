@@ -1,6 +1,6 @@
 // Presentation component for AppSimple - handles only UI rendering
 import React, { Suspense } from 'react'
-import { Note, Notebook, Settings } from '../../types'
+import type { Note, Notebook, Settings } from '../../types'
 
 // UI Components
 import { AppLoading } from '../LoadingStates'
@@ -9,6 +9,8 @@ import { ErrorBoundary } from '../ErrorBoundary'
 import StorageErrorBoundary from '../errors/StorageErrorBoundary'
 import AppLayout from './AppLayout'
 import AppModals from './AppModals'
+import { OfflineIndicator } from '../OfflineIndicator'
+import GlobalConfirmModal from '../modals/GlobalConfirmModal'
 
 interface AppPresentationProps {
   // Data
@@ -17,7 +19,7 @@ interface AppPresentationProps {
   filteredNotes: Note[]
   notebooks: Notebook[]
   settings: Partial<Settings>
-  
+
   // UI State
   isEditorOpen: boolean
   isLoading: boolean
@@ -29,7 +31,7 @@ interface AppPresentationProps {
     tagModal: boolean
     notebookManager: boolean
   }
-  
+
   // Handlers
   handleOpenNote: (noteId: string) => void
   handleContentChange: (content: string) => void
@@ -57,13 +59,13 @@ const AppPresentation: React.FC<AppPresentationProps> = ({
   filteredNotes,
   notebooks,
   settings,
-  
+
   // UI State
   isEditorOpen,
   isLoading,
   activeSection,
   modals,
-  
+
   // Handlers
   handleOpenNote,
   handleContentChange,
@@ -77,20 +79,19 @@ const AppPresentation: React.FC<AppPresentationProps> = ({
   handleRestoreNote,
   handlePermanentDelete,
   setModal,
-  sortNotes
+  sortNotes,
 }) => {
   // Loading state
   if (isLoading) {
     return <AppLoading message="Loading Viny..." />
   }
 
-
   return (
     <div data-testid="app-container">
       <ErrorBoundary>
         <StorageErrorBoundary
           clearStorageOnRetry={true}
-          onError={(error) => {
+          onError={error => {
             // Error is handled by ErrorBoundary
           }}
           onRetry={() => {
@@ -98,43 +99,47 @@ const AppPresentation: React.FC<AppPresentationProps> = ({
           }}
         >
           <AppLayout
-          // Data
-          currentNote={currentNote}
-          selectedNote={selectedNote}
-          filteredNotes={filteredNotes}
-          notebooks={notebooks}
-          settings={settings}
-          
-          // UI State
-          isEditorOpen={isEditorOpen}
-          activeSection={activeSection}
-          
-          // Handlers
-          handleOpenNote={handleOpenNote}
-          handleContentChange={handleContentChange}
-          handleNotebookChange={handleNotebookChange}
-          handleMetadataChange={handleMetadataChange}
-          createNewNote={createNewNote}
-          handleDeleteNote={handleDeleteNote}
-          handleTogglePin={handleTogglePin}
-          handleDuplicateNote={handleDuplicateNote}
-          handleRestoreNote={handleRestoreNote}
-          handlePermanentDelete={handlePermanentDelete}
-          setModal={setModal}
-          sortNotes={sortNotes}
-        />
+            // Data
+            currentNote={currentNote}
+            selectedNote={selectedNote}
+            filteredNotes={filteredNotes}
+            notebooks={notebooks}
+            settings={settings}
+            // UI State
+            isEditorOpen={isEditorOpen}
+            activeSection={activeSection}
+            // Handlers
+            handleOpenNote={handleOpenNote}
+            handleContentChange={handleContentChange}
+            handleNotebookChange={handleNotebookChange}
+            handleMetadataChange={handleMetadataChange}
+            createNewNote={createNewNote}
+            handleDeleteNote={handleDeleteNote}
+            handleTogglePin={handleTogglePin}
+            handleDuplicateNote={handleDuplicateNote}
+            handleRestoreNote={handleRestoreNote}
+            handlePermanentDelete={handlePermanentDelete}
+            setModal={setModal}
+            sortNotes={sortNotes}
+          />
 
-        <AppModals
-          modals={modals}
-          currentNote={currentNote}
-          filteredNotes={filteredNotes}
-          handleOpenNote={handleOpenNote}
-          handleSaveNote={handleSaveNote}
-          setModal={setModal}
-          createNewNote={createNewNote}
-        />
-      </StorageErrorBoundary>
-    </ErrorBoundary>
+          <AppModals
+            modals={modals}
+            currentNote={currentNote}
+            filteredNotes={filteredNotes}
+            handleOpenNote={handleOpenNote}
+            handleSaveNote={handleSaveNote}
+            setModal={setModal}
+            createNewNote={createNewNote}
+          />
+        </StorageErrorBoundary>
+      </ErrorBoundary>
+
+      {/* Offline Indicator */}
+      <OfflineIndicator />
+
+      {/* Global Confirm Modal */}
+      <GlobalConfirmModal />
     </div>
   )
 }

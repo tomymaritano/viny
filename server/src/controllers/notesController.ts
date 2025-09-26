@@ -6,6 +6,11 @@ import { createError } from '../middleware/errorHandler'
 // Get all notes with optional filtering
 export const getNotes = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw createError('User not authenticated', 401)
+    }
+
     const query = NotesQuerySchema.parse({
       ...req.query,
       limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
@@ -14,7 +19,9 @@ export const getNotes = async (req: Request, res: Response, next: NextFunction) 
       isTrashed: req.query.isTrashed ? req.query.isTrashed === 'true' : undefined
     })
 
-    const where: any = {}
+    const where: any = {
+      userId: userId
+    }
     
     if (query.notebook) where.notebook = query.notebook
     if (query.status) where.status = query.status
@@ -96,6 +103,11 @@ export const getNotes = async (req: Request, res: Response, next: NextFunction) 
 // Get single note by ID
 export const getNoteById = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw createError('User not authenticated', 401)
+    }
+
     const { id } = req.params
     const noteId = parseInt(id)
 
@@ -103,8 +115,11 @@ export const getNoteById = async (req: Request, res: Response, next: NextFunctio
       throw createError('Invalid note ID', 400)
     }
 
-    const note = await prisma.note.findUnique({
-      where: { id: noteId },
+    const note = await prisma.note.findFirst({
+      where: { 
+        id: noteId,
+        userId: userId
+      },
       include: {
         tags: {
           include: {
@@ -143,6 +158,11 @@ export const getNoteById = async (req: Request, res: Response, next: NextFunctio
 // Create new note
 export const createNote = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw createError('User not authenticated', 401)
+    }
+
     const validatedData = CreateNoteSchema.parse(req.body)
     
     // Generate preview
@@ -158,15 +178,19 @@ export const createNote = async (req: Request, res: Response, next: NextFunction
         preview,
         notebook: validatedData.notebook,
         status: validatedData.status,
-        isPinned: validatedData.isPinned
+        isPinned: validatedData.isPinned,
+        userId: userId
       }
     })
 
     // Handle tags - optimized with parallel operations
     if (validatedData.tags.length > 0) {
-      // Find existing tags in parallel
+      // Find existing tags in parallel (filtered by userId)
       const existingTags = await prisma.tag.findMany({
-        where: { name: { in: validatedData.tags } }
+        where: { 
+          name: { in: validatedData.tags },
+          userId: userId
+        }
       })
       
       const existingTagNames = new Set(existingTags.map(tag => tag.name))
@@ -176,7 +200,7 @@ export const createNote = async (req: Request, res: Response, next: NextFunction
       const newTags = newTagNames.length > 0 
         ? await Promise.all(
             newTagNames.map(name => 
-              prisma.tag.create({ data: { name } })
+              prisma.tag.create({ data: { name, userId: userId } })
             )
           )
         : []
@@ -234,6 +258,11 @@ export const createNote = async (req: Request, res: Response, next: NextFunction
 // Update note
 export const updateNote = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw createError('User not authenticated', 401)
+    }
+
     const { id } = req.params
     const noteId = parseInt(id)
 
@@ -243,9 +272,12 @@ export const updateNote = async (req: Request, res: Response, next: NextFunction
 
     const validatedData = UpdateNoteSchema.parse(req.body)
 
-    // Check if note exists
-    const existingNote = await prisma.note.findUnique({
-      where: { id: noteId }
+    // Check if note exists and belongs to user
+    const existingNote = await prisma.note.findFirst({
+      where: { 
+        id: noteId,
+        userId: userId
+      }
     })
 
     if (!existingNote) {
@@ -286,9 +318,12 @@ export const updateNote = async (req: Request, res: Response, next: NextFunction
       })
 
       if (validatedData.tags.length > 0) {
-        // Find existing tags in parallel
+        // Find existing tags in parallel (filtered by userId)
         const existingTags = await prisma.tag.findMany({
-          where: { name: { in: validatedData.tags } }
+          where: { 
+            name: { in: validatedData.tags },
+            userId: userId
+          }
         })
         
         const existingTagNames = new Set(existingTags.map(tag => tag.name))
@@ -298,7 +333,7 @@ export const updateNote = async (req: Request, res: Response, next: NextFunction
         const newTags = newTagNames.length > 0 
           ? await Promise.all(
               newTagNames.map(name => 
-                prisma.tag.create({ data: { name } })
+                prisma.tag.create({ data: { name, userId: userId } })
               )
             )
           : []
@@ -357,6 +392,11 @@ export const updateNote = async (req: Request, res: Response, next: NextFunction
 // Delete note permanently
 export const deleteNote = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw createError('User not authenticated', 401)
+    }
+
     const { id } = req.params
     const noteId = parseInt(id)
 
@@ -364,8 +404,11 @@ export const deleteNote = async (req: Request, res: Response, next: NextFunction
       throw createError('Invalid note ID', 400)
     }
 
-    const note = await prisma.note.findUnique({
-      where: { id: noteId }
+    const note = await prisma.note.findFirst({
+      where: { 
+        id: noteId,
+        userId: userId
+      }
     })
 
     if (!note) {

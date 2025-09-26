@@ -2,7 +2,13 @@ import React from 'react'
 import ModernSpinner from './ui/LoadingSpinner'
 
 type SpinnerSize = 'small' | 'medium' | 'large' | 'xlarge'
-type SpinnerColor = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'white'
+type SpinnerColor =
+  | 'primary'
+  | 'secondary'
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'white'
 
 interface LoadingSpinnerProps {
   size?: SpinnerSize
@@ -18,7 +24,8 @@ interface SkeletonLoaderProps {
   height?: string
 }
 
-interface LoadingButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface LoadingButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode
   loading?: boolean
   disabled?: boolean
@@ -38,7 +45,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     small: 'sm' as const,
     medium: 'md' as const,
     large: 'lg' as const,
-    xlarge: 'xl' as const
+    xlarge: 'xl' as const,
   }
 
   // Map legacy colors to new colors
@@ -48,16 +55,18 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     success: 'primary' as const,
     warning: 'primary' as const,
     error: 'primary' as const,
-    white: 'white' as const
+    white: 'white' as const,
   }
 
   if (overlay) {
     return (
-      <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ${className}`}>
+      <div
+        className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ${className}`}
+      >
         <div className="flex flex-col items-center justify-center gap-3 p-6 bg-theme-bg-primary rounded-lg">
-          <ModernSpinner 
-            size={sizeMap[size]} 
-            color={colorMap[color]} 
+          <ModernSpinner
+            size={sizeMap[size]}
+            color={colorMap[color]}
             variant="spinner"
           />
           <span className="text-sm text-theme-text-secondary">
@@ -70,10 +79,12 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   if (text) {
     return (
-      <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
-        <ModernSpinner 
-          size={sizeMap[size]} 
-          color={colorMap[color]} 
+      <div
+        className={`flex flex-col items-center justify-center gap-3 ${className}`}
+      >
+        <ModernSpinner
+          size={sizeMap[size]}
+          color={colorMap[color]}
           variant="spinner"
         />
         <span className="text-sm text-theme-text-secondary animate-pulse">
@@ -85,9 +96,9 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   return (
     <div className={`flex items-center justify-center ${className}`}>
-      <ModernSpinner 
-        size={sizeMap[size]} 
-        color={colorMap[color]} 
+      <ModernSpinner
+        size={sizeMap[size]}
+        color={colorMap[color]}
         variant="spinner"
       />
     </div>
@@ -138,13 +149,7 @@ export const LoadingButton: React.FC<LoadingButtonProps> = ({
       `}
       {...props}
     >
-      {loading && (
-        <ModernSpinner
-          size="sm"
-          color="white"
-          variant="dots"
-        />
-      )}
+      {loading && <ModernSpinner size="sm" color="white" variant="dots" />}
       <span className={loading ? 'opacity-75' : ''}>{children}</span>
     </button>
   )

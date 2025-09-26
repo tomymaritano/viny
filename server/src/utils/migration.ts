@@ -55,9 +55,12 @@ export const migrateFromLocalStorage = async (notes: LocalStorageNote[]) => {
       // Handle tags
       if (note.tags && note.tags.length > 0) {
         for (const tagName of note.tags) {
-          // Find or create tag
-          let tag = await prisma.tag.findUnique({
-            where: { name: tagName }
+          // Find or create tag (find by name where userId is null during migration)
+          let tag = await prisma.tag.findFirst({
+            where: { 
+              name: tagName,
+              userId: null
+            }
           })
 
           if (!tag) {
@@ -99,8 +102,11 @@ export const createDefaultNotebooks = async () => {
 
   for (const notebook of defaultNotebooks) {
     try {
-      const existing = await prisma.notebook.findUnique({
-        where: { name: notebook.name }
+      const existing = await prisma.notebook.findFirst({
+        where: { 
+          name: notebook.name,
+          userId: null
+        }
       })
 
       if (!existing) {

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Note } from '../../types'
+import type { Note } from '../../types'
 import SearchResultItem from './SearchResultItem'
 import { Icons } from '../Icons'
 
@@ -18,13 +18,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   highlightMatches,
   onSelectNote,
   hasQuery,
-  isSearching
+  isSearching,
 }) => {
   if (isSearching) {
     return (
       <div className="flex items-center justify-center py-8">
         <div className="text-center">
-          <Icons.Loader size={24} className="animate-spin text-theme-text-muted mx-auto mb-2" />
+          <Icons.Loader
+            size={24}
+            className="animate-spin text-theme-text-muted mx-auto mb-2"
+          />
           <p className="text-sm text-theme-text-muted">Searching...</p>
         </div>
       </div>
@@ -35,12 +38,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     return (
       <div className="flex items-center justify-center py-8">
         <div className="text-center max-w-sm">
-          <Icons.Search size={32} className="text-theme-text-muted mx-auto mb-3 opacity-50" />
+          <Icons.Search
+            size={32}
+            className="text-theme-text-muted mx-auto mb-3 opacity-50"
+          />
           <h3 className="text-lg font-medium text-theme-text-secondary mb-2">
             Search your notes
           </h3>
           <p className="text-sm text-theme-text-muted leading-relaxed">
-            Start typing to search across titles, content, and tags. Use keywords to find exactly what you're looking for.
+            Start typing to search across titles, content, and tags. Use
+            keywords to find exactly what you're looking for.
           </p>
         </div>
       </div>
@@ -49,9 +56,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
   if (results.length === 0) {
     return (
-      <div className="flex items-center justify-center py-8" data-testid="search-no-results">
+      <div
+        className="flex items-center justify-center py-8"
+        data-testid="search-no-results"
+      >
         <div className="text-center max-w-sm">
-          <Icons.Search size={32} className="text-theme-text-muted mx-auto mb-3 opacity-50" />
+          <Icons.Search
+            size={32}
+            className="text-theme-text-muted mx-auto mb-3 opacity-50"
+          />
           <h3 className="text-lg font-medium text-theme-text-secondary mb-2">
             No notes found
           </h3>

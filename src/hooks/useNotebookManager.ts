@@ -8,10 +8,13 @@ interface NotebookOption {
   icon: string
 }
 
-export function useNotebookManager(note: any, onNotebookChange: (notebookId: string) => void) {
+export function useNotebookManager(
+  note: any,
+  onNotebookChange: (notebookId: string) => void
+) {
   const [showNotebookModal, setShowNotebookModal] = useState(false)
   const [notebookSearchInput, setNotebookSearchInput] = useState('')
-  
+
   const { flatNotebooks } = useNotebooks()
 
   // Convert notebooks to options for dropdown
@@ -19,14 +22,14 @@ export function useNotebookManager(note: any, onNotebookChange: (notebookId: str
     return flatNotebooks.map(notebook => ({
       value: notebook.id,
       label: notebook.name,
-      icon: 'Book' // Default icon since icon property doesn't exist in Notebook type
+      icon: 'Book', // Default icon since icon property doesn't exist in Notebook type
     }))
   }, [flatNotebooks])
 
   // Filter notebooks based on search input
   const filteredNotebooks = useMemo(() => {
     if (!notebookSearchInput.trim()) return notebookOptions
-    
+
     const search = notebookSearchInput.toLowerCase()
     return notebookOptions.filter(notebook =>
       notebook.label.toLowerCase().includes(search)
@@ -62,7 +65,7 @@ export function useNotebookManager(note: any, onNotebookChange: (notebookId: str
     notebookOptions,
     filteredNotebooks,
     currentNotebook,
-    
+
     // Actions
     setShowNotebookModal,
     setNotebookSearchInput,

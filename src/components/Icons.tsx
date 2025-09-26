@@ -7,6 +7,7 @@ import {
   Maximize2,
   Minimize2,
   MoreVertical,
+  MoreHorizontal,
   X,
   FileText,
   Star,
@@ -30,6 +31,7 @@ import {
   XCircle,
   Clock,
   Clock4,
+  Calendar,
   Circle,
   RefreshCw,
   Search,
@@ -39,6 +41,7 @@ import {
   Sidebar,
   FileEdit,
   ArrowLeft,
+  WifiOff,
   Bold,
   Italic,
   List,
@@ -55,6 +58,7 @@ import {
   Heading2,
   Heading3,
   Code2,
+  Filter,
   Minus,
   Strikethrough,
   Hash,
@@ -88,6 +92,25 @@ import {
   Monitor,
   Palette,
   Shield,
+  Mail,
+  Lock,
+  LogIn,
+  LogOut,
+  UserPlus,
+  Zap,
+  Brain,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Sparkles,
+  MessageSquare,
+  Server,
+  ExternalLink,
+  GitBranch,
+  GitCommit,
+  GitCompare,
+  Columns,
+  Activity,
 } from 'lucide-react'
 
 interface IconProps {
@@ -132,7 +155,13 @@ const Icons = {
     <MoreVertical size={size} className={className} />
   ),
 
-  X: ({ size = 16, className = '' }: IconProps) => <X size={size} className={className} />,
+  MoreHorizontal: ({ size = 16, className = '' }: IconProps) => (
+    <MoreHorizontal size={size} className={className} />
+  ),
+
+  X: ({ size = 16, className = '' }: IconProps) => (
+    <X size={size} className={className} />
+  ),
 
   // Sidebar icons
   FileText: ({ size = 16, className = '' }: IconProps) => (
@@ -228,6 +257,10 @@ const Icons = {
   Clock4: ({ size = 16, className = '' }: IconProps) => (
     <Clock4 size={size} className={className} />
   ),
+  
+  Calendar: ({ size = 16, className = '' }: IconProps) => (
+    <Calendar size={size} className={className} />
+  ),
 
   Circle: ({ size = 16, className = '' }: IconProps) => (
     <Circle size={size} className={className} />
@@ -235,6 +268,10 @@ const Icons = {
 
   RefreshCw: ({ size = 16, className = '' }: IconProps) => (
     <RefreshCw size={size} className={className} />
+  ),
+
+  WifiOff: ({ size = 16, className = '' }: IconProps) => (
+    <WifiOff size={size} className={className} />
   ),
 
   Search: ({ size = 16, className = '' }: IconProps) => (
@@ -371,6 +408,26 @@ const Icons = {
     <User size={size} className={className} />
   ),
 
+  Mail: ({ size = 16, className = '' }: IconProps) => (
+    <Mail size={size} className={className} />
+  ),
+
+  Lock: ({ size = 16, className = '' }: IconProps) => (
+    <Lock size={size} className={className} />
+  ),
+
+  LogIn: ({ size = 16, className = '' }: IconProps) => (
+    <LogIn size={size} className={className} />
+  ),
+
+  LogOut: ({ size = 16, className = '' }: IconProps) => (
+    <LogOut size={size} className={className} />
+  ),
+
+  UserPlus: ({ size = 16, className = '' }: IconProps) => (
+    <UserPlus size={size} className={className} />
+  ),
+
   Briefcase: ({ size = 16, className = '' }: IconProps) => (
     <Briefcase size={size} className={className} />
   ),
@@ -380,14 +437,14 @@ const Icons = {
   ),
 
   ArrowRight: ({ size = 16, className = '' }: IconProps) => (
-    <svg 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
     >
@@ -481,6 +538,62 @@ const Icons = {
   // Security icons
   Shield: ({ size = 16, className = '' }: IconProps) => (
     <Shield size={size} className={className} />
+  ),
+
+  // AI/Energy icons
+  Zap: ({ size = 16, className = '' }: IconProps) => (
+    <Zap size={size} className={className} />
+  ),
+
+  Brain: ({ size = 16, className = '' }: IconProps) => (
+    <Brain size={size} className={className} />
+  ),
+  
+  Filter: ({ size = 16, className = '' }: IconProps) => (
+    <Filter size={size} className={className} />
+  ),
+  
+  // Alignment icons
+  AlignLeft: ({ size = 16, className = '' }: IconProps) => (
+    <AlignLeft size={size} className={className} />
+  ),
+  AlignCenter: ({ size = 16, className = '' }: IconProps) => (
+    <AlignCenter size={size} className={className} />
+  ),
+  AlignRight: ({ size = 16, className = '' }: IconProps) => (
+    <AlignRight size={size} className={className} />
+  ),
+
+  Sparkles: ({ size = 16, className = '' }: IconProps) => (
+    <Sparkles size={size} className={className} />
+  ),
+
+  MessageSquare: ({ size = 16, className = '' }: IconProps) => (
+    <MessageSquare size={size} className={className} />
+  ),
+
+  Server: ({ size = 16, className = '' }: IconProps) => (
+    <Server size={size} className={className} />
+  ),
+
+  History: ({ size = 16, className = '' }: IconProps) => (
+    <Clock size={size} className={className} />
+  ),
+  GitCommit: ({ size = 16, className = '' }: IconProps) => (
+    <GitCommit size={size} className={className} />
+  ),
+  GitCompare: ({ size = 16, className = '' }: IconProps) => (
+    <GitCompare size={size} className={className} />
+  ),
+  Columns: ({ size = 16, className = '' }: IconProps) => (
+    <Columns size={size} className={className} />
+  ),
+  Activity: ({ size = 16, className = '' }: IconProps) => (
+    <Activity size={size} className={className} />
+  ),
+
+  GitBranch: ({ size = 16, className = '' }: IconProps) => (
+    <GitBranch size={size} className={className} />
   ),
 }
 

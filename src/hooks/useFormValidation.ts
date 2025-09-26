@@ -1,9 +1,13 @@
 import { useState, useCallback, useMemo } from 'react'
-import { FieldValidation, ValidationResult, validateForm } from '../utils/validation'
+import type { FieldValidation } from '../utils/validation'
+import { ValidationResult, validateForm } from '../utils/validation'
 
 interface UseFormValidationOptions<T> {
   initialValues: T
-  validationRules: Record<string, (value: any, ...args: any[]) => FieldValidation>
+  validationRules: Record<
+    string,
+    (value: any, ...args: any[]) => FieldValidation
+  >
   validateOnChange?: boolean
   validateOnBlur?: boolean
 }
@@ -12,7 +16,7 @@ export function useFormValidation<T extends Record<string, any>>({
   initialValues,
   validationRules,
   validateOnChange = true,
-  validateOnBlur = true
+  validateOnBlur = true,
 }: UseFormValidationOptions<T>) {
   const [values, setValues] = useState<T>(initialValues)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -21,19 +25,29 @@ export function useFormValidation<T extends Record<string, any>>({
   const [isValidating, setIsValidating] = useState(false)
 
   // Validate a single field
-  const validateField = useCallback((fieldName: string, value: any): FieldValidation => {
-    const validator = validationRules[fieldName]
-    if (!validator) return { field: fieldName, value, isValid: true, error: undefined, warning: undefined }
+  const validateField = useCallback(
+    (fieldName: string, value: any): FieldValidation => {
+      const validator = validationRules[fieldName]
+      if (!validator)
+        return {
+          field: fieldName,
+          value,
+          isValid: true,
+          error: undefined,
+          warning: undefined,
+        }
 
-    const result = validator(value)
-    return result
-  }, [validationRules])
+      const result = validator(value)
+      return result
+    },
+    [validationRules]
+  )
 
   // Validate all fields
   const validateAllFields = useCallback(() => {
     setIsValidating(true)
     const result = validateForm(values, validationRules)
-    
+
     const newErrors: Record<string, string> = {}
     const newWarnings: Record<string, string> = {}
 
@@ -56,42 +70,48 @@ export function useFormValidation<T extends Record<string, any>>({
   }, [values, validationRules, validateField])
 
   // Handle field value change
-  const handleFieldChange = useCallback((fieldName: string, value: any) => {
-    setValues(prev => ({ ...prev, [fieldName]: value }))
+  const handleFieldChange = useCallback(
+    (fieldName: string, value: any) => {
+      setValues(prev => ({ ...prev, [fieldName]: value }))
 
-    if (validateOnChange) {
-      const result = validateField(fieldName, value)
-      
-      setErrors(prev => ({
-        ...prev,
-        [fieldName]: result.error || ''
-      }))
-      
-      setWarnings(prev => ({
-        ...prev,
-        [fieldName]: result.warning || ''
-      }))
-    }
-  }, [validateField, validateOnChange])
+      if (validateOnChange) {
+        const result = validateField(fieldName, value)
+
+        setErrors(prev => ({
+          ...prev,
+          [fieldName]: result.error || '',
+        }))
+
+        setWarnings(prev => ({
+          ...prev,
+          [fieldName]: result.warning || '',
+        }))
+      }
+    },
+    [validateField, validateOnChange]
+  )
 
   // Handle field blur
-  const handleFieldBlur = useCallback((fieldName: string) => {
-    setTouched(prev => ({ ...prev, [fieldName]: true }))
+  const handleFieldBlur = useCallback(
+    (fieldName: string) => {
+      setTouched(prev => ({ ...prev, [fieldName]: true }))
 
-    if (validateOnBlur) {
-      const result = validateField(fieldName, values[fieldName])
-      
-      setErrors(prev => ({
-        ...prev,
-        [fieldName]: result.error || ''
-      }))
-      
-      setWarnings(prev => ({
-        ...prev,
-        [fieldName]: result.warning || ''
-      }))
-    }
-  }, [validateField, validateOnBlur, values])
+      if (validateOnBlur) {
+        const result = validateField(fieldName, values[fieldName])
+
+        setErrors(prev => ({
+          ...prev,
+          [fieldName]: result.error || '',
+        }))
+
+        setWarnings(prev => ({
+          ...prev,
+          [fieldName]: result.warning || '',
+        }))
+      }
+    },
+    [validateField, validateOnBlur, values]
+  )
 
   // Reset form
   const resetForm = useCallback(() => {
@@ -113,14 +133,17 @@ export function useFormValidation<T extends Record<string, any>>({
   }, [values, initialValues])
 
   // Get field props for easy integration
-  const getFieldProps = useCallback((fieldName: string) => ({
-    value: values[fieldName] || '',
-    onChange: (value: any) => handleFieldChange(fieldName, value),
-    onBlur: () => handleFieldBlur(fieldName),
-    error: touched[fieldName] ? errors[fieldName] : undefined,
-    warning: touched[fieldName] ? warnings[fieldName] : undefined,
-    isValid: touched[fieldName] ? !errors[fieldName] : undefined
-  }), [values, handleFieldChange, handleFieldBlur, errors, warnings, touched])
+  const getFieldProps = useCallback(
+    (fieldName: string) => ({
+      value: values[fieldName] || '',
+      onChange: (value: any) => handleFieldChange(fieldName, value),
+      onBlur: () => handleFieldBlur(fieldName),
+      error: touched[fieldName] ? errors[fieldName] : undefined,
+      warning: touched[fieldName] ? warnings[fieldName] : undefined,
+      isValid: touched[fieldName] ? !errors[fieldName] : undefined,
+    }),
+    [values, handleFieldChange, handleFieldBlur, errors, warnings, touched]
+  )
 
   return {
     // State
@@ -143,6 +166,6 @@ export function useFormValidation<T extends Record<string, any>>({
     // Utilities
     setValues,
     setErrors,
-    setWarnings
+    setWarnings,
   }
 }

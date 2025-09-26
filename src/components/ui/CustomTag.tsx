@@ -17,20 +17,20 @@ export const CustomTag: React.FC<CustomTagProps> = ({
   onRemove,
   removable = false,
   size = 'md',
-  className = ''
+  className = '',
 }) => {
   const { tagColors } = useAppStore()
-  
+
   const colorObj = getCustomTagColor(tagName, tagColors)
   const style = getTagStyle(tagName, tagColors)
-  
+
   const sizeClasses = {
     xs: 'px-1 py-0.5 text-xs',
     sm: 'px-1.5 py-0.5 text-xs',
     md: 'px-2 py-1 text-xs',
-    lg: 'px-3 py-1.5 text-sm'
+    lg: 'px-3 py-1.5 text-sm',
   }
-  
+
   const baseClasses = `
     inline-flex items-center gap-1 rounded-lg font-medium transition-all duration-200
     hover:scale-105 hover:shadow-sm cursor-pointer border
@@ -47,33 +47,33 @@ export const CustomTag: React.FC<CustomTagProps> = ({
     >
       <span className="flex items-center gap-1">
         {/* Color indicator dot */}
-        <span 
+        <span
           className="w-1.5 h-1.5 rounded-full flex-shrink-0"
           style={{ backgroundColor: colorObj.text }}
         />
         <span className="truncate">{tagName}</span>
       </span>
-      
+
       {removable && onRemove && (
         <button
-          onClick={(e) => {
+          onClick={e => {
             e.stopPropagation()
             onRemove()
           }}
           className="ml-1 hover:opacity-70 flex-shrink-0 transition-opacity"
           aria-label={`Remove ${tagName} tag`}
         >
-          <svg 
-            className="w-3 h-3" 
-            fill="none" 
-            stroke="currentColor" 
+          <svg
+            className="w-3 h-3"
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M6 18L18 6M6 6l12 12" 
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
             />
           </svg>
         </button>

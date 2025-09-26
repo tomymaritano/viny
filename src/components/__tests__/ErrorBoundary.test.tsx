@@ -7,18 +7,14 @@ import ErrorBoundary, { useErrorHandler } from '../ErrorBoundary'
 vi.mock('../Icons', () => ({
   Icons: {
     AlertTriangle: ({ size, className }: any) => (
-      <div data-testid="alert-triangle" className={className}>AlertTriangle</div>
+      <div data-testid="alert-triangle" className={className}>
+        AlertTriangle
+      </div>
     ),
-    RefreshCw: ({ size }: any) => (
-      <div data-testid="refresh-cw">RefreshCw</div>
-    ),
-    RotateCw: ({ size }: any) => (
-      <div data-testid="rotate-cw">RotateCw</div>
-    ),
-    ArrowLeft: ({ size }: any) => (
-      <div data-testid="arrow-left">ArrowLeft</div>
-    )
-  }
+    RefreshCw: ({ size }: any) => <div data-testid="refresh-cw">RefreshCw</div>,
+    RotateCw: ({ size }: any) => <div data-testid="rotate-cw">RotateCw</div>,
+    ArrowLeft: ({ size }: any) => <div data-testid="arrow-left">ArrowLeft</div>,
+  },
 }))
 
 vi.mock('../ui/StyledButton', () => ({
@@ -26,16 +22,18 @@ vi.mock('../ui/StyledButton', () => ({
     <button onClick={onClick} className={className} data-variant={variant}>
       {children}
     </button>
-  )
+  ),
 }))
 
 const mockLogComponentError = vi.hoisted(() => vi.fn())
 vi.mock('../../services/errorLogger', () => ({
-  logComponentError: mockLogComponentError
+  logComponentError: mockLogComponentError,
 }))
 
 // Component that throws an error for testing
-const ThrowError: React.FC<{ shouldThrow?: boolean }> = ({ shouldThrow = true }) => {
+const ThrowError: React.FC<{ shouldThrow?: boolean }> = ({
+  shouldThrow = true,
+}) => {
   if (shouldThrow) {
     throw new Error('Test error')
   }
@@ -61,7 +59,7 @@ describe('ErrorBoundary', () => {
         <div>Test content</div>
       </ErrorBoundary>
     )
-    
+
     expect(screen.getByText('Test content')).toBeInTheDocument()
   })
 
@@ -71,9 +69,11 @@ describe('ErrorBoundary', () => {
         <ThrowError />
       </ErrorBoundary>
     )
-    
+
     expect(screen.getByText('Something went wrong')).toBeInTheDocument()
-    expect(screen.getByText('An unexpected error occurred in the application')).toBeInTheDocument()
+    expect(
+      screen.getByText('An unexpected error occurred in the application')
+    ).toBeInTheDocument()
   })
 
   it('displays error details', () => {
@@ -82,37 +82,37 @@ describe('ErrorBoundary', () => {
         <ThrowError />
       </ErrorBoundary>
     )
-    
+
     expect(screen.getByText('Error Details:')).toBeInTheDocument()
     expect(screen.getByText('Error: Test error')).toBeInTheDocument()
   })
 
   it('renders custom fallback when provided', () => {
     const customFallback = <div>Custom error UI</div>
-    
+
     render(
       <ErrorBoundary fallback={customFallback}>
         <ThrowError />
       </ErrorBoundary>
     )
-    
+
     expect(screen.getByText('Custom error UI')).toBeInTheDocument()
     expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument()
   })
 
   it('calls onError callback when error occurs', () => {
     const onError = vi.fn()
-    
+
     render(
       <ErrorBoundary onError={onError}>
         <ThrowError />
       </ErrorBoundary>
     )
-    
+
     expect(onError).toHaveBeenCalledWith(
       expect.any(Error),
       expect.objectContaining({
-        componentStack: expect.any(String)
+        componentStack: expect.any(String),
       })
     )
   })
@@ -123,16 +123,16 @@ describe('ErrorBoundary', () => {
         <ThrowError />
       </ErrorBoundary>
     )
-    
+
     expect(mockLogComponentError).toHaveBeenCalledWith(
       'ErrorBoundary',
       expect.any(Error),
       expect.objectContaining({
-        componentStack: expect.any(String)
+        componentStack: expect.any(String),
       }),
       expect.objectContaining({
         props: expect.any(Array),
-        hasCustomFallback: false
+        hasCustomFallback: false,
       })
     )
   })
@@ -140,45 +140,45 @@ describe('ErrorBoundary', () => {
   it('shows stack trace in development mode', () => {
     const originalEnv = process.env.NODE_ENV
     process.env.NODE_ENV = 'development'
-    
+
     render(
       <ErrorBoundary>
         <ThrowError />
       </ErrorBoundary>
     )
-    
+
     expect(screen.getByText('View stack trace')).toBeInTheDocument()
-    
+
     process.env.NODE_ENV = originalEnv
   })
 
   it('hides stack trace in production by default', () => {
     const originalEnv = process.env.NODE_ENV
     process.env.NODE_ENV = 'production'
-    
+
     render(
       <ErrorBoundary>
         <ThrowError />
       </ErrorBoundary>
     )
-    
+
     expect(screen.queryByText('View stack trace')).not.toBeInTheDocument()
-    
+
     process.env.NODE_ENV = originalEnv
   })
 
   it('shows stack trace when showDetails is true', () => {
     const originalEnv = process.env.NODE_ENV
     process.env.NODE_ENV = 'production'
-    
+
     render(
       <ErrorBoundary showDetails={true}>
         <ThrowError />
       </ErrorBoundary>
     )
-    
+
     expect(screen.getByText('View stack trace')).toBeInTheDocument()
-    
+
     process.env.NODE_ENV = originalEnv
   })
 
@@ -188,10 +188,10 @@ describe('ErrorBoundary', () => {
         <ThrowError />
       </ErrorBoundary>
     )
-    
+
     const details = screen.getByText('View stack trace').closest('details')
     expect(details).not.toHaveAttribute('open')
-    
+
     fireEvent.click(screen.getByText('View stack trace'))
     // Note: Manual click on summary doesn't automatically open details in jsdom
     // so we'd need to manually set the open attribute or test differently
@@ -201,15 +201,15 @@ describe('ErrorBoundary', () => {
     const mockReload = vi.fn()
     Object.defineProperty(window, 'location', {
       value: { reload: mockReload },
-      writable: true
+      writable: true,
     })
-    
+
     render(
       <ErrorBoundary>
         <ThrowError />
       </ErrorBoundary>
     )
-    
+
     fireEvent.click(screen.getByText('Reload Page'))
     expect(mockReload).toHaveBeenCalled()
   })
@@ -220,15 +220,15 @@ describe('ErrorBoundary', () => {
         <ThrowError />
       </ErrorBoundary>
     )
-    
+
     expect(screen.getByText('Something went wrong')).toBeInTheDocument()
-    
+
     const tryAgainButton = screen.getByText('Try Again')
     expect(tryAgainButton).toBeInTheDocument()
-    
+
     // Reset is called when button is clicked
     fireEvent.click(tryAgainButton)
-    
+
     // The error boundary state should be reset (internal state test)
     expect(screen.getByText('Try Again')).toBeInTheDocument()
   })
@@ -237,15 +237,15 @@ describe('ErrorBoundary', () => {
     const mockBack = vi.fn()
     Object.defineProperty(window, 'history', {
       value: { back: mockBack },
-      writable: true
+      writable: true,
     })
-    
+
     render(
       <ErrorBoundary>
         <ThrowError />
       </ErrorBoundary>
     )
-    
+
     fireEvent.click(screen.getByText('Go Back'))
     expect(mockBack).toHaveBeenCalled()
   })
@@ -256,7 +256,7 @@ describe('ErrorBoundary', () => {
         <ThrowError />
       </ErrorBoundary>
     )
-    
+
     expect(screen.getByText(/clearing your browser cache/)).toBeInTheDocument()
   })
 
@@ -264,14 +264,16 @@ describe('ErrorBoundary', () => {
     const ErrorComponent = () => {
       throw new Error('Specific error message')
     }
-    
+
     render(
       <ErrorBoundary>
         <ErrorComponent />
       </ErrorBoundary>
     )
-    
-    expect(screen.getByText('Error: Specific error message')).toBeInTheDocument()
+
+    expect(
+      screen.getByText('Error: Specific error message')
+    ).toBeInTheDocument()
   })
 })
 
@@ -279,14 +281,14 @@ describe('useErrorHandler', () => {
   it('captures and throws errors', () => {
     const TestComponent = () => {
       const { captureError } = useErrorHandler()
-      
+
       return (
         <button onClick={() => captureError(new Error('Hook error'))}>
           Trigger Error
         </button>
       )
     }
-    
+
     expect(() => {
       render(<TestComponent />)
       fireEvent.click(screen.getByText('Trigger Error'))
@@ -295,17 +297,17 @@ describe('useErrorHandler', () => {
 
   it('resets error state', () => {
     const { result } = renderHook(() => useErrorHandler())
-    
+
     // First capture an error
     try {
       result.current.captureError(new Error('Hook error'))
     } catch (e) {
       // Expected
     }
-    
+
     // Reset should clear the error
     result.current.resetError()
-    
+
     // Should not throw after reset
     expect(() => {
       // Re-render doesn't throw
@@ -316,15 +318,18 @@ describe('useErrorHandler', () => {
   it('logs errors to console', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     const { result } = renderHook(() => useErrorHandler())
-    
+
     try {
       result.current.captureError(new Error('Test error'))
     } catch (e) {
       // Expected
     }
-    
-    expect(consoleSpy).toHaveBeenCalledWith('Error captured:', expect.any(Error))
-    
+
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Error captured:',
+      expect.any(Error)
+    )
+
     consoleSpy.mockRestore()
   })
 })

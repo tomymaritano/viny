@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { useAppStore } from '../../../stores/newSimpleStore'
 import { Icons } from '../../Icons'
-import { StorageInfo, ElectronAPI, isElectronAPI } from '../../../types/settings'
+import type { StorageInfo } from '../../../types/settings'
+import { ElectronAPI, isElectronAPI } from '../../../types/settings'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../ui/SelectRadix'
+import { DatabaseMigration } from '../DatabaseMigration'
+import { storageLogger } from '../../../utils/logger'
 
 const StorageSettings: React.FC = () => {
   const { settings, updateSettings, showSuccess, showError } = useAppStore()
@@ -18,21 +28,21 @@ const StorageSettings: React.FC = () => {
         const info = await window.electronAPI.getStorageInfo()
         setStorageInfo(info)
       } catch (error) {
-        console.error('Failed to load storage info:', error)
+        storageLogger.error('Failed to load storage info:', error)
       }
     }
   }
 
   const handleBackup = async () => {
     if (!window.electronAPI?.isElectron) return
-    
+
     setLoading(true)
     try {
       await window.electronAPI.createBackup()
       await loadStorageInfo()
       showSuccess('Backup created successfully')
     } catch (error) {
-      console.error('Backup failed:', error)
+      storageLogger.error('Backup failed:', error)
       showError('Failed to create backup. Please try again.')
     } finally {
       setLoading(false)
@@ -41,26 +51,28 @@ const StorageSettings: React.FC = () => {
 
   const handleExport = async () => {
     if (!window.electronAPI?.isElectron) return
-    
+
     try {
       await window.electronAPI.exportData()
       showSuccess('Data exported successfully')
     } catch (error) {
-      console.error('Export failed:', error)
+      storageLogger.error('Export failed:', error)
       showError('Failed to export data. Please try again.')
     }
   }
 
   const handleImport = async () => {
     if (!window.electronAPI?.isElectron) return
-    
+
     try {
       await window.electronAPI.importData()
       await loadStorageInfo()
       showSuccess('Data imported successfully')
     } catch (error) {
-      console.error('Import failed:', error)
-      showError('Failed to import data. Please check the file format and try again.')
+      storageLogger.error('Import failed:', error)
+      showError(
+        'Failed to import data. Please check the file format and try again.'
+      )
     }
   }
 
@@ -70,30 +82,38 @@ const StorageSettings: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Storage Information
         </h3>
-        
+
         {storageInfo ? (
           <div className="bg-theme-bg-secondary rounded-lg p-4 space-y-3">
             <div className="flex justify-between">
-              <span className="text-sm text-theme-text-secondary">Notes Count:</span>
+              <span className="text-sm text-theme-text-secondary">
+                Notes Count:
+              </span>
               <span className="text-sm font-medium text-theme-text-primary">
                 {storageInfo.notesCount || 0}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-theme-text-secondary">Notebooks Count:</span>
+              <span className="text-sm text-theme-text-secondary">
+                Notebooks Count:
+              </span>
               <span className="text-sm font-medium text-theme-text-primary">
                 {storageInfo.notebooksCount || 0}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-theme-text-secondary">Storage Size:</span>
+              <span className="text-sm text-theme-text-secondary">
+                Storage Size:
+              </span>
               <span className="text-sm font-medium text-theme-text-primary">
                 {formatBytes(storageInfo.storageSize || 0)}
               </span>
             </div>
             {storageInfo.lastBackup && (
               <div className="flex justify-between">
-                <span className="text-sm text-theme-text-secondary">Last Backup:</span>
+                <span className="text-sm text-theme-text-secondary">
+                  Last Backup:
+                </span>
                 <span className="text-sm font-medium text-theme-text-primary">
                   {new Date(storageInfo.lastBackup).toLocaleDateString()}
                 </span>
@@ -111,9 +131,16 @@ const StorageSettings: React.FC = () => {
 
       <div className="border-t border-theme-border-primary pt-6">
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
+          Database Engine
+        </h3>
+        <DatabaseMigration />
+      </div>
+
+      <div className="border-t border-theme-border-primary pt-6">
+        <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Backup & Sync
         </h3>
-        
+
         <div className="space-y-4">
           {/* Auto Backup */}
           <label className="flex items-center justify-between">
@@ -128,7 +155,7 @@ const StorageSettings: React.FC = () => {
             <input
               type="checkbox"
               checked={settings.autoBackup !== false}
-              onChange={(e) => updateSettings({ autoBackup: e.target.checked })}
+              onChange={e => updateSettings({ autoBackup: e.target.checked })}
               className="w-4 h-4 text-theme-accent-primary bg-theme-bg-secondary border-theme-border-primary rounded"
             />
           </label>
@@ -138,16 +165,24 @@ const StorageSettings: React.FC = () => {
             <label className="block text-sm font-medium text-theme-text-secondary mb-2">
               Backup Retention
             </label>
-            <select
-              value={settings.backupRetentionDays || 7}
-              onChange={(e) => updateSettings({ backupRetentionDays: parseInt(e.target.value) })}
-              className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-theme-text-primary"
+            <Select
+              value={String(settings.backupRetentionDays || 7)}
+              onValueChange={value =>
+                updateSettings({
+                  backupRetentionDays: parseInt(value),
+                })
+              }
             >
-              <option value="7">7 days</option>
-              <option value="14">14 days</option>
-              <option value="30">30 days</option>
-              <option value="90">90 days</option>
-            </select>
+              <SelectTrigger className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-theme-text-primary">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">7 days</SelectItem>
+                <SelectItem value="14">14 days</SelectItem>
+                <SelectItem value="30">30 days</SelectItem>
+                <SelectItem value="90">90 days</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Action Buttons */}
@@ -160,7 +195,7 @@ const StorageSettings: React.FC = () => {
               <Icons.Download size={16} />
               <span>Backup Now</span>
             </button>
-            
+
             <button
               onClick={handleExport}
               disabled={!window.electronAPI?.isElectron}
@@ -169,7 +204,7 @@ const StorageSettings: React.FC = () => {
               <Icons.FolderOpen size={16} />
               <span>Export Data</span>
             </button>
-            
+
             <button
               onClick={handleImport}
               disabled={!window.electronAPI?.isElectron}

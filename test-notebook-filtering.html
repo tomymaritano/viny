@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Notebook Filtering</title>
+    <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.min.js"></script>
+</head>
+<body>
+    <h1>Testing Notebook Filtering in Viny</h1>
+    <button onclick="testDatabase()">Test Database</button>
+    <div id="results"></div>
+    
+    <script>
+        async function testDatabase() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h2>Testing...</h2>';
+            
+            try {
+                // Open the same database that Viny uses
+                const db = new Dexie('VinyDatabase');
+                
+                // Define the schema (must match the app)
+                db.version(3).stores({
+                    notes: '++id, title, [status+updatedAt], [notebookId+updatedAt], *tags, isTrashed, createdAt, updatedAt',
+                    notebooks: '++id, name, parentId, createdAt, updatedAt',
+                    metadata: '++key',
+                    embeddings: '++id, noteId, position, model, createdAt',
+                    revisions: '++id, noteId, createdAt, changeType',
+                });
+                
+                await db.open();
+                
+                // Get all notes
+                const allNotes = await db.notes.toArray();
+                const notebooks = await db.notebooks.toArray();
+                
+                let html = '<h2>Database Contents:</h2>';
+                
+                // Show notebooks
+                html += '<h3>Notebooks:</h3><ul>';
+                notebooks.forEach(nb => {
+                    html += `<li>${nb.name} (id: ${nb.id})</li>`;
+                });
+                html += '</ul>';
+                
+                // Show notes with their notebooks
+                html += '<h3>Notes:</h3><ul>';
+                allNotes.forEach(note => {
+                    html += `<li>
+                        <strong>${note.title}</strong><br>
+                        ID: ${note.id}<br>
+                        Notebook field: ${note.notebook || 'undefined'}<br>
+                        NotebookId field: ${note.notebookId || 'undefined'}<br>
+                        Status: ${note.status}<br>
+                        Trashed: ${note.isTrashed}<br>
+                        ---
+                    </li>`;
+                });
+                html += '</ul>';
+                
+                // Test filtering
+                html += '<h3>Filtering Test:</h3>';
+                const inboxNotes = allNotes.filter(n => 
+                    (n.notebook || '').toLowerCase() === 'inbox' ||
+                    (n.notebookId || '').toLowerCase() === 'inbox'
+                );
+                html += `<p>Notes in "inbox": ${inboxNotes.length}</p>`;
+                
+                results.innerHTML = html;
+                
+            } catch (error) {
+                results.innerHTML = `<h2>Error:</h2><pre>${error.stack}</pre>`;
+            }
+        }
+    </script>
+</body>
+</html>

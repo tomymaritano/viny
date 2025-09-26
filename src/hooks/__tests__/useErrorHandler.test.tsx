@@ -21,8 +21,8 @@ const mockShowToast = vi.fn()
 // Mock the app store
 vi.mock('../../stores/newSimpleStore', () => ({
   useAppStore: vi.fn(() => ({
-    showToast: mockShowToast
-  }))
+    showToast: mockShowToast,
+  })),
 }))
 
 // Mock ErrorHandler with accessible functions
@@ -33,12 +33,12 @@ vi.mock('../../utils/errorHandler', () => ({
       handleError: mockHandleError,
       getErrorHistory: mockGetErrorHistory,
       getErrorsBy: mockGetErrorsBy,
-      clearErrorHistory: mockClearErrorHistory
+      clearErrorHistory: mockClearErrorHistory,
     })),
     handleNetworkError: mockHandleNetworkError,
     handleValidationError: mockHandleValidationError,
     handleStorageError: mockHandleStorageError,
-    handleSyncError: mockHandleSyncError
+    handleSyncError: mockHandleSyncError,
   },
   ErrorType: {
     VALIDATION: 'validation',
@@ -49,14 +49,14 @@ vi.mock('../../utils/errorHandler', () => ({
     IMPORT_EXPORT: 'import_export',
     SEARCH: 'search',
     FILE_SYSTEM: 'file_system',
-    UNKNOWN: 'unknown'
+    UNKNOWN: 'unknown',
   },
   ErrorSeverity: {
     LOW: 'low',
     MEDIUM: 'medium',
     HIGH: 'high',
-    CRITICAL: 'critical'
-  }
+    CRITICAL: 'critical',
+  },
 }))
 
 // Mock global functions that will be used in error actions
@@ -73,18 +73,18 @@ vi.stubGlobal('window', {
   dispatchEvent: mockDispatchEvent,
   location: {
     ...global.window?.location,
-    reload: mockLocationReload
-  }
+    reload: mockLocationReload,
+  },
 })
 
 vi.stubGlobal('localStorage', {
   ...global.localStorage,
-  clear: mockLocalStorageClear
+  clear: mockLocalStorageClear,
 })
 
 vi.stubGlobal('sessionStorage', {
   ...global.sessionStorage,
-  clear: mockSessionStorageClear
+  clear: mockSessionStorageClear,
 })
 
 describe('useErrorHandler', () => {
@@ -95,10 +95,10 @@ describe('useErrorHandler', () => {
     vi.clearAllMocks()
     mockUnsubscribe = vi.fn()
     mockSubscribe.mockReturnValue(mockUnsubscribe)
-    
+
     // Reset modules
     vi.resetModules()
-    
+
     // Import fresh hook
     const module = await import('../useErrorHandler')
     useErrorHandler = module.useErrorHandler
@@ -126,7 +126,7 @@ describe('useErrorHandler', () => {
       expect(result.current).toHaveProperty('handleError')
       expect(result.current).toHaveProperty('withErrorHandling')
       expect(result.current).toHaveProperty('withSyncErrorHandling')
-      
+
       // Initial subscription should be called once
       expect(mockSubscribe).toHaveBeenCalledTimes(1)
     })
@@ -142,7 +142,7 @@ describe('useErrorHandler', () => {
         type: 'validation',
         severity: 'low',
         message: 'Validation warning',
-        timestamp: new Date()
+        timestamp: new Date(),
       }
 
       act(() => {
@@ -155,7 +155,7 @@ describe('useErrorHandler', () => {
         details: undefined,
         duration: 3000,
         dismissible: true,
-        actions: []
+        actions: [],
       })
     })
 
@@ -169,7 +169,7 @@ describe('useErrorHandler', () => {
         severity: 'medium',
         message: 'Something went wrong',
         details: 'Error details here',
-        timestamp: new Date()
+        timestamp: new Date(),
       }
 
       act(() => {
@@ -182,7 +182,7 @@ describe('useErrorHandler', () => {
         details: 'Error details here',
         duration: 5000,
         dismissible: true,
-        actions: []
+        actions: [],
       })
     })
 
@@ -195,7 +195,7 @@ describe('useErrorHandler', () => {
         type: 'storage',
         severity: 'high',
         message: 'Storage error occurred',
-        timestamp: new Date()
+        timestamp: new Date(),
       }
 
       act(() => {
@@ -211,9 +211,9 @@ describe('useErrorHandler', () => {
         actions: [
           {
             label: 'Clear Cache',
-            action: expect.any(Function)
-          }
-        ]
+            action: expect.any(Function),
+          },
+        ],
       })
     })
 
@@ -226,7 +226,7 @@ describe('useErrorHandler', () => {
         type: 'network',
         severity: 'critical',
         message: 'Critical network failure',
-        timestamp: new Date()
+        timestamp: new Date(),
       }
 
       act(() => {
@@ -242,9 +242,9 @@ describe('useErrorHandler', () => {
         actions: [
           {
             label: 'Check Connection',
-            action: expect.any(Function)
-          }
-        ]
+            action: expect.any(Function),
+          },
+        ],
       })
     })
   })
@@ -261,7 +261,7 @@ describe('useErrorHandler', () => {
         severity: 'medium',
         message: 'Network error',
         timestamp: new Date(),
-        retry: retryFunction
+        retry: retryFunction,
       }
 
       act(() => {
@@ -271,7 +271,7 @@ describe('useErrorHandler', () => {
       const toastCall = mockShowToast.mock.calls[0][0]
       expect(toastCall.actions).toContainEqual({
         label: 'Retry',
-        action: retryFunction
+        action: retryFunction,
       })
     })
 
@@ -286,7 +286,7 @@ describe('useErrorHandler', () => {
         severity: 'low',
         message: 'Validation error',
         timestamp: new Date(),
-        dismiss: dismissFunction
+        dismiss: dismissFunction,
       }
 
       act(() => {
@@ -296,7 +296,7 @@ describe('useErrorHandler', () => {
       const toastCall = mockShowToast.mock.calls[0][0]
       expect(toastCall.actions).toContainEqual({
         label: 'Dismiss',
-        action: dismissFunction
+        action: dismissFunction,
       })
     })
 
@@ -309,7 +309,7 @@ describe('useErrorHandler', () => {
         type: 'network',
         severity: 'high',
         message: 'Network connection failed',
-        timestamp: new Date()
+        timestamp: new Date(),
       }
 
       act(() => {
@@ -317,16 +317,21 @@ describe('useErrorHandler', () => {
       })
 
       const toastCall = mockShowToast.mock.calls[0][0]
-      const checkConnectionAction = toastCall.actions.find((action: any) => action.label === 'Check Connection')
-      
+      const checkConnectionAction = toastCall.actions.find(
+        (action: any) => action.label === 'Check Connection'
+      )
+
       expect(checkConnectionAction).toBeDefined()
-      
+
       // Test the action
       act(() => {
         checkConnectionAction.action()
       })
-      
-      expect(mockWindowOpen).toHaveBeenCalledWith('https://www.google.com', '_blank')
+
+      expect(mockWindowOpen).toHaveBeenCalledWith(
+        'https://www.google.com',
+        '_blank'
+      )
     })
 
     it('should provide storage-specific actions for storage errors', () => {
@@ -338,7 +343,7 @@ describe('useErrorHandler', () => {
         type: 'storage',
         severity: 'high',
         message: 'Storage quota exceeded',
-        timestamp: new Date()
+        timestamp: new Date(),
       }
 
       act(() => {
@@ -346,15 +351,17 @@ describe('useErrorHandler', () => {
       })
 
       const toastCall = mockShowToast.mock.calls[0][0]
-      const clearCacheAction = toastCall.actions.find((action: any) => action.label === 'Clear Cache')
-      
+      const clearCacheAction = toastCall.actions.find(
+        (action: any) => action.label === 'Clear Cache'
+      )
+
       expect(clearCacheAction).toBeDefined()
-      
+
       // Test the action
       act(() => {
         clearCacheAction.action()
       })
-      
+
       expect(mockLocalStorageClear).toHaveBeenCalled()
       expect(mockSessionStorageClear).toHaveBeenCalled()
       expect(mockLocationReload).toHaveBeenCalled()
@@ -369,7 +376,7 @@ describe('useErrorHandler', () => {
         type: 'sync',
         severity: 'medium',
         message: 'Sync failed',
-        timestamp: new Date()
+        timestamp: new Date(),
       }
 
       act(() => {
@@ -377,18 +384,20 @@ describe('useErrorHandler', () => {
       })
 
       const toastCall = mockShowToast.mock.calls[0][0]
-      const syncNowAction = toastCall.actions.find((action: any) => action.label === 'Sync Now')
-      
+      const syncNowAction = toastCall.actions.find(
+        (action: any) => action.label === 'Sync Now'
+      )
+
       expect(syncNowAction).toBeDefined()
-      
+
       // Test the action
       act(() => {
         syncNowAction.action()
       })
-      
+
       expect(mockDispatchEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'manual-sync'
+          type: 'manual-sync',
         })
       )
     })
@@ -419,7 +428,7 @@ describe('useErrorHandler', () => {
   describe('Error Handling Methods', () => {
     it('should call ErrorHandler.handleError with correct parameters', () => {
       const { result } = renderHook(() => useErrorHandler())
-      
+
       const error = new Error('Test error')
       const context = { source: 'test' }
 
@@ -432,7 +441,7 @@ describe('useErrorHandler', () => {
 
     it('should call ErrorHandler.handleNetworkError for network errors', () => {
       const { result } = renderHook(() => useErrorHandler())
-      
+
       const error = new Error('Network failed')
       const context = { source: 'api' }
 
@@ -445,7 +454,7 @@ describe('useErrorHandler', () => {
 
     it('should call ErrorHandler.handleValidationError for validation errors', () => {
       const { result } = renderHook(() => useErrorHandler())
-      
+
       const message = 'Validation failed'
       const context = { field: 'email' }
 
@@ -458,7 +467,7 @@ describe('useErrorHandler', () => {
 
     it('should call ErrorHandler.handleStorageError for storage errors', () => {
       const { result } = renderHook(() => useErrorHandler())
-      
+
       const error = new Error('Storage full')
       const context = { operation: 'save' }
 
@@ -471,7 +480,7 @@ describe('useErrorHandler', () => {
 
     it('should call ErrorHandler.handleSyncError for sync errors', () => {
       const { result } = renderHook(() => useErrorHandler())
-      
+
       const error = new Error('Sync failed')
       const context = { attemptNumber: 3 }
 
@@ -486,11 +495,14 @@ describe('useErrorHandler', () => {
   describe('Error Wrapper Functions', () => {
     it('should handle async function errors with withErrorHandling', async () => {
       const { result } = renderHook(() => useErrorHandler())
-      
+
       const asyncFunction = vi.fn().mockRejectedValue(new Error('Async error'))
       const context = { operation: 'fetch' }
 
-      const wrappedFunction = result.current.withErrorHandling(asyncFunction, context)
+      const wrappedFunction = result.current.withErrorHandling(
+        asyncFunction,
+        context
+      )
 
       const returnValue = await act(async () => {
         return await wrappedFunction('arg1', 'arg2')
@@ -503,7 +515,7 @@ describe('useErrorHandler', () => {
 
     it('should return result when async function succeeds', async () => {
       const { result } = renderHook(() => useErrorHandler())
-      
+
       const asyncFunction = vi.fn().mockResolvedValue('success result')
 
       const wrappedFunction = result.current.withErrorHandling(asyncFunction)
@@ -519,13 +531,16 @@ describe('useErrorHandler', () => {
 
     it('should handle sync function errors with withSyncErrorHandling', () => {
       const { result } = renderHook(() => useErrorHandler())
-      
+
       const syncFunction = vi.fn().mockImplementation(() => {
         throw new Error('Sync error')
       })
       const context = { operation: 'calculate' }
 
-      const wrappedFunction = result.current.withSyncErrorHandling(syncFunction, context)
+      const wrappedFunction = result.current.withSyncErrorHandling(
+        syncFunction,
+        context
+      )
 
       let returnValue: any
       act(() => {
@@ -539,7 +554,7 @@ describe('useErrorHandler', () => {
 
     it('should return result when sync function succeeds', () => {
       const { result } = renderHook(() => useErrorHandler())
-      
+
       const syncFunction = vi.fn().mockReturnValue('sync result')
 
       const wrappedFunction = result.current.withSyncErrorHandling(syncFunction)
@@ -558,9 +573,15 @@ describe('useErrorHandler', () => {
   describe('History Management', () => {
     it('should delegate getErrorHistory to ErrorHandler', () => {
       const { result } = renderHook(() => useErrorHandler())
-      
+
       const mockHistory = [
-        { id: '1', type: 'network', severity: 'high', message: 'Error 1', timestamp: new Date() }
+        {
+          id: '1',
+          type: 'network',
+          severity: 'high',
+          message: 'Error 1',
+          timestamp: new Date(),
+        },
       ]
       mockGetErrorHistory.mockReturnValue(mockHistory)
 
@@ -572,10 +593,16 @@ describe('useErrorHandler', () => {
 
     it('should delegate getErrorsBy to ErrorHandler with filter', () => {
       const { result } = renderHook(() => useErrorHandler())
-      
+
       const filter = { type: 'network', severity: 'high' }
       const mockFilteredErrors = [
-        { id: '1', type: 'network', severity: 'high', message: 'Network Error', timestamp: new Date() }
+        {
+          id: '1',
+          type: 'network',
+          severity: 'high',
+          message: 'Network Error',
+          timestamp: new Date(),
+        },
       ]
       mockGetErrorsBy.mockReturnValue(mockFilteredErrors)
 
@@ -587,7 +614,7 @@ describe('useErrorHandler', () => {
 
     it('should delegate clearErrorHistory to ErrorHandler', () => {
       const { result } = renderHook(() => useErrorHandler())
-      
+
       result.current.clearErrorHistory()
 
       expect(mockClearErrorHistory).toHaveBeenCalled()
@@ -607,7 +634,7 @@ describe('useErrorHandler', () => {
         message: 'Integration test error',
         details: 'Error occurred during integration test',
         timestamp: new Date(),
-        retry: vi.fn()
+        retry: vi.fn(),
       }
 
       act(() => {
@@ -624,9 +651,9 @@ describe('useErrorHandler', () => {
         actions: [
           {
             label: 'Retry',
-            action: testError.retry
-          }
-        ]
+            action: testError.retry,
+          },
+        ],
       })
     })
 
@@ -639,7 +666,7 @@ describe('useErrorHandler', () => {
         type: 'unknown',
         severity: 'medium',
         message: 'Simple error',
-        timestamp: new Date()
+        timestamp: new Date(),
       }
 
       act(() => {
@@ -652,7 +679,7 @@ describe('useErrorHandler', () => {
         details: undefined,
         duration: 5000,
         dismissible: true,
-        actions: []
+        actions: [],
       })
     })
   })

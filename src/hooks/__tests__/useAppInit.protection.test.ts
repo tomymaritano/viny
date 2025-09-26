@@ -10,7 +10,7 @@ import { useAppInit } from '../useAppInit'
 
 // Create a working mock that handles selectors properly
 vi.mock('../../stores/newSimpleStore', () => ({
-  useAppStore: vi.fn((selector) => {
+  useAppStore: vi.fn(selector => {
     const state = {
       isLoading: false,
       error: null,
@@ -23,25 +23,25 @@ vi.mock('../../stores/newSimpleStore', () => ({
       setError: vi.fn(),
       setTheme: vi.fn(),
       loadTagColors: vi.fn(),
-      updateSettings: vi.fn()
+      updateSettings: vi.fn(),
     }
-    
+
     // If selector is provided, use it to select from state
     if (typeof selector === 'function') {
       return selector(state)
     }
-    
+
     // If no selector, return full state
     return state
-  })
+  }),
 }))
 
 // Mock storage services to return successful results
 vi.mock('../../lib/storage', () => ({
   storageService: {
     loadNotes: vi.fn().mockResolvedValue([]),
-    loadSettings: vi.fn().mockResolvedValue({})
-  }
+    loadSettings: vi.fn().mockResolvedValue({}),
+  },
 }))
 
 // Mock logger
@@ -50,19 +50,19 @@ vi.mock('../../utils/logger', () => ({
     debug: vi.fn(),
     info: vi.fn(),
     warn: vi.fn(),
-    error: vi.fn()
+    error: vi.fn(),
   },
   storageLogger: {
     debug: vi.fn(),
     info: vi.fn(),
     warn: vi.fn(),
-    error: vi.fn()
-  }
+    error: vi.fn(),
+  },
 }))
 
 // Mock default data initializer
 vi.mock('../../utils/defaultDataInitializer', () => ({
-  initializeDefaultData: vi.fn().mockResolvedValue(undefined)
+  initializeDefaultData: vi.fn().mockResolvedValue(undefined),
 }))
 
 // Mock DOM environment
@@ -78,7 +78,7 @@ Object.defineProperty(window, 'matchMedia', {
 
 Object.defineProperty(document.documentElement, 'setAttribute', {
   value: vi.fn(),
-  writable: true
+  writable: true,
 })
 
 // Mock localStorage
@@ -87,9 +87,9 @@ Object.defineProperty(window, 'localStorage', {
     getItem: vi.fn().mockReturnValue(null),
     setItem: vi.fn(),
     removeItem: vi.fn(),
-    clear: vi.fn()
+    clear: vi.fn(),
   },
-  writable: true
+  writable: true,
 })
 
 describe('useAppInit - Protection Tests', () => {
@@ -107,7 +107,7 @@ describe('useAppInit - Protection Tests', () => {
 
     it('should return the expected interface', () => {
       const { result } = renderHook(() => useAppInit())
-      
+
       expect(result.current).toHaveProperty('isInitializing')
       expect(result.current).toHaveProperty('initError')
       expect(typeof result.current.isInitializing).toBe('boolean')
@@ -115,11 +115,11 @@ describe('useAppInit - Protection Tests', () => {
 
     it('should return consistent results on multiple calls', () => {
       const { result, rerender } = renderHook(() => useAppInit())
-      
+
       const firstResult = result.current
       rerender()
       const secondResult = result.current
-      
+
       expect(firstResult).toEqual(secondResult)
     })
   })
@@ -134,7 +134,7 @@ describe('useAppInit - Protection Tests', () => {
 
     it('should handle component unmounting', () => {
       const { unmount } = renderHook(() => useAppInit())
-      
+
       expect(() => {
         unmount()
       }).not.toThrow()
@@ -144,7 +144,7 @@ describe('useAppInit - Protection Tests', () => {
   describe('Integration Points', () => {
     it('should access the store without errors', async () => {
       const { result } = renderHook(() => useAppInit())
-      
+
       // Should not have crashed accessing the store
       expect(result.current).toBeDefined()
       expect(result.current.isInitializing).toBeDefined()
@@ -156,7 +156,7 @@ describe('useAppInit - Protection Tests', () => {
       process.env.NODE_ENV = 'production'
       const { result: prodResult } = renderHook(() => useAppInit())
       expect(prodResult.current).toBeDefined()
-      
+
       // Test development
       process.env.NODE_ENV = 'development'
       const { result: devResult } = renderHook(() => useAppInit())
@@ -167,27 +167,32 @@ describe('useAppInit - Protection Tests', () => {
   describe('State Access', () => {
     it('should access isInitializing from store', () => {
       const { result } = renderHook(() => useAppInit())
-      
+
       // The hook should be accessing the store state correctly
       expect(typeof result.current.isInitializing).toBe('boolean')
     })
 
     it('should access initError from store', () => {
       const { result } = renderHook(() => useAppInit())
-      
+
       // Should be null (no error) or a string
-      expect(result.current.initError === null || typeof result.current.initError === 'string').toBe(true)
+      expect(
+        result.current.initError === null ||
+          typeof result.current.initError === 'string'
+      ).toBe(true)
     })
   })
 
   describe('Memory Safety', () => {
     it('should handle multiple hook instances', () => {
-      const hooks = Array.from({ length: 3 }, () => renderHook(() => useAppInit()))
-      
+      const hooks = Array.from({ length: 3 }, () =>
+        renderHook(() => useAppInit())
+      )
+
       hooks.forEach(({ result }) => {
         expect(result.current).toBeDefined()
       })
-      
+
       hooks.forEach(({ unmount }) => {
         expect(() => unmount()).not.toThrow()
       })

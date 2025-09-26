@@ -18,15 +18,15 @@ vi.mock('../../config/editorColors', () => ({
     background: '#1e1e1e',
     foreground: '#d4d4d4',
     selectionBackground: '#264f78',
-    lineHighlight: '#2a2d2e'
+    lineHighlight: '#2a2d2e',
   },
-  applyEditorColors: mockApplyEditorColors
+  applyEditorColors: mockApplyEditorColors,
 }))
 
 // Mock document.documentElement.style.setProperty
 Object.defineProperty(document.documentElement.style, 'setProperty', {
   value: mockSetProperty,
-  writable: true
+  writable: true,
 })
 
 describe('useSettings', () => {
@@ -36,18 +36,18 @@ describe('useSettings', () => {
     vi.clearAllMocks()
     mockSetProperty.mockClear()
     mockApplyEditorColors.mockClear()
-    
+
     // Clear localStorage
     global.localStorageMock.getItem.mockReturnValue(null)
     global.localStorageMock.setItem.mockClear()
-    
+
     // Reset modules to clear global state
     vi.resetModules()
-    
+
     // Re-import the hook fresh each time
     const module = await import('../useSettings')
     useSettings = module.useSettings
-    
+
     // Reset the global state for testing
     module.__resetGlobalSettingsForTesting()
   })
@@ -66,7 +66,7 @@ describe('useSettings', () => {
         tabSize: 2,
         wordWrap: true,
         lineNumbers: true,
-        minimap: false
+        minimap: false,
       })
     })
 
@@ -78,7 +78,7 @@ describe('useSettings', () => {
       expect(result.current).toHaveProperty('updateSettings')
       expect(result.current).toHaveProperty('resetSettings')
       expect(result.current).toHaveProperty('getSetting')
-      
+
       expect(typeof result.current.updateSetting).toBe('function')
       expect(typeof result.current.updateSettings).toBe('function')
       expect(typeof result.current.resetSettings).toBe('function')
@@ -91,10 +91,12 @@ describe('useSettings', () => {
       const savedSettings = {
         theme: 'light',
         fontSize: 14,
-        fontFamily: 'Monaco'
+        fontFamily: 'Monaco',
       }
-      global.localStorageMock.getItem.mockReturnValue(JSON.stringify(savedSettings))
-      
+      global.localStorageMock.getItem.mockReturnValue(
+        JSON.stringify(savedSettings)
+      )
+
       const { result } = renderHook(() => useSettings())
 
       expect(result.current.settings.theme).toBe('light')
@@ -106,7 +108,7 @@ describe('useSettings', () => {
 
     it('should handle corrupted localStorage data gracefully', () => {
       global.localStorageMock.getItem.mockReturnValue('invalid-json')
-      
+
       const { result } = renderHook(() => useSettings())
 
       // Should fall back to default settings
@@ -118,7 +120,7 @@ describe('useSettings', () => {
       global.localStorageMock.getItem.mockImplementation(() => {
         throw new Error('localStorage not available')
       })
-      
+
       const { result } = renderHook(() => useSettings())
 
       // Should fall back to default settings
@@ -171,7 +173,7 @@ describe('useSettings', () => {
       const newSettings = {
         theme: 'light',
         fontSize: 16,
-        autoSave: false
+        autoSave: false,
       }
 
       act(() => {
@@ -247,7 +249,7 @@ describe('useSettings', () => {
         background: '#ffffff',
         foreground: '#000000',
         selectionBackground: '#0078d4',
-        lineHighlight: '#f0f0f0'
+        lineHighlight: '#f0f0f0',
       }
 
       act(() => {
@@ -264,12 +266,13 @@ describe('useSettings', () => {
 
       act(() => {
         result.current.updateSettings({
-          theme: 'light',           // string
-          fontSize: 16,             // number
-          autoSave: false,          // boolean
-          editorColors: {           // object
-            background: '#ffffff'
-          }
+          theme: 'light', // string
+          fontSize: 16, // number
+          autoSave: false, // boolean
+          editorColors: {
+            // object
+            background: '#ffffff',
+          },
         })
       })
 
@@ -277,7 +280,7 @@ describe('useSettings', () => {
       expect(result.current.settings.fontSize).toBe(16)
       expect(result.current.settings.autoSave).toBe(false)
       expect(result.current.settings.editorColors).toMatchObject({
-        background: '#ffffff'
+        background: '#ffffff',
       })
     })
   })
@@ -294,7 +297,7 @@ describe('useSettings', () => {
           uiFontSize: 16,
           markdownFontFamily: 'Georgia',
           markdownFontSize: 18,
-          lineHeight: 1.8
+          lineHeight: 1.8,
         })
       })
 
@@ -308,12 +311,21 @@ describe('useSettings', () => {
       expect(result.current.settings.lineHeight).toBe(1.8)
 
       // Verify CSS variables are called (they may be called multiple times due to individual updates)
-      expect(mockSetProperty).toHaveBeenCalledWith('--font-family-editor', 'Monaco')
+      expect(mockSetProperty).toHaveBeenCalledWith(
+        '--font-family-editor',
+        'Monaco'
+      )
       expect(mockSetProperty).toHaveBeenCalledWith('--font-size-editor', '14px')
       expect(mockSetProperty).toHaveBeenCalledWith('--font-family-ui', 'Inter')
       expect(mockSetProperty).toHaveBeenCalledWith('--font-size-ui', '16px')
-      expect(mockSetProperty).toHaveBeenCalledWith('--font-family-markdown', 'Georgia')
-      expect(mockSetProperty).toHaveBeenCalledWith('--font-size-markdown', '18px')
+      expect(mockSetProperty).toHaveBeenCalledWith(
+        '--font-family-markdown',
+        'Georgia'
+      )
+      expect(mockSetProperty).toHaveBeenCalledWith(
+        '--font-size-markdown',
+        '18px'
+      )
       expect(mockSetProperty).toHaveBeenCalledWith('--line-height', 1.8)
     })
   })
@@ -335,9 +347,11 @@ describe('useSettings', () => {
     it('should load settings from localStorage on initialization', () => {
       const savedSettings = {
         theme: 'light',
-        fontSize: 16
+        fontSize: 16,
       }
-      global.localStorageMock.getItem.mockReturnValue(JSON.stringify(savedSettings))
+      global.localStorageMock.getItem.mockReturnValue(
+        JSON.stringify(savedSettings)
+      )
 
       const { result } = renderHook(() => useSettings())
 

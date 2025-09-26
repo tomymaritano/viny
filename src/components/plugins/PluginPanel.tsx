@@ -4,6 +4,7 @@ import { pluginService } from '../../services/PluginService'
 import PluginCatalog from './PluginCatalog'
 import { PluginManager } from '../PluginManager'
 import type { PluginInstance } from '../../services/PluginService'
+import { logger } from '../../utils/logger'
 
 type PluginTab = 'catalog' | 'updates' | 'manager'
 
@@ -57,22 +58,22 @@ export const PluginPanel: React.FC<PluginPanelProps> = ({ isActive }) => {
       id: 'catalog' as PluginTab,
       label: 'Install',
       icon: <Icons.Download size={16} />,
-      description: 'Browse and install plugins'
+      description: 'Browse and install plugins',
     },
     {
       id: 'updates' as PluginTab,
       label: 'Updates',
       icon: <Icons.RefreshCw size={16} />,
       description: 'Check for plugin updates',
-      count: getUpdateCount()
+      count: getUpdateCount(),
     },
     {
       id: 'manager' as PluginTab,
       label: 'Manager',
       icon: <Icons.Settings size={16} />,
       description: 'Manage installed plugins',
-      count: getInstalledCount()
-    }
+      count: getInstalledCount(),
+    },
   ]
 
   const renderTabContent = () => {
@@ -86,11 +87,14 @@ export const PluginPanel: React.FC<PluginPanelProps> = ({ isActive }) => {
             }}
           />
         )
-      
+
       case 'updates':
         return (
           <div className="p-6 text-center">
-            <Icons.RefreshCw size={48} className="mx-auto mb-4 text-theme-text-muted" />
+            <Icons.RefreshCw
+              size={48}
+              className="mx-auto mb-4 text-theme-text-muted"
+            />
             <h3 className="text-lg font-medium text-theme-text-primary mb-2">
               Plugin Updates
             </h3>
@@ -98,11 +102,12 @@ export const PluginPanel: React.FC<PluginPanelProps> = ({ isActive }) => {
               Update functionality coming soon. All plugins are up to date.
             </p>
             <div className="text-sm text-theme-text-muted">
-              Check back later for automatic update detection and one-click updates.
+              Check back later for automatic update detection and one-click
+              updates.
             </div>
           </div>
         )
-      
+
       case 'manager':
         return (
           <div className="p-6">
@@ -112,7 +117,8 @@ export const PluginPanel: React.FC<PluginPanelProps> = ({ isActive }) => {
                   Plugin Manager
                 </h3>
                 <p className="text-sm text-theme-text-secondary">
-                  Manage your installed plugins ({getInstalledCount()} installed, {getActiveCount()} active)
+                  Manage your installed plugins ({getInstalledCount()}{' '}
+                  installed, {getActiveCount()} active)
                 </p>
               </div>
               <button
@@ -150,15 +156,18 @@ export const PluginPanel: React.FC<PluginPanelProps> = ({ isActive }) => {
                           <span className="text-xs px-2 py-1 bg-theme-bg-tertiary rounded text-theme-text-secondary">
                             v{plugin.manifest.version}
                           </span>
-                          <div className={`w-2 h-2 rounded-full ${
-                            plugin.activated ? 'bg-green-500' : 'bg-gray-400'
-                          }`} />
+                          <div
+                            className={`w-2 h-2 rounded-full ${
+                              plugin.activated ? 'bg-green-500' : 'bg-gray-400'
+                            }`}
+                          />
                         </div>
                         <p className="text-sm text-theme-text-secondary">
                           {plugin.manifest.description}
                         </p>
                         <div className="text-xs text-theme-text-muted mt-1">
-                          By {plugin.manifest.author} • Loaded {new Date(plugin.loadedAt).toLocaleDateString()}
+                          By {plugin.manifest.author} • Loaded{' '}
+                          {new Date(plugin.loadedAt).toLocaleDateString()}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -166,13 +175,17 @@ export const PluginPanel: React.FC<PluginPanelProps> = ({ isActive }) => {
                           onClick={async () => {
                             try {
                               if (plugin.activated) {
-                                await pluginService.deactivatePlugin(plugin.manifest.name)
+                                await pluginService.deactivatePlugin(
+                                  plugin.manifest.name
+                                )
                               } else {
-                                await pluginService.activatePlugin(plugin.manifest.name)
+                                await pluginService.activatePlugin(
+                                  plugin.manifest.name
+                                )
                               }
                               setPlugins(pluginService.getPlugins())
                             } catch (error) {
-                              console.error('Failed to toggle plugin:', error)
+                              logger.error('Failed to toggle plugin:', error)
                             }
                           }}
                           className={`px-3 py-1 text-xs rounded transition-colors ${
@@ -191,7 +204,7 @@ export const PluginPanel: React.FC<PluginPanelProps> = ({ isActive }) => {
             )}
           </div>
         )
-      
+
       default:
         return null
     }
@@ -227,9 +240,7 @@ export const PluginPanel: React.FC<PluginPanelProps> = ({ isActive }) => {
 
       {/* Tab Content */}
       <div className="flex-1 overflow-hidden">
-        <div className="h-full overflow-y-auto">
-          {renderTabContent()}
-        </div>
+        <div className="h-full overflow-y-auto">{renderTabContent()}</div>
       </div>
 
       {/* Advanced Plugin Manager Modal */}

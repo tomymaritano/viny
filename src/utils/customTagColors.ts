@@ -23,7 +23,10 @@ interface CustomTagColors {
 /**
  * Get custom color for a tag
  */
-export const getCustomTagColor = (tagName: string, customTagColors: CustomTagColors = {}): TagColor => {
+export const getCustomTagColor = (
+  tagName: string,
+  customTagColors: CustomTagColors = {}
+): TagColor => {
   const lowerTagName = tagName.toLowerCase()
 
   // Check if user has set a custom color for this tag
@@ -59,7 +62,10 @@ interface TagStyle {
 /**
  * Get CSS style object for a tag
  */
-export const getTagStyle = (tagName: string, customTagColors: CustomTagColors = {}): TagStyle => {
+export const getTagStyle = (
+  tagName: string,
+  customTagColors: CustomTagColors = {}
+): TagStyle => {
   const color = getCustomTagColor(tagName, customTagColors)
   return {
     backgroundColor: color.bg,
@@ -71,7 +77,10 @@ export const getTagStyle = (tagName: string, customTagColors: CustomTagColors = 
 /**
  * Get Tailwind-compatible CSS classes for a tag (fallback for components that need classes)
  */
-export const getTagClasses = (tagName: string, customTagColors: CustomTagColors = {}): string => {
+export const getTagClasses = (
+  tagName: string,
+  customTagColors: CustomTagColors = {}
+): string => {
   // Return base classes and use CSS custom properties for colors
   return `tag-custom border rounded-md px-2 py-1 text-xs font-medium transition-colors hover:opacity-80`
 }

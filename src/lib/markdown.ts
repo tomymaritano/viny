@@ -1,6 +1,7 @@
 // Optimized Markdown processing utilities with dynamic language loading
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js/lib/core'
+import { editorLogger } from '../utils/logger'
 
 // Language mapping for dynamic imports
 const LANGUAGE_MAP: Record<string, () => Promise<any>> = {
@@ -11,7 +12,7 @@ const LANGUAGE_MAP: Record<string, () => Promise<any>> = {
   html: () => import('highlight.js/lib/languages/xml'),
   xml: () => import('highlight.js/lib/languages/xml'),
   json: () => import('highlight.js/lib/languages/json'),
-  
+
   // Popular Backend Languages (loaded on demand)
   python: () => import('highlight.js/lib/languages/python'),
   java: () => import('highlight.js/lib/languages/java'),
@@ -21,32 +22,32 @@ const LANGUAGE_MAP: Record<string, () => Promise<any>> = {
   ruby: () => import('highlight.js/lib/languages/ruby'),
   go: () => import('highlight.js/lib/languages/go'),
   rust: () => import('highlight.js/lib/languages/rust'),
-  
+
   // Shell & DevOps
   bash: () => import('highlight.js/lib/languages/bash'),
   yaml: () => import('highlight.js/lib/languages/yaml'),
   dockerfile: () => import('highlight.js/lib/languages/dockerfile'),
-  
+
   // Database
   sql: () => import('highlight.js/lib/languages/sql'),
-  
+
   // Mobile Development
   swift: () => import('highlight.js/lib/languages/swift'),
   kotlin: () => import('highlight.js/lib/languages/kotlin'),
   dart: () => import('highlight.js/lib/languages/dart'),
-  
+
   // Other popular languages
   scala: () => import('highlight.js/lib/languages/scala'),
   haskell: () => import('highlight.js/lib/languages/haskell'),
   lua: () => import('highlight.js/lib/languages/lua'),
   perl: () => import('highlight.js/lib/languages/perl'),
   r: () => import('highlight.js/lib/languages/r'),
-  
+
   // Configuration formats
   ini: () => import('highlight.js/lib/languages/ini'),
   properties: () => import('highlight.js/lib/languages/properties'),
   makefile: () => import('highlight.js/lib/languages/makefile'),
-  
+
   // Markup
   markdown: () => import('highlight.js/lib/languages/markdown'),
   latex: () => import('highlight.js/lib/languages/latex'),
@@ -72,6 +73,7 @@ const LANGUAGE_ALIASES: Record<string, string> = {
   sh: 'bash',
   shell: 'bash',
   yml: 'yaml',
+  env: 'bash', // Treat .env files as shell scripts
   kt: 'kotlin',
   kts: 'kotlin',
   hs: 'haskell',
@@ -90,54 +92,61 @@ const loadedLanguages = new Set<string>()
 const loadingPromises = new Map<string, Promise<void>>()
 
 // Pre-load core web languages immediately
-const CORE_LANGUAGES = ['javascript', 'typescript', 'css', 'html', 'xml', 'json']
+const CORE_LANGUAGES = [
+  'javascript',
+  'typescript',
+  'css',
+  'html',
+  'xml',
+  'json',
+]
 
 // Load a language dynamically
 async function loadLanguage(lang: string): Promise<boolean> {
   // Resolve alias
   const resolvedLang = LANGUAGE_ALIASES[lang] || lang
-  
+
   // Check if already loaded
   if (loadedLanguages.has(resolvedLang)) {
     return true
   }
-  
+
   // Check if currently loading
   if (loadingPromises.has(resolvedLang)) {
     await loadingPromises.get(resolvedLang)
     return loadedLanguages.has(resolvedLang)
   }
-  
+
   // Check if we have a loader for this language
   if (!LANGUAGE_MAP[resolvedLang]) {
-    console.warn(`Language not supported: ${lang} (resolved: ${resolvedLang})`)
+    editorLogger.warn(`Language not supported: ${lang} (resolved: ${resolvedLang})`)
     return false
   }
-  
+
   // Start loading
   const loadingPromise = (async () => {
     try {
       const module = await LANGUAGE_MAP[resolvedLang]()
       hljs.registerLanguage(resolvedLang, module.default)
       loadedLanguages.add(resolvedLang)
-      
+
       // Register aliases
       Object.entries(LANGUAGE_ALIASES).forEach(([alias, target]) => {
         if (target === resolvedLang) {
           hljs.registerLanguage(alias, module.default)
         }
       })
-      
-      console.debug(`Loaded language: ${resolvedLang}`)
+
+      editorLogger.debug(`Loaded language: ${resolvedLang}`)
     } catch (error) {
-      console.error(`Failed to load language ${resolvedLang}:`, error)
+      editorLogger.error(`Failed to load language ${resolvedLang}:`, error)
     }
   })()
-  
+
   loadingPromises.set(resolvedLang, loadingPromise)
   await loadingPromise
   loadingPromises.delete(resolvedLang)
-  
+
   return loadedLanguages.has(resolvedLang)
 }
 
@@ -145,27 +154,27 @@ async function loadLanguage(lang: string): Promise<boolean> {
 const initPromise = Promise.all(
   CORE_LANGUAGES.map(lang => loadLanguage(lang))
 ).then(() => {
-  console.debug('Core languages pre-loaded')
+  editorLogger.debug('Core languages pre-loaded')
 })
 
 // Enhanced highlight function with dynamic loading
 async function highlightCode(code: string, language?: string): Promise<string> {
   // Ensure core languages are loaded
   await initPromise
-  
+
   if (!language) {
     return hljs.highlightAuto(code).value
   }
-  
+
   // Try to load the language if not already loaded
   const loaded = await loadLanguage(language)
-  
+
   if (loaded) {
     const resolvedLang = LANGUAGE_ALIASES[language] || language
     try {
       return hljs.highlight(code, { language: resolvedLang }).value
     } catch (error) {
-      console.warn(`Highlighting failed for language ${language}:`, error)
+      editorLogger.warn(`Highlighting failed for language ${language}:`, error)
       return hljs.highlightAuto(code).value
     }
   } else {
@@ -189,23 +198,47 @@ export const createOptimizedMarkdown = (): MarkdownIt => {
           try {
             return hljs.highlight(str, { language: resolvedLang }).value
           } catch (error) {
-            console.warn(`Highlighting failed for language ${lang}:`, error)
+            editorLogger.warn(`Highlighting failed for language ${lang}:`, error)
           }
         } else {
           // Trigger async loading for next time
-          loadLanguage(lang).catch(console.error)
+          loadLanguage(lang).catch(error => editorLogger.error('Failed to load language:', error))
         }
       }
-      
+
       // Fallback to auto-detection or plain text
       try {
         return hljs.highlightAuto(str).value
       } catch (error) {
         return str // Return plain text if highlighting fails
       }
-    }
+    },
   })
+
+  // Customize link rendering to add target="_blank" and rel="noopener noreferrer"
+  const defaultLinkRenderer = md.renderer.rules.link_open || function(tokens, idx, options, env, self) {
+    return self.renderToken(tokens, idx, options)
+  }
   
+  md.renderer.rules.link_open = function(tokens, idx, options, env, self) {
+    const token = tokens[idx]
+    const hrefIndex = token.attrIndex('href')
+    
+    if (hrefIndex >= 0) {
+      const href = token.attrs[hrefIndex][1]
+      
+      // Check if it's an external link
+      if (href && (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('//'))) {
+        // Add target="_blank" and rel="noopener noreferrer" for external links
+        token.attrPush(['target', '_blank'])
+        token.attrPush(['rel', 'noopener noreferrer'])
+        token.attrPush(['class', 'external-link'])
+      }
+    }
+    
+    return defaultLinkRenderer(tokens, idx, options, env, self)
+  }
+
   return md
 }
 
@@ -214,10 +247,7 @@ export { highlightCode, loadLanguage }
 
 // Export language utilities
 export const getSupportedLanguages = (): string[] => {
-  return [
-    ...Object.keys(LANGUAGE_MAP),
-    ...Object.keys(LANGUAGE_ALIASES)
-  ].sort()
+  return [...Object.keys(LANGUAGE_MAP), ...Object.keys(LANGUAGE_ALIASES)].sort()
 }
 
 export const getLoadedLanguages = (): string[] => {
@@ -227,11 +257,11 @@ export const getLoadedLanguages = (): string[] => {
 // Pre-warm popular languages in the background
 export const preloadPopularLanguages = async (): Promise<void> => {
   const popular = ['python', 'java', 'bash', 'yaml', 'sql', 'go', 'rust']
-  
+
   // Load popular languages in the background with a delay
   setTimeout(() => {
     popular.forEach(lang => {
-      loadLanguage(lang).catch(console.error)
+      loadLanguage(lang).catch(error => editorLogger.error('Failed to preload language:', error))
     })
   }, 2000) // Wait 2 seconds after initial page load
 }
@@ -250,7 +280,7 @@ export interface MarkdownHook {
 // Plugin registration for markdown hooks
 const markdownPluginHooks: MarkdownHook[] = []
 
-export const registerMarkdownPlugin = (hook: MarkdownHook): () => void => {
+export const registerMarkdownPlugin = (hook: MarkdownHook): (() => void) => {
   markdownPluginHooks.push(hook)
   // Return unregister function
   return () => {
@@ -265,16 +295,19 @@ export const registerMarkdownPlugin = (hook: MarkdownHook): () => void => {
 export class MarkdownProcessor {
   private static md = createOptimizedMarkdown()
 
-  static render(content: string, options: {
-    codeHighlighting?: boolean
-    showLineNumbers?: boolean
-    copyCodeButton?: boolean
-    renderMath?: boolean
-    renderMermaid?: boolean
-    tableOfContents?: boolean
-    tocPosition?: string
-    enablePlugins?: boolean
-  } = {}): string {
+  static render(
+    content: string,
+    options: {
+      codeHighlighting?: boolean
+      showLineNumbers?: boolean
+      copyCodeButton?: boolean
+      renderMath?: boolean
+      renderMermaid?: boolean
+      tableOfContents?: boolean
+      tocPosition?: string
+      enablePlugins?: boolean
+    } = {}
+  ): string {
     if (!content.trim()) {
       return '<div class="empty-state">Start typing to see your markdown rendered here...</div>'
     }
@@ -289,7 +322,7 @@ export class MarkdownProcessor {
       tableOfContents: false,
       tocPosition: 'top',
       enablePlugins: true,
-      ...options
+      ...options,
     }
 
     // Apply plugin beforeMarkdown hooks if enabled
@@ -302,14 +335,16 @@ export class MarkdownProcessor {
           }
         }
       } catch (error) {
-        console.warn('Plugin beforeMarkdown hook failed:', error)
+        editorLogger.warn('Plugin beforeMarkdown hook failed:', error)
         // Continue with original content if plugin fails
         processedContent = content
       }
     }
 
     // Check cache first for performance (include processed content in cache key)
-    const cacheKey = this.generateCacheKey(processedContent + JSON.stringify(finalOptions))
+    const cacheKey = this.generateCacheKey(
+      processedContent + JSON.stringify(finalOptions)
+    )
     const cached = renderCache.get(cacheKey)
     if (cached) {
       return cached
@@ -321,29 +356,33 @@ export class MarkdownProcessor {
       if (!finalOptions.codeHighlighting) {
         this.md.options.highlight = undefined
       }
-      
+
       // Render markdown with all enhancements
       let rendered = this.md.render(processedContent)
-      
+
       // Restore original highlight function
       this.md.options.highlight = originalHighlight
-      
+
       // Post-process for additional features
       if (finalOptions.showLineNumbers) {
         rendered = this.addLineNumbers(rendered)
       }
-      
+
       if (finalOptions.copyCodeButton) {
         rendered = this.addCopyButtons(rendered)
       }
-      
+
       if (finalOptions.tableOfContents) {
-        rendered = this.addTableOfContents(rendered, content, finalOptions.tocPosition)
+        rendered = this.addTableOfContents(
+          rendered,
+          content,
+          finalOptions.tocPosition
+        )
       }
-      
+
       // Process viny:// image references and blocked images
       rendered = this.processImageReferences(rendered)
-      
+
       // Apply plugin afterHTML hooks if enabled
       if (finalOptions.enablePlugins) {
         try {
@@ -353,17 +392,17 @@ export class MarkdownProcessor {
             }
           }
         } catch (error) {
-          console.warn('Plugin afterHTML hook failed:', error)
+          editorLogger.warn('Plugin afterHTML hook failed:', error)
           // Continue with current rendered content if plugin fails
         }
       }
-      
+
       // Cache the result with size limit
       this.updateCache(cacheKey, rendered)
-      
+
       return rendered
     } catch (error) {
-      console.error('Markdown rendering error:', error)
+      editorLogger.error('Markdown rendering error:', error)
       return '<div class="empty-state error">Error rendering markdown</div>'
     }
   }
@@ -373,7 +412,7 @@ export class MarkdownProcessor {
     let hash = 0
     for (let i = 0; i < content.length; i++) {
       const char = content.charCodeAt(i)
-      hash = ((hash << 5) - hash) + char
+      hash = (hash << 5) - hash + char
       hash = hash & hash // Convert to 32-bit integer
     }
     return hash.toString(36)
@@ -395,25 +434,28 @@ export class MarkdownProcessor {
   static getCacheStats(): { size: number; limit: number } {
     return {
       size: renderCache.size,
-      limit: CACHE_SIZE_LIMIT
+      limit: CACHE_SIZE_LIMIT,
     }
   }
 
   private static addLineNumbers(html: string): string {
     // Add line numbers to code blocks
-    return html.replace(/<pre><code.*?>([\s\S]*?)<\/code><\/pre>/g, (match, code) => {
-      const lines = code.split('\n')
-      const numberedLines = lines.map((line, i) => 
-        `<span class="line-number">${i + 1}</span>${line}`
-      ).join('\n')
-      return match.replace(code, numberedLines)
-    })
+    return html.replace(
+      /<pre><code.*?>([\s\S]*?)<\/code><\/pre>/g,
+      (match, code) => {
+        const lines = code.split('\n')
+        const numberedLines = lines
+          .map((line, i) => `<span class="line-number">${i + 1}</span>${line}`)
+          .join('\n')
+        return match.replace(code, numberedLines)
+      }
+    )
   }
 
   private static addCopyButtons(html: string): string {
     // Add copy buttons to code blocks
     let codeBlockIndex = 0
-    return html.replace(/<pre><code.*?>([\s\S]*?)<\/code><\/pre>/g, (match) => {
+    return html.replace(/<pre><code.*?>([\s\S]*?)<\/code><\/pre>/g, match => {
       const id = `code-block-${codeBlockIndex++}`
       return `<div class="code-block-wrapper" id="${id}">
         <button class="copy-code-button" onclick="copyCodeBlock('${id}')" title="Copy code">
@@ -427,27 +469,32 @@ export class MarkdownProcessor {
     })
   }
 
-  private static addTableOfContents(html: string, markdown: string, position: string): string {
+  private static addTableOfContents(
+    html: string,
+    markdown: string,
+    position: string
+  ): string {
     // Extract headings from markdown
     const headingRegex = /^(#{1,6})\s+(.+)$/gm
-    const headings: Array<{level: number, text: string, id: string}> = []
+    const headings: Array<{ level: number; text: string; id: string }> = []
     let match
-    
+
     while ((match = headingRegex.exec(markdown)) !== null) {
       const level = match[1].length
       const text = match[2]
       const id = text.toLowerCase().replace(/[^\w]+/g, '-')
       headings.push({ level, text, id })
     }
-    
+
     if (headings.length === 0) {
       return html
     }
-    
+
     // Build TOC HTML
-    let tocHtml = '<div class="table-of-contents"><h2>Table of Contents</h2><ul>'
+    let tocHtml =
+      '<div class="table-of-contents"><h2>Table of Contents</h2><ul>'
     let currentLevel = 0
-    
+
     headings.forEach(heading => {
       while (currentLevel < heading.level) {
         tocHtml += '<ul>'
@@ -459,19 +506,19 @@ export class MarkdownProcessor {
       }
       tocHtml += `<li><a href="#${heading.id}">${heading.text}</a></li>`
     })
-    
+
     while (currentLevel > 0) {
       tocHtml += '</ul>'
       currentLevel--
     }
     tocHtml += '</ul></div>'
-    
+
     // Add IDs to headings in HTML
     html = html.replace(/<h([1-6])>(.*?)<\/h\1>/g, (match, level, text) => {
       const id = text.toLowerCase().replace(/[^\w]+/g, '-')
       return `<h${level} id="${id}">${text}</h${level}>`
     })
-    
+
     // Insert TOC based on position
     if (position === 'bottom') {
       return html + tocHtml
@@ -482,7 +529,7 @@ export class MarkdownProcessor {
 
   static extractTitle(content: string): string {
     const lines = content.split('\n')
-    
+
     // Look for first heading
     for (const line of lines) {
       const trimmed = line.trim()
@@ -490,7 +537,7 @@ export class MarkdownProcessor {
         return trimmed.replace(/^#+\s*/, '').trim()
       }
     }
-    
+
     // Fallback to first non-empty line
     const firstLine = lines.find(line => line.trim())
     return firstLine ? firstLine.trim().substring(0, 50) : 'Untitled Note'
@@ -509,7 +556,10 @@ export class MarkdownProcessor {
   }
 
   static getWordCount(content: string): number {
-    return content.trim().split(/\s+/).filter(word => word.length > 0).length
+    return content
+      .trim()
+      .split(/\s+/)
+      .filter(word => word.length > 0).length
   }
 
   static getCharCount(content: string): number {
@@ -533,10 +583,14 @@ export class MarkdownProcessor {
 
           // Try to get from memory first
           let dataUri = null
-          if (typeof window !== 'undefined' && (window as any).vinyImageStore && (window as any).vinyImageStore.has(imageId)) {
+          if (
+            typeof window !== 'undefined' &&
+            (window as any).vinyImageStore &&
+            (window as any).vinyImageStore.has(imageId)
+          ) {
             dataUri = (window as any).vinyImageStore.get(imageId)
           } else if (typeof window !== 'undefined') {
-            // Try to load from localStorage
+            // Try to load from localStorage directly
             try {
               const storedImages = JSON.parse(
                 localStorage.getItem('viny-images') || '{}'
@@ -545,12 +599,12 @@ export class MarkdownProcessor {
                 dataUri = storedImages[imageId]
                 // Cache in memory for next time
                 if (!(window as any).vinyImageStore) {
-                  (window as any).vinyImageStore = new Map()
+                  ;(window as any).vinyImageStore = new Map()
                 }
-                (window as any).vinyImageStore.set(imageId, dataUri)
+                ;(window as any).vinyImageStore.set(imageId, dataUri)
               }
             } catch (error) {
-              console.error('Failed to load image from storage:', error)
+              editorLogger.error('Failed to load image from storage:', error)
             }
           }
 
@@ -593,16 +647,16 @@ export class MarkdownProcessor {
   static injectPluginCSS(css: string, pluginId: string): () => void {
     const styleId = `plugin-css-${pluginId}`
     let styleElement = document.getElementById(styleId) as HTMLStyleElement
-    
+
     if (!styleElement) {
       styleElement = document.createElement('style')
       styleElement.id = styleId
       styleElement.setAttribute('data-plugin', pluginId)
       document.head.appendChild(styleElement)
     }
-    
+
     styleElement.textContent = css
-    
+
     // Return cleanup function
     return () => {
       const element = document.getElementById(styleId)

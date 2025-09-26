@@ -10,28 +10,26 @@ interface TagEditInputProps {
   placeholder?: string
 }
 
-const TagEditInput = forwardRef<HTMLInputElement, TagEditInputProps>(({
-  value,
-  onChange,
-  onKeyDown,
-  onBlur,
-  className = '',
-  placeholder = ''
-}, ref) => {
-  return (
-    <input
-      ref={ref}
-      type="text"
-      value={value}
-      onChange={onChange}
-      onKeyDown={onKeyDown}
-      onBlur={onBlur}
-      placeholder={placeholder}
-      className={`bg-transparent outline-none border-none ${className}`}
-      autoFocus
-    />
-  )
-})
+const TagEditInput = forwardRef<HTMLInputElement, TagEditInputProps>(
+  (
+    { value, onChange, onKeyDown, onBlur, className = '', placeholder = '' },
+    ref
+  ) => {
+    return (
+      <input
+        ref={ref}
+        type="text"
+        value={value}
+        onChange={onChange}
+        onKeyDown={onKeyDown}
+        onBlur={onBlur}
+        placeholder={placeholder}
+        className={`bg-transparent outline-none border-none ${className}`}
+        autoFocus
+      />
+    )
+  }
+)
 
 TagEditInput.displayName = 'TagEditInput'
 

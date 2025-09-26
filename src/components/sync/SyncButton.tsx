@@ -15,7 +15,7 @@ const SyncButton: React.FC<SyncButtonProps> = ({
   className = '',
   showText = false,
   variant = 'ghost',
-  size = 'md'
+  size = 'md',
 }) => {
   const {
     syncState,
@@ -24,7 +24,7 @@ const SyncButton: React.FC<SyncButtonProps> = ({
     hasUnresolvedConflicts,
     forceSync,
     getUnresolvedConflicts,
-    resolveConflict
+    resolveConflict,
   } = useSync()
 
   const [showConflictModal, setShowConflictModal] = useState(false)
@@ -44,18 +44,22 @@ const SyncButton: React.FC<SyncButtonProps> = ({
   }
 
   const getButtonClass = () => {
-    const baseClass = 'flex items-center space-x-2 font-medium transition-colors rounded-md'
-    
+    const baseClass =
+      'flex items-center space-x-2 font-medium transition-colors rounded-md'
+
     const sizeClass = {
       sm: 'px-2 py-1 text-xs',
       md: 'px-3 py-1.5 text-sm',
-      lg: 'px-4 py-2 text-base'
+      lg: 'px-4 py-2 text-base',
     }[size]
 
     const variantClass = {
-      primary: 'bg-theme-accent-primary text-white hover:bg-theme-accent-primary/90',
-      secondary: 'bg-theme-bg-secondary text-theme-text-primary border border-theme-border-primary hover:bg-theme-bg-tertiary',
-      ghost: 'text-theme-text-secondary hover:text-theme-text-primary hover:bg-theme-bg-secondary'
+      primary:
+        'bg-theme-accent-primary text-white hover:bg-theme-accent-primary/90',
+      secondary:
+        'bg-theme-bg-secondary text-theme-text-primary border border-theme-border-primary hover:bg-theme-bg-tertiary',
+      ghost:
+        'text-theme-text-secondary hover:text-theme-text-primary hover:bg-theme-bg-secondary',
     }[variant]
 
     return `${baseClass} ${sizeClass} ${variantClass} ${className}`
@@ -113,7 +117,7 @@ const SyncButton: React.FC<SyncButtonProps> = ({
   }
 
   const unresolvedConflicts = getUnresolvedConflicts()
-  const currentConflict = selectedConflict 
+  const currentConflict = selectedConflict
     ? unresolvedConflicts.find(c => c.id === selectedConflict)
     : unresolvedConflicts[0]
 

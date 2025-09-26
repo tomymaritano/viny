@@ -8,7 +8,7 @@ vi.mock('../../../../hooks/useSettings')
 
 describe('ThemesSettings', () => {
   const mockUseSettingsService = vi.mocked(useSettings)
-  
+
   const defaultMockReturn = {
     settings: {
       theme: 'dark',
@@ -17,7 +17,7 @@ describe('ThemesSettings', () => {
       fontSize: 14,
       compactMode: false,
       animationSpeed: 'normal',
-      customTheme: false
+      customTheme: false,
     },
     setSetting: vi.fn(),
     previewSetting: vi.fn(),
@@ -32,8 +32,8 @@ describe('ThemesSettings', () => {
         options: [
           { value: 'light', label: 'Light', icon: 'Sun' },
           { value: 'dark', label: 'Dark', icon: 'Moon' },
-          { value: 'system', label: 'System', icon: 'Monitor' }
-        ]
+          { value: 'system', label: 'System', icon: 'Monitor' },
+        ],
       },
       {
         key: 'accentColor',
@@ -43,8 +43,8 @@ describe('ThemesSettings', () => {
         options: [
           { value: 'blue', label: 'Blue' },
           { value: 'green', label: 'Green' },
-          { value: 'purple', label: 'Purple' }
-        ]
+          { value: 'purple', label: 'Purple' },
+        ],
       },
       {
         key: 'fontSize',
@@ -53,13 +53,13 @@ describe('ThemesSettings', () => {
         defaultValue: 14,
         min: 10,
         max: 24,
-        step: 1
+        step: 1,
       },
       {
         key: 'compactMode',
         type: 'boolean',
         label: 'Compact Mode',
-        defaultValue: false
+        defaultValue: false,
       },
       {
         key: 'animationSpeed',
@@ -70,12 +70,12 @@ describe('ThemesSettings', () => {
           { value: 'slow', label: 'Slow' },
           { value: 'normal', label: 'Normal' },
           { value: 'fast', label: 'Fast' },
-          { value: 'none', label: 'None' }
-        ]
-      }
+          { value: 'none', label: 'None' },
+        ],
+      },
     ],
     errors: {},
-    loading: false
+    loading: false,
   }
 
   beforeEach(() => {
@@ -86,7 +86,7 @@ describe('ThemesSettings', () => {
   describe('Rendering', () => {
     it('should render theme selection options', () => {
       render(<ThemesSettings />)
-      
+
       expect(screen.getByText('Theme Selection')).toBeInTheDocument()
       expect(screen.getByText('Light')).toBeInTheDocument()
       expect(screen.getByText('Dark')).toBeInTheDocument()
@@ -95,14 +95,14 @@ describe('ThemesSettings', () => {
 
     it('should render accent color selection', () => {
       render(<ThemesSettings />)
-      
+
       expect(screen.getByText('Accent Color')).toBeInTheDocument()
       expect(screen.getByDisplayValue('blue')).toBeInTheDocument()
     })
 
     it('should render appearance settings', () => {
       render(<ThemesSettings />)
-      
+
       expect(screen.getByText('Appearance')).toBeInTheDocument()
       expect(screen.getByText('Compact Mode')).toBeInTheDocument()
       expect(screen.getByText('Animation Speed')).toBeInTheDocument()
@@ -110,14 +110,14 @@ describe('ThemesSettings', () => {
 
     it('should render typography settings', () => {
       render(<ThemesSettings />)
-      
+
       expect(screen.getByText('Typography')).toBeInTheDocument()
       expect(screen.getByText('Font Size')).toBeInTheDocument()
     })
 
     it('should show current selected theme', () => {
       render(<ThemesSettings />)
-      
+
       const darkButton = screen.getByRole('button', { name: /dark/i })
       expect(darkButton).toHaveClass('border-theme-accent-primary')
       expect(darkButton).toHaveClass('bg-theme-accent-primary/10')
@@ -127,34 +127,40 @@ describe('ThemesSettings', () => {
   describe('Theme Selection', () => {
     it('should select a theme when clicked', () => {
       render(<ThemesSettings />)
-      
+
       const lightButton = screen.getByRole('button', { name: /light/i })
       fireEvent.click(lightButton)
-      
-      expect(defaultMockReturn.setSetting).toHaveBeenCalledWith('theme', 'light')
+
+      expect(defaultMockReturn.setSetting).toHaveBeenCalledWith(
+        'theme',
+        'light'
+      )
     })
 
     it('should preview theme on hover', () => {
       render(<ThemesSettings />)
-      
+
       const lightButton = screen.getByRole('button', { name: /light/i })
       fireEvent.mouseEnter(lightButton)
-      
-      expect(defaultMockReturn.previewSetting).toHaveBeenCalledWith('theme', 'light')
+
+      expect(defaultMockReturn.previewSetting).toHaveBeenCalledWith(
+        'theme',
+        'light'
+      )
     })
 
     it('should clear preview on mouse leave', () => {
       render(<ThemesSettings />)
-      
+
       const lightButton = screen.getByRole('button', { name: /light/i })
       fireEvent.mouseLeave(lightButton)
-      
+
       expect(defaultMockReturn.clearPreview).toHaveBeenCalledWith('theme')
     })
 
     it('should show icons for theme options', () => {
       render(<ThemesSettings />)
-      
+
       // These would require the Icons component to be properly mocked
       // For now, just verify the theme options are rendered
       expect(screen.getByText('Light')).toBeInTheDocument()
@@ -166,31 +172,40 @@ describe('ThemesSettings', () => {
   describe('Accent Color Selection', () => {
     it('should change accent color', () => {
       render(<ThemesSettings />)
-      
+
       const select = screen.getByDisplayValue('blue')
       fireEvent.change(select, { target: { value: 'green' } })
-      
-      expect(defaultMockReturn.setSetting).toHaveBeenCalledWith('accentColor', 'green')
+
+      expect(defaultMockReturn.setSetting).toHaveBeenCalledWith(
+        'accentColor',
+        'green'
+      )
     })
 
     it('should preview accent color on change', () => {
       render(<ThemesSettings />)
-      
+
       const select = screen.getByDisplayValue('blue')
       fireEvent.change(select, { target: { value: 'purple' } })
-      
-      expect(defaultMockReturn.previewSetting).toHaveBeenCalledWith('accentColor', 'purple')
+
+      expect(defaultMockReturn.previewSetting).toHaveBeenCalledWith(
+        'accentColor',
+        'purple'
+      )
     })
   })
 
   describe('Toggle Settings', () => {
     it('should toggle compact mode', () => {
       render(<ThemesSettings />)
-      
+
       const compactToggle = screen.getByRole('checkbox')
       fireEvent.click(compactToggle)
-      
-      expect(defaultMockReturn.setSetting).toHaveBeenCalledWith('compactMode', true)
+
+      expect(defaultMockReturn.setSetting).toHaveBeenCalledWith(
+        'compactMode',
+        true
+      )
     })
 
     it('should show correct toggle state', () => {
@@ -198,12 +213,12 @@ describe('ThemesSettings', () => {
         ...defaultMockReturn,
         settings: {
           ...defaultMockReturn.settings,
-          compactMode: true
-        }
+          compactMode: true,
+        },
       })
-      
+
       render(<ThemesSettings />)
-      
+
       const compactToggle = screen.getByRole('checkbox')
       expect(compactToggle).toBeChecked()
     })
@@ -212,22 +227,22 @@ describe('ThemesSettings', () => {
   describe('Number Input Settings', () => {
     it('should change font size', () => {
       render(<ThemesSettings />)
-      
+
       const fontSizeSlider = screen.getByRole('slider')
       fireEvent.change(fontSizeSlider, { target: { value: '16' } })
-      
+
       expect(defaultMockReturn.setSetting).toHaveBeenCalledWith('fontSize', 16)
     })
 
     it('should show current font size value', () => {
       render(<ThemesSettings />)
-      
+
       expect(screen.getByText('14')).toBeInTheDocument() // Current value
     })
 
     it('should respect min/max constraints', () => {
       render(<ThemesSettings />)
-      
+
       const fontSizeSlider = screen.getByRole('slider')
       expect(fontSizeSlider).toHaveAttribute('min', '10')
       expect(fontSizeSlider).toHaveAttribute('max', '24')
@@ -238,19 +253,22 @@ describe('ThemesSettings', () => {
   describe('Dropdown Settings', () => {
     it('should change animation speed', () => {
       render(<ThemesSettings />)
-      
+
       const animationSelect = screen.getByDisplayValue('normal')
       fireEvent.change(animationSelect, { target: { value: 'fast' } })
-      
-      expect(defaultMockReturn.setSetting).toHaveBeenCalledWith('animationSpeed', 'fast')
+
+      expect(defaultMockReturn.setSetting).toHaveBeenCalledWith(
+        'animationSpeed',
+        'fast'
+      )
     })
 
     it('should show all animation speed options', () => {
       render(<ThemesSettings />)
-      
+
       const animationSelect = screen.getByDisplayValue('normal')
       const options = animationSelect.querySelectorAll('option')
-      
+
       expect(options).toHaveLength(4)
       expect(options[0]).toHaveValue('slow')
       expect(options[1]).toHaveValue('normal')
@@ -264,25 +282,27 @@ describe('ThemesSettings', () => {
       mockUseSettingsService.mockReturnValue({
         ...defaultMockReturn,
         errors: {
-          fontSize: 'Font size must be between 10 and 24'
-        }
+          fontSize: 'Font size must be between 10 and 24',
+        },
       })
-      
+
       render(<ThemesSettings />)
-      
-      expect(screen.getByText('Font size must be between 10 and 24')).toBeInTheDocument()
+
+      expect(
+        screen.getByText('Font size must be between 10 and 24')
+      ).toBeInTheDocument()
     })
 
     it('should apply error styles to invalid inputs', () => {
       mockUseSettingsService.mockReturnValue({
         ...defaultMockReturn,
         errors: {
-          fontSize: 'Invalid value'
-        }
+          fontSize: 'Invalid value',
+        },
       })
-      
+
       render(<ThemesSettings />)
-      
+
       // The error text should be displayed
       expect(screen.getByText('Invalid value')).toBeInTheDocument()
       expect(screen.getByText('Invalid value')).toHaveClass('text-red-500')
@@ -294,11 +314,11 @@ describe('ThemesSettings', () => {
       mockUseSettingsService.mockReturnValue({
         ...defaultMockReturn,
         loading: true,
-        settings: {}
+        settings: {},
       })
-      
+
       render(<ThemesSettings />)
-      
+
       // Component should still render with default values
       expect(screen.getByText('Theme Selection')).toBeInTheDocument()
     })
@@ -311,17 +331,17 @@ describe('ThemesSettings', () => {
           key: 'customSetting',
           type: 'boolean',
           label: 'Custom Setting',
-          defaultValue: false
-        }
+          defaultValue: false,
+        },
       ]
-      
+
       mockUseSettingsService.mockReturnValue({
         ...defaultMockReturn,
-        schemas: customSchemas
+        schemas: customSchemas,
       })
-      
+
       render(<ThemesSettings />)
-      
+
       // Should still render the basic structure even with different schemas
       expect(screen.getByText('Theme Selection')).toBeInTheDocument()
     })
@@ -329,11 +349,11 @@ describe('ThemesSettings', () => {
     it('should handle missing schemas gracefully', () => {
       mockUseSettingsService.mockReturnValue({
         ...defaultMockReturn,
-        schemas: []
+        schemas: [],
       })
-      
+
       render(<ThemesSettings />)
-      
+
       // Should still render basic structure
       expect(screen.getByText('Theme Selection')).toBeInTheDocument()
     })
@@ -342,17 +362,17 @@ describe('ThemesSettings', () => {
   describe('Accessibility', () => {
     it('should have proper ARIA labels', () => {
       render(<ThemesSettings />)
-      
+
       const fontSizeSlider = screen.getByRole('slider')
       expect(fontSizeSlider).toBeInTheDocument()
-      
+
       const compactToggle = screen.getByRole('checkbox')
       expect(compactToggle).toBeInTheDocument()
     })
 
     it('should be keyboard navigable', () => {
       render(<ThemesSettings />)
-      
+
       const firstButton = screen.getByRole('button', { name: /light/i })
       firstButton.focus()
       expect(document.activeElement).toBe(firstButton)

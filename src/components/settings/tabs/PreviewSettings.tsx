@@ -1,95 +1,88 @@
 import React from 'react'
 import { useSettings } from '../../../hooks/useSettings'
 import { Icons } from '../../Icons'
+import { SliderWithLabels } from '../../ui/SliderRadix'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../ui/SelectRadix'
+import { SwitchWithLabel } from '../../ui/SwitchRadix'
 
 const PreviewSettings: React.FC = () => {
-  const {
-    settings,
-    setSetting,
-    error
-  } = useSettings()
+  const { settings, setSetting, error } = useSettings()
 
   // Static schema options (temporary fix)
   const previewThemes = [
     { value: 'github', label: 'GitHub' },
     { value: 'github-dark', label: 'GitHub Dark' },
-    { value: 'default', label: 'Default' }
+    { value: 'default', label: 'Default' },
   ]
 
   const codeThemes = [
     { value: 'github', label: 'GitHub' },
     { value: 'monokai', label: 'Monokai' },
     { value: 'dracula', label: 'Dracula' },
-    { value: 'nord', label: 'Nord' }
+    { value: 'nord', label: 'Nord' },
   ]
 
   const mathEngines = [
     { value: 'katex', label: 'KaTeX' },
-    { value: 'mathjax', label: 'MathJax' }
+    { value: 'mathjax', label: 'MathJax' },
   ]
 
   const tocPositions = [
     { value: 'left', label: 'Left' },
     { value: 'right', label: 'Right' },
-    { value: 'none', label: 'None' }
+    { value: 'none', label: 'None' },
   ]
 
   const renderToggle = (key: string, label: string, description: string) => {
     const value = settings[key] ?? false
-    
+
     return (
       <div className="flex items-center justify-between">
         <div>
           <h4 className="text-sm font-medium text-theme-text-primary">
             {label}
           </h4>
-          <p className="text-xs text-theme-text-muted mt-1">
-            {description}
-          </p>
+          <p className="text-xs text-theme-text-muted mt-1">{description}</p>
         </div>
-        <label className="relative inline-flex items-center cursor-pointer">
-          <input
-            type="checkbox"
-            checked={value as boolean}
-            onChange={(e) => setSetting(key, e.target.checked)}
-            className="sr-only peer"
-          />
-          <div className="w-11 h-6 bg-theme-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent-primary"></div>
-        </label>
+        <SwitchWithLabel
+          checked={value as boolean}
+          onCheckedChange={checked => setSetting(key, checked)}
+        />
       </div>
     )
   }
 
-  const renderNumberInput = (key: string, label: string, description?: string) => {
+  const renderNumberInput = (
+    key: string,
+    label: string,
+    description?: string
+  ) => {
     const value = settings[key] ?? 0
-    
+
     return (
       <div>
-        <label className="block text-sm font-medium text-theme-text-secondary mb-2">
-          {label}
-        </label>
-        {description && (
-          <p className="text-xs text-theme-text-muted mb-2">{description}</p>
-        )}
-        <div className="flex items-center space-x-4">
-          <span className="text-xs text-theme-text-muted">0</span>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            step={1}
-            value={value as number}
-            onChange={(e) => setSetting(key, parseFloat(e.target.value))}
-            className="flex-1 h-2 bg-theme-bg-tertiary rounded-lg appearance-none cursor-pointer"
-          />
-          <span className="text-xs text-theme-text-muted">100</span>
-          <span className="text-sm font-medium text-theme-text-primary w-12">
-            {value}
-          </span>
-        </div>
-        {error && (
-          <p className="mt-1 text-xs text-red-500">{error}</p>
-        )}
+        <SliderWithLabels
+          label={label}
+          description={description}
+          value={[value as number]}
+          min={0}
+          max={100}
+          step={1}
+          showValue={true}
+          showRange={true}
+          formatValue={val => String(val)}
+          onValueChange={values =>
+            setSetting(key, parseFloat(values[0].toString()))
+          }
+          className="w-full"
+        />
+        {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
       </div>
     )
   }
@@ -107,28 +100,39 @@ const PreviewSettings: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Live Preview
         </h3>
-        
+
         <div className="space-y-6">
-          {renderToggle('syncScrolling', 'Sync Scrolling', 'Synchronize scrolling between editor and preview')}
-          
+          {renderToggle(
+            'syncScrolling',
+            'Sync Scrolling',
+            'Synchronize scrolling between editor and preview'
+          )}
+
           <div>
             <label className="block text-sm font-medium text-theme-text-secondary mb-2">
               Preview Mode
             </label>
-            <select
+            <Select
               value={settings.previewMode || 'live'}
-              onChange={(e) => setSetting('previewMode', e.target.value)}
-              className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
+              onValueChange={value => setSetting('previewMode', value)}
             >
-              <option value="live">Live Preview</option>
-              <option value="manual">Manual Refresh</option>
-              <option value="off">Disabled</option>
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select preview mode" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="live">Live Preview</SelectItem>
+                <SelectItem value="manual">Manual Refresh</SelectItem>
+                <SelectItem value="off">Disabled</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          
-          {settings.previewMode === 'live' && (
-            renderNumberInput('previewDelay', 'Preview Delay (ms)', 'Delay before updating preview in live mode')
-          )}
+
+          {settings.previewMode === 'live' &&
+            renderNumberInput(
+              'previewDelay',
+              'Preview Delay (ms)',
+              'Delay before updating preview in live mode'
+            )}
         </div>
       </div>
 
@@ -137,96 +141,136 @@ const PreviewSettings: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Rendering Options
         </h3>
-        
+
         <div className="space-y-6">
           {/* Preview Theme */}
           <div>
             <label className="block text-sm font-medium text-theme-text-secondary mb-2">
               Preview Theme
             </label>
-            <select
+            <Select
               value={settings.previewTheme || 'github'}
-              onChange={(e) => setSetting('previewTheme', e.target.value)}
-              className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
+              onValueChange={value => setSetting('previewTheme', value)}
             >
-              {previewThemes.map((theme) => (
-                <option key={theme.value} value={theme.value} className="bg-theme-bg-secondary text-theme-text-primary">
-                  {theme.label}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select preview theme" />
+              </SelectTrigger>
+              <SelectContent>
+                {previewThemes.map(theme => (
+                  <SelectItem key={theme.value} value={theme.value}>
+                    {theme.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          
+
           {/* Math & Diagrams */}
-          {renderToggle('renderMath', 'Render Math', 'Render LaTeX math expressions in preview')}
-          
+          {renderToggle(
+            'renderMath',
+            'Render Math',
+            'Render LaTeX math expressions in preview'
+          )}
+
           {settings.renderMath && (
             <div>
               <label className="block text-sm font-medium text-theme-text-secondary mb-2">
                 Math Engine
               </label>
-              <select
+              <Select
                 value={settings.mathEngine || 'katex'}
-                onChange={(e) => setSetting('mathEngine', e.target.value)}
-                className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
+                onValueChange={value => setSetting('mathEngine', value)}
               >
-                {mathEngines.map((engine) => (
-                  <option key={engine.value} value={engine.value} className="bg-theme-bg-secondary text-theme-text-primary">
-                    {engine.label}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select math engine" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mathEngines.map(engine => (
+                    <SelectItem key={engine.value} value={engine.value}>
+                      {engine.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
-          
-          {renderToggle('renderMermaid', 'Render Mermaid Diagrams', 'Render Mermaid diagrams in preview')}
-          
+
+          {renderToggle(
+            'renderMermaid',
+            'Render Mermaid Diagrams',
+            'Render Mermaid diagrams in preview'
+          )}
+
           {/* Code Highlighting */}
-          {renderToggle('codeHighlighting', 'Code Highlighting', 'Syntax highlighting for code blocks')}
-          
+          {renderToggle(
+            'codeHighlighting',
+            'Code Highlighting',
+            'Syntax highlighting for code blocks'
+          )}
+
           {settings.codeHighlighting && (
             <>
               <div>
                 <label className="block text-sm font-medium text-theme-text-secondary mb-2">
                   Code Theme
                 </label>
-                <select
+                <Select
                   value={settings.codeTheme || 'github'}
-                  onChange={(e) => setSetting('codeTheme', e.target.value)}
-                  className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
+                  onValueChange={value => setSetting('codeTheme', value)}
                 >
-                  {codeThemes.map((theme) => (
-                    <option key={theme.value} value={theme.value} className="bg-theme-bg-secondary text-theme-text-primary">
-                      {theme.label}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select code theme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {codeThemes.map(theme => (
+                      <SelectItem key={theme.value} value={theme.value}>
+                        {theme.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              
-              {renderToggle('showLineNumbers', 'Show Line Numbers in Code', 'Display line numbers in code blocks')}
-              {renderToggle('copyCodeButton', 'Copy Code Button', 'Show copy button on code blocks')}
+
+              {renderToggle(
+                'showLineNumbers',
+                'Show Line Numbers in Code',
+                'Display line numbers in code blocks'
+              )}
+              {renderToggle(
+                'copyCodeButton',
+                'Copy Code Button',
+                'Show copy button on code blocks'
+              )}
             </>
           )}
-          
+
           {/* Table of Contents */}
-          {renderToggle('tableOfContents', 'Table of Contents', 'Auto-generate table of contents from headings')}
-          
+          {renderToggle(
+            'tableOfContents',
+            'Table of Contents',
+            'Auto-generate table of contents from headings'
+          )}
+
           {settings.tableOfContents && (
             <div>
               <label className="block text-sm font-medium text-theme-text-secondary mb-2">
                 TOC Position
               </label>
-              <select
+              <Select
                 value={settings.tocPosition || 'top'}
-                onChange={(e) => setSetting('tocPosition', e.target.value)}
-                className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
+                onValueChange={value => setSetting('tocPosition', value)}
               >
-                {tocPositions.map((position) => (
-                  <option key={position.value} value={position.value} className="bg-theme-bg-secondary text-theme-text-primary">
-                    {position.label}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select TOC position" />
+                </SelectTrigger>
+                <SelectContent>
+                  {tocPositions.map(position => (
+                    <SelectItem key={position.value} value={position.value}>
+                      {position.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
         </div>
@@ -237,11 +281,23 @@ const PreviewSettings: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Typography
         </h3>
-        
+
         <div className="space-y-6">
-          {renderNumberInput('previewFontSize', 'Font Size', 'Font size for preview content')}
-          {renderNumberInput('previewLineHeight', 'Line Height', 'Line height for preview content')}
-          {renderToggle('printStyles', 'Print-Optimized Styles', 'Use print-friendly styles when printing')}
+          {renderNumberInput(
+            'previewFontSize',
+            'Font Size',
+            'Font size for preview content'
+          )}
+          {renderNumberInput(
+            'previewLineHeight',
+            'Line Height',
+            'Line height for preview content'
+          )}
+          {renderToggle(
+            'printStyles',
+            'Print-Optimized Styles',
+            'Use print-friendly styles when printing'
+          )}
         </div>
       </div>
 
@@ -250,11 +306,23 @@ const PreviewSettings: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Links & Images
         </h3>
-        
+
         <div className="space-y-6">
-          {renderToggle('linkPreview', 'Link Preview', 'Show preview tooltips for internal links')}
-          {renderToggle('imageZoom', 'Image Zoom', 'Allow zooming images in preview')}
-          {renderToggle('embedEnabled', 'Enable Embeds', 'Show embedded content (videos, tweets, etc.)')}
+          {renderToggle(
+            'linkPreview',
+            'Link Preview',
+            'Show preview tooltips for internal links'
+          )}
+          {renderToggle(
+            'imageZoom',
+            'Image Zoom',
+            'Allow zooming images in preview'
+          )}
+          {renderToggle(
+            'embedEnabled',
+            'Enable Embeds',
+            'Show embedded content (videos, tweets, etc.)'
+          )}
         </div>
       </div>
 
@@ -263,28 +331,39 @@ const PreviewSettings: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Advanced
         </h3>
-        
+
         <div className="space-y-6">
-          {renderToggle('allowHTML', 'Allow HTML', 'Render HTML tags in markdown (security risk)')}
-          
-          {settings.allowHTML && (
-            renderToggle('sanitizeHTML', 'Sanitize HTML', 'Remove potentially dangerous HTML content')
+          {renderToggle(
+            'allowHTML',
+            'Allow HTML',
+            'Render HTML tags in markdown (security risk)'
           )}
-          
+
+          {settings.allowHTML &&
+            renderToggle(
+              'sanitizeHTML',
+              'Sanitize HTML',
+              'Remove potentially dangerous HTML content'
+            )}
+
           {/* Export Quality */}
           <div>
             <label className="block text-sm font-medium text-theme-text-secondary mb-2">
               Export Quality
             </label>
-            <select
+            <Select
               value={settings.exportQuality || 'high'}
-              onChange={(e) => setSetting('exportQuality', e.target.value)}
-              className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
+              onValueChange={value => setSetting('exportQuality', value)}
             >
-              <option value="low">Low (Fast)</option>
-              <option value="medium">Medium</option>
-              <option value="high">High (Slow)</option>
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select export quality" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="low">Low (Fast)</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="high">High (Slow)</SelectItem>
+              </SelectContent>
+            </Select>
             <p className="mt-1 text-xs text-theme-text-muted">
               Quality for PDF and image exports
             </p>

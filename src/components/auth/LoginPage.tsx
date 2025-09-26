@@ -11,6 +11,9 @@ import { AUTH_THEME } from '../../config/authTheme'
 
 interface LoginPageProps {
   onLoginSuccess?: () => void
+  onSuccess?: () => void
+  canSkip?: boolean
+  onSkip?: () => void
 }
 
 interface FormData {
@@ -18,7 +21,12 @@ interface FormData {
   password: string
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
+const LoginPage: React.FC<LoginPageProps> = ({
+  onLoginSuccess,
+  onSuccess,
+  canSkip = false,
+  onSkip,
+}) => {
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
@@ -57,6 +65,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       await login(formData.email, formData.password)
       showSuccess('Welcome back! You have successfully logged in.')
       onLoginSuccess?.()
+      onSuccess?.()
     } catch (error) {
       showError('Login failed. Please check your credentials.')
     }
@@ -73,9 +82,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const isFormValid = formData.email && formData.password
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{
-      background: AUTH_THEME.colors.background.primary
-    }}>
+    <div
+      className="min-h-screen flex items-center justify-center relative overflow-hidden"
+      style={{ backgroundColor: 'transparent' }}
+    >
       {/* Vanta Fog Background */}
       <VantaFog
         backgroundAlpha={AUTH_THEME.vantaFog.backgroundAlpha}
@@ -94,36 +104,49 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         touchControls={AUTH_THEME.vantaFog.touchControls}
         zoom={AUTH_THEME.vantaFog.zoom}
       />
-      
+
       {/* Login Content */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="relative z-10 w-full max-w-md mx-4"
       >
         {/* Logo */}
-        <motion.div 
+        <motion.div
           {...AUTH_THEME.animations.motionVariants.logoScale}
           className="flex justify-center mb-8"
         >
-          <div className={cn(AUTH_THEME.components.logo.size, AUTH_THEME.components.logo.borderRadius, "flex items-center justify-center shadow-2xl")} style={{
-            background: 'linear-gradient(135deg, #533061 0%, #375968 100%)'
-          }}>
-            <Icons.NotebookPen size={AUTH_THEME.components.logo.iconSize} className={cn("text-white")} />
+          <div
+            className={cn(
+              AUTH_THEME.components.logo.size,
+              AUTH_THEME.components.logo.borderRadius,
+              'flex items-center justify-center shadow-2xl'
+            )}
+            style={{
+              background: 'linear-gradient(135deg, #533061 0%, #375968 100%)',
+            }}
+          >
+            <Icons.NotebookPen
+              size={AUTH_THEME.components.logo.iconSize}
+              className={cn('text-white')}
+            />
           </div>
         </motion.div>
-        
+
         {/* Title */}
         <motion.div
           {...AUTH_THEME.animations.motionVariants.titleSlide}
           className="text-center mb-8"
         >
-          <h1 
-            className={cn(AUTH_THEME.typography.sizes.title, "font-bold mb-2 font-heading")}
-            style={{ 
+          <h1
+            className={cn(
+              AUTH_THEME.typography.sizes.title,
+              'font-bold mb-2 font-heading'
+            )}
+            style={{
               fontFamily: AUTH_THEME.typography.fonts.heading,
-              color: AUTH_THEME.colors.text.primary
+              color: AUTH_THEME.colors.text.primary,
             }}
           >
             Log In to Viny
@@ -131,7 +154,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         </motion.div>
 
         {/* Form */}
-        <motion.form 
+        <motion.form
           {...AUTH_THEME.animations.motionVariants.formSlide}
           onSubmit={handleSubmit}
           className="space-y-6"
@@ -143,7 +166,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             label=""
             placeholder="Enter your email"
             value={formData.email}
-            onChange={(value) => handleInputChange('email', value)}
+            onChange={value => handleInputChange('email', value)}
             icon={<Icons.Mail size={18} />}
             disabled={isLoading}
             error={errors.email}
@@ -158,7 +181,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             label=""
             placeholder="Enter your password"
             value={formData.password}
-            onChange={(value) => handleInputChange('password', value)}
+            onChange={value => handleInputChange('password', value)}
             icon={<Icons.Lock size={18} />}
             disabled={isLoading}
             error={errors.password}
@@ -205,11 +228,27 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             style={{
               backgroundColor: AUTH_THEME.colors.interactive.primary,
               borderColor: AUTH_THEME.colors.interactive.primary,
-              backgroundImage: 'none'
+              backgroundImage: 'none',
             }}
           >
             Log In
           </Button>
+
+          {/* Skip Option */}
+          {canSkip && (
+            <div className="text-center pt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  onSkip?.()
+                  onSuccess?.()
+                }}
+                className="text-white/60 text-sm hover:text-white/80 transition-colors font-body"
+              >
+                Continue without account →
+              </button>
+            </div>
+          )}
 
           {/* Register Link */}
           <div className="text-center pt-4 border-t border-white/20">

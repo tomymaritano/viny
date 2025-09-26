@@ -1,6 +1,6 @@
 /**
  * Authentication Theme Configuration
- * 
+ *
  * Centralized configuration for all authentication-related styling,
  * colors, and visual effects to maintain consistency and easy maintenance.
  */
@@ -15,7 +15,7 @@ export const AUTH_THEME = {
       inputBorder: '#11243B',
       inputBorderFocus: '#6578E1',
     },
-    
+
     // Text colors
     text: {
       primary: '#FFFFFF',
@@ -23,7 +23,7 @@ export const AUTH_THEME = {
       placeholder: '#9CA3AF',
       error: '#EF4444',
     },
-    
+
     // Interactive colors
     interactive: {
       primary: '#6578E1',
@@ -31,16 +31,16 @@ export const AUTH_THEME = {
       iconFocus: '#6578E1',
       iconError: '#EF4444',
     },
-    
+
     // Vanta Fog colors (hex values converted to numbers)
     vantaFog: {
-      baseColor: 0x4A5D7A,
+      baseColor: 0x4a5d7a,
       highlightColor: 0x00b9ae,
       lowlightColor: 0x5c3cfc,
       midtoneColor: 0xd200d2,
     },
   },
-  
+
   // Typography
   typography: {
     fonts: {
@@ -52,7 +52,7 @@ export const AUTH_THEME = {
       body: 'text-sm',
     },
   },
-  
+
   // Component Configurations
   components: {
     // Input field settings
@@ -72,14 +72,14 @@ export const AUTH_THEME = {
         right: 'right-4',
       },
     },
-    
+
     // Button settings
     button: {
       height: 'h-14',
       borderRadius: 'rounded-xl',
       padding: 'px-8 py-5',
     },
-    
+
     // Logo settings
     logo: {
       size: 'w-20 h-20',
@@ -87,7 +87,7 @@ export const AUTH_THEME = {
       borderRadius: 'rounded-full',
     },
   },
-  
+
   // Animation Settings
   animations: {
     transitions: {
@@ -95,26 +95,26 @@ export const AUTH_THEME = {
       colors: 'transition-colors duration-200',
       transform: 'transition-transform duration-300',
     },
-    
+
     motionVariants: {
       fadeIn: {
         initial: { opacity: 0, y: 20 },
         animate: { opacity: 1, y: 0 },
         transition: { duration: 0.6 },
       },
-      
+
       logoScale: {
         initial: { scale: 0.8, opacity: 0 },
         animate: { scale: 1, opacity: 1 },
         transition: { duration: 0.5, delay: 0.2 },
       },
-      
+
       titleSlide: {
         initial: { y: 20, opacity: 0 },
         animate: { y: 0, opacity: 1 },
         transition: { duration: 0.5, delay: 0.3 },
       },
-      
+
       formSlide: {
         initial: { y: 20, opacity: 0 },
         animate: { y: 0, opacity: 1 },
@@ -122,22 +122,22 @@ export const AUTH_THEME = {
       },
     },
   },
-  
+
   // Vanta Fog Configuration
   vantaFog: {
-    backgroundAlpha: 1,
+    backgroundAlpha: 0.1,
     blurFactor: 0.9,
     gyroControls: false,
     mouseControls: true,
     touchControls: true,
-    scale: 2,
+    scale: 1,
     scaleMobile: 4,
-    speed: 1,
-    zoom: 0.4,
+    speed: 0.7,
+    zoom: 0.5,
     minHeight: 200,
     minWidth: 200,
   },
-  
+
   // Effects and Shadows
   effects: {
     shadows: {
@@ -145,11 +145,11 @@ export const AUTH_THEME = {
       focus: 'shadow-xl',
       button: 'shadow-xl hover:shadow-2xl',
     },
-    
+
     blur: {
       backdrop: 'backdrop-blur-xl',
     },
-    
+
     transforms: {
       scale: {
         focus: 'scale-[1.02]',

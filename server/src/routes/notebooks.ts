@@ -6,8 +6,12 @@ import {
   updateNotebook,
   deleteNotebook
 } from '../controllers/notebooksController'
+import { authenticate, injectUserId } from '../middleware/authMiddleware'
 
 const router = Router()
+
+// Apply authentication to all routes
+router.use(authenticate)
 
 // GET /api/notebooks - Get all notebooks
 router.get('/', getNotebooks)
@@ -16,7 +20,7 @@ router.get('/', getNotebooks)
 router.get('/:id', getNotebookById)
 
 // POST /api/notebooks - Create new notebook
-router.post('/', createNotebook)
+router.post('/', injectUserId, createNotebook)
 
 // PUT /api/notebooks/:id - Update notebook
 router.put('/:id', updateNotebook)

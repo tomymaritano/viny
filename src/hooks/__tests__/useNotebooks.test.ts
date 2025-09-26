@@ -5,18 +5,18 @@
 
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { Notebook } from '../../types/notebook'
+import type { Notebook } from '../../types/notebook'
 
 // Mock logger
 const mockLogger = {
   info: vi.fn(),
   warn: vi.fn(),
   error: vi.fn(),
-  debug: vi.fn()
+  debug: vi.fn(),
 }
 
 vi.mock('../../utils/logger', () => ({
-  logger: mockLogger
+  logger: mockLogger,
 }))
 
 // Mock electron storage service
@@ -27,15 +27,33 @@ vi.mock('../../lib/electronStorage', () => ({
   electronStorageService: {
     isElectronEnvironment: false,
     getNotebooks: mockGetNotebooks,
-    saveNotebooks: mockSaveNotebooks
-  }
+    saveNotebooks: mockSaveNotebooks,
+  },
 }))
 
 // Mock app store
 const mockNotes = [
-  { id: 'note1', notebook: 'inbox', title: 'Test Note 1', content: 'Content 1', createdAt: new Date().toISOString() },
-  { id: 'note2', notebook: 'projects', title: 'Test Note 2', content: 'Content 2', createdAt: new Date().toISOString() },
-  { id: 'note3', notebook: 'work', title: 'Test Note 3', content: 'Content 3', createdAt: new Date().toISOString() }
+  {
+    id: 'note1',
+    notebook: 'inbox',
+    title: 'Test Note 1',
+    content: 'Content 1',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'note2',
+    notebook: 'projects',
+    title: 'Test Note 2',
+    content: 'Content 2',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'note3',
+    notebook: 'work',
+    title: 'Test Note 3',
+    content: 'Content 3',
+    createdAt: new Date().toISOString(),
+  },
 ]
 
 const mockUpdateNote = vi.fn()
@@ -43,8 +61,8 @@ const mockUpdateNote = vi.fn()
 vi.mock('../../stores/newSimpleStore', () => ({
   useAppStore: vi.fn(() => ({
     notes: mockNotes,
-    updateNote: mockUpdateNote
-  }))
+    updateNote: mockUpdateNote,
+  })),
 }))
 
 // Mock validation utilities
@@ -55,7 +73,7 @@ const mockValidateNotebookMove = vi.fn()
 vi.mock('../../utils/notebookValidation', () => ({
   validateNotebookName: mockValidateNotebookName,
   validateNotebookNesting: mockValidateNotebookNesting,
-  validateNotebookMove: mockValidateNotebookMove
+  validateNotebookMove: mockValidateNotebookMove,
 }))
 
 // Mock tree utilities
@@ -70,7 +88,7 @@ vi.mock('../../utils/notebookTree', () => ({
   flattenNotebookTree: mockFlattenNotebookTree,
   getNotebookWithCounts: mockGetNotebookWithCounts,
   deleteNotebookAndChildren: mockDeleteNotebookAndChildren,
-  moveNotebookWithChildren: mockMoveNotebookWithChildren
+  moveNotebookWithChildren: mockMoveNotebookWithChildren,
 }))
 
 // Mock alert
@@ -82,19 +100,19 @@ const mockLocalStorage = {
   getItem: vi.fn(),
   setItem: vi.fn(),
   removeItem: vi.fn(),
-  clear: vi.fn()
+  clear: vi.fn(),
 }
 
 Object.defineProperty(window, 'localStorage', {
   value: mockLocalStorage,
-  writable: true
+  writable: true,
 })
 
 // Mock console methods
 const mockConsole = {
   log: vi.fn(),
   error: vi.fn(),
-  warn: vi.fn()
+  warn: vi.fn(),
 }
 
 global.console = { ...global.console, ...mockConsole }
@@ -111,7 +129,7 @@ const sampleNotebooks: Notebook[] = [
     level: 0,
     path: 'inbox',
     createdAt: '2025-01-01T00:00:00.000Z',
-    updatedAt: '2025-01-01T00:00:00.000Z'
+    updatedAt: '2025-01-01T00:00:00.000Z',
   },
   {
     id: 'projects',
@@ -123,7 +141,7 @@ const sampleNotebooks: Notebook[] = [
     level: 0,
     path: 'projects',
     createdAt: '2025-01-01T00:00:00.000Z',
-    updatedAt: '2025-01-01T00:00:00.000Z'
+    updatedAt: '2025-01-01T00:00:00.000Z',
   },
   {
     id: 'work',
@@ -135,8 +153,8 @@ const sampleNotebooks: Notebook[] = [
     level: 0,
     path: 'work',
     createdAt: '2025-01-01T00:00:00.000Z',
-    updatedAt: '2025-01-01T00:00:00.000Z'
-  }
+    updatedAt: '2025-01-01T00:00:00.000Z',
+  },
 ]
 
 describe('useNotebooks', () => {
@@ -144,7 +162,7 @@ describe('useNotebooks', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks()
-    
+
     // Setup default mock returns
     mockBuildNotebookTree.mockReturnValue(sampleNotebooks)
     mockFlattenNotebookTree.mockReturnValue(sampleNotebooks)
@@ -154,10 +172,10 @@ describe('useNotebooks', () => {
     mockValidateNotebookMove.mockReturnValue({ isValid: true })
     mockDeleteNotebookAndChildren.mockReturnValue(['test-id'])
     mockMoveNotebookWithChildren.mockReturnValue(sampleNotebooks)
-    
+
     // Reset modules
     vi.resetModules()
-    
+
     // Import fresh hook
     const module = await import('../useNotebooks')
     useNotebooks = module.useNotebooks
@@ -180,7 +198,7 @@ describe('useNotebooks', () => {
       expect(result.current).toHaveProperty('updateNotebook')
       expect(result.current).toHaveProperty('deleteNotebook')
       expect(result.current).toHaveProperty('moveNotebook')
-      
+
       // Getters
       expect(result.current).toHaveProperty('getNotebook')
       expect(result.current).toHaveProperty('getNotebookByName')
@@ -188,7 +206,7 @@ describe('useNotebooks', () => {
       expect(result.current).toHaveProperty('getRootNotebooks')
       expect(result.current).toHaveProperty('getNotebookChildren')
       expect(result.current).toHaveProperty('getFlattenedNotebooks')
-      
+
       // Helpers
       expect(result.current).toHaveProperty('getColorClass')
       expect(result.current).toHaveProperty('getAvailableColors')
@@ -206,7 +224,7 @@ describe('useNotebooks', () => {
       mockLocalStorage.getItem.mockReturnValue(storedNotebooks)
 
       const { result } = renderHook(() => useNotebooks())
-      
+
       // Test that hook initializes successfully
       expect(result.current.notebooks).toBeDefined()
       expect(mockBuildNotebookTree).toHaveBeenCalled()
@@ -218,7 +236,7 @@ describe('useNotebooks', () => {
       })
 
       const { result } = renderHook(() => useNotebooks())
-      
+
       // Test that hook still initializes with defaults
       expect(result.current.notebooks).toBeDefined()
       expect(mockBuildNotebookTree).toHaveBeenCalled()
@@ -232,7 +250,7 @@ describe('useNotebooks', () => {
       const newNotebookData = {
         name: 'New Notebook',
         color: 'blue',
-        description: 'A new test notebook'
+        description: 'A new test notebook',
       }
 
       let createdNotebook: Notebook | null = null
@@ -255,7 +273,7 @@ describe('useNotebooks', () => {
       const newNotebookData = {
         name: 'Child Notebook',
         color: 'red',
-        parentId: 'projects'
+        parentId: 'projects',
       }
 
       let createdNotebook: Notebook | null = null
@@ -265,20 +283,23 @@ describe('useNotebooks', () => {
 
       expect(createdNotebook).not.toBeNull()
       expect(createdNotebook?.parentId).toBe('projects')
-      expect(mockValidateNotebookNesting).toHaveBeenCalledWith('projects', expect.any(Array))
+      expect(mockValidateNotebookNesting).toHaveBeenCalledWith(
+        'projects',
+        expect.any(Array)
+      )
     })
 
     it('should handle name validation failure', () => {
-      mockValidateNotebookName.mockReturnValue({ 
-        isValid: false, 
-        error: 'Name already exists' 
+      mockValidateNotebookName.mockReturnValue({
+        isValid: false,
+        error: 'Name already exists',
       })
 
       const { result } = renderHook(() => useNotebooks())
 
       const newNotebookData = {
         name: 'Duplicate Name',
-        color: 'blue'
+        color: 'blue',
       }
 
       let createdNotebook: Notebook | null = null
@@ -287,13 +308,15 @@ describe('useNotebooks', () => {
       })
 
       expect(createdNotebook).toBeNull()
-      expect(mockAlert).toHaveBeenCalledWith('Cannot create notebook: Name already exists')
+      expect(mockAlert).toHaveBeenCalledWith(
+        'Cannot create notebook: Name already exists'
+      )
     })
 
     it('should handle nesting validation failure', () => {
-      mockValidateNotebookNesting.mockReturnValue({ 
-        isValid: false, 
-        error: 'Invalid nesting level' 
+      mockValidateNotebookNesting.mockReturnValue({
+        isValid: false,
+        error: 'Invalid nesting level',
       })
 
       const { result } = renderHook(() => useNotebooks())
@@ -301,7 +324,7 @@ describe('useNotebooks', () => {
       const newNotebookData = {
         name: 'Deep Nested',
         color: 'blue',
-        parentId: 'some-deep-parent'
+        parentId: 'some-deep-parent',
       }
 
       let createdNotebook: Notebook | null = null
@@ -310,7 +333,9 @@ describe('useNotebooks', () => {
       })
 
       expect(createdNotebook).toBeNull()
-      expect(mockAlert).toHaveBeenCalledWith('Cannot create notebook: Invalid nesting level')
+      expect(mockAlert).toHaveBeenCalledWith(
+        'Cannot create notebook: Invalid nesting level'
+      )
     })
 
     it('should trim whitespace from notebook name', () => {
@@ -318,7 +343,7 @@ describe('useNotebooks', () => {
 
       const newNotebookData = {
         name: '  Trimmed Name  ',
-        color: 'blue'
+        color: 'blue',
       }
 
       let createdNotebook: Notebook | null = null
@@ -333,7 +358,7 @@ describe('useNotebooks', () => {
       const { result } = renderHook(() => useNotebooks())
 
       const newNotebookData = {
-        name: 'No Color Notebook'
+        name: 'No Color Notebook',
       }
 
       let createdNotebook: Notebook | null = null
@@ -352,16 +377,20 @@ describe('useNotebooks', () => {
       const updates = {
         name: 'Updated Name',
         color: 'red',
-        description: 'Updated description'
+        description: 'Updated description',
       }
 
-      let updateResult: boolean = false
+      let updateResult = false
       act(() => {
         updateResult = result.current.updateNotebook('inbox', updates)
       })
 
       expect(updateResult).toBe(true)
-      expect(mockValidateNotebookName).toHaveBeenCalledWith('Updated Name', expect.any(Array), 'inbox')
+      expect(mockValidateNotebookName).toHaveBeenCalledWith(
+        'Updated Name',
+        expect.any(Array),
+        'inbox'
+      )
       expect(mockBuildNotebookTree).toHaveBeenCalled()
     })
 
@@ -369,17 +398,25 @@ describe('useNotebooks', () => {
       const { result } = renderHook(() => useNotebooks())
 
       const updates = {
-        parentId: 'projects'
+        parentId: 'projects',
       }
 
-      let updateResult: boolean = false
+      let updateResult = false
       act(() => {
         updateResult = result.current.updateNotebook('inbox', updates)
       })
 
       expect(updateResult).toBe(true)
-      expect(mockValidateNotebookMove).toHaveBeenCalledWith('inbox', 'projects', expect.any(Array))
-      expect(mockMoveNotebookWithChildren).toHaveBeenCalledWith('inbox', 'projects', expect.any(Array))
+      expect(mockValidateNotebookMove).toHaveBeenCalledWith(
+        'inbox',
+        'projects',
+        expect.any(Array)
+      )
+      expect(mockMoveNotebookWithChildren).toHaveBeenCalledWith(
+        'inbox',
+        'projects',
+        expect.any(Array)
+      )
     })
 
     it('should handle notebook not found', () => {
@@ -387,51 +424,60 @@ describe('useNotebooks', () => {
 
       const updates = { name: 'Updated Name' }
 
-      let updateResult: boolean = false
+      let updateResult = false
       act(() => {
         updateResult = result.current.updateNotebook('nonexistent', updates)
       })
 
       expect(updateResult).toBe(false)
-      expect(mockLogger.warn).toHaveBeenCalledWith('Notebook not found:', 'nonexistent')
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Notebook not found:',
+        'nonexistent'
+      )
     })
 
     it('should handle name validation failure on update', () => {
-      mockValidateNotebookName.mockReturnValue({ 
-        isValid: false, 
-        error: 'Invalid name' 
+      mockValidateNotebookName.mockReturnValue({
+        isValid: false,
+        error: 'Invalid name',
       })
 
       const { result } = renderHook(() => useNotebooks())
 
       const updates = { name: 'Invalid Name' }
 
-      let updateResult: boolean = false
+      let updateResult = false
       act(() => {
         updateResult = result.current.updateNotebook('inbox', updates)
       })
 
       expect(updateResult).toBe(false)
-      expect(mockLogger.warn).toHaveBeenCalledWith('Invalid notebook name:', 'Invalid name')
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Invalid notebook name:',
+        'Invalid name'
+      )
     })
 
     it('should handle move validation failure on update', () => {
-      mockValidateNotebookMove.mockReturnValue({ 
-        isValid: false, 
-        error: 'Invalid move' 
+      mockValidateNotebookMove.mockReturnValue({
+        isValid: false,
+        error: 'Invalid move',
       })
 
       const { result } = renderHook(() => useNotebooks())
 
       const updates = { parentId: 'invalid-parent' }
 
-      let updateResult: boolean = false
+      let updateResult = false
       act(() => {
         updateResult = result.current.updateNotebook('inbox', updates)
       })
 
       expect(updateResult).toBe(false)
-      expect(mockLogger.warn).toHaveBeenCalledWith('Invalid move:', 'Invalid move')
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Invalid move:',
+        'Invalid move'
+      )
     })
   })
 
@@ -440,63 +486,80 @@ describe('useNotebooks', () => {
       mockDeleteNotebookAndChildren.mockReturnValue(['inbox'])
       const { result } = renderHook(() => useNotebooks())
 
-      let deleteResult: boolean = false
+      let deleteResult = false
       act(() => {
         deleteResult = result.current.deleteNotebook('inbox')
       })
 
       expect(deleteResult).toBe(true)
-      expect(mockDeleteNotebookAndChildren).toHaveBeenCalledWith('inbox', expect.any(Array))
-      expect(mockUpdateNote).toHaveBeenCalledWith(expect.objectContaining({
-        id: 'note1',
-        isTrashed: true,
-        trashedAt: expect.any(String)
-      }))
-      expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining('Deleted notebook inbox'))
+      expect(mockDeleteNotebookAndChildren).toHaveBeenCalledWith(
+        'inbox',
+        expect.any(Array)
+      )
+      expect(mockUpdateNote).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'note1',
+          isTrashed: true,
+          trashedAt: expect.any(String),
+        })
+      )
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        expect.stringContaining('Deleted notebook inbox')
+      )
     })
 
     it('should prevent deleting the last root notebook', () => {
       // Mock only one root notebook
-      const singleRootNotebook = [
-        { ...sampleNotebooks[0], parentId: null }
-      ]
+      const singleRootNotebook = [{ ...sampleNotebooks[0], parentId: null }]
       mockBuildNotebookTree.mockReturnValue(singleRootNotebook)
 
       const { result } = renderHook(() => useNotebooks())
 
-      let deleteResult: boolean = false
+      let deleteResult = false
       act(() => {
         deleteResult = result.current.deleteNotebook('inbox')
       })
 
       expect(deleteResult).toBe(false)
-      expect(mockLogger.warn).toHaveBeenCalledWith('Cannot delete the last root notebook')
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Cannot delete the last root notebook'
+      )
     })
 
     it('should allow deleting child notebooks', () => {
       mockDeleteNotebookAndChildren.mockReturnValue(['child-notebook'])
       const { result } = renderHook(() => useNotebooks())
 
-      let deleteResult: boolean = false
+      let deleteResult = false
       act(() => {
         deleteResult = result.current.deleteNotebook('child-notebook')
       })
 
       expect(deleteResult).toBe(true)
-      expect(mockDeleteNotebookAndChildren).toHaveBeenCalledWith('child-notebook', expect.any(Array))
+      expect(mockDeleteNotebookAndChildren).toHaveBeenCalledWith(
+        'child-notebook',
+        expect.any(Array)
+      )
     })
 
     it('should handle deleting notebook with children', () => {
-      mockDeleteNotebookAndChildren.mockReturnValue(['parent', 'child1', 'child2'])
+      mockDeleteNotebookAndChildren.mockReturnValue([
+        'parent',
+        'child1',
+        'child2',
+      ])
       const { result } = renderHook(() => useNotebooks())
 
-      let deleteResult: boolean = false
+      let deleteResult = false
       act(() => {
         deleteResult = result.current.deleteNotebook('parent')
       })
 
       expect(deleteResult).toBe(true)
-      expect(mockDeleteNotebookAndChildren).toHaveBeenCalledWith('parent', expect.any(Array))
+      expect(mockDeleteNotebookAndChildren).toHaveBeenCalledWith(
+        'parent',
+        expect.any(Array)
+      )
     })
   })
 
@@ -504,43 +567,58 @@ describe('useNotebooks', () => {
     it('should move notebook to new parent', () => {
       const { result } = renderHook(() => useNotebooks())
 
-      let moveResult: boolean = false
+      let moveResult = false
       act(() => {
         moveResult = result.current.moveNotebook('inbox', 'projects')
       })
 
       expect(moveResult).toBe(true)
-      expect(mockValidateNotebookMove).toHaveBeenCalledWith('inbox', 'projects', expect.any(Array))
-      expect(mockMoveNotebookWithChildren).toHaveBeenCalledWith('inbox', 'projects', expect.any(Array))
+      expect(mockValidateNotebookMove).toHaveBeenCalledWith(
+        'inbox',
+        'projects',
+        expect.any(Array)
+      )
+      expect(mockMoveNotebookWithChildren).toHaveBeenCalledWith(
+        'inbox',
+        'projects',
+        expect.any(Array)
+      )
     })
 
     it('should handle move validation failure', () => {
-      mockValidateNotebookMove.mockReturnValue({ 
-        isValid: false, 
-        error: 'Cannot move to child' 
+      mockValidateNotebookMove.mockReturnValue({
+        isValid: false,
+        error: 'Cannot move to child',
       })
 
       const { result } = renderHook(() => useNotebooks())
 
-      let moveResult: boolean = false
+      let moveResult = false
       act(() => {
         moveResult = result.current.moveNotebook('inbox', 'projects')
       })
 
       expect(moveResult).toBe(false)
-      expect(mockConsole.warn).toHaveBeenCalledWith('Invalid move:', 'Cannot move to child')
+      expect(mockConsole.warn).toHaveBeenCalledWith(
+        'Invalid move:',
+        'Cannot move to child'
+      )
     })
 
     it('should move notebook to root level', () => {
       const { result } = renderHook(() => useNotebooks())
 
-      let moveResult: boolean = false
+      let moveResult = false
       act(() => {
         moveResult = result.current.moveNotebook('child-notebook', null)
       })
 
       expect(moveResult).toBe(true)
-      expect(mockValidateNotebookMove).toHaveBeenCalledWith('child-notebook', null, expect.any(Array))
+      expect(mockValidateNotebookMove).toHaveBeenCalledWith(
+        'child-notebook',
+        null,
+        expect.any(Array)
+      )
     })
   })
 
@@ -605,12 +683,12 @@ describe('useNotebooks', () => {
       // Mock NOTEBOOK_COLORS
       const mockColors = [
         { value: 'blue', class: 'text-blue-500' },
-        { value: 'red', class: 'text-red-500' }
+        { value: 'red', class: 'text-red-500' },
       ]
 
       // We need to mock the NOTEBOOK_COLORS import
       vi.doMock('../../types/notebook', () => ({
-        NOTEBOOK_COLORS: mockColors
+        NOTEBOOK_COLORS: mockColors,
       }))
 
       const colorClass = result.current.getColorClass('blue')
@@ -660,9 +738,9 @@ describe('useNotebooks', () => {
           id: 'old-notebook',
           name: 'Old Notebook',
           color: 'blue',
-          createdAt: '2025-01-01T00:00:00.000Z'
+          createdAt: '2025-01-01T00:00:00.000Z',
           // Missing: parentId, children, level, path, updatedAt
-        }
+        },
       ]
 
       mockLocalStorage.getItem.mockReturnValue(JSON.stringify(oldNotebooks))

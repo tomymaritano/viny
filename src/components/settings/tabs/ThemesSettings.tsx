@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { useAppStore } from '../../../stores/newSimpleStore'
 import { Icons } from '../../Icons'
-import { applyThemeCompletely, type ThemeValue } from '../../../utils/themeUtils'
+import {
+  applyThemeCompletely,
+  type ThemeValue,
+} from '../../../utils/themeUtils'
 import { themeLogger } from '../../../utils/logger'
+import { SliderWithLabels } from '../../ui/SliderRadix'
+import { SwitchWithLabel } from '../../ui/SwitchRadix'
 
 const ThemesSettings: React.FC = () => {
   const { setTheme, updateSettings, settings, loading } = useAppStore()
@@ -19,7 +24,7 @@ const ThemesSettings: React.FC = () => {
     { value: 'dark', label: 'Dark', icon: 'Moon' },
     { value: 'solarized', label: 'Solarized', icon: 'Palette' },
     { value: 'hacklab', label: 'Hacklab', icon: 'Monitor' },
-    { value: 'system', label: 'System', icon: 'Monitor' }
+    { value: 'system', label: 'System', icon: 'Monitor' },
   ]
 
   const syntaxThemes = [
@@ -32,7 +37,7 @@ const ThemesSettings: React.FC = () => {
     { value: 'dracula', label: 'Dracula' },
     { value: 'nord', label: 'Nord' },
     { value: 'one-dark', label: 'One Dark' },
-    { value: 'gruvbox', label: 'Gruvbox' }
+    { value: 'gruvbox', label: 'Gruvbox' },
   ]
 
   const previewThemes = [
@@ -42,7 +47,7 @@ const ThemesSettings: React.FC = () => {
     { value: 'github', label: 'GitHub' },
     { value: 'minimal', label: 'Minimal' },
     { value: 'academic', label: 'Academic' },
-    { value: 'modern', label: 'Modern' }
+    { value: 'modern', label: 'Modern' },
   ]
 
   if (loading) {
@@ -58,28 +63,31 @@ const ThemesSettings: React.FC = () => {
     try {
       themeLogger.group('Theme Change Debug')
       themeLogger.debug('Theme change initiated:', { key, value })
-      
+
       // Update local state immediately for UI responsiveness
       setLocalSettings(prev => ({ ...prev, [key]: value }))
-      
+
       // Update store if it's theme
       if (key === 'theme') {
         themeLogger.debug('Applying theme to DOM and store')
         // Apply theme using centralized utility
         applyThemeCompletely(value as ThemeValue, {
           updateMetaColor: true,
-          updateStore: async (theme) => await setTheme(theme)
+          updateStore: async theme => await setTheme(theme),
         })
       } else {
         // For non-theme settings, use updateSettings
         await updateSettings({ [key]: value })
       }
-      
+
       themeLogger.info('Theme change completed successfully:', { key, value })
       themeLogger.groupEnd()
-      
     } catch (error) {
-      themeLogger.error('Failed to update theme setting:', { key, value, error })
+      themeLogger.error('Failed to update theme setting:', {
+        key,
+        value,
+        error,
+      })
       themeLogger.groupEnd()
     }
   }
@@ -95,9 +103,9 @@ const ThemesSettings: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           UI Theme
         </h3>
-        
+
         <div className="grid grid-cols-3 gap-3">
-          {themes.map((theme) => (
+          {themes.map(theme => (
             <button
               key={theme.value}
               onClick={() => handleThemeChange('theme', theme.value)}
@@ -111,18 +119,25 @@ const ThemesSettings: React.FC = () => {
                 }
               `}
             >
-              <div className={`w-6 h-6 ${
-                localSettings.theme === theme.value ? 'text-theme-accent-primary' : 'text-theme-text-muted'
-              }`}>
+              <div
+                className={`w-6 h-6 ${
+                  localSettings.theme === theme.value
+                    ? 'text-theme-accent-primary'
+                    : 'text-theme-text-muted'
+                }`}
+              >
                 {getIcon(theme.icon)}
               </div>
-              <span className="text-sm font-medium text-theme-text-primary">{theme.label}</span>
+              <span className="text-sm font-medium text-theme-text-primary">
+                {theme.label}
+              </span>
             </button>
           ))}
         </div>
-        
+
         <p className="mt-3 text-xs text-theme-text-muted">
-          System theme automatically switches between light and dark based on your OS preferences
+          System theme automatically switches between light and dark based on
+          your OS preferences
         </p>
       </div>
 
@@ -131,9 +146,9 @@ const ThemesSettings: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Syntax Highlighting
         </h3>
-        
+
         <div className="grid grid-cols-2 gap-3">
-          {syntaxThemes.map((theme) => (
+          {syntaxThemes.map(theme => (
             <button
               key={theme.value}
               onClick={() => handleThemeChange('syntaxTheme', theme.value)}
@@ -147,14 +162,17 @@ const ThemesSettings: React.FC = () => {
               `}
             >
               <div className="flex items-center space-x-3">
-                <span className="text-sm font-medium text-theme-text-primary">{theme.label}</span>
+                <span className="text-sm font-medium text-theme-text-primary">
+                  {theme.label}
+                </span>
               </div>
             </button>
           ))}
         </div>
-        
+
         <p className="mt-3 text-xs text-theme-text-muted">
-          Choose the color scheme for code blocks and syntax highlighting in your notes
+          Choose the color scheme for code blocks and syntax highlighting in
+          your notes
         </p>
       </div>
 
@@ -163,9 +181,9 @@ const ThemesSettings: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Preview Theme
         </h3>
-        
+
         <div className="grid grid-cols-2 gap-3">
-          {previewThemes.map((theme) => (
+          {previewThemes.map(theme => (
             <button
               key={theme.value}
               onClick={() => handleThemeChange('previewTheme', theme.value)}
@@ -178,11 +196,13 @@ const ThemesSettings: React.FC = () => {
                 }
               `}
             >
-              <span className="text-sm font-medium text-theme-text-primary">{theme.label}</span>
+              <span className="text-sm font-medium text-theme-text-primary">
+                {theme.label}
+              </span>
             </button>
           ))}
         </div>
-        
+
         <p className="mt-3 text-xs text-theme-text-muted">
           Set the styling theme for note preview and rendered markdown
         </p>
@@ -193,51 +213,48 @@ const ThemesSettings: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Typography
         </h3>
-        
+
         <div className="space-y-6">
           {/* Font Size */}
           <div>
-            <label className="block text-sm font-medium text-theme-text-secondary mb-2">
-              Font Size
-            </label>
-            <div className="flex items-center space-x-4">
-              <span className="text-xs text-theme-text-muted">12px</span>
-              <input
-                type="range"
-                min="12"
-                max="20"
-                value={localSettings.editorFontSize || 14}
-                onChange={(e) => handleThemeChange('editorFontSize', parseInt(e.target.value))}
-                className="flex-1 h-2 bg-theme-bg-tertiary rounded-lg appearance-none cursor-pointer"
-              />
-              <span className="text-xs text-theme-text-muted">20px</span>
-              <span className="text-sm font-medium text-theme-text-primary w-12">
-                {localSettings.editorFontSize || 14}px
-              </span>
-            </div>
+            <SliderWithLabels
+              label="Font Size"
+              value={[localSettings.editorFontSize || 14]}
+              min={12}
+              max={20}
+              step={1}
+              showValue={true}
+              showRange={true}
+              formatValue={val => `${val}px`}
+              onValueChange={values =>
+                handleThemeChange(
+                  'editorFontSize',
+                  parseInt(values[0].toString())
+                )
+              }
+              className="w-full"
+            />
           </div>
 
           {/* Line Height */}
           <div>
-            <label className="block text-sm font-medium text-theme-text-secondary mb-2">
-              Line Height
-            </label>
-            <div className="flex items-center space-x-4">
-              <span className="text-xs text-theme-text-muted">1.2</span>
-              <input
-                type="range"
-                min="1.2"
-                max="2.0"
-                step="0.1"
-                value={localSettings.lineHeight || 1.6}
-                onChange={(e) => handleThemeChange('lineHeight', parseFloat(e.target.value))}
-                className="flex-1 h-2 bg-theme-bg-tertiary rounded-lg appearance-none cursor-pointer"
-              />
-              <span className="text-xs text-theme-text-muted">2.0</span>
-              <span className="text-sm font-medium text-theme-text-primary w-12">
-                {localSettings.lineHeight || 1.6}
-              </span>
-            </div>
+            <SliderWithLabels
+              label="Line Height"
+              value={[localSettings.lineHeight || 1.6]}
+              min={1.2}
+              max={2.0}
+              step={0.1}
+              showValue={true}
+              showRange={true}
+              formatValue={val => val.toFixed(1)}
+              onValueChange={values =>
+                handleThemeChange(
+                  'lineHeight',
+                  parseFloat(values[0].toString())
+                )
+              }
+              className="w-full"
+            />
           </div>
         </div>
       </div>
@@ -247,27 +264,17 @@ const ThemesSettings: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Custom Styling
         </h3>
-        
+
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-medium text-theme-text-primary">
-                Enable Custom CSS
-              </h4>
-              <p className="text-xs text-theme-text-muted mt-1">
-                Apply custom CSS to personalize your interface
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={localSettings.customCSSEnabled || false}
-                onChange={(e) => handleThemeChange('customCSSEnabled', e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-theme-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent-primary"></div>
-            </label>
-          </div>
+          <SwitchWithLabel
+            checked={localSettings.customCSSEnabled || false}
+            onCheckedChange={checked =>
+              handleThemeChange('customCSSEnabled', checked)
+            }
+            label="Enable Custom CSS"
+            description="Apply custom CSS to personalize your interface"
+            labelPosition="left"
+          />
 
           {localSettings.customCSSEnabled && (
             <div>
@@ -276,7 +283,7 @@ const ThemesSettings: React.FC = () => {
               </label>
               <textarea
                 value={localSettings.customCSS || ''}
-                onChange={(e) => handleThemeChange('customCSS', e.target.value)}
+                onChange={e => handleThemeChange('customCSS', e.target.value)}
                 placeholder="/* Add your custom CSS here */\n.note-content {\n  /* Custom styles */\n}"
                 className="w-full h-32 px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm font-mono focus:outline-none focus:ring-2 focus:ring-theme-accent-primary resize-none"
               />

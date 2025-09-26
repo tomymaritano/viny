@@ -1,92 +1,128 @@
-import React, { useEffect, useState } from 'react'
-import { createPortal } from 'react-dom'
-import { Toast, ToastProps } from './Toast'
+import React, { useEffect, useState, useMemo } from 'react'
+import { CheckCircle, AlertCircle, AlertTriangle, Info, X } from 'lucide-react'
+import {
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+  ToastAction,
+} from './RadixToast'
 
-interface ToastData extends Omit<ToastProps, 'onDismiss'> {
+export interface ToastAction {
+  label: string
+  action: () => void
+}
+
+interface ToastData {
   id: string
+  type: 'success' | 'error' | 'warning' | 'info'
+  message: string
+  details?: string
   duration?: number
+  dismissible?: boolean
+  actions?: ToastAction[]
 }
 
 interface ToastContainerProps {
   toasts: ToastData[]
   onDismiss: (id: string) => void
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center'
   maxToasts?: number
 }
 
 const ToastContainer: React.FC<ToastContainerProps> = ({
-  toasts,
+  toasts = [],
   onDismiss,
-  position = 'top-right',
-  maxToasts = 5
+  maxToasts = 5,
 }) => {
   const [mountedToasts, setMountedToasts] = useState<ToastData[]>([])
 
-  // Update mounted toasts
+  // Memoize the sliced toasts to prevent unnecessary updates
+  const limitedToasts = useMemo(
+    () => (toasts || []).slice(0, maxToasts),
+    [toasts, maxToasts]
+  )
+
+  // Update mounted toasts only when limitedToasts actually changes
   useEffect(() => {
-    setMountedToasts(toasts.slice(0, maxToasts))
-  }, [toasts, maxToasts])
-
-  const getPositionClasses = () => {
-    switch (position) {
-      case 'top-right':
-        return 'top-0 right-0 items-end'
-      case 'top-left':
-        return 'top-0 left-0 items-start'
-      case 'bottom-right':
-        return 'bottom-0 right-0 items-end'
-      case 'bottom-left':
-        return 'bottom-0 left-0 items-start'
-      case 'top-center':
-        return 'top-0 left-1/2 transform -translate-x-1/2 items-center'
-      case 'bottom-center':
-        return 'bottom-0 left-1/2 transform -translate-x-1/2 items-center'
-      default:
-        return 'top-0 right-0 items-end'
-    }
-  }
-
-  const getAnimationClasses = () => {
-    const isTop = position.includes('top')
-    const isRight = position.includes('right')
-    const isLeft = position.includes('left')
-    const isCenter = position.includes('center')
-
-    if (isTop && isRight) return 'animate-slide-in-right'
-    if (isTop && isLeft) return 'animate-slide-in-left'
-    if (isTop && isCenter) return 'animate-slide-in-top'
-    if (!isTop && isRight) return 'animate-slide-in-right'
-    if (!isTop && isLeft) return 'animate-slide-in-left'
-    if (!isTop && isCenter) return 'animate-slide-in-bottom'
-    
-    return 'animate-slide-in-right'
-  }
+    setMountedToasts(prevToasts => {
+      // Only update if the toast IDs have changed
+      const currentIds = prevToasts.map(t => t.id).join(',')
+      const newIds = limitedToasts.map(t => t.id).join(',')
+      
+      if (currentIds !== newIds) {
+        return limitedToasts
+      }
+      return prevToasts
+    })
+  }, [limitedToasts])
 
   if (mountedToasts.length === 0) return null
 
-  const toastContainer = (
-    <div 
-      className={`
-        fixed z-50 flex flex-col gap-3 p-4 pointer-events-none
-        ${getPositionClasses()}
-      `}
-      style={{ maxHeight: '100vh', overflow: 'hidden' }}
-    >
-      {mountedToasts.map((toast) => (
-        <div
-          key={toast.id}
-          className={`transform transition-all duration-300 ${getAnimationClasses()}`}
-        >
-          <Toast
-            {...toast}
-            onDismiss={onDismiss}
-          />
-        </div>
-      ))}
-    </div>
-  )
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'success':
+        return <CheckCircle className="w-5 h-5 text-theme-accent-green" />
+      case 'error':
+        return <AlertCircle className="w-5 h-5 text-theme-accent-red" />
+      case 'warning':
+        return <AlertTriangle className="w-5 h-5 text-theme-accent-yellow" />
+      case 'info':
+        return <Info className="w-5 h-5 text-theme-accent-primary" />
+    }
+  }
 
-  return createPortal(toastContainer, document.body)
+  const getVariant = (type: string) => {
+    return type === 'error' ? 'destructive' : 'default'
+  }
+
+  return (
+    <>
+      {mountedToasts.map(toast => (
+        <Toast
+          key={toast.id}
+          variant={getVariant(toast.type)}
+          duration={toast.duration || 5000}
+          onOpenChange={open => {
+            if (!open) {
+              onDismiss(toast.id)
+            }
+          }}
+        >
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 mt-0.5">{getIcon(toast.type)}</div>
+            <div className="flex-1 min-w-0">
+              <ToastTitle className="text-sm font-medium text-theme-text-primary">
+                {toast.message}
+              </ToastTitle>
+              {toast.details && (
+                <ToastDescription className="mt-1 text-xs text-theme-text-secondary">
+                  {toast.details}
+                </ToastDescription>
+              )}
+              {toast.actions && toast.actions.length > 0 && (
+                <div className="mt-2 flex gap-2">
+                  {toast.actions.map((action, index) => (
+                    <ToastAction
+                      key={index}
+                      onClick={action.action}
+                      className="text-xs font-medium px-2 py-1 rounded bg-theme-bg-secondary hover:bg-theme-bg-tertiary transition-colors"
+                    >
+                      {action.label}
+                    </ToastAction>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          {toast.dismissible !== false && (
+            <ToastClose className="flex-shrink-0">
+              <X className="w-4 h-4" />
+            </ToastClose>
+          )}
+        </Toast>
+      ))}
+    </>
+  )
 }
 
 export { ToastContainer }

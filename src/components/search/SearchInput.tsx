@@ -6,30 +6,26 @@ interface SearchInputProps {
   query: string
   onQueryChange: (query: string) => void
   onClear: () => void
-  onClose: () => void
   placeholder?: string
 }
 
-const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
-  query,
-  onQueryChange,
-  onClear,
-  onClose,
-  placeholder = "Search notes..."
-}, ref) => {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="flex-1 relative">
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-          <Icons.Search size={16} className="text-theme-text-muted" />
+const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
+  (
+    { query, onQueryChange, onClear, placeholder = 'Search notes...' },
+    ref
+  ) => {
+    return (
+      <div className="relative">
+        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+          <Icons.Search size={14} className="text-theme-text-muted opacity-50" />
         </div>
         <input
           ref={ref}
           type="text"
           value={query}
-          onChange={(e) => onQueryChange(e.target.value)}
+          onChange={e => onQueryChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full pl-10 pr-10 py-2.5 bg-transparent border-0 text-theme-text-primary placeholder-theme-text-muted focus:outline-none focus:ring-0"
+          className="w-full pl-9 pr-9 py-1.5 bg-transparent border-0 text-theme-text-primary placeholder-theme-text-muted focus:outline-none text-sm"
           autoComplete="off"
           spellCheck="false"
           data-testid="search-input"
@@ -37,24 +33,16 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
         {query && (
           <button
             onClick={onClear}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-theme-text-muted hover:text-theme-text-primary transition-colors"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-theme-text-muted hover:text-theme-text-primary p-0.5"
+            aria-label="Clear search"
           >
-            <Icons.X size={16} />
+            <Icons.X size={14} />
           </button>
         )}
       </div>
-      
-      <IconButton
-        icon={Icons.X}
-        onClick={onClose}
-        title="Close search"
-        size={16}
-        variant="default"
-        aria-label="Close search modal"
-      />
-    </div>
-  )
-})
+    )
+  }
+)
 
 SearchInput.displayName = 'SearchInput'
 

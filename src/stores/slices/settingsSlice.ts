@@ -4,29 +4,44 @@
  * This replaces the old settingsSlice.ts with simplified, testable architecture
  */
 
-import { StateCreator } from 'zustand'
-import { AppSettings, defaultAppSettings } from '../../types/settings'
-import { createSettingsRepository, ISettingsRepository, StorageError } from '../../lib/repositories/RepositoryFactory'
+import type { StateCreator } from 'zustand'
+import type { AppSettings } from '../../types/settings'
+import { defaultAppSettings } from '../../types/settings'
+import type { ISettingsRepository } from '../../lib/repositories/RepositoryFactory'
+import {
+  createSettingsRepository,
+  StorageError,
+} from '../../lib/repositories/RepositoryFactory'
 import { storageLogger as logger } from '../../utils/logger'
 
 // Predefined tag color mappings (kept from original)
 const predefinedTagColors = {
-  'project': 'ocean',
-  'work': 'steel', 
-  'personal': 'forest',
-  'urgent': 'cherry',
-  'important': 'sunset',
-  'idea': 'golden',
-  'note': 'sage',
-  'todo': 'royal',
-  'meeting': 'turquoise',
-  'draft': 'lavender'
+  project: 'ocean',
+  work: 'steel',
+  personal: 'forest',
+  urgent: 'cherry',
+  important: 'sunset',
+  idea: 'golden',
+  note: 'sage',
+  todo: 'royal',
+  meeting: 'turquoise',
+  draft: 'lavender',
 } as const
 
 // Available color options for automatic assignment
 const colorOptions = [
-  'ocean', 'forest', 'royal', 'sunset', 'cherry', 'golden',
-  'lavender', 'turquoise', 'rose', 'sage', 'steel', 'copper'
+  'ocean',
+  'forest',
+  'royal',
+  'sunset',
+  'cherry',
+  'golden',
+  'lavender',
+  'turquoise',
+  'rose',
+  'sage',
+  'steel',
+  'copper',
 ] as const
 
 // Hash function for consistent color assignment
@@ -45,31 +60,36 @@ export interface SettingsSlice {
   loading: boolean
   error: string | null
   isInitialized: boolean
-  
+
   // Core settings actions (now async)
   updateSettings: (updates: Partial<AppSettings>) => Promise<void>
   resetSettings: () => Promise<void>
   loadSettings: () => Promise<void>
-  
+
   // Theme actions (consolidated from themeSlice)
   setTheme: (theme: string) => Promise<void>
   setTagColor: (tag: string, color: string) => Promise<void>
   getTagColor: (tag: string) => string
   resetTagColors: () => Promise<void>
-  
+
   // Import/Export (now async)
   exportSettings: () => Promise<string>
   importSettings: (settingsJson: string) => Promise<boolean>
-  
+
   // Internal methods
   _setError: (error: string | null) => void
   _setLoading: (loading: boolean) => void
 }
 
-export const createSettingsSlice: StateCreator<SettingsSlice, [], [], SettingsSlice> = (set, get) => {
+export const createSettingsSlice: StateCreator<
+  SettingsSlice,
+  [],
+  [],
+  SettingsSlice
+> = (set, get) => {
   // Initialize repository
   const repository: ISettingsRepository = createSettingsRepository()
-  
+
   // Helper to handle async operations with error handling
   const withErrorHandling = async <T>(
     operation: () => Promise<T>,
@@ -81,10 +101,11 @@ export const createSettingsSlice: StateCreator<SettingsSlice, [], [], SettingsSl
       set({ loading: false })
       return result
     } catch (error) {
-      const errorMessage = error instanceof StorageError 
-        ? `${operationName} failed: ${error.message}`
-        : `${operationName} failed unexpectedly`
-      
+      const errorMessage =
+        error instanceof StorageError
+          ? `${operationName} failed: ${error.message}`
+          : `${operationName} failed unexpectedly`
+
       logger.error(`Settings ${operationName} error:`, error)
       set({ loading: false, error: errorMessage })
       return null
@@ -104,7 +125,7 @@ export const createSettingsSlice: StateCreator<SettingsSlice, [], [], SettingsSl
         () => repository.getSettings(),
         'load'
       )
-      
+
       if (settings) {
         set({ settings, isInitialized: true })
         logger.debug('Settings loaded successfully')
@@ -112,35 +133,31 @@ export const createSettingsSlice: StateCreator<SettingsSlice, [], [], SettingsSl
     },
 
     // Update settings through repository
-    updateSettings: async (updates) => {
-      const success = await withErrorHandling(
-        async () => {
-          await repository.saveSettings(updates)
-          return true
-        },
-        'update'
-      )
-      
+    updateSettings: async updates => {
+      const success = await withErrorHandling(async () => {
+        await repository.saveSettings(updates)
+        return true
+      }, 'update')
+
       if (success) {
         // Update local state immediately (optimistic update)
         set(state => ({
-          settings: { ...state.settings, ...updates }
+          settings: { ...state.settings, ...updates },
         }))
-        
-        logger.debug('Settings updated successfully', { keys: Object.keys(updates) })
+
+        logger.debug('Settings updated successfully', {
+          keys: Object.keys(updates),
+        })
       }
     },
 
     // Reset settings to defaults
     resetSettings: async () => {
-      const success = await withErrorHandling(
-        async () => {
-          await repository.resetSettings()
-          return true
-        },
-        'reset'
-      )
-      
+      const success = await withErrorHandling(async () => {
+        await repository.resetSettings()
+        return true
+      }, 'reset')
+
       if (success) {
         set({ settings: { ...defaultAppSettings } })
         logger.debug('Settings reset successfully')
@@ -149,7 +166,7 @@ export const createSettingsSlice: StateCreator<SettingsSlice, [], [], SettingsSl
 
     // Theme-specific actions
 
-    setTheme: async (theme) => {
+    setTheme: async theme => {
       const currentTheme = get().settings.theme
       if (currentTheme === theme) return
       await get().updateSettings({ theme })
@@ -158,25 +175,25 @@ export const createSettingsSlice: StateCreator<SettingsSlice, [], [], SettingsSl
     setTagColor: async (tag, color) => {
       const currentTagColors = get().settings.tagColors || {}
       const newTagColors = { ...currentTagColors, [tag]: color }
-      
+
       await get().updateSettings({ tagColors: newTagColors })
     },
 
-    getTagColor: (tag) => {
+    getTagColor: tag => {
       const state = get()
       const tagColors = state.settings.tagColors || {}
-      
+
       // Return stored color if available
       if (tagColors[tag]) {
         return tagColors[tag]
       }
-      
+
       // Check predefined colors
       const lowerTag = tag.toLowerCase()
       if (predefinedTagColors[lowerTag as keyof typeof predefinedTagColors]) {
         return predefinedTagColors[lowerTag as keyof typeof predefinedTagColors]
       }
-      
+
       // Generate color based on tag hash for consistency
       return hashTagToColor(tag)
     },
@@ -192,28 +209,25 @@ export const createSettingsSlice: StateCreator<SettingsSlice, [], [], SettingsSl
         () => repository.export(),
         'export'
       )
-      
+
       return exported || '{}'
     },
 
-    importSettings: async (settingsJson) => {
-      const success = await withErrorHandling(
-        async () => {
-          await repository.import(settingsJson)
-          // Reload settings after import
-          const newSettings = await repository.getSettings()
-          set({ settings: newSettings })
-          return true
-        },
-        'import'
-      )
-      
+    importSettings: async settingsJson => {
+      const success = await withErrorHandling(async () => {
+        await repository.import(settingsJson)
+        // Reload settings after import
+        const newSettings = await repository.getSettings()
+        set({ settings: newSettings })
+        return true
+      }, 'import')
+
       return success !== null
     },
 
     // Internal state management
-    _setError: (error) => set({ error }),
-    _setLoading: (loading) => set({ loading })
+    _setError: error => set({ error }),
+    _setLoading: loading => set({ loading }),
   }
 }
 

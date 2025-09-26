@@ -38,25 +38,26 @@ const AuthInputFixed: React.FC<AuthInputProps> = ({
   const [showPassword, setShowPassword] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
 
-  const inputType = type === 'password' ? (showPassword ? 'text' : 'password') : type
+  const inputType =
+    type === 'password' ? (showPassword ? 'text' : 'password') : type
   const hasValue = value.length > 0
   const hasError = !!error
 
   /*
    * CÁLCULOS MATEMÁTICOS PRECISOS PARA EVITAR SOLAPAMIENTO:
-   * 
+   *
    * ICONO IZQUIERDO:
    * - Posición del icono: left-4 (16px desde el borde)
    * - Ancho del icono: 18px
    * - Espaciado mínimo después del icono: 10px
    * - Total padding izquierdo necesario: 16px + 18px + 10px = 44px = pl-11
-   * 
+   *
    * BOTÓN TOGGLE DERECHO:
    * - Posición del botón: right-4 (16px desde el borde)
    * - Ancho del botón: 18px
    * - Espaciado mínimo antes del botón: 10px
    * - Total padding derecho necesario: 16px + 18px + 10px = 44px = pr-11
-   * 
+   *
    * NOTA: Esta matemática garantiza que NO haya solapamiento entre iconos y texto
    */
   const getPaddingClasses = () => {
@@ -74,41 +75,45 @@ const AuthInputFixed: React.FC<AuthInputProps> = ({
   const getInputClasses = () => {
     return cn(
       // Base styles
-      "w-full",
+      'w-full',
       AUTH_THEME.components.input.height,
       AUTH_THEME.components.input.borderRadius,
       AUTH_THEME.components.input.borderWidth,
       AUTH_THEME.animations.transitions.default,
-      "focus:outline-none font-body",
+      'focus:outline-none font-body',
       // Custom styling
       AUTH_THEME.effects.blur.backdrop,
-      "placeholder-gray-400",
+      'placeholder-gray-400',
       // Dynamic padding based on icons
       getPaddingClasses(),
       // State-based styles
       hasError
-        ? "border-red-400 text-red-300 shadow-md"
+        ? 'border-red-400 text-red-300 shadow-md'
         : isFocused
-        ? cn(AUTH_THEME.effects.shadows.focus, AUTH_THEME.effects.transforms.scale.focus, "ring-2 ring-blue-200/50")
-        : hasValue
-        ? AUTH_THEME.effects.shadows.default
-        : "",
+          ? cn(
+              AUTH_THEME.effects.shadows.focus,
+              AUTH_THEME.effects.transforms.scale.focus,
+              'ring-2 ring-blue-200/50'
+            )
+          : hasValue
+            ? AUTH_THEME.effects.shadows.default
+            : '',
       // Hover effect
-      "hover:border-gray-500 hover:shadow-lg",
+      'hover:border-gray-500 hover:shadow-lg',
       // Disabled state
-      disabled && "opacity-50 cursor-not-allowed"
+      disabled && 'opacity-50 cursor-not-allowed'
     )
   }
 
   return (
-    <div className={cn("relative space-y-2", className)}>
+    <div className={cn('relative space-y-2', className)}>
       {/* Label */}
       {label && (
         <label
           htmlFor={id}
           className={cn(
-            "block text-sm font-medium transition-colors duration-200",
-            hasError ? "text-red-500" : "text-theme-text-primary"
+            'block text-sm font-medium transition-colors duration-200',
+            hasError ? 'text-red-500' : 'text-theme-text-primary'
           )}
         >
           {label}
@@ -122,12 +127,12 @@ const AuthInputFixed: React.FC<AuthInputProps> = ({
         {icon && (
           <div
             className={cn(
-              "absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none transition-colors duration-300 z-10",
+              'absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none transition-colors duration-300 z-10',
               hasError
                 ? AUTH_THEME.colors.interactive.iconError
                 : isFocused
-                ? AUTH_THEME.colors.interactive.iconFocus
-                : AUTH_THEME.colors.interactive.icon
+                  ? AUTH_THEME.colors.interactive.iconFocus
+                  : AUTH_THEME.colors.interactive.icon
             )}
           >
             {icon}
@@ -140,7 +145,7 @@ const AuthInputFixed: React.FC<AuthInputProps> = ({
           type={inputType}
           placeholder={placeholder}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={e => onChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           disabled={disabled}
@@ -150,18 +155,22 @@ const AuthInputFixed: React.FC<AuthInputProps> = ({
             backgroundColor: AUTH_THEME.colors.background.input,
             borderColor: AUTH_THEME.colors.background.inputBorder,
             color: AUTH_THEME.colors.text.primary,
-            ...(!hasError && isFocused && { 
-              backgroundColor: AUTH_THEME.colors.background.input, 
-              borderColor: AUTH_THEME.colors.background.inputBorderFocus 
-            }),
-            ...(!hasError && hasValue && { 
-              backgroundColor: AUTH_THEME.colors.background.input, 
-              borderColor: AUTH_THEME.colors.background.inputBorder 
-            }),
-            ...(!hasError && !isFocused && !hasValue && { 
-              backgroundColor: AUTH_THEME.colors.background.input, 
-              borderColor: AUTH_THEME.colors.background.inputBorder 
-            })
+            ...(!hasError &&
+              isFocused && {
+                backgroundColor: AUTH_THEME.colors.background.input,
+                borderColor: AUTH_THEME.colors.background.inputBorderFocus,
+              }),
+            ...(!hasError &&
+              hasValue && {
+                backgroundColor: AUTH_THEME.colors.background.input,
+                borderColor: AUTH_THEME.colors.background.inputBorder,
+              }),
+            ...(!hasError &&
+              !isFocused &&
+              !hasValue && {
+                backgroundColor: AUTH_THEME.colors.background.input,
+                borderColor: AUTH_THEME.colors.background.inputBorder,
+              }),
           }}
           aria-invalid={hasError}
           aria-describedby={hasError ? `${id}-error` : undefined}
@@ -176,7 +185,11 @@ const AuthInputFixed: React.FC<AuthInputProps> = ({
             disabled={disabled}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
-            {showPassword ? <Icons.EyeOff size={AUTH_THEME.components.input.iconSize} /> : <Icons.Eye size={AUTH_THEME.components.input.iconSize} />}
+            {showPassword ? (
+              <Icons.EyeOff size={AUTH_THEME.components.input.iconSize} />
+            ) : (
+              <Icons.Eye size={AUTH_THEME.components.input.iconSize} />
+            )}
           </button>
         )}
       </div>
@@ -198,7 +211,6 @@ const AuthInputFixed: React.FC<AuthInputProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
-
     </div>
   )
 }

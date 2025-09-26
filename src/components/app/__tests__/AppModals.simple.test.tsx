@@ -2,7 +2,7 @@ import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest'
 import AppModals from '../AppModals'
-import { Note } from '../../../types'
+import type { Note } from '../../../types'
 
 // Mock all lazy components
 vi.mock('react', async () => {
@@ -13,14 +13,22 @@ vi.mock('react', async () => {
       return vi.fn((props: any) => {
         // Simple mock components that check their visibility
         if ('isOpen' in props && props.isOpen) {
-          return <div data-testid={`${props.testId || 'lazy'}-modal`}>Mock Modal</div>
+          return (
+            <div data-testid={`${props.testId || 'lazy'}-modal`}>
+              Mock Modal
+            </div>
+          )
         }
         if ('isVisible' in props && props.isVisible) {
-          return <div data-testid={`${props.testId || 'lazy'}-modal`}>Mock Modal</div>
+          return (
+            <div data-testid={`${props.testId || 'lazy'}-modal`}>
+              Mock Modal
+            </div>
+          )
         }
         return null
       })
-    })
+    }),
   }
 })
 
@@ -34,7 +42,7 @@ describe('AppModals', () => {
     notebook: 'test',
     status: 'active' as const,
     tags: ['test'],
-    pinned: false
+    pinned: false,
   }
 
   const defaultProps = {
@@ -43,14 +51,14 @@ describe('AppModals', () => {
       export: false,
       settings: false,
       tagModal: false,
-      notebookManager: false
+      notebookManager: false,
     },
     currentNote: mockNote,
     filteredNotes: [mockNote],
     handleOpenNote: vi.fn(),
     handleSaveNote: vi.fn().mockResolvedValue(mockNote),
     setModal: vi.fn(),
-    createNewNote: vi.fn()
+    createNewNote: vi.fn(),
   }
 
   beforeEach(() => {
@@ -67,11 +75,11 @@ describe('AppModals', () => {
       const setModalSpy = vi.fn()
       const props = {
         ...defaultProps,
-        setModal: setModalSpy
+        setModal: setModalSpy,
       }
-      
+
       render(<AppModals {...props} />)
-      
+
       // Component should render without errors
       expect(setModalSpy).not.toHaveBeenCalled()
     })
@@ -82,24 +90,24 @@ describe('AppModals', () => {
         export: true,
         settings: true,
         tagModal: true,
-        notebookManager: true
+        notebookManager: true,
       }
-      
+
       const { rerender } = render(
         <AppModals {...defaultProps} modals={allOpen} />
       )
-      
+
       // Should handle state changes
       const allClosed = {
         search: false,
         export: false,
         settings: false,
         tagModal: false,
-        notebookManager: false
+        notebookManager: false,
       }
-      
+
       rerender(<AppModals {...defaultProps} modals={allClosed} />)
-      
+
       // No errors should occur
     })
   })
@@ -108,18 +116,18 @@ describe('AppModals', () => {
     it('should handle null currentNote', () => {
       const props = {
         ...defaultProps,
-        currentNote: null
+        currentNote: null,
       }
-      
+
       expect(() => render(<AppModals {...props} />)).not.toThrow()
     })
 
     it('should handle empty filteredNotes', () => {
       const props = {
         ...defaultProps,
-        filteredNotes: []
+        filteredNotes: [],
       }
-      
+
       expect(() => render(<AppModals {...props} />)).not.toThrow()
     })
 
@@ -128,16 +136,16 @@ describe('AppModals', () => {
         handleOpenNote: vi.fn(),
         handleSaveNote: vi.fn(),
         setModal: vi.fn(),
-        createNewNote: vi.fn()
+        createNewNote: vi.fn(),
       }
-      
+
       const props = {
         ...defaultProps,
-        ...callbacks
+        ...callbacks,
       }
-      
+
       render(<AppModals {...props} />)
-      
+
       // All callbacks should be defined
       Object.values(callbacks).forEach(callback => {
         expect(callback).toBeDefined()
@@ -150,9 +158,9 @@ describe('AppModals', () => {
     it('should support search modal state', () => {
       const props = {
         ...defaultProps,
-        modals: { ...defaultProps.modals, search: true }
+        modals: { ...defaultProps.modals, search: true },
       }
-      
+
       render(<AppModals {...props} />)
       // Component should handle search modal state
     })
@@ -160,9 +168,9 @@ describe('AppModals', () => {
     it('should support export modal state', () => {
       const props = {
         ...defaultProps,
-        modals: { ...defaultProps.modals, export: true }
+        modals: { ...defaultProps.modals, export: true },
       }
-      
+
       render(<AppModals {...props} />)
       // Component should handle export modal state
     })
@@ -170,9 +178,9 @@ describe('AppModals', () => {
     it('should support settings modal state', () => {
       const props = {
         ...defaultProps,
-        modals: { ...defaultProps.modals, settings: true }
+        modals: { ...defaultProps.modals, settings: true },
       }
-      
+
       render(<AppModals {...props} />)
       // Component should handle settings modal state
     })
@@ -180,9 +188,9 @@ describe('AppModals', () => {
     it('should support tag modal state', () => {
       const props = {
         ...defaultProps,
-        modals: { ...defaultProps.modals, tagModal: true }
+        modals: { ...defaultProps.modals, tagModal: true },
       }
-      
+
       render(<AppModals {...props} />)
       // Component should handle tag modal state
     })
@@ -190,9 +198,9 @@ describe('AppModals', () => {
     it('should support notebook manager state', () => {
       const props = {
         ...defaultProps,
-        modals: { ...defaultProps.modals, notebookManager: true }
+        modals: { ...defaultProps.modals, notebookManager: true },
       }
-      
+
       render(<AppModals {...props} />)
       // Component should handle notebook manager state
     })

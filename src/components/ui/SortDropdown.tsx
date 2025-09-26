@@ -1,7 +1,7 @@
 import React from 'react'
 import { Icons } from '../Icons'
 import IconButton from './IconButton'
-import StandardDropdown from './StandardDropdown'
+import StandardDropdownRadix from './StandardDropdownRadix'
 
 type SortField = 'title' | 'date' | 'updated' | 'notebook'
 type SortDirection = 'asc' | 'desc'
@@ -15,11 +15,13 @@ interface SortDropdownProps {
 const SortDropdown: React.FC<SortDropdownProps> = ({
   currentSortBy,
   currentSortDirection,
-  onSort
+  onSort,
 }) => {
   const getIcon = () => {
     if (currentSortBy === 'title') {
-      return currentSortDirection === 'asc' ? Icons.ArrowUpAZ : Icons.ArrowDownAZ
+      return currentSortDirection === 'asc'
+        ? Icons.ArrowUpAZ
+        : Icons.ArrowDownAZ
     }
     if (currentSortBy === 'date') {
       return Icons.FileText
@@ -46,39 +48,39 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
         {
           value: 'title-asc',
           label: 'Title: A → Z',
-          icon: <Icons.ArrowUpAZ size={14} />
+          icon: <Icons.ArrowUpAZ size={14} />,
         },
         {
           value: 'title-desc',
           label: 'Title: Z → A',
-          icon: <Icons.ArrowDownAZ size={14} />
+          icon: <Icons.ArrowDownAZ size={14} />,
         },
         {
           value: 'date-desc',
           label: 'Date Created: New → Old',
-          icon: <Icons.FileText size={14} />
+          icon: <Icons.FileText size={14} />,
         },
         {
           value: 'date-asc',
           label: 'Date Created: Old → New',
-          icon: <Icons.FileText size={14} />
+          icon: <Icons.FileText size={14} />,
         },
         {
           value: 'updated-desc',
           label: 'Date Updated: New → Old',
-          icon: <Icons.Clock size={14} />
+          icon: <Icons.Clock size={14} />,
         },
         {
           value: 'updated-asc',
           label: 'Date Updated: Old → New',
-          icon: <Icons.Clock size={14} />
-        }
-      ]
-    }
+          icon: <Icons.Clock size={14} />,
+        },
+      ],
+    },
   ]
 
   return (
-    <StandardDropdown
+    <StandardDropdownRadix
       trigger={
         <IconButton
           icon={getIcon()}

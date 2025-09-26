@@ -1,17 +1,17 @@
-import React, { useState, useRef, useEffect, memo, Suspense } from 'react'
-import { ExportDialog } from './features/LazyComponents'
+import React, { useState, memo, Suspense } from 'react'
+import { ExportDialog } from './LazyComponents'
 import { useSettings } from '../hooks/useSettings'
 import { useAppStore } from '../stores/newSimpleStore'
 import EmptyNoteState from './preview/EmptyNoteState'
 import NotePreviewHeader from './preview/NotePreviewHeader'
-import NotePreviewMenu from './preview/NotePreviewMenu'
 import NotePreviewContent from './preview/NotePreviewContent'
 
-import { Note } from '../types'
+import type { Note } from '../types'
 
 interface NotePreviewProps {
   note: Note | null
   onEdit?: (note: Note) => void
+  onSave?: (note: Note) => void
   onTogglePin?: (note: Note) => void
   onDuplicate?: (note: Note) => void
   onDelete?: (note: Note) => void
@@ -21,11 +21,14 @@ interface NotePreviewProps {
   onRestoreNote?: (note: Note) => void
   onPermanentDelete?: (note: Note) => void
   onExport?: (note: Note) => void
+  onOpenInNewWindow?: (note: Note) => void
+  onViewHistory?: (note: Note) => void
 }
 
 const NotePreview: React.FC<NotePreviewProps> = ({
   note,
   onEdit,
+  onSave,
   onTogglePin,
   onDuplicate,
   onDelete,
@@ -35,34 +38,16 @@ const NotePreview: React.FC<NotePreviewProps> = ({
   onRestoreNote,
   onPermanentDelete,
   onExport,
+  onOpenInNewWindow,
+  onViewHistory,
 }) => {
   const { settings } = useSettings()
   const { getTagColor } = useAppStore()
-  const [showMenu, setShowMenu] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
-
-  // Handle clicks outside menu to close it
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowMenu(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [])
 
   // Show empty state if no note is selected
   if (!note) {
     return <EmptyNoteState />
-  }
-
-  const handleToggleMenu = () => {
-    setShowMenu(!showMenu)
   }
 
   return (
@@ -73,25 +58,15 @@ const NotePreview: React.FC<NotePreviewProps> = ({
         viewMode={viewMode}
         onViewModeChange={onViewModeChange}
         onEdit={onEdit}
-        showMenu={showMenu}
-        onToggleMenu={handleToggleMenu}
+        onSave={onSave}
         isTrashView={isTrashView}
-        menuRef={menuRef}
-      />
-
-      {/* Context menu */}
-      <NotePreviewMenu
-        note={note}
-        showMenu={showMenu}
         onTogglePin={onTogglePin}
         onDuplicate={onDuplicate}
         onDelete={onDelete}
-        onExport={onExport}
-        onEdit={onEdit}
-        isTrashView={isTrashView}
         onRestoreNote={onRestoreNote}
         onPermanentDelete={onPermanentDelete}
-        onSetShowExportDialog={setShowExportDialog}
+        onOpenInNewWindow={onOpenInNewWindow}
+        onViewHistory={onViewHistory}
       />
 
       {/* Main content area */}
@@ -103,7 +78,13 @@ const NotePreview: React.FC<NotePreviewProps> = ({
 
       {/* Export Dialog */}
       {showExportDialog && (
-        <Suspense fallback={<div>Loading Export Dialog...</div>}>
+        <Suspense 
+          fallback={
+            <div className="fixed inset-0 flex items-center justify-center bg-black/50">
+              <div className="bg-white p-4 rounded">Loading Export Dialog...</div>
+            </div>
+          }
+        >
           <ExportDialog
             isVisible={showExportDialog}
             onClose={() => setShowExportDialog(false)}

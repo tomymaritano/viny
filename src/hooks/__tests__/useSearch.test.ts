@@ -14,12 +14,12 @@ const mockLocalStorage = {
   getItem: vi.fn(),
   setItem: vi.fn(),
   removeItem: vi.fn(),
-  clear: vi.fn()
+  clear: vi.fn(),
 }
 
 Object.defineProperty(global, 'localStorage', {
   value: mockLocalStorage,
-  writable: true
+  writable: true,
 })
 
 describe('useSearch', () => {
@@ -27,7 +27,7 @@ describe('useSearch', () => {
   const mockLogger = {
     warn: vi.fn(),
     error: vi.fn(),
-    debug: vi.fn()
+    debug: vi.fn(),
   }
 
   // Test data
@@ -42,7 +42,7 @@ describe('useSearch', () => {
       isPinned: true,
       isTrashed: false,
       createdAt: '2023-01-01T00:00:00.000Z',
-      updatedAt: '2023-01-02T00:00:00.000Z'
+      updatedAt: '2023-01-02T00:00:00.000Z',
     },
     {
       id: '2',
@@ -54,7 +54,7 @@ describe('useSearch', () => {
       isPinned: false,
       isTrashed: false,
       createdAt: '2023-01-03T00:00:00.000Z',
-      updatedAt: '2023-01-04T00:00:00.000Z'
+      updatedAt: '2023-01-04T00:00:00.000Z',
     },
     {
       id: '3',
@@ -66,7 +66,7 @@ describe('useSearch', () => {
       isPinned: false,
       isTrashed: false,
       createdAt: '2023-01-05T00:00:00.000Z',
-      updatedAt: '2023-01-06T00:00:00.000Z'
+      updatedAt: '2023-01-06T00:00:00.000Z',
     },
     {
       id: '4',
@@ -78,8 +78,8 @@ describe('useSearch', () => {
       isPinned: false,
       isTrashed: true,
       createdAt: '2023-01-07T00:00:00.000Z',
-      updatedAt: '2023-01-08T00:00:00.000Z'
-    }
+      updatedAt: '2023-01-08T00:00:00.000Z',
+    },
   ]
 
   beforeEach(async () => {
@@ -90,7 +90,7 @@ describe('useSearch', () => {
     const loggerModule = await import('../../utils/logger')
     Object.defineProperty(loggerModule, 'logger', {
       value: mockLogger,
-      writable: true
+      writable: true,
     })
 
     // Clear localStorage mock
@@ -128,7 +128,9 @@ describe('useSearch', () => {
 
       const { result } = renderHook(() => useSearch(mockNotes))
 
-      expect(mockLocalStorage.getItem).toHaveBeenCalledWith('viny_search_history')
+      expect(mockLocalStorage.getItem).toHaveBeenCalledWith(
+        'viny_search_history'
+      )
       expect(result.current.searchHistory).toEqual(savedHistory)
     })
 
@@ -140,7 +142,10 @@ describe('useSearch', () => {
       const { result } = renderHook(() => useSearch(mockNotes))
 
       expect(result.current.searchHistory).toEqual([])
-      expect(mockLogger.warn).toHaveBeenCalledWith('Failed to load search history:', expect.any(Error))
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to load search history:',
+        expect.any(Error)
+      )
     })
   })
 
@@ -148,8 +153,17 @@ describe('useSearch', () => {
     it('should extract unique notebooks and tags', () => {
       const { result } = renderHook(() => useSearch(mockNotes))
 
-      expect(result.current.filterOptions.notebooks).toEqual(['design', 'programming'])
-      expect(result.current.filterOptions.tags).toEqual(['css', 'javascript', 'layout', 'react', 'typescript'])
+      expect(result.current.filterOptions.notebooks).toEqual([
+        'design',
+        'programming',
+      ])
+      expect(result.current.filterOptions.tags).toEqual([
+        'css',
+        'javascript',
+        'layout',
+        'react',
+        'typescript',
+      ])
     })
 
     it('should exclude trashed notes from filter options', () => {
@@ -187,7 +201,7 @@ describe('useSearch', () => {
       act(() => {
         result.current.setQuery('')
       })
-      
+
       act(() => {
         vi.advanceTimersByTime(300)
       })
@@ -202,7 +216,7 @@ describe('useSearch', () => {
       act(() => {
         result.current.search('test')
       })
-      
+
       act(() => {
         vi.advanceTimersByTime(300)
       })
@@ -272,7 +286,10 @@ describe('useSearch', () => {
       })
 
       expect(result.current.searchHistory).toEqual([])
-      expect(mockLocalStorage.setItem).toHaveBeenCalledWith('viny_search_history', JSON.stringify([]))
+      expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
+        'viny_search_history',
+        JSON.stringify([])
+      )
     })
 
     it('should handle save history errors gracefully', () => {
@@ -286,7 +303,10 @@ describe('useSearch', () => {
         result.current.addToHistory('react')
       })
 
-      expect(mockLogger.warn).toHaveBeenCalledWith('Failed to save search history:', expect.any(Error))
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to save search history:',
+        expect.any(Error)
+      )
     })
   })
 
@@ -315,7 +335,7 @@ describe('useSearch', () => {
         notebooks: [],
         tags: [],
         dateRange: null,
-        isPinned: null
+        isPinned: null,
       })
       expect(result.current.hasActiveFilters).toBe(false)
     })
@@ -337,7 +357,7 @@ describe('useSearch', () => {
 
       const dateRange = {
         start: new Date('2023-01-01T00:00:00.000Z'),
-        end: new Date('2023-01-03T00:00:00.000Z')
+        end: new Date('2023-01-03T00:00:00.000Z'),
       }
 
       act(() => {
@@ -356,8 +376,11 @@ describe('useSearch', () => {
       const matches = [
         {
           value: 'React Hooks Guide',
-          indices: [[0, 4], [6, 10]]
-        }
+          indices: [
+            [0, 4],
+            [6, 10],
+          ],
+        },
       ]
 
       const highlighted = result.current.highlightMatches(text, matches)
@@ -379,12 +402,17 @@ describe('useSearch', () => {
       const matches = [
         {
           value: 'JavaScript and TypeScript',
-          indices: [[0, 9], [15, 24]]
-        }
+          indices: [
+            [0, 9],
+            [15, 24],
+          ],
+        },
       ]
 
       const highlighted = result.current.highlightMatches(text, matches)
-      expect(highlighted).toBe('<mark>JavaScript</mark> and <mark>TypeScript</mark>')
+      expect(highlighted).toBe(
+        '<mark>JavaScript</mark> and <mark>TypeScript</mark>'
+      )
     })
 
     it('should handle overlapping matches', () => {
@@ -394,8 +422,8 @@ describe('useSearch', () => {
       const matches = [
         {
           value: 'React Native',
-          indices: [[0, 10]] // Overlapping with next match
-        }
+          indices: [[0, 10]], // Overlapping with next match
+        },
       ]
 
       const highlighted = result.current.highlightMatches(text, matches)
@@ -477,8 +505,8 @@ describe('useSearch', () => {
           isPinned: false,
           isTrashed: false,
           createdAt: '2023-01-01T00:00:00.000Z',
-          updatedAt: '2023-01-01T00:00:00.000Z'
-        }
+          updatedAt: '2023-01-01T00:00:00.000Z',
+        },
       ] as Note[]
 
       const { result } = renderHook(() => useSearch(incompleteNotes))
@@ -513,7 +541,7 @@ describe('useSearch', () => {
   describe('filter functions', () => {
     it('should apply notebook filter correctly', () => {
       const { result } = renderHook(() => useSearch(mockNotes))
-      
+
       // Create a simple filter scenario
       const notesToFilter = mockNotes.slice(0, 3) // Exclude trashed note
 

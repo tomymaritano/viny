@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Three Dots Menu</title>
+    <script>
+        // Test script to debug the three dots menu
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Test page loaded');
+            
+            // Wait for app to load
+            setTimeout(() => {
+                // Find all three dots buttons
+                const buttons = document.querySelectorAll('[data-testid="note-actions-button"]');
+                console.log('Found', buttons.length, 'three dots buttons');
+                
+                // Click the first one if found
+                if (buttons.length > 0) {
+                    console.log('Clicking first three dots button...');
+                    buttons[0].click();
+                    
+                    // Check if drawer opened
+                    setTimeout(() => {
+                        const drawer = document.getElementById('note-actions-drawer');
+                        if (drawer) {
+                            const isOpen = drawer.classList.contains('translate-x-0');
+                            console.log('Drawer found, isOpen:', isOpen);
+                            console.log('Drawer classes:', drawer.className);
+                        } else {
+                            console.log('Drawer not found!');
+                        }
+                    }, 500);
+                }
+            }, 2000);
+        });
+    </script>
+</head>
+<body>
+    <h1>Test Three Dots Menu</h1>
+    <p>Open DevTools console to see debug output</p>
+</body>
+</html>

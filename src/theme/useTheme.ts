@@ -1,10 +1,11 @@
 import { useAppStore } from '../stores/newSimpleStore'
-import { THEME_CONFIG, ThemeType, DIRECT_COLORS } from './themeConstants'
-import { 
-  resolveSystemTheme, 
-  applyThemeCompletely, 
+import type { ThemeType } from './themeConstants'
+import { THEME_CONFIG, DIRECT_COLORS } from './themeConstants'
+import {
+  resolveSystemTheme,
+  applyThemeCompletely,
   createSystemThemeListener,
-  type ThemeValue 
+  type ThemeValue,
 } from '../utils/themeUtils'
 
 /**
@@ -16,7 +17,7 @@ export const useTheme = () => {
 
   const currentTheme = settings.theme || THEME_CONFIG.DEFAULT
   const resolvedTheme = resolveSystemTheme(currentTheme as ThemeValue)
-  
+
   // Theme state helpers
   const isDark = resolvedTheme === 'dark' || resolvedTheme === 'solarized'
   const isLight = resolvedTheme === 'light'
@@ -28,7 +29,9 @@ export const useTheme = () => {
   }
 
   // Get direct color values (for when CSS vars can't be used)
-  const getDirectColor = (colorKey: keyof typeof DIRECT_COLORS.DARK): string => {
+  const getDirectColor = (
+    colorKey: keyof typeof DIRECT_COLORS.DARK
+  ): string => {
     const colorSet = isDark ? DIRECT_COLORS.DARK : DIRECT_COLORS.LIGHT
     return colorSet[colorKey]
   }
@@ -38,7 +41,7 @@ export const useTheme = () => {
     applyThemeCompletely(themeName as ThemeValue, {
       updateMetaColor: true,
       persistToStorage: true,
-      updateStore: setTheme
+      updateStore: setTheme,
     })
   }
 
@@ -56,7 +59,7 @@ export const useTheme = () => {
   // Tag color management with theme awareness
   const getContextualTagColor = (tagName: string): string => {
     const baseColor = getTagColor(tagName)
-    
+
     // You could modify colors based on theme here
     // For now, return the base color
     return baseColor
@@ -108,13 +111,15 @@ export const useThemeStyles = () => {
     return getThemeValue(dark, light)
   }
 
-  const getTextColor = (variant: 'primary' | 'secondary' | 'muted' = 'primary') => {
+  const getTextColor = (
+    variant: 'primary' | 'secondary' | 'muted' = 'primary'
+  ) => {
     const variants = {
       primary: { dark: '#cccccc', light: '#333333' },
       secondary: { dark: '#888888', light: '#666666' },
-      muted: { dark: '#555555', light: '#999999' }
+      muted: { dark: '#555555', light: '#999999' },
     }
-    
+
     const colors = variants[variant]
     return getThemeValue(colors.dark, colors.light)
   }
@@ -131,6 +136,6 @@ export const useThemeStyles = () => {
     getBackgroundColor,
     getTextColor,
     getBorderColor,
-    getDirectColor
+    getDirectColor,
   }
 }

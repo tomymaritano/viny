@@ -1,4 +1,4 @@
-import { StateCreator } from 'zustand'
+import type { StateCreator } from 'zustand'
 
 export interface AppStateSlice {
   // App state
@@ -16,7 +16,7 @@ export interface AppStateSlice {
   resetAppState: () => void
 }
 
-export const createAppStateSlice: StateCreator<AppStateSlice> = (set) => ({
+export const createAppStateSlice: StateCreator<AppStateSlice> = set => ({
   // Initial state
   isLoading: false,
   error: null,
@@ -24,12 +24,11 @@ export const createAppStateSlice: StateCreator<AppStateSlice> = (set) => ({
   lastActivity: null,
 
   // Actions
-  setLoading: (isLoading) => set({ isLoading }),
-  setError: (error) => set({ error }),
-  setInitialized: (isInitialized) => set({ isInitialized }),
-  
-  updateLastActivity: () =>
-    set({ lastActivity: new Date().toISOString() }),
+  setLoading: isLoading => set({ isLoading }),
+  setError: error => set({ error }),
+  setInitialized: isInitialized => set({ isInitialized }),
+
+  updateLastActivity: () => set({ lastActivity: new Date().toISOString() }),
 
   clearError: () => set({ error: null }),
 
@@ -38,6 +37,6 @@ export const createAppStateSlice: StateCreator<AppStateSlice> = (set) => ({
       isLoading: false,
       error: null,
       isInitialized: false,
-      lastActivity: null
-    })
+      lastActivity: null,
+    }),
 })

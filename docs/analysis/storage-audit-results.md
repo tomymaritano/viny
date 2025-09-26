@@ -59,11 +59,11 @@ await settingsRepository.updateSettings(newSettings)
 
 **Priority: MEDIUM** - User experience
 
-| File                                    | Purpose                   | Storage Keys                                     | Complexity |
-| --------------------------------------- | ------------------------- | ------------------------------------------------ | ---------- |
-| `src/components/ResizableLayout.tsx`    | Layout dimensions         | `inkrun-sidebar-width`, `inkrun-noteslist-width` | Low        |
-| `src/components/editor/SplitEditor.tsx` | Editor split ratio        | `viny-split-ratio`                               | Low        |
-| `src/hooks/usePersistentState.ts`       | Generic state persistence | Various                                          | Medium     |
+| File                                    | Purpose                   | Storage Keys                                 | Complexity |
+| --------------------------------------- | ------------------------- | -------------------------------------------- | ---------- |
+| `src/components/ResizableLayout.tsx`    | Layout dimensions         | `viny-sidebar-width`, `viny-noteslist-width` | Low        |
+| `src/components/editor/SplitEditor.tsx` | Editor split ratio        | `viny-split-ratio`                           | Low        |
+| `src/hooks/usePersistentState.ts`       | Generic state persistence | Various                                      | Medium     |
 
 ### 4. 🖼️ **Media & Content (3 usages)**
 
@@ -159,8 +159,8 @@ Plugin System:
 ├── viny_plugin_cleanup_*  (Plugin cleanup data)
 
 UI State:
-├── inkrun-sidebar-width   (Sidebar width)
-├── inkrun-noteslist-width (Notes list width)
+├── viny-sidebar-width   (Sidebar width)
+├── viny-noteslist-width (Notes list width)
 ├── viny-split-ratio       (Editor split ratio)
 
 Content & Media:

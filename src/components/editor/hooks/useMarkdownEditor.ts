@@ -3,6 +3,8 @@ import { useSettings } from '../../../hooks/useSettings'
 import { calculateStats } from '../utils/markdownFormatter'
 import { useAppStore } from '../../../stores/newSimpleStore'
 import { logger } from '../../../utils/logger'
+import { featureFlags } from '../../../config/featureFlags'
+import { useMarkdownEditorQuery } from './useMarkdownEditorQuery'
 
 export const useMarkdownEditor = ({
   value = '',
@@ -11,6 +13,15 @@ export const useMarkdownEditor = ({
   selectedNote,
   onNotebookChange,
 }) => {
+  // Use query version if feature flag is enabled
+  if (featureFlags.useQueryForNotesList) {
+    return useMarkdownEditorQuery({
+      value,
+      onChange,
+      selectedNote,
+      onNotebookChange,
+    })
+  }
   const { settings } = useSettings()
   const { addToast } = useAppStore()
 
@@ -40,7 +51,6 @@ export const useMarkdownEditor = ({
   // Auto-save is handled at the app level in AppSimple.tsx
   // No auto-save logic needed here to prevent conflicts
 
-
   // Note metadata handlers
   const handleTitleChange = useCallback(
     e => {
@@ -62,18 +72,44 @@ export const useMarkdownEditor = ({
   )
 
   const handleNotebookChange = useCallback(
-    e => {
-      if (onNotebookChange) {
-        onNotebookChange(e.target.value)
+    notebook => {
+      // Debug: handleNotebookChange called
+      
+      if (selectedNote && onSave) {
+        // Handle both event objects and direct values
+        const notebookValue = notebook?.target?.value || notebook
+        // Notebook change: updating metadata only
+        
+        // IMPORTANT: Only update metadata, NOT content
+        // Content is managed separately to avoid conflicts
+        const updatedNote = { 
+          id: selectedNote.id,
+          notebook: notebookValue,
+          updatedAt: new Date().toISOString()
+        }
+        onSave(updatedNote)
+        
+        // Also call the onNotebookChange callback if provided
+        if (onNotebookChange) {
+          // Also calling onNotebookChange callback
+          onNotebookChange(selectedNote.id, notebookValue)
+        }
+      } else {
+        logger.error('useMarkdownEditor handleNotebookChange missing requirements')
       }
     },
-    [onNotebookChange]
+    [selectedNote, onSave, onNotebookChange]
   )
 
   const handleStatusChange = useCallback(
     e => {
       if (selectedNote && onSave) {
-        const updatedNote = { ...selectedNote, status: e.target.value }
+        // Only update metadata, NOT content
+        const updatedNote = { 
+          id: selectedNote.id,
+          status: e.target.value,
+          updatedAt: new Date().toISOString()
+        }
         onSave(updatedNote)
       }
     },
@@ -90,65 +126,46 @@ export const useMarkdownEditor = ({
           processedTags = tags
         } else if (tags?.target?.value !== undefined) {
           // Handle event format - check if it's already an array or string
-          const value = tags.target.value
-          if (Array.isArray(value)) {
-            processedTags = value
-          } else if (typeof value === 'string') {
-            processedTags = value
+          const tagValue = tags.target.value
+          if (Array.isArray(tagValue)) {
+            processedTags = tagValue
+          } else if (typeof tagValue === 'string') {
+            processedTags = tagValue
               .split(',')
               .map(tag => tag.trim())
               .filter(tag => tag.length > 0)
           }
         }
 
-        const updatedNote = { ...selectedNote, tags: processedTags }
+        // Only update metadata, NOT content
+        const updatedNote = { 
+          id: selectedNote.id,
+          tags: processedTags,
+          updatedAt: new Date().toISOString()
+        }
         onSave(updatedNote)
       }
     },
     [selectedNote, onSave]
   )
 
-
-  // Manual save
+  // Manual save - DEPRECATED: Use global keyboard shortcut handler instead
+  // This is kept for backward compatibility but should not be used
   const handleManualSave = useCallback(async () => {
-    if (selectedNote && onSave) {
-      try {
-        setIsSaving(true)
-        setSaveError(null)
+    logger.warn('handleManualSave called - this should use global keyboard handler instead')
+    // Do nothing - let the global handler manage saves
+  }, [])
 
-        const updatedNote = {
-          ...selectedNote,
-          content: value,
-          updatedAt: new Date().toISOString(),
-        }
-
-        await onSave(updatedNote)
-        setLastSaved(new Date().toISOString())
-      } catch (error) {
-        setSaveError(error.message || 'Failed to save')
-        logger.error('Manual save failed:', error)
-      } finally {
-        setIsSaving(false)
-      }
-    }
-  }, [selectedNote, onSave, value])
-
-  // Keyboard shortcuts
+  // Keyboard shortcuts (removed Ctrl+S to avoid conflicts with global handler)
   const handleKeyDown = useCallback(
     event => {
-      // Save shortcut
-      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
-        event.preventDefault()
-        handleManualSave()
-      }
-
       // Fullscreen toggle
       if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
         event.preventDefault()
         setIsFullscreen(!isFullscreen)
       }
     },
-    [handleManualSave, isFullscreen]
+    [isFullscreen]
   )
 
   return {

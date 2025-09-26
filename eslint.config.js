@@ -2,23 +2,29 @@ const js = require('@eslint/js')
 const react = require('eslint-plugin-react')
 const reactHooks = require('eslint-plugin-react-hooks')
 const prettier = require('eslint-plugin-prettier')
+const typescript = require('@typescript-eslint/eslint-plugin')
+const typescriptParser = require('@typescript-eslint/parser')
 
 module.exports = [
   js.configs.recommended,
   {
-    files: ['**/*.{js,jsx}'],
+    files: ['**/*.{js,jsx,ts,tsx}'],
     plugins: {
       react,
       'react-hooks': reactHooks,
       prettier,
+      '@typescript-eslint': typescript,
     },
     languageOptions: {
+      parser: typescriptParser,
       ecmaVersion: 2024,
       sourceType: 'module',
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
         },
+        project: './tsconfig.json',
+        tsconfigRootDir: __dirname,
       },
       globals: {
         // Browser globals
@@ -82,21 +88,34 @@ module.exports = [
       'react-hooks/exhaustive-deps': 'warn',
       
       // General JavaScript rules
-      'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-      'no-console': 'warn',
+      'no-unused-vars': 'off', // Use TypeScript version instead
       'no-debugger': 'error',
       'no-duplicate-imports': 'error',
       'prefer-const': 'error',
       'no-var': 'error',
+      
+      // TypeScript-specific rules
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/prefer-as-const': 'error',
+      '@typescript-eslint/no-inferrable-types': 'error',
+      '@typescript-eslint/consistent-type-imports': 'warn',
+      '@typescript-eslint/no-unused-vars': ['warn', { 
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        ignoreRestSiblings: true
+      }],
+      'no-console': 'error', // Strict no-console rule
+      'react/no-unescaped-entities': 'warn',
       
       // Prettier integration
       'prettier/prettier': 'error',
     },
   },
   {
-    files: ['**/*.test.{js,jsx}', '**/__tests__/**/*.{js,jsx}'],
+    files: ['**/*.test.{js,jsx,ts,tsx}', '**/__tests__/**/*.{js,jsx,ts,tsx}'],
     rules: {
       'no-console': 'off', // Allow console in tests
+      '@typescript-eslint/no-explicit-any': 'off', // Allow any in tests
     },
   },
   {

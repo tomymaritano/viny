@@ -6,7 +6,7 @@ import { SyncStatus } from '../../../utils/syncManager'
 // Mock the useSync hook
 const mockUseSyncStatus = vi.fn()
 vi.mock('../../../hooks/useSync', () => ({
-  useSyncStatus: () => mockUseSyncStatus()
+  useSyncStatus: () => mockUseSyncStatus(),
 }))
 
 describe('SyncStatusIndicator', () => {
@@ -17,7 +17,7 @@ describe('SyncStatusIndicator', () => {
     lastSync: null,
     hasConflicts: false,
     conflictCount: 0,
-    progress: 0
+    progress: 0,
   }
 
   beforeEach(() => {
@@ -28,7 +28,7 @@ describe('SyncStatusIndicator', () => {
     it('should show offline indicator when offline', () => {
       mockUseSyncStatus.mockReturnValue({
         ...defaultSyncState,
-        isOnline: false
+        isOnline: false,
       })
 
       render(<SyncStatusIndicator showText={true} />)
@@ -52,7 +52,7 @@ describe('SyncStatusIndicator', () => {
         ...defaultSyncState,
         status: SyncStatus.SYNCING,
         isSyncing: true,
-        progress: 50
+        progress: 50,
       })
 
       render(<SyncStatusIndicator showText={true} />)
@@ -68,7 +68,7 @@ describe('SyncStatusIndicator', () => {
         ...defaultSyncState,
         status: SyncStatus.SYNCING,
         isSyncing: true,
-        progress: 0
+        progress: 0,
       })
 
       render(<SyncStatusIndicator showText={true} />)
@@ -80,7 +80,7 @@ describe('SyncStatusIndicator', () => {
       mockUseSyncStatus.mockReturnValue({
         ...defaultSyncState,
         status: SyncStatus.SUCCESS,
-        lastSync: new Date('2025-01-01T10:00:00Z')
+        lastSync: new Date('2025-01-01T10:00:00Z'),
       })
 
       render(<SyncStatusIndicator showText={true} />)
@@ -95,7 +95,7 @@ describe('SyncStatusIndicator', () => {
       mockUseSyncStatus.mockReturnValue({
         ...defaultSyncState,
         status: SyncStatus.CONFLICT,
-        hasConflicts: true
+        hasConflicts: true,
       })
 
       render(<SyncStatusIndicator showText={true} />)
@@ -109,7 +109,7 @@ describe('SyncStatusIndicator', () => {
     it('should show error status', () => {
       mockUseSyncStatus.mockReturnValue({
         ...defaultSyncState,
-        status: SyncStatus.ERROR
+        status: SyncStatus.ERROR,
       })
 
       render(<SyncStatusIndicator showText={true} />)
@@ -128,7 +128,7 @@ describe('SyncStatusIndicator', () => {
       mockUseSyncStatus.mockReturnValue({
         ...defaultSyncState,
         status: SyncStatus.SUCCESS,
-        lastSync: recentSync
+        lastSync: recentSync,
       })
 
       render(<SyncStatusIndicator showText={true} />)
@@ -142,7 +142,7 @@ describe('SyncStatusIndicator', () => {
       mockUseSyncStatus.mockReturnValue({
         ...defaultSyncState,
         status: SyncStatus.SUCCESS,
-        lastSync: recentSync
+        lastSync: recentSync,
       })
 
       render(<SyncStatusIndicator showText={true} />)
@@ -156,7 +156,7 @@ describe('SyncStatusIndicator', () => {
       mockUseSyncStatus.mockReturnValue({
         ...defaultSyncState,
         status: SyncStatus.SUCCESS,
-        lastSync: oldSync
+        lastSync: oldSync,
       })
 
       render(<SyncStatusIndicator showText={true} />)
@@ -171,7 +171,7 @@ describe('SyncStatusIndicator', () => {
         ...defaultSyncState,
         status: SyncStatus.SYNCING,
         isSyncing: true,
-        lastSync: recentSync
+        lastSync: recentSync,
       })
 
       render(<SyncStatusIndicator showText={true} />)
@@ -257,18 +257,20 @@ describe('SyncStatusIndicator', () => {
         { status: SyncStatus.ERROR, textClass: 'text-red-600' },
         { status: SyncStatus.CONFLICT, textClass: 'text-yellow-600' },
         { status: SyncStatus.SYNCING, textClass: 'text-blue-600' },
-        { status: SyncStatus.IDLE, textClass: 'text-gray-600' }
+        { status: SyncStatus.IDLE, textClass: 'text-gray-600' },
       ]
 
       statusColors.forEach(({ status, textClass }) => {
         mockUseSyncStatus.mockReturnValue({
           ...defaultSyncState,
-          status
+          status,
         })
 
         rerender(<SyncStatusIndicator showText={true} />)
 
-        const statusText = screen.getByText(/Ready|Synced|Sync Error|Conflicts|Syncing|Resolved/)
+        const statusText = screen.getByText(
+          /Ready|Synced|Sync Error|Conflicts|Syncing|Resolved/
+        )
         expect(statusText).toHaveClass(textClass)
       })
     })
@@ -278,7 +280,7 @@ describe('SyncStatusIndicator', () => {
     it('should handle undefined lastSync gracefully', () => {
       mockUseSyncStatus.mockReturnValue({
         ...defaultSyncState,
-        lastSync: undefined
+        lastSync: undefined,
       })
 
       render(<SyncStatusIndicator showText={true} />)
@@ -291,7 +293,7 @@ describe('SyncStatusIndicator', () => {
       mockUseSyncStatus.mockReturnValue({
         ...defaultSyncState,
         status: SyncStatus.SUCCESS,
-        isOnline: false
+        isOnline: false,
       })
 
       render(<SyncStatusIndicator showText={true} />)

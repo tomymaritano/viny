@@ -1,9 +1,18 @@
 import { useState, useMemo } from 'react'
 import { useAppStore } from '../../../stores/newSimpleStore'
-import { Note } from '../../../types'
+import type { Note } from '../../../types'
+import { editorLogger } from '../../../utils/logger'
 
 export const useEditorState = (selectedNote: Note | null) => {
-  const { addNote, removeNote, updateNote, addToast, showSuccess, showError, setModal } = useAppStore()
+  const {
+    addNote,
+    removeNote,
+    updateNote,
+    addToast,
+    showSuccess,
+    showError,
+    setModal,
+  } = useAppStore()
   // Tag modal state
   const [isTagModalOpen, setIsTagModalOpen] = useState(false)
 
@@ -76,7 +85,7 @@ export const useEditorState = (selectedNote: Note | null) => {
         addNote(duplicatedNote)
         showSuccess('Note duplicated successfully')
       } catch (error) {
-        console.error('Error duplicating note:', error)
+        editorLogger.error('Error duplicating note:', error)
         showError('Failed to duplicate note')
       }
       handleCloseOptionsModal()
@@ -96,7 +105,7 @@ export const useEditorState = (selectedNote: Note | null) => {
         addNote(trashedNote) // Add back as trashed (automatically persists)
         showSuccess('Note moved to trash')
       } catch (error) {
-        console.error('Error deleting note:', error)
+        editorLogger.error('Error deleting note:', error)
         showError('Failed to delete note')
       }
       handleCloseOptionsModal()
@@ -114,7 +123,7 @@ export const useEditorState = (selectedNote: Note | null) => {
         updateNote(updatedNote) // Automatically persists via repository
         showSuccess(updatedNote.isPinned ? 'Note pinned' : 'Note unpinned')
       } catch (error) {
-        console.error('Error toggling pin:', error)
+        editorLogger.error('Error toggling pin:', error)
         showError('Failed to toggle pin')
       }
       handleCloseOptionsModal()
@@ -138,11 +147,14 @@ export const useEditorState = (selectedNote: Note | null) => {
   const handleCopyLink = () => {
     if (selectedNote) {
       const link = `viny://note/${selectedNote.id}`
-      navigator.clipboard.writeText(link).then(() => {
-        showSuccess('Link copied to clipboard')
-      }).catch(() => {
-        showError('Failed to copy link')
-      })
+      navigator.clipboard
+        .writeText(link)
+        .then(() => {
+          showSuccess('Link copied to clipboard')
+        })
+        .catch(() => {
+          showError('Failed to copy link')
+        })
       handleCloseOptionsModal()
     }
   }

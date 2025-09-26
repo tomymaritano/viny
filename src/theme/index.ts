@@ -11,5 +11,5 @@ export {
   FONT_CONFIG,
   SIZE_CONFIG,
   type ThemeType,
-  type StatusType
+  type StatusType,
 } from './themeConstants'

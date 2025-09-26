@@ -9,7 +9,8 @@ export const TYPOGRAPHY_CONFIG = {
   fontFamilies: {
     editor: "'SF Mono', 'Monaco', 'Consolas', 'Fira Code', monospace",
     ui: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-    markdown: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    markdown:
+      "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   },
 
   fontSizes: {
@@ -29,11 +30,11 @@ export const TYPOGRAPHY_CONFIG = {
 export const EDITOR_LAYOUT = {
   // Consistent padding between editor and preview
   contentPadding: '16px',
-  
+
   // Editor specific dimensions
   minHeight: '100%',
   borderRadius: '8px',
-  
+
   // Focus states
   focusOutline: 'none',
   focusBorderColor: 'var(--color-blue)',
@@ -107,7 +108,7 @@ export const TODO_STYLES = {
       borderRadius: '2px',
       fontSize: '0.85em',
     },
-    
+
     variants: {
       todo: {
         color: CSS_THEME_VARS.CYAN,
@@ -168,7 +169,7 @@ export const SCROLLBAR_STYLES = {
     width: '12px',
     height: '12px',
   },
-  
+
   colors: {
     track: 'transparent',
     thumb: 'var(--color-base01)',
@@ -179,17 +180,22 @@ export const SCROLLBAR_STYLES = {
 // Utility functions
 export const getEditorPadding = () => EDITOR_LAYOUT.contentPadding
 
-export const getTodoKeywordStyle = (keyword: keyof typeof TODO_STYLES.keywords.variants) => {
+export const getTodoKeywordStyle = (
+  keyword: keyof typeof TODO_STYLES.keywords.variants
+) => {
   const baseStyle = TODO_STYLES.keywords.base
-  const variantStyle = TODO_STYLES.keywords.variants[keyword] || TODO_STYLES.keywords.variants.todo
-  
+  const variantStyle =
+    TODO_STYLES.keywords.variants[keyword] || TODO_STYLES.keywords.variants.todo
+
   return { ...baseStyle, ...variantStyle }
 }
 
-export const generateScrollbarCSS = (size: 'thin' | 'medium' | 'thick' = 'medium') => {
+export const generateScrollbarCSS = (
+  size: 'thin' | 'medium' | 'thick' = 'medium'
+) => {
   const { width, height } = SCROLLBAR_STYLES[size]
   const { track, thumb, thumbHover } = SCROLLBAR_STYLES.colors
-  
+
   return `
     ::-webkit-scrollbar {
       width: ${width};

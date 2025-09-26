@@ -1,5 +1,5 @@
 import React from 'react'
-import { Note } from '../../types'
+import type { Note } from '../../types'
 import { formatDate } from '../../utils/dateUtils'
 import { Icons } from '../Icons'
 
@@ -14,7 +14,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
   note,
   isSelected,
   highlightMatches,
-  onSelect
+  onSelect,
 }) => {
   return (
     <div
@@ -28,13 +28,13 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
     >
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
-          <h3 
+          <h3
             className="text-sm font-medium text-theme-text-primary truncate mb-1"
             dangerouslySetInnerHTML={{
-              __html: highlightMatches(note.title)
+              __html: highlightMatches(note.title),
             }}
           />
-          
+
           <div className="text-xs text-theme-text-muted mb-2 space-y-1">
             <div className="flex items-center gap-2">
               <span>{formatDate(note.updatedAt)}</span>
@@ -45,7 +45,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
                 </>
               )}
             </div>
-            
+
             {note.isPinned && (
               <div className="flex items-center gap-1">
                 <Icons.Star size={12} className="text-theme-accent-primary" />
@@ -53,10 +53,10 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
               </div>
             )}
           </div>
-          
+
           {note.tags.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-2">
-              {note.tags.slice(0, 3).map((tag) => (
+              {note.tags.slice(0, 3).map(tag => (
                 <span
                   key={tag}
                   className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-theme-bg-tertiary text-theme-text-secondary"

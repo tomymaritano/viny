@@ -5,11 +5,13 @@ import IconButton from '../ui/IconButton'
 interface SidebarHeaderProps {
   onSettingsClick: () => void
   onCreateNote: () => void
+  onProfileClick: () => void
 }
 
 const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   onSettingsClick,
-  onCreateNote
+  onCreateNote,
+  onProfileClick,
 }) => {
   return (
     <div className="p-2 border-b border-theme-border-primary flex items-center justify-between flex-shrink-0">
@@ -18,10 +20,12 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({
           <div className="w-6 h-6 bg-theme-accent-primary rounded-md flex items-center justify-center mr-2">
             <Icons.NotebookPen size={14} className="text-white" />
           </div>
-          <h1 className="text-lg font-semibold text-theme-text-primary">Viny</h1>
+          <h1 className="text-lg font-semibold text-theme-text-primary">
+            Viny
+          </h1>
         </div>
       </div>
-      
+
       <div className="flex items-center space-x-1">
         <IconButton
           icon={Icons.Plus}
@@ -31,6 +35,15 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({
           variant="ghost"
           className="text-theme-text-secondary hover:text-theme-text-primary"
           aria-label="Create new note"
+        />
+        <IconButton
+          icon={Icons.User}
+          onClick={onProfileClick}
+          title="Account Settings"
+          size={16}
+          variant="ghost"
+          className="text-theme-text-secondary hover:text-theme-text-primary"
+          aria-label="Account Settings"
         />
         <IconButton
           icon={Icons.Settings}

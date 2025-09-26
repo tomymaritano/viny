@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import { Icons } from '../../Icons'
 import IconButton from '../../ui/IconButton'
 import { useAppStore } from '../../../stores/newSimpleStore'
+import { editorLogger } from '../../../utils/logger'
 
 const EditorToolbar = ({
   onBold,
@@ -21,6 +22,8 @@ const EditorToolbar = ({
   onTags,
   onToggleLineNumbers,
   showLineNumbers,
+  onToggleZenMode,
+  isZenMode,
   isSaving,
   lastSaved,
   saveError,
@@ -101,52 +104,61 @@ const EditorToolbar = ({
             fileInput.type = 'file'
             fileInput.accept = 'image/*'
             fileInput.style.display = 'none'
-            
-            fileInput.onchange = async (e) => {
+
+            fileInput.onchange = async e => {
               const file = e.target.files[0]
               if (file && insertText) {
                 try {
                   const altText = file.name
                   const sizeKB = Math.round(file.size / 1024)
-                  
+
                   // Generate a short reference ID
-                  const imageId = 'img_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5)
-                  
+                  const imageId =
+                    'img_' +
+                    Date.now().toString(36) +
+                    Math.random().toString(36).substr(2, 5)
+
                   // Store the data URI in a global map for retrieval
                   const reader = new FileReader()
-                  reader.onload = (event) => {
+                  reader.onload = event => {
                     const dataUri = event.target.result
-                    
+
                     // Store in localStorage for persistence
                     try {
-                      const storedImages = JSON.parse(localStorage.getItem('viny-images') || '{}')
+                      const storedImages = JSON.parse(
+                        storageService.getItem(StorageService.KEYS.IMAGES) ||
+                          '{}'
+                      )
                       storedImages[imageId] = dataUri
-                      localStorage.setItem('viny-images', JSON.stringify(storedImages))
-                      
+                      localStorage.setItem(
+                        'viny-images',
+                        JSON.stringify(storedImages)
+                      )
+
                       // Also store in memory for immediate access
                       if (!window.vinyImageStore) {
                         window.vinyImageStore = new Map()
                       }
                       window.vinyImageStore.set(imageId, dataUri)
-                      
+
                       // Insert clean reference in editor
                       insertText(`![${altText}](viny://image:${imageId})`)
                     } catch (error) {
-                      console.error('Failed to store image:', error)
+                      editorLogger.error('Failed to store image:', error)
                       // Fallback to data URI if storage fails
                       insertText(`![${altText}](${dataUri})`)
                     }
                   }
                   reader.readAsDataURL(file)
                 } catch (error) {
-                  console.error('Error processing image:', error)
+                  editorLogger.error('Error processing image:', error)
                   onImage() // Fallback
                 }
               }
               // Clean up
               document.body.removeChild(fileInput)
             }
-            
+
             document.body.appendChild(fileInput)
             fileInput.click()
           },
@@ -228,6 +240,14 @@ const EditorToolbar = ({
           active: showLineNumbers,
           testId: 'toggle-line-numbers',
         },
+        {
+          icon: Icons.Maximize,
+          onClick: onToggleZenMode,
+          title: 'Zen Mode (Ctrl+.)',
+          shortcut: 'Ctrl+.',
+          active: isZenMode,
+          testId: 'toggle-zen-mode',
+        },
       ],
     },
   ]
@@ -269,9 +289,7 @@ const EditorToolbar = ({
   }
 
   return (
-    <div
-      className="flex items-center justify-between px-2 sm:px-4 py-2 border-b border-theme-border-primary overflow-x-auto custom-scrollbar-thin bg-theme-bg-primary"
-    >
+    <div className="flex items-center justify-between px-2 sm:px-4 py-2 border-b border-theme-border-primary overflow-x-auto custom-scrollbar-thin bg-theme-bg-primary">
       {/* Toolbar buttons - responsive layout */}
       <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-1">
         {toolbarSections.map((section, sectionIndex) => (
@@ -314,15 +332,14 @@ const EditorToolbar = ({
       </div>
 
       {/* Save indicator - hide on very small screens */}
-      <div 
-        className="hidden sm:flex items-center ml-2 flex-shrink-0" 
+      <div
+        className="hidden sm:flex items-center ml-2 flex-shrink-0"
         data-testid="save-indicator"
         aria-live="polite"
         aria-label="Save status"
       >
         {getSaveIndicator()}
       </div>
-
     </div>
   )
 }
@@ -345,6 +362,8 @@ EditorToolbar.propTypes = {
   onTags: PropTypes.func.isRequired,
   onToggleLineNumbers: PropTypes.func.isRequired,
   showLineNumbers: PropTypes.bool,
+  onToggleZenMode: PropTypes.func,
+  isZenMode: PropTypes.bool,
   isSaving: PropTypes.bool,
   lastSaved: PropTypes.string,
   saveError: PropTypes.string,

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 
 interface Tag {
   tag: string
@@ -8,7 +8,12 @@ interface Tag {
 interface TagsListProps {
   tags: Tag[]
   activeSection: string
-  getTagColor: (tag: string) => { bg: string; border: string; text: string; name: string }
+  getTagColor: (tag: string) => {
+    bg: string
+    border: string
+    text: string
+    name: string
+  }
   onSectionClick: (section: string) => void
   onContextMenu: (e: React.MouseEvent, tagName: string) => void
 }
@@ -18,29 +23,25 @@ const TagsList: React.FC<TagsListProps> = ({
   activeSection,
   getTagColor,
   onSectionClick,
-  onContextMenu
+  onContextMenu,
 }) => {
   return (
-    <div className="space-y-0.5">
-      {tags.map(({ tag, count }) => {
+    <div className="space-y-1">
+      {tags.map(({ tag, count }, index) => {
         const sectionKey = `tag-${tag.toLowerCase()}`
         const isActive = activeSection === sectionKey
         const tagColor = getTagColor(tag)
 
         return (
-          <button
+          <div
             key={tag}
-            className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left transition-all duration-200 ${
+            className={`flex items-center gap-2 px-2 py-1.5 text-sm transition-colors duration-150 cursor-pointer rounded ${
               isActive
-                ? 'text-theme-text-primary relative'
-                : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary'
+                ? 'text-theme-text-primary bg-theme-accent-primary/10'
+                : 'text-theme-text-tertiary hover:text-theme-text-primary hover:bg-theme-bg-tertiary/30'
             }`}
-            style={isActive ? {
-              backgroundColor: 'var(--color-active-bg)',
-              boxShadow: 'inset 3px 0 0 var(--color-active-border)'
-            } : {}}
             onClick={() => onSectionClick(sectionKey)}
-            onContextMenu={(e) => {
+            onContextMenu={e => {
               if (window.electronAPI?.isElectron) {
                 e.preventDefault()
                 window.electronAPI.showContextMenu('tag', { name: tag })
@@ -49,32 +50,20 @@ const TagsList: React.FC<TagsListProps> = ({
               }
             }}
           >
-            <div className="flex items-center space-x-3 flex-1 min-w-0">
-              <div className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
-                <div 
-                  className="w-3 h-3 rounded-full border-2"
-                  style={{ 
-                    backgroundColor: tagColor.text + '40', // Use text color with opacity
-                    borderColor: tagColor.text
-                  }}
-                />
-              </div>
-              <span className="text-sm truncate flex-1 min-w-0">
-                #{tag}
-              </span>
-            </div>
-            
-            <span 
-              className="text-xs px-1.5 py-0.5 bg-theme-accent-primary/20 text-theme-accent-primary rounded-full min-w-[20px] text-center flex-shrink-0"
-              title={`${count} notes with this tag`}
-            >
-              {count}
-            </span>
-          </button>
+            <div
+              className="w-3 h-3 rounded-full border-2 flex-shrink-0 transition-transform duration-150 hover:scale-110"
+              style={{
+                backgroundColor: tagColor.text + '40',
+                borderColor: tagColor.text,
+              }}
+            />
+            <span className="truncate flex-1">#{tag}</span>
+            {count > 0 && <span className="text-xs opacity-60">{count}</span>}
+          </div>
         )
       })}
     </div>
   )
 }
 
-export default TagsList
+export default memo(TagsList)

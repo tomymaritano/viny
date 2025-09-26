@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import Fuse from 'fuse.js'
-import { Note } from '../types'
+import type { Note } from '../types'
 import { logger } from '../utils/logger'
+import { createEnhancedDocumentRepository } from '../lib/repositories/RepositoryFactory'
 
 // Search configuration for Fuse.js
 const SEARCH_OPTIONS = {
@@ -74,25 +75,41 @@ export const useSearch = (notes: Note[] = []) => {
     return new Fuse(searchableNotes, SEARCH_OPTIONS)
   }, [notes])
 
-  // Load search history from localStorage
+  // Load search history from repository
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(SEARCH_HISTORY_KEY)
-      if (stored) {
-        setSearchHistory(JSON.parse(stored))
+    const loadSearchHistory = async () => {
+      try {
+        const repository = createEnhancedDocumentRepository()
+        await repository.initialize()
+
+        const stored = await repository.getUIState<string[]>(
+          'search',
+          'history'
+        )
+        if (stored && Array.isArray(stored)) {
+          setSearchHistory(stored)
+        }
+      } catch (error) {
+        logger.warn('Failed to load search history:', error)
       }
-    } catch (error) {
-      logger.warn('Failed to load search history:', error)
     }
+
+    loadSearchHistory()
   }, [])
 
-  // Save search history to localStorage
+  // Save search history to repository
   const saveSearchHistory = useCallback((history: string[]) => {
-    try {
-      localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history))
-    } catch (error) {
-      logger.warn('Failed to save search history:', error)
+    const saveToRepository = async () => {
+      try {
+        const repository = createEnhancedDocumentRepository()
+        await repository.initialize()
+        await repository.setUIState('search', 'history', history)
+      } catch (error) {
+        logger.warn('Failed to save search history:', error)
+      }
     }
+
+    saveToRepository()
   }, [])
 
   // Add query to search history

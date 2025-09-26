@@ -2,40 +2,45 @@ import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest'
 import AppPresentation from '../AppPresentation'
-import { Note, Notebook, Settings } from '../../../types'
+import type { Note, Notebook, Settings } from '../../../types'
 
 // Mock child components
 vi.mock('../AppLayout', () => ({
-  default: vi.fn((props) => (
-    <div data-testid="app-layout" {...Object.keys(props).reduce((acc, key) => {
-      if (typeof props[key] === 'string' || typeof props[key] === 'boolean' || typeof props[key] === 'number') {
-        acc[key] = props[key]
-      }
-      return acc
-    }, {} as any)}>
+  default: vi.fn(props => (
+    <div
+      data-testid="app-layout"
+      {...Object.keys(props).reduce((acc, key) => {
+        if (
+          typeof props[key] === 'string' ||
+          typeof props[key] === 'boolean' ||
+          typeof props[key] === 'number'
+        ) {
+          acc[key] = props[key]
+        }
+        return acc
+      }, {} as any)}
+    >
       AppLayout Component
     </div>
-  ))
+  )),
 }))
 
 vi.mock('../AppModals', () => ({
-  default: vi.fn((props) => (
-    <div data-testid="app-modals" {...props} />
-  ))
+  default: vi.fn(props => <div data-testid="app-modals" {...props} />),
 }))
 
 vi.mock('../../LoadingStates', () => ({
   AppLoading: vi.fn(({ message }) => (
     <div data-testid="app-loading">{message}</div>
-  ))
+  )),
 }))
 
 vi.mock('../../ErrorBoundary', () => ({
-  ErrorBoundary: vi.fn(({ children }) => children)
+  ErrorBoundary: vi.fn(({ children }) => children),
 }))
 
 vi.mock('../../errors/StorageErrorBoundary', () => ({
-  default: vi.fn(({ children }) => children)
+  default: vi.fn(({ children }) => children),
 }))
 
 describe('AppPresentation', () => {
@@ -48,19 +53,19 @@ describe('AppPresentation', () => {
     notebook: 'test',
     status: 'active' as const,
     tags: ['test'],
-    pinned: false
+    pinned: false,
   }
 
   const mockNotebook: Notebook = {
     name: 'test',
     color: '#000000',
     count: 1,
-    isDefault: false
+    isDefault: false,
   }
 
   const mockSettings: Partial<Settings> = {
     theme: 'dark',
-    language: 'en'
+    language: 'en',
   }
 
   const defaultProps = {
@@ -70,7 +75,7 @@ describe('AppPresentation', () => {
     filteredNotes: [mockNote],
     notebooks: [mockNotebook],
     settings: mockSettings,
-    
+
     // UI State
     isEditorOpen: true,
     isLoading: false,
@@ -80,9 +85,9 @@ describe('AppPresentation', () => {
       export: false,
       settings: false,
       tagModal: false,
-      notebookManager: false
+      notebookManager: false,
     },
-    
+
     // Handlers
     handleOpenNote: vi.fn(),
     handleContentChange: vi.fn(),
@@ -96,7 +101,7 @@ describe('AppPresentation', () => {
     handleRestoreNote: vi.fn(),
     handlePermanentDelete: vi.fn(),
     setModal: vi.fn(),
-    sortNotes: vi.fn()
+    sortNotes: vi.fn(),
   }
 
   beforeEach(() => {
@@ -106,14 +111,14 @@ describe('AppPresentation', () => {
   describe('Loading State', () => {
     it('should display loading screen when isLoading is true', () => {
       render(<AppPresentation {...defaultProps} isLoading={true} />)
-      
+
       expect(screen.getByTestId('app-loading')).toBeInTheDocument()
       expect(screen.getByText('Loading Viny...')).toBeInTheDocument()
     })
 
     it('should not display loading screen when isLoading is false', () => {
       render(<AppPresentation {...defaultProps} />)
-      
+
       expect(screen.queryByTestId('app-loading')).not.toBeInTheDocument()
     })
   })
@@ -121,13 +126,13 @@ describe('AppPresentation', () => {
   describe('App Container', () => {
     it('should render app container with correct data-testid', () => {
       render(<AppPresentation {...defaultProps} />)
-      
+
       expect(screen.getByTestId('app-container')).toBeInTheDocument()
     })
 
     it('should render AppLayout with all props', () => {
       render(<AppPresentation {...defaultProps} />)
-      
+
       const appLayout = screen.getByTestId('app-layout')
       expect(appLayout).toBeInTheDocument()
       expect(appLayout).toHaveTextContent('AppLayout Component')
@@ -135,7 +140,7 @@ describe('AppPresentation', () => {
 
     it('should render AppModals with modal state', () => {
       render(<AppPresentation {...defaultProps} />)
-      
+
       const appModals = screen.getByTestId('app-modals')
       expect(appModals).toBeInTheDocument()
     })
@@ -144,14 +149,14 @@ describe('AppPresentation', () => {
   describe('Error Boundaries', () => {
     it('should wrap content in ErrorBoundary', () => {
       render(<AppPresentation {...defaultProps} />)
-      
+
       // Content should be rendered (ErrorBoundary is mocked to render children)
       expect(screen.getByTestId('app-container')).toBeInTheDocument()
     })
 
     it('should wrap content in StorageErrorBoundary', () => {
       render(<AppPresentation {...defaultProps} />)
-      
+
       // Just verify the component renders without errors
       expect(screen.getByTestId('app-container')).toBeInTheDocument()
     })
@@ -160,10 +165,10 @@ describe('AppPresentation', () => {
   describe('Prop Handling', () => {
     it('should pass props to child components', () => {
       render(<AppPresentation {...defaultProps} />)
-      
+
       // Verify AppLayout is rendered with data-testid
       expect(screen.getByTestId('app-layout')).toBeInTheDocument()
-      
+
       // Verify AppModals is rendered with data-testid
       expect(screen.getByTestId('app-modals')).toBeInTheDocument()
     })
@@ -172,25 +177,25 @@ describe('AppPresentation', () => {
   describe('Edge Cases', () => {
     it('should handle null currentNote', () => {
       render(<AppPresentation {...defaultProps} currentNote={null} />)
-      
+
       expect(screen.getByTestId('app-container')).toBeInTheDocument()
     })
 
     it('should handle empty filteredNotes', () => {
       render(<AppPresentation {...defaultProps} filteredNotes={[]} />)
-      
+
       expect(screen.getByTestId('app-container')).toBeInTheDocument()
     })
 
     it('should handle empty notebooks', () => {
       render(<AppPresentation {...defaultProps} notebooks={[]} />)
-      
+
       expect(screen.getByTestId('app-container')).toBeInTheDocument()
     })
 
     it('should handle empty settings', () => {
       render(<AppPresentation {...defaultProps} settings={{}} />)
-      
+
       expect(screen.getByTestId('app-container')).toBeInTheDocument()
     })
   })

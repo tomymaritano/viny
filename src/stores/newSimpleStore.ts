@@ -1,29 +1,51 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
-import { NotesSlice, createNotesSlice } from './slices/notesSlice'
-import { UiSlice, createUiSlice } from './slices/uiSlice'
-import { TemplatesSlice, createTemplatesSlice } from './slices/templatesSlice'
-import { ModalSlice, createModalSlice } from './slices/modalSlice'
-import { ToastSlice, createToastSlice } from './slices/toastSlice'
-import { NavigationSlice, createNavigationSlice } from './slices/navigationSlice'
-import { SearchSlice, createSearchSlice } from './slices/searchSlice'
-import { EditorSlice, createEditorSlice } from './slices/editorSlice'
-import { AppStateSlice, createAppStateSlice } from './slices/appStateSlice'
-import { SettingsSlice, createSettingsSlice, initializeSettings } from './slices/settingsSlice'
+import type { NotesSlice } from './slices/notesSlice'
+import { createNotesSlice } from './slices/notesSlice'
+import type { UiSlice } from './slices/uiSlice'
+import { createUiSlice } from './slices/uiSlice'
+import type { TemplatesSlice } from './slices/templatesSlice'
+import { createTemplatesSlice } from './slices/templatesSlice'
+import type { ModalSlice } from './slices/modalSlice'
+import { createModalSlice } from './slices/modalSlice'
+import type { ToastSlice } from './slices/toastSlice'
+import { createToastSlice } from './slices/toastSlice'
+import type { NavigationSlice } from './slices/navigationSlice'
+import { createNavigationSlice } from './slices/navigationSlice'
+import type { SearchSlice } from './slices/searchSlice'
+import { createSearchSlice } from './slices/searchSlice'
+import type { EditorSlice } from './slices/editorSlice'
+import { createEditorSlice } from './slices/editorSlice'
+import type { AppStateSlice } from './slices/appStateSlice'
+import { createAppStateSlice } from './slices/appStateSlice'
+import type { SettingsSlice } from './slices/settingsSlice'
+import { createSettingsSlice, initializeSettings } from './slices/settingsSlice'
+import type { AuthSlice } from './slices/authSlice'
+import { createAuthSlice, initializeAuth } from './slices/authSlice'
+import type { FilterSlice } from './slices/filterSlice'
+import { createFilterSlice } from './slices/filterSlice'
+import type { NotebooksSlice } from './slices/notebooksSlice'
+import {
+  createNotebooksSlice,
+  initializeNotebooks,
+} from './slices/notebooksSlice'
 import { initializeNotes } from './slices/notesSlice'
 import { initializeTemplates } from './slices/templatesSlice'
 
 // Combined store interface with all specialized slices
-type AppStore = NotesSlice & 
-  UiSlice & 
-  TemplatesSlice & 
-  ModalSlice & 
-  ToastSlice & 
-  NavigationSlice & 
-  SearchSlice & 
-  EditorSlice & 
-  AppStateSlice & 
-  SettingsSlice
+type AppStore = NotesSlice &
+  UiSlice &
+  TemplatesSlice &
+  ModalSlice &
+  ToastSlice &
+  NavigationSlice &
+  SearchSlice &
+  EditorSlice &
+  AppStateSlice &
+  SettingsSlice &
+  AuthSlice &
+  FilterSlice &
+  NotebooksSlice
 
 // Create the combined store
 export const useAppStore = create<AppStore>()(
@@ -38,7 +60,10 @@ export const useAppStore = create<AppStore>()(
       ...createSearchSlice(...args),
       ...createEditorSlice(...args),
       ...createAppStateSlice(...args),
-      ...createSettingsSlice(...args)
+      ...createSettingsSlice(...args),
+      ...createAuthSlice(...args),
+      ...createFilterSlice(...args),
+      ...createNotebooksSlice(...args),
     }),
     { name: 'app-store' }
   )
@@ -49,22 +74,27 @@ const storeState = useAppStore.getState()
 initializeSettings(storeState)
 initializeNotes(storeState)
 initializeTemplates(storeState)
+initializeAuth(storeState)
+// Note: initializeNotebooks is called from useAppInit to ensure proper sequencing
 
 // Store reference for storage service (needed for Electron sync compatibility)
 // Only expose in development or Electron environment for debugging
-if (typeof globalThis !== 'undefined' && 
-    (process.env.NODE_ENV === 'development' || (typeof window !== 'undefined' && window.electronAPI))) {
+if (
+  typeof globalThis !== 'undefined' &&
+  (process.env.NODE_ENV === 'development' ||
+    (typeof window !== 'undefined' && window.electronAPI))
+) {
   interface AppGlobal {
     __appStore?: typeof useAppStore
   }
-  (globalThis as AppGlobal).__appStore = useAppStore
+  ;(globalThis as AppGlobal).__appStore = useAppStore
 }
 
 // Re-export types for convenience
-export type { 
-  NotesSlice, 
-  UiSlice, 
-  TemplatesSlice, 
+export type {
+  NotesSlice,
+  UiSlice,
+  TemplatesSlice,
   ModalSlice,
   ToastSlice,
   NavigationSlice,
@@ -72,10 +102,14 @@ export type {
   EditorSlice,
   AppStateSlice,
   SettingsSlice,
-  AppStore 
+  AuthSlice,
+  // TEMPORALMENTE COMENTADO - CONFLICTO CON SISTEMA EXISTENTE
+  // NotebooksSlice,
+  AppStore,
 }
 export type { Template } from './slices/templatesSlice'
 export type { Toast } from './slices/toastSlice'
+export type { User } from './slices/authSlice'
 
 // Legacy alias for backward compatibility during migration
 export const useSimpleStore = useAppStore

@@ -4,27 +4,32 @@
  * Eliminates the wrapper layer and provides clean async interface
  */
 
-import { AppSettings, defaultAppSettings } from '../../types/settings'
-import { ISettingsRepository, StorageError, StorageUtils } from './IRepository'
+import type { AppSettings } from '../../types/settings'
+import { defaultAppSettings } from '../../types/settings'
+import type { ISettingsRepository } from './IRepository'
+import { StorageError, StorageUtils } from './IRepository'
 import { storageLogger as logger } from '../../utils/logger'
+import { storageService, StorageService } from '../../services/StorageService'
 
 export class SettingsRepository implements ISettingsRepository {
   private listeners: Map<string, ((value: any) => void)[]> = new Map()
   private isElectron: boolean
-  private isInitialized: boolean = false
+  private isInitialized = false
 
   constructor() {
     this.isElectron = StorageUtils.isElectron()
-    logger.debug('SettingsRepository initialized', { isElectron: this.isElectron })
+    logger.debug('SettingsRepository initialized', {
+      isElectron: this.isElectron,
+    })
   }
 
   private async ensureInitialized(): Promise<void> {
     if (this.isInitialized) return
-    
+
     if (!this.isElectron && !StorageUtils.hasLocalStorage()) {
       throw new StorageError('initialize', new Error('No storage available'))
     }
-    
+
     this.isInitialized = true
   }
 
@@ -33,7 +38,7 @@ export class SettingsRepository implements ISettingsRepository {
    */
   async getSettings(): Promise<AppSettings> {
     await this.ensureInitialized()
-    
+
     try {
       if (this.isElectron) {
         return await this.getElectronSettings()
@@ -51,24 +56,26 @@ export class SettingsRepository implements ISettingsRepository {
    */
   async saveSettings(updates: Partial<AppSettings>): Promise<void> {
     await this.ensureInitialized()
-    
+
     try {
       // Get current settings and merge with updates
       const currentSettings = await this.getSettings()
       const newSettings = { ...currentSettings, ...updates }
-      
+
       if (this.isElectron) {
         await this.saveElectronSettings(newSettings)
       } else {
         this.saveLocalStorageSettings(newSettings)
       }
-      
+
       // Notify listeners of changed keys
       Object.keys(updates).forEach(key => {
         this.notifyListeners(key, updates[key as keyof AppSettings])
       })
-      
-      logger.debug('Settings saved successfully', { keys: Object.keys(updates) })
+
+      logger.debug('Settings saved successfully', {
+        keys: Object.keys(updates),
+      })
     } catch (error) {
       logger.error('Failed to save settings:', error)
       throw new StorageError('saveSettings', error as Error, true)
@@ -80,19 +87,19 @@ export class SettingsRepository implements ISettingsRepository {
    */
   async resetSettings(): Promise<void> {
     await this.ensureInitialized()
-    
+
     try {
       if (this.isElectron) {
         await this.saveElectronSettings(defaultAppSettings)
       } else {
         this.saveLocalStorageSettings(defaultAppSettings)
       }
-      
+
       // Notify all listeners of reset
       Object.keys(defaultAppSettings).forEach(key => {
         this.notifyListeners(key, defaultAppSettings[key as keyof AppSettings])
       })
-      
+
       logger.debug('Settings reset to defaults')
     } catch (error) {
       logger.error('Failed to reset settings:', error)
@@ -103,7 +110,9 @@ export class SettingsRepository implements ISettingsRepository {
   /**
    * Get single setting value
    */
-  async getSetting<K extends keyof AppSettings>(key: K): Promise<AppSettings[K]> {
+  async getSetting<K extends keyof AppSettings>(
+    key: K
+  ): Promise<AppSettings[K]> {
     const settings = await this.getSettings()
     return settings[key] ?? defaultAppSettings[key]
   }
@@ -111,7 +120,10 @@ export class SettingsRepository implements ISettingsRepository {
   /**
    * Set single setting value
    */
-  async setSetting<K extends keyof AppSettings>(key: K, value: AppSettings[K]): Promise<void> {
+  async setSetting<K extends keyof AppSettings>(
+    key: K,
+    value: AppSettings[K]
+  ): Promise<void> {
     await this.saveSettings({ [key]: value } as Partial<AppSettings>)
   }
 
@@ -134,17 +146,17 @@ export class SettingsRepository implements ISettingsRepository {
    * Watch for setting changes
    */
   watch<K extends keyof AppSettings>(
-    key: K, 
+    key: K,
     callback: (value: AppSettings[K]) => void
   ): () => void {
     const keyStr = String(key)
-    
+
     if (!this.listeners.has(keyStr)) {
       this.listeners.set(keyStr, [])
     }
-    
+
     this.listeners.get(keyStr)!.push(callback)
-    
+
     // Return unsubscribe function
     return () => {
       const keyListeners = this.listeners.get(keyStr)
@@ -171,7 +183,7 @@ export class SettingsRepository implements ISettingsRepository {
   async import(data: string): Promise<void> {
     try {
       const importedSettings = JSON.parse(data)
-      
+
       // Validate imported settings
       const validSettings: Partial<AppSettings> = {}
       Object.keys(defaultAppSettings).forEach(key => {
@@ -179,7 +191,7 @@ export class SettingsRepository implements ISettingsRepository {
           validSettings[key as keyof AppSettings] = importedSettings[key]
         }
       })
-      
+
       await this.saveSettings(validSettings)
       logger.debug('Settings imported successfully')
     } catch (error) {
@@ -193,11 +205,11 @@ export class SettingsRepository implements ISettingsRepository {
   private async getElectronSettings(): Promise<AppSettings> {
     try {
       const stored = await window.electronAPI?.storage?.loadSettings?.()
-      
+
       if (!stored || Object.keys(stored).length === 0) {
         return defaultAppSettings
       }
-      
+
       // Merge with defaults to ensure all properties exist
       return { ...defaultAppSettings, ...stored }
     } catch (error) {
@@ -208,11 +220,11 @@ export class SettingsRepository implements ISettingsRepository {
 
   private getLocalStorageSettings(): AppSettings {
     try {
-      const stored = localStorage.getItem('viny-settings')
+      const stored = storageService.getItem(StorageService.KEYS.SETTINGS)
       if (!stored) {
         return defaultAppSettings
       }
-      
+
       const parsed = JSON.parse(stored)
       return { ...defaultAppSettings, ...parsed }
     } catch (error) {
@@ -234,7 +246,10 @@ export class SettingsRepository implements ISettingsRepository {
 
   private saveLocalStorageSettings(settings: AppSettings): void {
     try {
-      localStorage.setItem('viny-settings', JSON.stringify(settings))
+      storageService.setItem(
+        StorageService.KEYS.SETTINGS,
+        JSON.stringify(settings)
+      )
     } catch (error) {
       throw new StorageError('saveLocalStorage', error as Error)
     }

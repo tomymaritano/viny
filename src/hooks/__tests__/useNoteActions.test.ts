@@ -28,19 +28,19 @@ describe('useNoteActions', () => {
     saveNote: vi.fn(),
     deleteNote: vi.fn(),
     getNotes: vi.fn(),
-    flushPendingSaves: vi.fn().mockResolvedValue(undefined)
+    flushPendingSaves: vi.fn().mockResolvedValue(undefined),
   }
 
   // Mock markdown processor
   const mockMarkdownProcessor = {
-    extractTitle: vi.fn()
+    extractTitle: vi.fn(),
   }
 
   // Mock logger
   const mockLogger = {
     debug: vi.fn(),
     error: vi.fn(),
-    info: vi.fn()
+    info: vi.fn(),
   }
 
   // Test data
@@ -54,7 +54,7 @@ describe('useNoteActions', () => {
     notebook: 'personal',
     status: 'draft',
     isPinned: false,
-    isTrashed: false
+    isTrashed: false,
   }
 
   const mockNotes = [mockNote]
@@ -77,34 +77,34 @@ describe('useNoteActions', () => {
       showSuccess: mockShowSuccess,
       showError: mockShowError,
       createNoteFromTemplate: mockCreateNoteFromTemplate,
-      addToast: vi.fn()
+      addToast: vi.fn(),
     })
 
     // Setup storage mock
     const storageModule = await import('../../lib/storage')
     Object.defineProperty(storageModule, 'storageService', {
       value: mockStorageService,
-      writable: true
+      writable: true,
     })
 
     // Setup markdown mock
     const markdownModule = await import('../../lib/markdown')
     Object.defineProperty(markdownModule, 'MarkdownProcessor', {
       value: mockMarkdownProcessor,
-      writable: true
+      writable: true,
     })
 
     // Setup logger mock
     const loggerModule = await import('../../utils/logger')
     Object.defineProperty(loggerModule, 'noteLogger', {
       value: mockLogger,
-      writable: true
+      writable: true,
     })
 
     // Mock global window for electron detection
     Object.defineProperty(global, 'window', {
       value: {},
-      writable: true
+      writable: true,
     })
   })
 
@@ -131,7 +131,7 @@ describe('useNoteActions', () => {
         tags: [],
         status: 'draft',
         isPinned: false,
-        isTrashed: false
+        isTrashed: false,
       })
 
       // Check store calls
@@ -157,7 +157,7 @@ describe('useNoteActions', () => {
         showSuccess: mockShowSuccess,
         showError: mockShowError,
         createNoteFromTemplate: mockCreateNoteFromTemplate,
-        addToast: vi.fn()
+        addToast: vi.fn(),
       })
 
       const { useNoteActions } = await import('../useNoteActions')
@@ -186,7 +186,7 @@ describe('useNoteActions', () => {
         showSuccess: mockShowSuccess,
         showError: mockShowError,
         createNoteFromTemplate: mockCreateNoteFromTemplate,
-        addToast: vi.fn()
+        addToast: vi.fn(),
       })
 
       const { useNoteActions } = await import('../useNoteActions')
@@ -251,7 +251,9 @@ describe('useNoteActions', () => {
       })
 
       expect(savedNote.title).toBe('Extracted Title')
-      expect(mockMarkdownProcessor.extractTitle).toHaveBeenCalledWith('Test content')
+      expect(mockMarkdownProcessor.extractTitle).toHaveBeenCalledWith(
+        'Test content'
+      )
     })
 
     it('should handle save verification failure', async () => {
@@ -261,10 +263,14 @@ describe('useNoteActions', () => {
       const { result } = renderHook(() => useNoteActions())
 
       await act(async () => {
-        await expect(result.current.handleSaveNote(mockNote)).rejects.toThrow('Save verification failed - note not found')
+        await expect(result.current.handleSaveNote(mockNote)).rejects.toThrow(
+          'Save verification failed - note not found'
+        )
       })
 
-      expect(mockShowError).toHaveBeenCalledWith('Failed to save note: Save verification failed - note not found')
+      expect(mockShowError).toHaveBeenCalledWith(
+        'Failed to save note: Save verification failed - note not found'
+      )
     })
   })
 
@@ -280,7 +286,7 @@ describe('useNoteActions', () => {
       expect(mockUpdateNote).toHaveBeenCalledWith({
         ...mockNote,
         isTrashed: true,
-        trashedAt: '2023-01-01T00:00:00.000Z'
+        trashedAt: '2023-01-01T00:00:00.000Z',
       })
       expect(mockStorageService.saveNote).toHaveBeenCalled()
       expect(mockShowSuccess).toHaveBeenCalledWith('Note moved to trash')
@@ -314,7 +320,7 @@ describe('useNoteActions', () => {
       expect(mockUpdateNote).toHaveBeenCalledWith({
         ...mockNote,
         isPinned: true,
-        updatedAt: '2023-01-01T00:00:00.000Z'
+        updatedAt: '2023-01-01T00:00:00.000Z',
       })
       expect(mockShowSuccess).toHaveBeenCalledWith('Note pinned')
     })
@@ -332,7 +338,7 @@ describe('useNoteActions', () => {
       expect(mockUpdateNote).toHaveBeenCalledWith({
         ...pinnedNote,
         isPinned: false,
-        updatedAt: '2023-01-01T00:00:00.000Z'
+        updatedAt: '2023-01-01T00:00:00.000Z',
       })
       expect(mockShowSuccess).toHaveBeenCalledWith('Note unpinned')
     })
@@ -354,13 +360,19 @@ describe('useNoteActions', () => {
       expect(duplicatedNote.id).not.toBe(mockNote.id)
       expect(mockAddNote).toHaveBeenCalledWith(duplicatedNote)
       expect(mockStorageService.saveNote).toHaveBeenCalledWith(duplicatedNote)
-      expect(mockShowSuccess).toHaveBeenCalledWith('Note duplicated successfully')
+      expect(mockShowSuccess).toHaveBeenCalledWith(
+        'Note duplicated successfully'
+      )
     })
   })
 
   describe('handleRestoreNote', () => {
     it('should restore note from trash', async () => {
-      const trashedNote = { ...mockNote, isTrashed: true, trashedAt: '2023-01-01T00:00:00.000Z' }
+      const trashedNote = {
+        ...mockNote,
+        isTrashed: true,
+        trashedAt: '2023-01-01T00:00:00.000Z',
+      }
 
       const { useNoteActions } = await import('../useNoteActions')
       const { result } = renderHook(() => useNoteActions())
@@ -373,7 +385,7 @@ describe('useNoteActions', () => {
         ...trashedNote,
         isTrashed: false,
         trashedAt: undefined,
-        updatedAt: '2023-01-01T00:00:00.000Z'
+        updatedAt: '2023-01-01T00:00:00.000Z',
       })
       expect(mockStorageService.saveNote).toHaveBeenCalled()
       expect(mockShowSuccess).toHaveBeenCalledWith('Note restored')

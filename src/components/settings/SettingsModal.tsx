@@ -19,6 +19,7 @@ import InstallSettings from './tabs/InstallSettings'
 import UpdatesSettings from './tabs/UpdatesSettings'
 import SyncSettings from './tabs/SyncSettings'
 import BackupSettings from './tabs/BackupSettings'
+import AISettings from './tabs/AISettings'
 
 interface SettingsModalProps {
   isOpen: boolean
@@ -27,7 +28,7 @@ interface SettingsModalProps {
 
 const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState<string>('general')
-  
+
   // Check if running in standalone mode (settings window)
   const isStandalone = window.location.hash === '#/settings'
 
@@ -37,6 +38,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
     { id: 'editing', label: 'Editing', icon: 'FileEdit' },
     { id: 'preview', label: 'Preview', icon: 'Eye' },
     { id: 'keybindings', label: 'Keybindings', icon: 'Command' },
+    { id: 'ai', label: 'AI', icon: 'Brain' },
     { id: 'plugins', label: 'Plugins', icon: 'Package' },
     { id: 'install', label: 'Install', icon: 'Download' },
     { id: 'updates', label: 'Updates', icon: 'RefreshCw' },
@@ -58,6 +60,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
         return <PreviewSettings />
       case 'keybindings':
         return <KeybindingsSettings />
+      case 'ai':
+        return <AISettings />
       case 'plugins':
         return <PluginsSettings />
       case 'install':
@@ -92,9 +96,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
         {/* Content area */}
         <div className="flex-1 overflow-y-auto bg-theme-bg-primary">
-          <div className="p-8">
-            {renderTabContent()}
-          </div>
+          <div className="p-8">{renderTabContent()}</div>
         </div>
       </div>
     )
@@ -132,9 +134,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
         {/* Content area */}
         <div className="flex-1">
-          <div className="p-6">
-            {renderTabContent()}
-          </div>
+          <div className="p-6">{renderTabContent()}</div>
         </div>
       </div>
     </StandardModal>

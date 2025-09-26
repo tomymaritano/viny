@@ -1,0 +1,830 @@
+{
+  "totalIssues": 117,
+  "fileCount": 19,
+  "typeCounts": {
+    "setItem": 28,
+    "getItem": 37,
+    "removeItem": 23,
+    "clear": 1,
+    "key": 14,
+    "length": 14
+  },
+  "issuesByFile": [
+    {
+      "file": "utils/themeUtils.ts",
+      "count": 1,
+      "issues": [
+        {
+          "line": 163,
+          "type": "setItem",
+          "content": "localStorage.setItem('theme', theme)",
+          "suggestion": "storageService.setItem(StorageService.KEYS.THEME, theme)"
+        }
+      ]
+    },
+    {
+      "file": "stores/slices/authSlice.ts",
+      "count": 13,
+      "issues": [
+        {
+          "line": 50,
+          "type": "getItem",
+          "content": "typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null,",
+          "suggestion": "storageService.getItem('accessToken')"
+        },
+        {
+          "line": 74,
+          "type": "setItem",
+          "content": "localStorage.setItem('accessToken', data.data.accessToken)",
+          "suggestion": "storageService.setItem('accessToken', data.data.accessToken)"
+        },
+        {
+          "line": 91,
+          "type": "removeItem",
+          "content": "localStorage.removeItem('accessToken')",
+          "suggestion": "storageService.removeItem('accessToken')"
+        },
+        {
+          "line": 117,
+          "type": "setItem",
+          "content": "localStorage.setItem('accessToken', data.data.accessToken)",
+          "suggestion": "storageService.setItem('accessToken', data.data.accessToken)"
+        },
+        {
+          "line": 134,
+          "type": "removeItem",
+          "content": "localStorage.removeItem('accessToken')",
+          "suggestion": "storageService.removeItem('accessToken')"
+        },
+        {
+          "line": 157,
+          "type": "removeItem",
+          "content": "localStorage.removeItem('accessToken')",
+          "suggestion": "storageService.removeItem('accessToken')"
+        },
+        {
+          "line": 182,
+          "type": "setItem",
+          "content": "localStorage.setItem('accessToken', data.data.accessToken)",
+          "suggestion": "storageService.setItem('accessToken', data.data.accessToken)"
+        },
+        {
+          "line": 192,
+          "type": "removeItem",
+          "content": "localStorage.removeItem('accessToken')",
+          "suggestion": "storageService.removeItem('accessToken')"
+        },
+        {
+          "line": 268,
+          "type": "removeItem",
+          "content": "localStorage.removeItem('accessToken')",
+          "suggestion": "storageService.removeItem('accessToken')"
+        },
+        {
+          "line": 315,
+          "type": "removeItem",
+          "content": "localStorage.removeItem('accessToken')",
+          "suggestion": "storageService.removeItem('accessToken')"
+        },
+        {
+          "line": 331,
+          "type": "setItem",
+          "content": "localStorage.setItem('accessToken', token)",
+          "suggestion": "storageService.setItem('accessToken', token)"
+        },
+        {
+          "line": 333,
+          "type": "removeItem",
+          "content": "localStorage.removeItem('accessToken')",
+          "suggestion": "storageService.removeItem('accessToken')"
+        },
+        {
+          "line": 342,
+          "type": "getItem",
+          "content": "typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null",
+          "suggestion": "storageService.getItem('accessToken')"
+        }
+      ]
+    },
+    {
+      "file": "services/i18nService.ts",
+      "count": 2,
+      "issues": [
+        {
+          "line": 153,
+          "type": "setItem",
+          "content": "localStorage.setItem('language', language)",
+          "suggestion": "storageService.setItem(StorageService.KEYS.LANGUAGE, language)"
+        },
+        {
+          "line": 179,
+          "type": "getItem",
+          "content": "const savedLanguage = localStorage.getItem('language') as SupportedLanguage",
+          "suggestion": "storageService.getItem(StorageService.KEYS.LANGUAGE)"
+        }
+      ]
+    },
+    {
+      "file": "services/StorageService.ts",
+      "count": 6,
+      "issues": [
+        {
+          "line": 69,
+          "type": "getItem",
+          "content": "return localStorage.getItem(key)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 73,
+          "type": "setItem",
+          "content": "localStorage.setItem(key, value)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 77,
+          "type": "removeItem",
+          "content": "localStorage.removeItem(key)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 81,
+          "type": "clear",
+          "content": "localStorage.clear()",
+          "suggestion": "storageService.clear()"
+        },
+        {
+          "line": 83,
+          "type": "key",
+          "content": "key: (index: number) => localStorage.key(index),",
+          "suggestion": "// Manual migration needed: storageService.getAllKeys()[index]"
+        },
+        {
+          "line": 84,
+          "type": "length",
+          "content": "get length() { return localStorage.length }",
+          "suggestion": "storageService.getAllKeys().length"
+        }
+      ]
+    },
+    {
+      "file": "services/StorageRecoveryService.ts",
+      "count": 20,
+      "issues": [
+        {
+          "line": 61,
+          "type": "setItem",
+          "content": "localStorage.setItem('storage_test', 'test')",
+          "suggestion": "storageService.setItem('storage_test', 'test')"
+        },
+        {
+          "line": 62,
+          "type": "removeItem",
+          "content": "localStorage.removeItem('storage_test')",
+          "suggestion": "storageService.removeItem('storage_test')"
+        },
+        {
+          "line": 70,
+          "type": "length",
+          "content": "for (let i = 0; i < localStorage.length; i++) {",
+          "suggestion": "storageService.getAllKeys().length"
+        },
+        {
+          "line": 71,
+          "type": "key",
+          "content": "const key = localStorage.key(i)",
+          "suggestion": "// Manual migration needed: storageService.getAllKeys()[index]"
+        },
+        {
+          "line": 75,
+          "type": "getItem",
+          "content": "const value = localStorage.getItem(key)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 105,
+          "type": "getItem",
+          "content": "const rawValue = localStorage.getItem(key)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 156,
+          "type": "length",
+          "content": "for (let i = 0; i < localStorage.length; i++) {",
+          "suggestion": "storageService.getAllKeys().length"
+        },
+        {
+          "line": 157,
+          "type": "key",
+          "content": "const key = localStorage.key(i)",
+          "suggestion": "// Manual migration needed: storageService.getAllKeys()[index]"
+        },
+        {
+          "line": 163,
+          "type": "getItem",
+          "content": "const value = localStorage.getItem(key)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 181,
+          "type": "setItem",
+          "content": "localStorage.setItem(backupKey, JSON.stringify(backupData))",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 232,
+          "type": "removeItem",
+          "content": "localStorage.removeItem(key)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 251,
+          "type": "setItem",
+          "content": "localStorage.setItem(",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 309,
+          "type": "getItem",
+          "content": "const backupData = localStorage.getItem(latestBackup)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 330,
+          "type": "length",
+          "content": "for (let i = localStorage.length - 1; i >= 0; i--) {",
+          "suggestion": "storageService.getAllKeys().length"
+        },
+        {
+          "line": 331,
+          "type": "key",
+          "content": "const key = localStorage.key(i)",
+          "suggestion": "// Manual migration needed: storageService.getAllKeys()[index]"
+        },
+        {
+          "line": 337,
+          "type": "removeItem",
+          "content": "localStorage.removeItem(key)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 343,
+          "type": "setItem",
+          "content": "localStorage.setItem(key, value as string)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 367,
+          "type": "length",
+          "content": "for (let i = 0; i < localStorage.length; i++) {",
+          "suggestion": "storageService.getAllKeys().length"
+        },
+        {
+          "line": 368,
+          "type": "key",
+          "content": "const key = localStorage.key(i)",
+          "suggestion": "// Manual migration needed: storageService.getAllKeys()[index]"
+        },
+        {
+          "line": 479,
+          "type": "removeItem",
+          "content": "localStorage.removeItem(backup)",
+          "suggestion": "// Manual migration needed"
+        }
+      ]
+    },
+    {
+      "file": "services/StorageMigrationService.ts",
+      "count": 17,
+      "issues": [
+        {
+          "line": 222,
+          "type": "getItem",
+          "content": "const hasSettings = localStorage.getItem('viny-settings') !== null",
+          "suggestion": "storageService.getItem(StorageService.KEYS.SETTINGS)"
+        },
+        {
+          "line": 223,
+          "type": "getItem",
+          "content": "const hasNotes = localStorage.getItem('viny-notes') !== null",
+          "suggestion": "storageService.getItem('viny-notes')"
+        },
+        {
+          "line": 224,
+          "type": "getItem",
+          "content": "const hasNotebooks = localStorage.getItem('viny-notebooks') !== null",
+          "suggestion": "storageService.getItem('viny-notebooks')"
+        },
+        {
+          "line": 225,
+          "type": "getItem",
+          "content": "const hasTemplates = localStorage.getItem('viny-templates') !== null",
+          "suggestion": "storageService.getItem(StorageService.KEYS.TEMPLATES)"
+        },
+        {
+          "line": 400,
+          "type": "length",
+          "content": "for (let i = 0; i < localStorage.length; i++) {",
+          "suggestion": "storageService.getAllKeys().length"
+        },
+        {
+          "line": 401,
+          "type": "key",
+          "content": "const key = localStorage.key(i)",
+          "suggestion": "// Manual migration needed: storageService.getAllKeys()[index]"
+        },
+        {
+          "line": 403,
+          "type": "getItem",
+          "content": "const value = localStorage.getItem(key)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 411,
+          "type": "setItem",
+          "content": "localStorage.setItem(backupKey, backupData)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 442,
+          "type": "getItem",
+          "content": "const settingsData = localStorage.getItem('viny-settings')",
+          "suggestion": "storageService.getItem(StorageService.KEYS.SETTINGS)"
+        },
+        {
+          "line": 492,
+          "type": "getItem",
+          "content": "const notesData = localStorage.getItem('viny-notes')",
+          "suggestion": "storageService.getItem('viny-notes')"
+        },
+        {
+          "line": 540,
+          "type": "getItem",
+          "content": "const notebooksData = localStorage.getItem('viny-notebooks')",
+          "suggestion": "storageService.getItem('viny-notebooks')"
+        },
+        {
+          "line": 589,
+          "type": "getItem",
+          "content": "const templatesData = localStorage.getItem('viny-templates')",
+          "suggestion": "storageService.getItem(StorageService.KEYS.TEMPLATES)"
+        },
+        {
+          "line": 639,
+          "type": "length",
+          "content": "for (let i = 0; i < localStorage.length; i++) {",
+          "suggestion": "storageService.getAllKeys().length"
+        },
+        {
+          "line": 640,
+          "type": "key",
+          "content": "const key = localStorage.key(i)",
+          "suggestion": "// Manual migration needed: storageService.getAllKeys()[index]"
+        },
+        {
+          "line": 683,
+          "type": "length",
+          "content": "for (let i = 0; i < localStorage.length; i++) {",
+          "suggestion": "storageService.getAllKeys().length"
+        },
+        {
+          "line": 684,
+          "type": "key",
+          "content": "const key = localStorage.key(i)",
+          "suggestion": "// Manual migration needed: storageService.getAllKeys()[index]"
+        },
+        {
+          "line": 694,
+          "type": "removeItem",
+          "content": "keysToRemove.forEach(key => localStorage.removeItem(key))",
+          "suggestion": "// Manual migration needed"
+        }
+      ]
+    },
+    {
+      "file": "services/PluginService.ts",
+      "count": 3,
+      "issues": [
+        {
+          "line": 700,
+          "type": "setItem",
+          "content": "localStorage.setItem(key, JSON.stringify(data))",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 708,
+          "type": "getItem",
+          "content": "const item = localStorage.getItem(key)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 718,
+          "type": "removeItem",
+          "content": "localStorage.removeItem(key)",
+          "suggestion": "// Manual migration needed"
+        }
+      ]
+    },
+    {
+      "file": "services/PluginSecurityService.ts",
+      "count": 7,
+      "issues": [
+        {
+          "line": 120,
+          "type": "getItem",
+          "content": "const config = localStorage.getItem('viny_security_config')",
+          "suggestion": "storageService.getItem(StorageService.KEYS.SECURITY_CONFIG)"
+        },
+        {
+          "line": 523,
+          "type": "getItem",
+          "content": "const data = localStorage.getItem(storageKey)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 534,
+          "type": "getItem",
+          "content": "const data = localStorage.getItem(storageKey)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 537,
+          "type": "setItem",
+          "content": "localStorage.setItem(storageKey, JSON.stringify(parsed))",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 546,
+          "type": "getItem",
+          "content": "const data = localStorage.getItem(storageKey)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 549,
+          "type": "setItem",
+          "content": "localStorage.setItem(storageKey, JSON.stringify(parsed))",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 557,
+          "type": "removeItem",
+          "content": "localStorage.removeItem(storageKey)",
+          "suggestion": "// Manual migration needed"
+        }
+      ]
+    },
+    {
+      "file": "lib/pluginApi.ts",
+      "count": 7,
+      "issues": [
+        {
+          "line": 448,
+          "type": "getItem",
+          "content": "const data = localStorage.getItem(storageKey)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 458,
+          "type": "setItem",
+          "content": "localStorage.setItem(storageKey, JSON.stringify(data))",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 497,
+          "type": "removeItem",
+          "content": "localStorage.removeItem(storageKey)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 569,
+          "type": "getItem",
+          "content": "localStorage.getItem(cleanupKey) || '[]'",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 572,
+          "type": "setItem",
+          "content": "localStorage.setItem(cleanupKey, JSON.stringify(existingCleanups))",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 655,
+          "type": "getItem",
+          "content": "const data = localStorage.getItem(key)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 666,
+          "type": "setItem",
+          "content": "localStorage.setItem(key, JSON.stringify(elements))",
+          "suggestion": "// Manual migration needed"
+        }
+      ]
+    },
+    {
+      "file": "lib/repositories/LocalStorageMigrationRepository.ts",
+      "count": 15,
+      "issues": [
+        {
+          "line": 83,
+          "type": "length",
+          "content": "for (let i = 0; i < localStorage.length; i++) {",
+          "suggestion": "storageService.getAllKeys().length"
+        },
+        {
+          "line": 84,
+          "type": "key",
+          "content": "const key = localStorage.key(i)",
+          "suggestion": "// Manual migration needed: storageService.getAllKeys()[index]"
+        },
+        {
+          "line": 87,
+          "type": "getItem",
+          "content": "const value = localStorage.getItem(key)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 240,
+          "type": "length",
+          "content": "for (let i = 0; i < localStorage.length; i++) {",
+          "suggestion": "storageService.getAllKeys().length"
+        },
+        {
+          "line": 241,
+          "type": "key",
+          "content": "const key = localStorage.key(i)",
+          "suggestion": "// Manual migration needed: storageService.getAllKeys()[index]"
+        },
+        {
+          "line": 243,
+          "type": "getItem",
+          "content": "const value = localStorage.getItem(key)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 255,
+          "type": "setItem",
+          "content": "localStorage.setItem(backupKey, backupData)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 295,
+          "type": "getItem",
+          "content": "const backupData = localStorage.getItem(backupKey)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 311,
+          "type": "setItem",
+          "content": "localStorage.setItem(key, value)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 354,
+          "type": "length",
+          "content": "for (let i = 0; i < localStorage.length; i++) {",
+          "suggestion": "storageService.getAllKeys().length"
+        },
+        {
+          "line": 355,
+          "type": "key",
+          "content": "const key = localStorage.key(i)",
+          "suggestion": "// Manual migration needed: storageService.getAllKeys()[index]"
+        },
+        {
+          "line": 361,
+          "type": "removeItem",
+          "content": "keysToRemove.forEach(key => localStorage.removeItem(key))",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 473,
+          "type": "setItem",
+          "content": "localStorage.setItem(testKey, testValue)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 474,
+          "type": "getItem",
+          "content": "const retrieved = localStorage.getItem(testKey)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 475,
+          "type": "removeItem",
+          "content": "localStorage.removeItem(testKey)",
+          "suggestion": "// Manual migration needed"
+        }
+      ]
+    },
+    {
+      "file": "lib/repositories/EnhancedDocumentRepository.ts",
+      "count": 11,
+      "issues": [
+        {
+          "line": 505,
+          "type": "length",
+          "content": "for (let i = 0; i < localStorage.length; i++) {",
+          "suggestion": "storageService.getAllKeys().length"
+        },
+        {
+          "line": 506,
+          "type": "key",
+          "content": "const key = localStorage.key(i)",
+          "suggestion": "// Manual migration needed: storageService.getAllKeys()[index]"
+        },
+        {
+          "line": 511,
+          "type": "removeItem",
+          "content": "keysToRemove.forEach(key => localStorage.removeItem(key))",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 629,
+          "type": "getItem",
+          "content": "const value = localStorage.getItem(localStorageKey)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 672,
+          "type": "setItem",
+          "content": "localStorage.setItem(key, serialized)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 919,
+          "type": "getItem",
+          "content": "const data = localStorage.getItem(storageKey)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 933,
+          "type": "setItem",
+          "content": "localStorage.setItem(storageKey, JSON.stringify(value))",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 951,
+          "type": "length",
+          "content": "for (let i = 0; i < localStorage.length; i++) {",
+          "suggestion": "storageService.getAllKeys().length"
+        },
+        {
+          "line": 952,
+          "type": "key",
+          "content": "const storageKey = localStorage.key(i)",
+          "suggestion": "// Manual migration needed: storageService.getAllKeys()[index]"
+        },
+        {
+          "line": 957,
+          "type": "removeItem",
+          "content": "keysToRemove.forEach(k => localStorage.removeItem(k))",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 960,
+          "type": "removeItem",
+          "content": "localStorage.removeItem(storageKey)",
+          "suggestion": "// Manual migration needed"
+        }
+      ]
+    },
+    {
+      "file": "hooks/useSemanticSearch.ts",
+      "count": 2,
+      "issues": [
+        {
+          "line": 161,
+          "type": "getItem",
+          "content": "const history = localStorage.getItem('viny_search_history')",
+          "suggestion": "storageService.getItem(StorageService.KEYS.SEARCH_HISTORY)"
+        },
+        {
+          "line": 177,
+          "type": "setItem",
+          "content": "localStorage.setItem('viny_search_history', JSON.stringify(newHistory))",
+          "suggestion": "storageService.setItem(StorageService.KEYS.SEARCH_HISTORY, JSON.stringify(newHistory))"
+        }
+      ]
+    },
+    {
+      "file": "hooks/usePersistentNotebookState.ts",
+      "count": 3,
+      "issues": [
+        {
+          "line": 17,
+          "type": "getItem",
+          "content": "const saved = localStorage.getItem(STORAGE_KEY)",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 42,
+          "type": "setItem",
+          "content": "localStorage.setItem(STORAGE_KEY, JSON.stringify(arrayToSave))",
+          "suggestion": "// Manual migration needed"
+        },
+        {
+          "line": 176,
+          "type": "removeItem",
+          "content": "localStorage.removeItem(STORAGE_KEY)",
+          "suggestion": "// Manual migration needed"
+        }
+      ]
+    },
+    {
+      "file": "components/ElectronExportHandler.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "line": 88,
+          "type": "setItem",
+          "content": "window.localStorage.setItem('temp-move-note-id', noteId)",
+          "suggestion": "storageService.setItem('temp-move-note-id', noteId)"
+        }
+      ]
+    },
+    {
+      "file": "components/settings/SettingsReset.tsx",
+      "count": 2,
+      "issues": [
+        {
+          "line": 62,
+          "type": "getItem",
+          "content": "const backupData = localStorage.getItem('viny_settings_backups')",
+          "suggestion": "storageService.getItem(StorageService.KEYS.SETTINGS_BACKUPS)"
+        },
+        {
+          "line": 65,
+          "type": "setItem",
+          "content": "localStorage.setItem('viny_settings_backups', backupData)",
+          "suggestion": "storageService.setItem(StorageService.KEYS.SETTINGS_BACKUPS, backupData)"
+        }
+      ]
+    },
+    {
+      "file": "components/settings/tabs/MCPSettings.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "line": 43,
+          "type": "getItem",
+          "content": "'Authorization': `Bearer ${localStorage.getItem('authToken')}`",
+          "suggestion": "storageService.getItem('authToken')"
+        }
+      ]
+    },
+    {
+      "file": "components/errors/StorageErrorBoundary.tsx",
+      "count": 3,
+      "issues": [
+        {
+          "line": 167,
+          "type": "length",
+          "content": "for (let i = 0; i < localStorage.length; i++) {",
+          "suggestion": "storageService.getAllKeys().length"
+        },
+        {
+          "line": 168,
+          "type": "key",
+          "content": "const key = localStorage.key(i)",
+          "suggestion": "// Manual migration needed: storageService.getAllKeys()[index]"
+        },
+        {
+          "line": 169,
+          "type": "getItem",
+          "content": "if (key) backup[key] = localStorage.getItem(key)",
+          "suggestion": "// Manual migration needed"
+        }
+      ]
+    },
+    {
+      "file": "components/editor/toolbar/EditorToolbar.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "line": 129,
+          "type": "setItem",
+          "content": "localStorage.setItem(",
+          "suggestion": "// Manual migration needed"
+        }
+      ]
+    },
+    {
+      "file": "components/editor/tags/TagModal.tsx",
+      "count": 2,
+      "issues": [
+        {
+          "line": 56,
+          "type": "getItem",
+          "content": "const tempAction = window.localStorage.getItem('temp-tag-action')",
+          "suggestion": "storageService.getItem('temp-tag-action')"
+        },
+        {
+          "line": 59,
+          "type": "removeItem",
+          "content": "window.localStorage.removeItem('temp-tag-action')",
+          "suggestion": "storageService.removeItem('temp-tag-action')"
+        }
+      ]
+    }
+  ]
+}

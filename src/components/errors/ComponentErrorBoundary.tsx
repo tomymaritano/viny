@@ -1,6 +1,7 @@
 import React from 'react'
 import { Icons } from '../Icons'
 import { logComponentError } from '../../services/errorLogger'
+import { logger } from '../../utils/logger'
 
 interface ComponentErrorBoundaryProps {
   children: React.ReactNode
@@ -21,7 +22,10 @@ interface ComponentErrorBoundaryState {
   errorInfo: React.ErrorInfo | null
 }
 
-class ComponentErrorBoundary extends React.Component<ComponentErrorBoundaryProps, ComponentErrorBoundaryState> {
+class ComponentErrorBoundary extends React.Component<
+  ComponentErrorBoundaryProps,
+  ComponentErrorBoundaryState
+> {
   constructor(props: ComponentErrorBoundaryProps) {
     super(props)
     this.state = {
@@ -31,12 +35,14 @@ class ComponentErrorBoundary extends React.Component<ComponentErrorBoundaryProps
     }
   }
 
-  static getDerivedStateFromError(error: Error): Partial<ComponentErrorBoundaryState> {
+  static getDerivedStateFromError(
+    error: Error
+  ): Partial<ComponentErrorBoundaryState> {
     return { hasError: true }
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error(`Error in ${this.props.componentName}:`, error, errorInfo)
+    logger.error(`Error in ${this.props.componentName}:`, error, errorInfo)
 
     this.setState({
       error: error,
@@ -48,7 +54,7 @@ class ComponentErrorBoundary extends React.Component<ComponentErrorBoundaryProps
       title: this.props.title,
       message: this.props.message,
       allowReload: this.props.allowReload,
-      showDetails: this.props.showDetails
+      showDetails: this.props.showDetails,
     })
 
     if (this.props.onError) {

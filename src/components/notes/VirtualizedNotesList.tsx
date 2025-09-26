@@ -2,7 +2,7 @@
  * Virtualized notes list for handling thousands of notes efficiently
  */
 import React, { useRef, useMemo } from 'react'
-import { Note } from '../../types'
+import type { Note } from '../../types'
 import VirtualizedList, { useVirtualization } from '../ui/VirtualizedList'
 import NoteListItem from '../features/notes-list/NoteListItem'
 
@@ -28,7 +28,7 @@ const VirtualizedNotesList: React.FC<VirtualizedNotesListProps> = ({
   itemHeight = 120, // Height for each note item
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  
+
   // Use virtualization hook
   const { containerHeight } = useVirtualization({
     items: notes,
@@ -50,7 +50,13 @@ const VirtualizedNotesList: React.FC<VirtualizedNotesListProps> = ({
         className="border-b border-theme-border-primary last:border-b-0"
       />
     )
-  }, [selectedNote?.id, onNoteSelect, onNoteDelete, onNoteDuplicate, searchQuery])
+  }, [
+    selectedNote?.id,
+    onNoteSelect,
+    onNoteDelete,
+    onNoteDuplicate,
+    searchQuery,
+  ])
 
   // Get unique ID for each note
   const getItemId = useMemo(() => {
@@ -99,7 +105,10 @@ export const PerformanceComparison: React.FC<{
             Performance Mode: {useVirtualization ? 'Virtualized' : 'Standard'}
           </span>
           <p className="text-xs text-theme-text-muted mt-1">
-            {notes.length} notes • {useVirtualization ? 'Only visible items rendered' : 'All items rendered'}
+            {notes.length} notes •{' '}
+            {useVirtualization
+              ? 'Only visible items rendered'
+              : 'All items rendered'}
           </p>
         </div>
         <button

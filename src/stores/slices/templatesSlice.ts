@@ -1,6 +1,10 @@
-import { StateCreator } from 'zustand'
-import { Note } from '../../types'
-import { createDocumentRepository, IDocumentRepository, StorageError } from '../../lib/repositories/RepositoryFactory'
+import type { StateCreator } from 'zustand'
+import type { Note } from '../../types'
+import type { IDocumentRepository } from '../../lib/repositories/RepositoryFactory'
+import {
+  createDocumentRepository,
+  StorageError,
+} from '../../lib/repositories/RepositoryFactory'
 import { storageLogger as logger } from '../../utils/logger'
 import { generateId } from '../../utils/idUtils'
 import { getCurrentTimestamp } from '../../utils/dateUtils'
@@ -25,8 +29,11 @@ export interface TemplatesSlice {
   addTemplate: (template: Template) => Promise<Template | null>
   updateTemplate: (template: Template) => Promise<void>
   removeTemplate: (id: string) => Promise<void>
-  createNoteFromTemplate: (templateId: string, notesSlice?: any) => Promise<Note | null>
-  
+  createNoteFromTemplate: (
+    templateId: string,
+    notesSlice?: any
+  ) => Promise<Note | null>
+
   // Internal methods
   _setTemplates: (templates: Template[]) => void
   _setError: (error: string | null) => void
@@ -60,7 +67,7 @@ const defaultTemplates: Template[] = [
 Created: {{date}}`,
     description: 'A template for daily note-taking',
     category: 'Personal',
-    createdAt: getCurrentTimestamp()
+    createdAt: getCurrentTimestamp(),
   },
   {
     id: 'meeting-notes',
@@ -91,7 +98,7 @@ Created: {{date}}`,
 Meeting ended: `,
     description: 'Template for meeting notes and action items',
     category: 'Work',
-    createdAt: getCurrentTimestamp()
+    createdAt: getCurrentTimestamp(),
   },
   {
     id: 'project-planning',
@@ -125,14 +132,19 @@ Meeting ended: `,
 Created: {{date}}`,
     description: 'Template for project planning and tracking',
     category: 'Work',
-    createdAt: getCurrentTimestamp()
-  }
+    createdAt: getCurrentTimestamp(),
+  },
 ]
 
-export const createTemplatesSlice: StateCreator<TemplatesSlice, [], [], TemplatesSlice> = (set, get) => {
+export const createTemplatesSlice: StateCreator<
+  TemplatesSlice,
+  [],
+  [],
+  TemplatesSlice
+> = (set, get) => {
   // Initialize repository
   const repository: IDocumentRepository = createDocumentRepository()
-  
+
   // Helper to handle async operations with error handling
   const withErrorHandling = async <T>(
     operation: () => Promise<T>,
@@ -144,10 +156,11 @@ export const createTemplatesSlice: StateCreator<TemplatesSlice, [], [], Template
       set({ loading: false })
       return result
     } catch (error) {
-      const errorMessage = error instanceof StorageError 
-        ? `${operationName} failed: ${error.message}`
-        : `${operationName} failed unexpectedly`
-      
+      const errorMessage =
+        error instanceof StorageError
+          ? `${operationName} failed: ${error.message}`
+          : `${operationName} failed unexpectedly`
+
       logger.error(`Templates ${operationName} error:`, error)
       set({ loading: false, error: errorMessage })
       return null
@@ -168,57 +181,50 @@ export const createTemplatesSlice: StateCreator<TemplatesSlice, [], [], Template
       logger.debug('Templates loaded successfully')
     },
 
-    addTemplate: async (template) => {
+    addTemplate: async template => {
       // For now, just add to memory (could be enhanced to persist)
-      const success = await withErrorHandling(
-        async () => {
-          // TODO: Persist template to storage when template persistence is needed
-          return template
-        },
-        'add'
-      )
-      
+      const success = await withErrorHandling(async () => {
+        // TODO: Persist template to storage when template persistence is needed
+        return template
+      }, 'add')
+
       if (success) {
-        set((state) => ({
-          templates: [...state.templates, template]
+        set(state => ({
+          templates: [...state.templates, template],
         }))
         logger.debug('Template added successfully', template.id)
       }
-      
+
       return success
     },
 
-    updateTemplate: async (updatedTemplate) => {
-      const success = await withErrorHandling(
-        async () => {
-          // TODO: Persist template to storage when template persistence is needed
-          return true
-        },
-        'update'
-      )
-      
+    updateTemplate: async updatedTemplate => {
+      const success = await withErrorHandling(async () => {
+        // TODO: Persist template to storage when template persistence is needed
+        return true
+      }, 'update')
+
       if (success) {
-        set((state) => ({
+        set(state => ({
           templates: state.templates.map(template =>
             template.id === updatedTemplate.id ? updatedTemplate : template
-          )
+          ),
         }))
         logger.debug('Template updated successfully', updatedTemplate.id)
       }
     },
 
-    removeTemplate: async (templateId) => {
-      const success = await withErrorHandling(
-        async () => {
-          // TODO: Remove template from storage when template persistence is needed
-          return true
-        },
-        'remove'
-      )
-      
+    removeTemplate: async templateId => {
+      const success = await withErrorHandling(async () => {
+        // TODO: Remove template from storage when template persistence is needed
+        return true
+      }, 'remove')
+
       if (success) {
-        set((state) => ({
-          templates: state.templates.filter(template => template.id !== templateId)
+        set(state => ({
+          templates: state.templates.filter(
+            template => template.id !== templateId
+          ),
         }))
         logger.debug('Template removed successfully', templateId)
       }
@@ -226,7 +232,7 @@ export const createTemplatesSlice: StateCreator<TemplatesSlice, [], [], Template
 
     createNoteFromTemplate: async (templateId, notesSlice?) => {
       const state = get()
-      
+
       try {
         // Input validation
         if (!templateId || typeof templateId !== 'string') {
@@ -247,8 +253,8 @@ export const createTemplatesSlice: StateCreator<TemplatesSlice, [], [], Template
         const now = new Date()
         const dateStr = now.toLocaleDateString()
         const timeStr = now.toLocaleTimeString()
-        
-        let content = template.content
+
+        const content = template.content
           .replace(/\{\{date\}\}/g, dateStr)
           .replace(/\{\{time\}\}/g, timeStr)
           .replace(/\{\{title\}\}/g, 'New Note')
@@ -258,9 +264,12 @@ export const createTemplatesSlice: StateCreator<TemplatesSlice, [], [], Template
 
         // Generate smart title based on template type
         const generateTitle = (templateName: string, date: string) => {
-          if (templateName.toLowerCase().includes('daily')) return `Daily Note - ${date}`
-          if (templateName.toLowerCase().includes('meeting')) return 'Meeting Notes'
-          if (templateName.toLowerCase().includes('project')) return 'Project Planning'
+          if (templateName.toLowerCase().includes('daily'))
+            return `Daily Note - ${date}`
+          if (templateName.toLowerCase().includes('meeting'))
+            return 'Meeting Notes'
+          if (templateName.toLowerCase().includes('project'))
+            return 'Project Planning'
           return templateName || 'New Note'
         }
 
@@ -274,7 +283,7 @@ export const createTemplatesSlice: StateCreator<TemplatesSlice, [], [], Template
           isPinned: false,
           isTrashed: false,
           createdAt: now.toISOString(),
-          updatedAt: now.toISOString()
+          updatedAt: now.toISOString(),
         }
 
         // Validate note before returning
@@ -283,13 +292,10 @@ export const createTemplatesSlice: StateCreator<TemplatesSlice, [], [], Template
         }
 
         // Save the note using repository pattern
-        const savedNote = await withErrorHandling(
-          async () => {
-            const result = await repository.saveNote(newNote)
-            return result
-          },
-          'create from template'
-        )
+        const savedNote = await withErrorHandling(async () => {
+          const result = await repository.saveNote(newNote)
+          return result
+        }, 'create from template')
 
         if (savedNote && notesSlice?.addNote) {
           // Add to notes slice if provided
@@ -304,9 +310,9 @@ export const createTemplatesSlice: StateCreator<TemplatesSlice, [], [], Template
     },
 
     // Internal state management
-    _setTemplates: (templates) => set({ templates }),
-    _setError: (error) => set({ error }),
-    _setLoading: (loading) => set({ loading })
+    _setTemplates: templates => set({ templates }),
+    _setError: error => set({ error }),
+    _setLoading: loading => set({ loading }),
   }
 }
 

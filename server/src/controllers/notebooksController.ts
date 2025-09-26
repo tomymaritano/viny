@@ -6,7 +6,15 @@ import { createError } from '../middleware/errorHandler'
 // Get all notebooks
 export const getNotebooks = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw createError('User not authenticated', 401)
+    }
+
     const notebooks = await prisma.notebook.findMany({
+      where: {
+        userId: userId
+      },
       orderBy: {
         name: 'asc'
       }
@@ -18,7 +26,8 @@ export const getNotebooks = async (req: Request, res: Response, next: NextFuncti
         const noteCount = await prisma.note.count({
           where: {
             notebook: notebook.name,
-            isTrashed: false
+            isTrashed: false,
+            userId: userId
           }
         })
 
@@ -41,6 +50,11 @@ export const getNotebooks = async (req: Request, res: Response, next: NextFuncti
 // Get notebook by ID
 export const getNotebookById = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw createError('User not authenticated', 401)
+    }
+
     const { id } = req.params
     const notebookId = parseInt(id)
 
@@ -48,8 +62,11 @@ export const getNotebookById = async (req: Request, res: Response, next: NextFun
       throw createError('Invalid notebook ID', 400)
     }
 
-    const notebook = await prisma.notebook.findUnique({
-      where: { id: notebookId }
+    const notebook = await prisma.notebook.findFirst({
+      where: { 
+        id: notebookId,
+        userId: userId
+      }
     })
 
     if (!notebook) {
@@ -59,7 +76,8 @@ export const getNotebookById = async (req: Request, res: Response, next: NextFun
     const noteCount = await prisma.note.count({
       where: {
         notebook: notebook.name,
-        isTrashed: false
+        isTrashed: false,
+        userId: userId
       }
     })
 
@@ -80,10 +98,18 @@ export const getNotebookById = async (req: Request, res: Response, next: NextFun
 // Create new notebook
 export const createNotebook = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw createError('User not authenticated', 401)
+    }
+
     const validatedData = CreateNotebookSchema.parse(req.body)
 
     const notebook = await prisma.notebook.create({
-      data: validatedData
+      data: {
+        ...validatedData,
+        userId: userId
+      }
     })
 
     const transformedNotebook = {
@@ -103,6 +129,11 @@ export const createNotebook = async (req: Request, res: Response, next: NextFunc
 // Update notebook
 export const updateNotebook = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw createError('User not authenticated', 401)
+    }
+
     const { id } = req.params
     const notebookId = parseInt(id)
 
@@ -112,18 +143,24 @@ export const updateNotebook = async (req: Request, res: Response, next: NextFunc
 
     const validatedData = UpdateNotebookSchema.parse(req.body)
 
-    const existingNotebook = await prisma.notebook.findUnique({
-      where: { id: notebookId }
+    const existingNotebook = await prisma.notebook.findFirst({
+      where: { 
+        id: notebookId,
+        userId: userId
+      }
     })
 
     if (!existingNotebook) {
       throw createError('Notebook not found', 404)
     }
 
-    // If name is being changed, update all notes with the old name
+    // If name is being changed, update all notes with the old name (only for this user)
     if (validatedData.name && validatedData.name !== existingNotebook.name) {
       await prisma.note.updateMany({
-        where: { notebook: existingNotebook.name },
+        where: { 
+          notebook: existingNotebook.name,
+          userId: userId
+        },
         data: { notebook: validatedData.name }
       })
     }
@@ -136,7 +173,8 @@ export const updateNotebook = async (req: Request, res: Response, next: NextFunc
     const noteCount = await prisma.note.count({
       where: {
         notebook: notebook.name,
-        isTrashed: false
+        isTrashed: false,
+        userId: userId
       }
     })
 
@@ -157,6 +195,11 @@ export const updateNotebook = async (req: Request, res: Response, next: NextFunc
 // Delete notebook
 export const deleteNotebook = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw createError('User not authenticated', 401)
+    }
+
     const { id } = req.params
     const notebookId = parseInt(id)
 
@@ -164,23 +207,32 @@ export const deleteNotebook = async (req: Request, res: Response, next: NextFunc
       throw createError('Invalid notebook ID', 400)
     }
 
-    const notebook = await prisma.notebook.findUnique({
-      where: { id: notebookId }
+    const notebook = await prisma.notebook.findFirst({
+      where: { 
+        id: notebookId,
+        userId: userId
+      }
     })
 
     if (!notebook) {
       throw createError('Notebook not found', 404)
     }
 
-    // Check if there are notes in this notebook
+    // Check if there are notes in this notebook (only for this user)
     const noteCount = await prisma.note.count({
-      where: { notebook: notebook.name }
+      where: { 
+        notebook: notebook.name,
+        userId: userId
+      }
     })
 
     if (noteCount > 0) {
-      // Move all notes to "Personal" notebook instead of deleting
+      // Move all notes to "Personal" notebook instead of deleting (only for this user)
       await prisma.note.updateMany({
-        where: { notebook: notebook.name },
+        where: { 
+          notebook: notebook.name,
+          userId: userId
+        },
         data: { notebook: 'Personal' }
       })
     }

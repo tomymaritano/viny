@@ -1,4 +1,11 @@
 import React from 'react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/SelectRadix'
 
 interface SelectOption {
   value: string | number
@@ -10,20 +17,47 @@ interface SelectProps {
   onChange: (value: string) => void
   options: SelectOption[]
   className?: string
+  placeholder?: string
+  disabled?: boolean
 }
 
-const Select: React.FC<SelectProps> = ({ value, onChange, options, className = '' }) => (
-  <select
-    value={value}
-    onChange={(e) => onChange(e.target.value)}
-    className={`px-2 py-1 bg-theme-bg-secondary border border-theme-border-primary rounded text-sm text-theme-text-secondary focus:border-theme-accent-primary focus:outline-none ${className}`}
-  >
-    {options.map((option) => (
-      <option key={option.value} value={option.value}>
-        {option.label}
-      </option>
-    ))}
-  </select>
-)
+/**
+ * Radix-based Select component that maintains compatibility with the legacy Select API
+ * This component now uses Radix UI internally for better accessibility and functionality
+ */
+const SelectComponent: React.FC<SelectProps> = ({
+  value,
+  onChange,
+  options,
+  className = '',
+  placeholder,
+  disabled = false,
+}) => {
+  // Convert value to string for Radix compatibility
+  const stringValue = String(value)
 
-export default Select
+  // Find the current option to display
+  const currentOption = options.find(
+    option => String(option.value) === stringValue
+  )
+
+  return (
+    <Select value={stringValue} onValueChange={onChange} disabled={disabled}>
+      <SelectTrigger className={className}>
+        <SelectValue placeholder={placeholder}>
+          {currentOption?.label || placeholder}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {options.map(option => (
+          <SelectItem key={option.value} value={String(option.value)}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )
+}
+
+export default SelectComponent
+export type { SelectOption, SelectProps }

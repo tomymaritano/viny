@@ -15,13 +15,31 @@ vi.mock('../../../../hooks/useSettings', () => ({
     },
     setSetting: vi.fn(),
     schemas: [
-      { key: 'telemetryEnabled', type: 'boolean', defaultValue: false, label: 'Enable Telemetry', category: 'privacy' },
-      { key: 'crashReporting', type: 'boolean', defaultValue: true, label: 'Crash Reporting', category: 'privacy' },
-      { key: 'localOnlyMode', type: 'boolean', defaultValue: true, label: 'Local-Only Mode', category: 'privacy' },
+      {
+        key: 'telemetryEnabled',
+        type: 'boolean',
+        defaultValue: false,
+        label: 'Enable Telemetry',
+        category: 'privacy',
+      },
+      {
+        key: 'crashReporting',
+        type: 'boolean',
+        defaultValue: true,
+        label: 'Crash Reporting',
+        category: 'privacy',
+      },
+      {
+        key: 'localOnlyMode',
+        type: 'boolean',
+        defaultValue: true,
+        label: 'Local-Only Mode',
+        category: 'privacy',
+      },
     ],
     errors: {},
-    loading: false
-  })
+    loading: false,
+  }),
 }))
 
 // Mock the settings error handler
@@ -30,21 +48,21 @@ vi.mock('../../../../hooks/useSettingsErrorHandler', () => ({
     errors: {},
     handleSettingsError: vi.fn(),
     validateAndHandle: vi.fn(),
-    clearError: vi.fn()
-  })
+    clearError: vi.fn(),
+  }),
 }))
 
 // Mock the privacy service
 vi.mock('../../../../services/privacyService', () => ({
   privacyService: {
     clearUsageData: vi.fn(),
-    downloadUserData: vi.fn()
-  }
+    downloadUserData: vi.fn(),
+  },
 }))
 
 // Mock the error boundary
 vi.mock('../../SettingsErrorBoundary', () => ({
-  default: ({ children }: { children: React.ReactNode }) => children
+  default: ({ children }: { children: React.ReactNode }) => children,
 }))
 
 // Mock the app store
@@ -52,11 +70,11 @@ vi.mock('../../../../stores/newSimpleStore', () => ({
   useAppStore: () => ({
     showSuccess: vi.fn(),
     showError: vi.fn(),
-    addToast: vi.fn()
-  })
+    addToast: vi.fn(),
+  }),
 }))
 
-// Simple mock components  
+// Simple mock components
 vi.mock('../../../Icons', () => ({
   default: {
     Download: () => null,
@@ -69,7 +87,7 @@ vi.mock('../../../Icons', () => ({
     X: () => null,
     RefreshCw: () => null,
     RotateCcw: () => null,
-  }
+  },
 }))
 
 describe('PrivacySettings - Simple', () => {

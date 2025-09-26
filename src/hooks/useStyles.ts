@@ -9,8 +9,9 @@ export const useStyles = () => {
   }
 
   const button = (variant: StyleVariants['button'] = 'default') => {
-    const baseClasses = 'px-4 py-2 rounded-lg font-medium transition-colors focus:outline-none'
-    
+    const baseClasses =
+      'px-4 py-2 rounded-lg font-medium transition-colors focus:outline-none'
+
     switch (variant) {
       case 'primary':
         return `${baseClasses} bg-theme-accent-primary text-white hover:bg-theme-accent-primary/90`
@@ -24,23 +25,25 @@ export const useStyles = () => {
   }
 
   const modal = {
-    overlay: () => 'fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm',
-    container: (maxWidth: string = 'md') => {
+    overlay: () =>
+      'fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm',
+    container: (maxWidth = 'md') => {
       const sizeClasses = {
         sm: 'max-w-sm',
-        md: 'max-w-md', 
+        md: 'max-w-md',
         lg: 'max-w-lg',
-        xl: 'max-w-xl'
+        xl: 'max-w-xl',
       }
       return `bg-theme-bg-primary border border-theme-border-primary rounded-lg shadow-xl max-h-[90vh] overflow-hidden ${sizeClasses[maxWidth as keyof typeof sizeClasses] || sizeClasses.md} w-full mx-4`
     },
-    header: () => 'flex items-center justify-between p-4 border-b border-theme-border-primary bg-theme-bg-secondary'
+    header: () =>
+      'flex items-center justify-between p-4 border-b border-theme-border-primary bg-theme-bg-secondary',
   }
 
   return {
     cn,
     button,
-    modal
+    modal,
   }
 }
 

@@ -1,6 +1,20 @@
-// Simplified StyledButton for backward compatibility
+// Enhanced StyledButton using Radix primitives for backward compatibility
 import React from 'react'
+import { StyledButton as StyledButtonRadix } from './ButtonRadix'
 import { useStyles, type StyleVariants } from '../../hooks/useStyles'
+
+// Map legacy variants to new Radix variants
+const variantMap: Record<
+  StyleVariants['button'],
+  'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
+> = {
+  default: 'default',
+  primary: 'default',
+  secondary: 'secondary',
+  danger: 'destructive',
+  ghost: 'ghost',
+  outline: 'outline',
+}
 
 interface StyledButtonProps {
   variant?: StyleVariants['button']
@@ -8,6 +22,8 @@ interface StyledButtonProps {
   children: React.ReactNode
   disabled?: boolean
   className?: string
+  type?: 'button' | 'submit' | 'reset'
+  isLoading?: boolean
 }
 
 const StyledButton: React.FC<StyledButtonProps> = ({
@@ -15,24 +31,25 @@ const StyledButton: React.FC<StyledButtonProps> = ({
   onClick,
   children,
   disabled = false,
-  className = ''
+  className = '',
+  type = 'button',
+  isLoading = false,
+  ...props
 }) => {
-  const styles = useStyles()
-  
-  const buttonClass = styles.cn(
-    styles.button(variant),
-    disabled && 'opacity-50 cursor-not-allowed',
-    className
-  )
-  
+  const radixVariant = variantMap[variant] || 'default'
+
   return (
-    <button
-      className={buttonClass}
+    <StyledButtonRadix
+      variant={radixVariant}
       onClick={onClick}
       disabled={disabled}
+      className={className}
+      type={type}
+      isLoading={isLoading}
+      {...props}
     >
       {children}
-    </button>
+    </StyledButtonRadix>
   )
 }
 

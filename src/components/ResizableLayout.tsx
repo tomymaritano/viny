@@ -1,12 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import ResizeHandle from './ResizeHandle'
+import { createEnhancedDocumentRepository } from '../lib/repositories/RepositoryFactory'
+import { logger } from '../utils/logger'
 
 const ResizableLayout = ({
   sidebar,
   notesList,
   mainContent,
+  aiChat,
   isSidebarVisible = true,
   isNotesListVisible = true,
+  isAIChatVisible = false,
   settings,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -14,21 +18,17 @@ const ResizableLayout = ({
 
   // Column widths
   const [notesListWidth, setNotesListWidth] = useState(() => {
-    const saved = localStorage.getItem('inkrun-noteslist-width')
-    const savedWidth = saved ? parseInt(saved) : null
-
-    // If no saved value or it's the old default (320), use new default (300)
-    if (!savedWidth || savedWidth === 320) {
-      return settings?.notesListWidth || 300
-    }
-
-    return savedWidth
+    return settings?.notesListWidth || 300
   })
 
   // Sidebar width with state for resizing
   const [sidebarWidth, setSidebarWidth] = useState(() => {
-    const saved = localStorage.getItem('inkrun-sidebar-width')
-    return saved ? parseInt(saved) : settings?.sidebarWidth || 200
+    return settings?.sidebarWidth || 200
+  })
+
+  // AI Chat width with state for resizing
+  const [aiChatWidth, setAIChatWidth] = useState(() => {
+    return settings?.aiChatWidth || 380
   })
 
   const minSidebarWidth = 160
@@ -36,6 +36,8 @@ const ResizableLayout = ({
   const minNotesListWidth = 220
   const maxNotesListWidth = 500
   const minMainContentWidth = 400
+  const minAIChatWidth = 320
+  const maxAIChatWidth = 600
 
   // Update container width on resize
   useEffect(() => {
@@ -51,21 +53,92 @@ const ResizableLayout = ({
     return () => window.removeEventListener('resize', updateWidth)
   }, [])
 
-  // Save to localStorage
+  // Load initial values from repository
   useEffect(() => {
-    localStorage.setItem('inkrun-noteslist-width', notesListWidth.toString())
+    const loadLayoutState = async () => {
+      try {
+        const repository = createEnhancedDocumentRepository()
+        await repository.initialize()
+
+        const [savedNotesListWidth, savedSidebarWidth, savedAIChatWidth] =
+          await Promise.all([
+            repository.getUIState<number>('layout', 'notesListWidth'),
+            repository.getUIState<number>('layout', 'sidebarWidth'),
+            repository.getUIState<number>('layout', 'aiChatWidth'),
+          ])
+
+        if (savedNotesListWidth !== null) {
+          // If saved value is the old default (320), use new default (300)
+          const width =
+            savedNotesListWidth === 320
+              ? settings?.notesListWidth || 300
+              : savedNotesListWidth
+          setNotesListWidth(width)
+        }
+
+        if (savedSidebarWidth !== null) {
+          setSidebarWidth(savedSidebarWidth)
+        }
+
+        if (savedAIChatWidth !== null) {
+          setAIChatWidth(savedAIChatWidth)
+        }
+      } catch (error) {
+        logger.warn('Failed to load layout state:', error)
+      }
+    }
+
+    loadLayoutState()
+  }, [settings])
+
+  // Save to repository
+  useEffect(() => {
+    const saveLayoutState = async () => {
+      try {
+        const repository = createEnhancedDocumentRepository()
+        await repository.initialize()
+        await repository.setUIState('layout', 'notesListWidth', notesListWidth)
+      } catch (error) {
+        logger.warn('Failed to save notes list width:', error)
+      }
+    }
+
+    saveLayoutState()
   }, [notesListWidth])
 
   useEffect(() => {
-    localStorage.setItem('inkrun-sidebar-width', sidebarWidth.toString())
+    const saveLayoutState = async () => {
+      try {
+        const repository = createEnhancedDocumentRepository()
+        await repository.initialize()
+        await repository.setUIState('layout', 'sidebarWidth', sidebarWidth)
+      } catch (error) {
+        logger.warn('Failed to save sidebar width:', error)
+      }
+    }
+
+    saveLayoutState()
   }, [sidebarWidth])
 
+  useEffect(() => {
+    const saveLayoutState = async () => {
+      try {
+        const repository = createEnhancedDocumentRepository()
+        await repository.initialize()
+        await repository.setUIState('layout', 'aiChatWidth', aiChatWidth)
+      } catch (error) {
+        logger.warn('Failed to save AI chat width:', error)
+      }
+    }
 
+    saveLayoutState()
+  }, [aiChatWidth])
 
   // Calculate available space and constraints
   const getConstraints = useCallback(() => {
     const usedWidth =
-      (isSidebarVisible ? sidebarWidth : 0)
+      (isSidebarVisible ? sidebarWidth : 0) +
+      (isAIChatVisible ? aiChatWidth : 0)
     const availableForNotesAndMain = containerWidth - usedWidth
     const maxNotesListWidthConstrained = Math.min(
       maxNotesListWidth,
@@ -83,21 +156,20 @@ const ResizableLayout = ({
     containerWidth,
     isSidebarVisible,
     isNotesListVisible,
+    isAIChatVisible,
     sidebarWidth,
+    aiChatWidth,
   ])
 
   // Handle Sidebar resize
-  const handleSidebarResize = useCallback(
-    (clientX, startX, startWidth) => {
-      const deltaX = clientX - startX
-      const newWidth = Math.max(
-        minSidebarWidth,
-        Math.min(maxSidebarWidth, startWidth + deltaX)
-      )
-      setSidebarWidth(newWidth)
-    },
-    []
-  )
+  const handleSidebarResize = useCallback((clientX, startX, startWidth) => {
+    const deltaX = clientX - startX
+    const newWidth = Math.max(
+      minSidebarWidth,
+      Math.min(maxSidebarWidth, startWidth + deltaX)
+    )
+    setSidebarWidth(newWidth)
+  }, [])
 
   // Handle NotesList resize
   const handleNotesListResize = useCallback(
@@ -113,19 +185,32 @@ const ResizableLayout = ({
     [getConstraints]
   )
 
+  // Handle AI Chat resize
+  const handleAIChatResize = useCallback((clientX, startX, startWidth) => {
+    const deltaX = startX - clientX // Reverse because it's on the right
+    const newWidth = Math.max(
+      minAIChatWidth,
+      Math.min(maxAIChatWidth, startWidth + deltaX)
+    )
+    setAIChatWidth(newWidth)
+  }, [])
 
   // Calculate main content width
   const mainContentWidth =
     containerWidth -
     (isSidebarVisible ? sidebarWidth : 0) -
-    (isNotesListVisible ? notesListWidth : 0)
+    (isNotesListVisible ? notesListWidth : 0) -
+    (isAIChatVisible ? aiChatWidth : 0)
 
   // Desktop render
   return (
     <div ref={containerRef} className="flex h-full w-full flex-1">
       {/* Sidebar - Resizable */}
       {isSidebarVisible && (
-        <div className="relative flex-shrink-0 h-full" style={{ width: sidebarWidth }}>
+        <div
+          className="relative flex-shrink-0 h-full"
+          style={{ width: sidebarWidth }}
+        >
           {sidebar}
           <ResizeHandle
             onMouseDown={startX => {
@@ -180,6 +265,31 @@ const ResizableLayout = ({
         {mainContent}
       </div>
 
+      {/* AI Chat - Resizable */}
+      {isAIChatVisible && (
+        <div
+          className="relative flex-shrink-0 h-full"
+          style={{ width: aiChatWidth }}
+        >
+          <ResizeHandle
+            onMouseDown={startX => {
+              const handleMouseMove = e => {
+                handleAIChatResize(e.clientX, startX, aiChatWidth)
+              }
+
+              const handleMouseUp = () => {
+                document.removeEventListener('mousemove', handleMouseMove)
+                document.removeEventListener('mouseup', handleMouseUp)
+              }
+
+              document.addEventListener('mousemove', handleMouseMove)
+              document.addEventListener('mouseup', handleMouseUp)
+            }}
+            position="left"
+          />
+          {aiChat}
+        </div>
+      )}
     </div>
   )
 }

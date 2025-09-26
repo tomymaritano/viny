@@ -13,21 +13,21 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   className = '',
   color = 'primary',
   variant = 'spinner',
-  'data-testid': testId = 'loading-spinner'
+  'data-testid': testId = 'loading-spinner',
 }) => {
   const sizeClasses = {
     xs: 'w-3 h-3',
     sm: 'w-4 h-4',
     md: 'w-6 h-6',
     lg: 'w-8 h-8',
-    xl: 'w-12 h-12'
+    xl: 'w-12 h-12',
   }
 
   const colorClasses = {
     primary: 'text-theme-accent-primary',
     secondary: 'text-theme-text-secondary',
     muted: 'text-theme-text-muted',
-    white: 'text-white'
+    white: 'text-white',
   }
 
   if (variant === 'dots') {
@@ -36,18 +36,21 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       sm: 'w-1.5 h-1.5',
       md: 'w-2 h-2',
       lg: 'w-2.5 h-2.5',
-      xl: 'w-3 h-3'
+      xl: 'w-3 h-3',
     }
 
     return (
-      <div className={`flex items-center justify-center gap-1 ${className}`} data-testid={testId}>
-        {[0, 1, 2].map((i) => (
+      <div
+        className={`flex items-center justify-center gap-1 ${className}`}
+        data-testid={testId}
+      >
+        {[0, 1, 2].map(i => (
           <div
             key={i}
             className={`${dotSize[size]} ${colorClasses[color]} bg-current rounded-full animate-pulse`}
             style={{
               animationDelay: `${i * 0.2}s`,
-              animationDuration: '1.2s'
+              animationDuration: '1.2s',
             }}
           />
         ))}
@@ -57,7 +60,10 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   if (variant === 'pulse') {
     return (
-      <div className={`${sizeClasses[size]} ${colorClasses[color]} ${className}`} data-testid={testId}>
+      <div
+        className={`${sizeClasses[size]} ${colorClasses[color]} ${className}`}
+        data-testid={testId}
+      >
         <div className="w-full h-full rounded-full bg-current animate-ping opacity-75" />
       </div>
     )
@@ -65,9 +71,12 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   if (variant === 'gradient') {
     return (
-      <div className={`relative ${sizeClasses[size]} ${className}`} data-testid={testId}>
+      <div
+        className={`relative ${sizeClasses[size]} ${className}`}
+        data-testid={testId}
+      >
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-theme-accent-primary via-theme-accent-cyan to-theme-accent-primary animate-spin opacity-75">
-          <div 
+          <div
             className="absolute inset-1 rounded-full bg-theme-bg-primary"
             style={{ background: 'inherit' }}
           />
@@ -78,7 +87,10 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   // Default spinner variant
   return (
-    <div className={`inline-block animate-spin ${sizeClasses[size]} ${colorClasses[color]} ${className}`} data-testid={testId}>
+    <div
+      className={`inline-block animate-spin ${sizeClasses[size]} ${colorClasses[color]} ${className}`}
+      data-testid={testId}
+    >
       <svg
         className="w-full h-full"
         xmlns="http://www.w3.org/2000/svg"

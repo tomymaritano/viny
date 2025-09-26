@@ -1,9 +1,28 @@
-import PropTypes from 'prop-types'
+import React from 'react'
 import { Icons } from '../../Icons'
+import type { Note } from '../../../types'
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalTitle,
+  ModalClose,
+} from '../../ui/Modal'
 import IconButton from '../../ui/IconButton'
-import { THEME_COLORS, ANIMATIONS, Z_INDEX } from '../../../constants/theme'
 
-const EditorOptionsModal = ({
+interface EditorOptionsModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onDuplicate: () => void
+  onDelete: () => void
+  onPin: () => void
+  onExport: () => void
+  onOpenInNewWindow: () => void
+  onCopyLink: () => void
+  selectedNote?: Note | null
+}
+
+const EditorOptionsModal: React.FC<EditorOptionsModalProps> = ({
   isOpen,
   onClose,
   onDuplicate,
@@ -13,64 +32,53 @@ const EditorOptionsModal = ({
   onOpenInNewWindow,
   onCopyLink,
   selectedNote,
-  isClosing = false,
-  isOpening = false,
 }) => {
-  if (!isOpen) return null
-
   return (
-    <div className="fixed inset-0 flex items-start justify-end" style={{ zIndex: Z_INDEX.MODAL }}>
-      {/* Backdrop */}
-      <div 
-        className={`absolute inset-0 bg-black/20 ${ANIMATIONS.FADE_IN}`}
-        onClick={onClose}
-      />
-      
-      {/* Modal Panel */}
-      <div 
-        className="relative w-80 h-full border-l border-theme-border-primary shadow-xl transition-transform duration-300 ease-out"
-        style={{ 
-          backgroundColor: THEME_COLORS.MODAL_BG,
-          transform: isClosing 
-            ? 'translateX(100%)' 
-            : isOpening 
-              ? 'translateX(0)' 
-              : 'translateX(100%)'
-        }}
+    <Modal open={isOpen} onOpenChange={onClose}>
+      <ModalContent
+        className="fixed right-0 top-0 h-full w-80 rounded-none border-l border-theme-border-primary shadow-xl translate-x-0 translate-y-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right"
+        variant="default"
       >
-        {/* Header */}
-        <div className="p-3 border-b border-theme-border-primary">
+        <ModalHeader className="p-4 border-b border-theme-border-primary">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-theme-text-primary">
+            <ModalTitle className="text-lg font-semibold text-theme-text-primary">
               Note Options
-            </h2>
-            <IconButton
-              icon={Icons.X}
-              onClick={onClose}
-              title="Close"
-              size={16}
-              variant="default"
-              aria-label="Close options"
-              aria-pressed={false}
-              aria-keyshortcuts=""
-            />
+            </ModalTitle>
+            <ModalClose asChild>
+              <IconButton
+                icon={Icons.X}
+                onClick={onClose}
+                title="Close"
+                size={16}
+                variant="ghost"
+                aria-label="Close options"
+              />
+            </ModalClose>
           </div>
-        </div>
+        </ModalHeader>
 
-        {/* Options */}
-        <div className="p-4 space-y-2">
+        <div className="p-4 space-y-2 flex-1 overflow-y-auto">
           {/* Pin/Unpin Note */}
           <button
             onClick={onPin}
             className="w-full flex items-center space-x-3 p-3 text-left rounded-lg hover:bg-theme-bg-secondary/50 transition-colors"
           >
-            <Icons.Pin size={16} className={selectedNote?.isPinned ? 'text-theme-accent-primary' : 'text-theme-text-muted'} />
+            <Icons.Pin
+              size={16}
+              className={
+                selectedNote?.isPinned
+                  ? 'text-theme-accent-primary'
+                  : 'text-theme-text-muted'
+              }
+            />
             <div>
               <div className="text-sm font-medium text-theme-text-primary">
                 {selectedNote?.isPinned ? 'Unpin Note' : 'Pin to Top'}
               </div>
               <div className="text-xs text-theme-text-muted">
-                {selectedNote?.isPinned ? 'Remove from pinned notes' : 'Keep this note at the top'}
+                {selectedNote?.isPinned
+                  ? 'Remove from pinned notes'
+                  : 'Keep this note at the top'}
               </div>
             </div>
           </button>
@@ -150,32 +158,16 @@ const EditorOptionsModal = ({
           >
             <Icons.Trash size={16} className="text-theme-accent-red" />
             <div>
-              <div className="text-sm font-medium">
-                Move to Trash
-              </div>
+              <div className="text-sm font-medium">Move to Trash</div>
               <div className="text-xs text-theme-text-muted">
                 Move this note to trash
               </div>
             </div>
           </button>
         </div>
-      </div>
-    </div>
+      </ModalContent>
+    </Modal>
   )
-}
-
-EditorOptionsModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  onDuplicate: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
-  onPin: PropTypes.func.isRequired,
-  onExport: PropTypes.func.isRequired,
-  onOpenInNewWindow: PropTypes.func.isRequired,
-  onCopyLink: PropTypes.func.isRequired,
-  selectedNote: PropTypes.object,
-  isClosing: PropTypes.bool,
-  isOpening: PropTypes.bool,
 }
 
 export default EditorOptionsModal

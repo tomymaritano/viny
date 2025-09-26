@@ -1,9 +1,21 @@
 /**
- * Servicio básico de internacionalización
+
+import { logger } from '../utils/logger' * Servicio básico de internacionalización
  * Maneja el cambio de idioma y configuraciones regionales
  */
 
-export type SupportedLanguage = 'en' | 'en-gb' | 'es' | 'es-mx' | 'fr' | 'de' | 'it' | 'pt-br' | 'zh-cn' | 'ja' | 'ko'
+export type SupportedLanguage =
+  | 'en'
+  | 'en-gb'
+  | 'es'
+  | 'es-mx'
+  | 'fr'
+  | 'de'
+  | 'it'
+  | 'pt-br'
+  | 'zh-cn'
+  | 'ja'
+  | 'ko'
 
 interface LanguageConfig {
   code: SupportedLanguage
@@ -16,32 +28,32 @@ interface LanguageConfig {
 }
 
 const LANGUAGE_CONFIGS: Record<SupportedLanguage, LanguageConfig> = {
-  'en': {
+  en: {
     code: 'en',
     name: 'English (US)',
     nativeName: 'English',
     flag: '🇺🇸',
     dir: 'ltr',
     dateFormat: 'MM/dd/yyyy',
-    numberFormat: 'en-US'
+    numberFormat: 'en-US',
   },
   'en-gb': {
     code: 'en-gb',
-    name: 'English (UK)', 
+    name: 'English (UK)',
     nativeName: 'English',
     flag: '🇬🇧',
     dir: 'ltr',
     dateFormat: 'dd/MM/yyyy',
-    numberFormat: 'en-GB'
+    numberFormat: 'en-GB',
   },
-  'es': {
+  es: {
     code: 'es',
     name: 'Español',
     nativeName: 'Español',
     flag: '🇪🇸',
     dir: 'ltr',
     dateFormat: 'dd/MM/yyyy',
-    numberFormat: 'es-ES'
+    numberFormat: 'es-ES',
   },
   'es-mx': {
     code: 'es-mx',
@@ -50,34 +62,34 @@ const LANGUAGE_CONFIGS: Record<SupportedLanguage, LanguageConfig> = {
     flag: '🇲🇽',
     dir: 'ltr',
     dateFormat: 'dd/MM/yyyy',
-    numberFormat: 'es-MX'
+    numberFormat: 'es-MX',
   },
-  'fr': {
+  fr: {
     code: 'fr',
     name: 'Français',
     nativeName: 'Français',
     flag: '🇫🇷',
     dir: 'ltr',
     dateFormat: 'dd/MM/yyyy',
-    numberFormat: 'fr-FR'
+    numberFormat: 'fr-FR',
   },
-  'de': {
+  de: {
     code: 'de',
     name: 'Deutsch',
     nativeName: 'Deutsch',
     flag: '🇩🇪',
     dir: 'ltr',
     dateFormat: 'dd.MM.yyyy',
-    numberFormat: 'de-DE'
+    numberFormat: 'de-DE',
   },
-  'it': {
+  it: {
     code: 'it',
     name: 'Italiano',
     nativeName: 'Italiano',
     flag: '🇮🇹',
     dir: 'ltr',
     dateFormat: 'dd/MM/yyyy',
-    numberFormat: 'it-IT'
+    numberFormat: 'it-IT',
   },
   'pt-br': {
     code: 'pt-br',
@@ -86,7 +98,7 @@ const LANGUAGE_CONFIGS: Record<SupportedLanguage, LanguageConfig> = {
     flag: '🇧🇷',
     dir: 'ltr',
     dateFormat: 'dd/MM/yyyy',
-    numberFormat: 'pt-BR'
+    numberFormat: 'pt-BR',
   },
   'zh-cn': {
     code: 'zh-cn',
@@ -95,26 +107,26 @@ const LANGUAGE_CONFIGS: Record<SupportedLanguage, LanguageConfig> = {
     flag: '🇨🇳',
     dir: 'ltr',
     dateFormat: 'yyyy/MM/dd',
-    numberFormat: 'zh-CN'
+    numberFormat: 'zh-CN',
   },
-  'ja': {
+  ja: {
     code: 'ja',
     name: '日本語',
     nativeName: '日本語',
     flag: '🇯🇵',
     dir: 'ltr',
     dateFormat: 'yyyy/MM/dd',
-    numberFormat: 'ja-JP'
+    numberFormat: 'ja-JP',
   },
-  'ko': {
+  ko: {
     code: 'ko',
     name: '한국어',
     nativeName: '한국어',
     flag: '🇰🇷',
     dir: 'ltr',
     dateFormat: 'yyyy. MM. dd.',
-    numberFormat: 'ko-KR'
-  }
+    numberFormat: 'ko-KR',
+  },
 }
 
 class I18nService {
@@ -126,7 +138,9 @@ class I18nService {
   applyLanguage(language: SupportedLanguage): void {
     const config = LANGUAGE_CONFIGS[language]
     if (!config) {
-      console.warn(`Language ${language} not supported, falling back to English`)
+      logger.warn(
+        `Language ${language} not supported, falling back to English`
+      )
       return
     }
 
@@ -175,7 +189,7 @@ class I18nService {
    */
   private detectBrowserLanguage(): SupportedLanguage | null {
     const browserLang = navigator.language.toLowerCase()
-    
+
     // Buscar coincidencia exacta
     if (browserLang in LANGUAGE_CONFIGS) {
       return browserLang as SupportedLanguage
@@ -183,11 +197,11 @@ class I18nService {
 
     // Buscar coincidencia por código de idioma base
     const langCode = browserLang.split('-')[0]
-    const match = Object.keys(LANGUAGE_CONFIGS).find(key => 
+    const match = Object.keys(LANGUAGE_CONFIGS).find(key =>
       key.startsWith(langCode)
     )
 
-    return match as SupportedLanguage || null
+    return (match as SupportedLanguage) || null
   }
 
   /**
@@ -196,9 +210,11 @@ class I18nService {
   private applyRegionalSettings(config: LanguageConfig): void {
     // Configurar formatos de fecha y número globalmente
     // Esto se puede usar para formatear fechas y números en la UI
-    
+
     // Ejemplo: Configurar meta tags para SEO
-    const metaLang = document.querySelector('meta[http-equiv="Content-Language"]')
+    const metaLang = document.querySelector(
+      'meta[http-equiv="Content-Language"]'
+    )
     if (metaLang) {
       metaLang.setAttribute('content', config.code)
     } else {

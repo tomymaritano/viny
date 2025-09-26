@@ -1,4 +1,5 @@
-import React, { createContext, useContext, ReactNode } from 'react'
+import type { ReactNode } from 'react'
+import React, { createContext, useContext } from 'react'
 import { useSidebarLogic } from '../../hooks/useSidebarLogic'
 import { useSidebarState } from '../../hooks/useSidebarState'
 import { useNoteActions } from '../../hooks/useNoteActions'
@@ -25,16 +26,22 @@ interface SidebarContextType {
   getRootNotebooks: () => any[]
   getNotebookChildren: (parentId: string) => any[]
   getNotebook: (id: string) => any
-  
+
   // Actions
-  createNewNote: () => void
+  createNewNote: () => Promise<any>
   handleEmptyTrash: () => void
   setModal: (modal: string, state: boolean) => void
   updateNote: any
-  getTagColor: (tag: string) => { bg: string; border: string; text: string; name: string }
-  
+  getTagColor: (tag: string) => {
+    bg: string
+    border: string
+    text: string
+    name: string
+  }
+
   // Missing notebook actions
   expandedNotebooks?: Set<string>
+  allNotebooksWithCounts?: any[]
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined)
@@ -42,7 +49,9 @@ const SidebarContext = createContext<SidebarContextType | undefined>(undefined)
 export const useSidebarContext = () => {
   const context = useContext(SidebarContext)
   if (!context) {
-    throw new Error('useSidebarContext must be used within a SidebarLogicProvider')
+    throw new Error(
+      'useSidebarContext must be used within a SidebarLogicProvider'
+    )
   }
   return context
 }
@@ -51,12 +60,22 @@ interface SidebarLogicProviderProps {
   children: ReactNode
 }
 
-const SidebarLogicProvider: React.FC<SidebarLogicProviderProps> = ({ children }) => {
-  // All the logic hooks
-  const sidebarLogic = useSidebarLogic()
+const SidebarLogicProvider: React.FC<SidebarLogicProviderProps> = ({
+  children,
+}) => {
+  // Get focusedNotebookId from store
+  const { focusedNotebookId } = useAppStore()
+
+  // All the logic hooks (now with focusedNotebookId)
+  const sidebarLogic = useSidebarLogic(focusedNotebookId)
   const { createNewNote, handleEmptyTrash } = useNoteActions()
-  const { setModal, updateNote, getTagColor: getTagColorKey, tagColors } = useAppStore()
-  
+  const {
+    setModal,
+    updateNote,
+    getTagColor: getTagColorKey,
+    tagColors,
+  } = useAppStore()
+
   // Wrapper function to convert tag color key to full color object
   const getTagColor = (tag: string) => {
     return getCustomTagColor(tag, tagColors)
@@ -68,7 +87,7 @@ const SidebarLogicProvider: React.FC<SidebarLogicProviderProps> = ({ children })
     handleEmptyTrash,
     setModal,
     updateNote,
-    getTagColor
+    getTagColor,
   }
 
   return (

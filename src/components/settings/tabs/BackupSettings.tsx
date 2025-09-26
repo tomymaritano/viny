@@ -1,16 +1,28 @@
 import React, { useState } from 'react'
 import { useAppStore } from '../../../stores/newSimpleStore'
 import { Icons } from '../../Icons'
+import { useConfirmDialog } from '../../../hooks/useConfirmDialog'
 import { useFormValidation } from '../../../hooks/useFormValidation'
 import { SettingsValidation } from '../../../utils/validation'
 import ValidationMessage from '../../ui/ValidationMessage'
+import { settingsLogger } from '../../../utils/logger'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../ui/SelectRadix'
 
 const BackupSettings: React.FC = () => {
-  const { settings, updateSettings, showSuccess, showError, showInfo } = useAppStore()
+  const { settings, updateSettings, showSuccess, showError, showInfo } =
+    useAppStore()
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [isCreatingBackup, setIsCreatingBackup] = useState(false)
   const [isRestoringBackup, setIsRestoringBackup] = useState(false)
-  
+  // Use centralized confirm dialog hook
+  const { showConfirm } = useConfirmDialog()
+
   // Default backup location
   const getDefaultBackupLocation = () => {
     if (window.electronAPI?.isElectron) {
@@ -27,12 +39,14 @@ const BackupSettings: React.FC = () => {
           updateSettings({ backupLocation: directory })
         }
       } catch (error) {
-        console.error('Failed to select backup location:', error)
+        settingsLogger.error('Failed to select backup location:', error)
         showError('Failed to select backup location')
       }
     } else {
       // For web, show instruction
-      showInfo('Backup location can be selected in the Electron app. In the web version, backups are downloaded to your default Downloads folder.')
+      showInfo(
+        'Backup location can be selected in the Electron app. In the web version, backups are downloaded to your default Downloads folder.'
+      )
     }
   }
 
@@ -43,11 +57,14 @@ const BackupSettings: React.FC = () => {
     }
 
     try {
-      const backupLocation = settings.backupLocation || getDefaultBackupLocation()
+      const backupLocation =
+        settings.backupLocation || getDefaultBackupLocation()
       const frequency = settings.backupFrequency || 'daily'
-      
-      showSuccess(`Auto backup is configured to run ${frequency} and save to: ${backupLocation}`)
-      
+
+      showSuccess(
+        `Auto backup is configured to run ${frequency} and save to: ${backupLocation}`
+      )
+
       // If in Electron, test actual backup creation
       if (window.electronAPI?.isElectron) {
         await handleCreateBackup() // Use the existing manual backup function
@@ -64,10 +81,10 @@ const BackupSettings: React.FC = () => {
     warnings,
     getFieldProps,
     handleFieldChange,
-    validateAllFields
+    validateAllFields,
   } = useFormValidation({
     initialValues: {
-      backupRetentionDays: settings.backupRetentionDays || 7
+      backupRetentionDays: settings.backupRetentionDays || 7,
     },
     validationRules: {
       backupRetentionDays: (value: number) => {
@@ -76,19 +93,19 @@ const BackupSettings: React.FC = () => {
           field: 'backupRetentionDays',
           value: value,
           isValid: !result.error,
-          error: result.error
+          error: result.error,
         }
-      }
+      },
     },
     validateOnChange: true,
-    validateOnBlur: true
+    validateOnBlur: true,
   })
 
   const handleCreateBackup = async () => {
     if (isCreatingBackup) return
-    
+
     setIsCreatingBackup(true)
-    
+
     try {
       const backupData = {
         notes: [], // Get from store
@@ -97,8 +114,8 @@ const BackupSettings: React.FC = () => {
         metadata: {
           backupDate: new Date().toISOString(),
           version: '1.3.0',
-          type: 'manual'
-        }
+          type: 'manual',
+        },
       }
 
       const dataStr = JSON.stringify(backupData, null, 2)
@@ -120,38 +137,47 @@ const BackupSettings: React.FC = () => {
 
   const handleRestoreBackup = () => {
     if (isRestoringBackup) return
-    
+
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = '.json'
-    input.onchange = async (e) => {
+    input.onchange = async e => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (!file) return
 
       setIsRestoringBackup(true)
-      
+
       try {
         const text = await file.text()
         const backupData = JSON.parse(text)
-        
+
         // Validate backup structure
         if (!backupData.metadata || !backupData.settings) {
           throw new Error('Invalid backup file format')
         }
 
-        if (window.confirm('⚠️ This will replace all your current data with the backup. This action cannot be undone.\n\nAre you sure you want to continue?')) {
-          // Restore settings
-          if (backupData.settings) {
-            updateSettings(backupData.settings)
-          }
+        // Show confirmation dialog
+        const confirmed = await showConfirm({
+          title: 'Restore Backup',
+          message: '⚠️ This will replace all your current data with the backup. This action cannot be undone.\n\nAre you sure you want to continue?',
+          type: 'warning',
+          confirmText: 'Restore',
+          onConfirm: () => {
+            // Restore settings
+            if (backupData.settings) {
+              updateSettings(backupData.settings)
+            }
 
-          showSuccess('Backup restored successfully. Please restart the application.')
-          
-          // Reload after delay to apply restored settings
-          setTimeout(() => {
-            window.location.reload()
-          }, 2000)
-        }
+            showSuccess(
+              'Backup restored successfully. Please restart the application.'
+            )
+
+            // Reload after delay to apply restored settings
+            setTimeout(() => {
+              window.location.reload()
+            }, 2000)
+          },
+        })
       } catch (error) {
         showError('Failed to restore backup. Please check the file format.')
       } finally {
@@ -161,7 +187,6 @@ const BackupSettings: React.FC = () => {
     input.click()
   }
 
-
   return (
     <div className="space-y-8">
       {/* Auto Backup Configuration */}
@@ -169,7 +194,7 @@ const BackupSettings: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Automatic Backup
         </h3>
-        
+
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
@@ -184,7 +209,7 @@ const BackupSettings: React.FC = () => {
               <input
                 type="checkbox"
                 checked={settings.autoBackup || false}
-                onChange={(e) => updateSettings({ autoBackup: e.target.checked })}
+                onChange={e => updateSettings({ autoBackup: e.target.checked })}
                 className="sr-only peer"
               />
               <div className="w-11 h-6 bg-theme-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent-primary"></div>
@@ -197,15 +222,23 @@ const BackupSettings: React.FC = () => {
                 <label className="block text-sm font-medium text-theme-text-secondary mb-2">
                   Backup Frequency
                 </label>
-                <select
+                <Select
                   value={settings.backupFrequency || 'daily'}
-                  onChange={(e) => updateSettings({ backupFrequency: e.target.value as 'hourly' | 'daily' | 'weekly' })}
-                  className="w-48 px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
+                  onValueChange={value =>
+                    updateSettings({
+                      backupFrequency: value as 'hourly' | 'daily' | 'weekly',
+                    })
+                  }
                 >
-                  <option value="hourly">Every Hour</option>
-                  <option value="daily">Daily</option>
-                  <option value="weekly">Weekly</option>
-                </select>
+                  <SelectTrigger className="w-48 px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hourly">Every Hour</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                  </SelectContent>
+                </Select>
                 <p className="mt-1 text-xs text-theme-text-muted">
                   How often automatic backups are created
                 </p>
@@ -218,8 +251,12 @@ const BackupSettings: React.FC = () => {
                 <div className="flex items-center space-x-3">
                   <input
                     type="text"
-                    value={settings.backupLocation || getDefaultBackupLocation()}
-                    onChange={(e) => updateSettings({ backupLocation: e.target.value })}
+                    value={
+                      settings.backupLocation || getDefaultBackupLocation()
+                    }
+                    onChange={e =>
+                      updateSettings({ backupLocation: e.target.value })
+                    }
                     placeholder={getDefaultBackupLocation()}
                     className="flex-1 px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
                   />
@@ -245,20 +282,25 @@ const BackupSettings: React.FC = () => {
                     min="1"
                     max="365"
                     value={values.backupRetentionDays}
-                    onChange={(e) => {
+                    onChange={e => {
                       const value = parseInt(e.target.value)
                       handleFieldChange('backupRetentionDays', value)
                       updateSettings({ backupRetentionDays: value })
                     }}
                     onBlur={() => getFieldProps('backupRetentionDays').onBlur()}
                     className={`w-32 px-3 py-2 bg-theme-bg-secondary border rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary ${
-                      errors.backupRetentionDays ? 'border-red-500' : 'border-theme-border-primary'
+                      errors.backupRetentionDays
+                        ? 'border-red-500'
+                        : 'border-theme-border-primary'
                     }`}
                   />
                   <span className="text-sm text-theme-text-muted">days</span>
                 </div>
                 {errors.backupRetentionDays && (
-                  <ValidationMessage type="error" message={errors.backupRetentionDays} />
+                  <ValidationMessage
+                    type="error"
+                    message={errors.backupRetentionDays}
+                  />
                 )}
                 <p className="mt-1 text-xs text-theme-text-muted">
                   Delete backups older than this many days
@@ -267,7 +309,7 @@ const BackupSettings: React.FC = () => {
             </div>
           )}
         </div>
-        
+
         {/* Test Auto Backup Button */}
         {settings.autoBackup && (
           <div className="flex items-center justify-between pt-4 border-t border-theme-border-primary">
@@ -294,7 +336,7 @@ const BackupSettings: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Manual Backup & Restore
         </h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <button
             onClick={handleCreateBackup}
@@ -309,7 +351,7 @@ const BackupSettings: React.FC = () => {
             </div>
             <Icons.ArrowRight size={14} className="text-theme-text-muted" />
           </button>
-          
+
           <button
             onClick={handleRestoreBackup}
             disabled={isRestoringBackup}
@@ -324,13 +366,17 @@ const BackupSettings: React.FC = () => {
             <Icons.ArrowRight size={14} className="text-theme-text-muted" />
           </button>
         </div>
-        
+
         <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
           <div className="flex items-start space-x-2">
-            <Icons.AlertTriangle size={14} className="text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
+            <Icons.AlertTriangle
+              size={14}
+              className="text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0"
+            />
             <p className="text-xs text-yellow-700 dark:text-yellow-300">
-              <strong>Important:</strong> Always keep regular backups of your data. 
-              Backup files contain all your notes, settings, and metadata. Store them in a safe location.
+              <strong>Important:</strong> Always keep regular backups of your
+              data. Backup files contain all your notes, settings, and metadata.
+              Store them in a safe location.
             </p>
           </div>
         </div>
@@ -344,7 +390,10 @@ const BackupSettings: React.FC = () => {
         >
           <Icons.Settings size={14} />
           <span>Advanced Backup Settings</span>
-          <Icons.ChevronDown size={14} className={`transform transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+          <Icons.ChevronDown
+            size={14}
+            className={`transform transition-transform ${showAdvanced ? 'rotate-180' : ''}`}
+          />
         </button>
 
         {showAdvanced && (
@@ -358,7 +407,9 @@ const BackupSettings: React.FC = () => {
                   <div>
                     <span className="text-theme-text-muted">Last Backup:</span>
                     <p className="text-theme-text-primary">
-                      {settings.autoBackup ? 'Auto-backup enabled' : 'Manual only'}
+                      {settings.autoBackup
+                        ? 'Auto-backup enabled'
+                        : 'Manual only'}
                     </p>
                   </div>
                   <div>
@@ -367,25 +418,41 @@ const BackupSettings: React.FC = () => {
                   </div>
                   <div>
                     <span className="text-theme-text-muted">Frequency:</span>
-                    <p className="text-theme-text-primary">{settings.backupFrequency || 'daily'}</p>
+                    <p className="text-theme-text-primary">
+                      {settings.backupFrequency || 'daily'}
+                    </p>
                   </div>
                   <div>
                     <span className="text-theme-text-muted">Retention:</span>
-                    <p className="text-theme-text-primary">{settings.backupRetentionDays || 7} days</p>
+                    <p className="text-theme-text-primary">
+                      {settings.backupRetentionDays || 7} days
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="pt-4 border-t border-theme-border-secondary">
                 <p className="text-xs text-theme-text-muted">
-                  Backups include: Notes content, notebooks, settings, tags, and metadata. 
-                  Sensitive information like sync credentials are excluded for security.
+                  Backups include: Notes content, notebooks, settings, tags, and
+                  metadata. Sensitive information like sync credentials are
+                  excluded for security.
                 </p>
               </div>
             </div>
           </div>
         )}
       </div>
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog({ isOpen: false, onConfirm: () => {} })}
+        onConfirm={confirmDialog.onConfirm}
+        title="Restore Backup"
+        description="⚠️ This will replace all your current data with the backup. This action cannot be undone.\n\nAre you sure you want to continue?"
+        confirmText="Restore"
+        variant="destructive"
+      />
     </div>
   )
 }

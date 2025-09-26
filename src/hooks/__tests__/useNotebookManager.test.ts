@@ -1,5 +1,6 @@
 import { renderHook, act } from '@testing-library/react'
-import { vi, describe, it, expect, beforeEach, Mock } from 'vitest'
+import type { Mock } from 'vitest'
+import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { useNotebookManager } from '../useNotebookManager'
 import { useNotebooks } from '../useNotebooks'
 import { logger } from '../../utils/logger'
@@ -10,7 +11,7 @@ vi.mock('../../utils/logger', () => ({
   logger: {
     debug: vi.fn(),
     error: vi.fn(),
-  }
+  },
 }))
 
 const mockNotebooks = [
@@ -70,7 +71,7 @@ describe('useNotebookManager', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    
+
     // Mock useNotebooks hook
     ;(useNotebooks as Mock).mockReturnValue({
       flatNotebooks: mockNotebooks,
@@ -79,7 +80,7 @@ describe('useNotebookManager', () => {
 
   describe('Initialization', () => {
     it('should initialize with default state', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useNotebookManager(mockNote, mockOnNotebookChange)
       )
 
@@ -90,7 +91,7 @@ describe('useNotebookManager', () => {
     })
 
     it('should convert notebooks to options format', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useNotebookManager(mockNote, mockOnNotebookChange)
       )
 
@@ -104,21 +105,21 @@ describe('useNotebookManager', () => {
     })
 
     it('should identify current notebook', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useNotebookManager(mockNote, mockOnNotebookChange)
       )
 
       expect(result.current.currentNotebook).toEqual({
         value: 'notebook-1',
         label: 'Work',
-        icon: 'Book'
+        icon: 'Book',
       })
     })
 
     it('should handle note without notebook', () => {
       const noteWithoutNotebook = { ...mockNote, notebookId: undefined }
-      
-      const { result } = renderHook(() => 
+
+      const { result } = renderHook(() =>
         useNotebookManager(noteWithoutNotebook, mockOnNotebookChange)
       )
 
@@ -127,8 +128,8 @@ describe('useNotebookManager', () => {
 
     it('should handle note with invalid notebook ID', () => {
       const noteWithInvalidNotebook = { ...mockNote, notebookId: 'invalid-id' }
-      
-      const { result } = renderHook(() => 
+
+      const { result } = renderHook(() =>
         useNotebookManager(noteWithInvalidNotebook, mockOnNotebookChange)
       )
 
@@ -138,7 +139,7 @@ describe('useNotebookManager', () => {
 
   describe('Notebook Search', () => {
     it('should show all notebooks when search is empty', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useNotebookManager(mockNote, mockOnNotebookChange)
       )
 
@@ -146,7 +147,7 @@ describe('useNotebookManager', () => {
     })
 
     it('should filter notebooks by search input', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useNotebookManager(mockNote, mockOnNotebookChange)
       )
 
@@ -159,7 +160,7 @@ describe('useNotebookManager', () => {
     })
 
     it('should filter notebooks case-insensitively', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useNotebookManager(mockNote, mockOnNotebookChange)
       )
 
@@ -172,7 +173,7 @@ describe('useNotebookManager', () => {
     })
 
     it('should show multiple matches for partial search', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useNotebookManager(mockNote, mockOnNotebookChange)
       )
 
@@ -181,11 +182,14 @@ describe('useNotebookManager', () => {
       })
 
       expect(result.current.filteredNotebooks).toHaveLength(2)
-      expect(result.current.filteredNotebooks.map(nb => nb.label)).toEqual(['Projects', 'Personal'])
+      expect(result.current.filteredNotebooks.map(nb => nb.label)).toEqual([
+        'Projects',
+        'Personal',
+      ])
     })
 
     it('should handle search with no matches', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useNotebookManager(mockNote, mockOnNotebookChange)
       )
 
@@ -197,7 +201,7 @@ describe('useNotebookManager', () => {
     })
 
     it('should trim search input', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useNotebookManager(mockNote, mockOnNotebookChange)
       )
 
@@ -212,7 +216,7 @@ describe('useNotebookManager', () => {
 
   describe('Notebook Selection', () => {
     it('should handle notebook selection', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useNotebookManager(mockNote, mockOnNotebookChange)
       )
 
@@ -223,7 +227,10 @@ describe('useNotebookManager', () => {
       expect(mockOnNotebookChange).toHaveBeenCalledWith('notebook-2')
       expect(result.current.showNotebookModal).toBe(false)
       expect(result.current.notebookSearchInput).toBe('')
-      expect(vi.mocked(logger.debug)).toHaveBeenCalledWith('Notebook changed to:', 'notebook-2')
+      expect(vi.mocked(logger.debug)).toHaveBeenCalledWith(
+        'Notebook changed to:',
+        'notebook-2'
+      )
     })
 
     it('should handle notebook selection errors', () => {
@@ -231,7 +238,7 @@ describe('useNotebookManager', () => {
         throw new Error('Selection failed')
       })
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useNotebookManager(mockNote, errorOnNotebookChange)
       )
 
@@ -248,7 +255,7 @@ describe('useNotebookManager', () => {
 
   describe('Modal Management', () => {
     it('should show notebook modal', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useNotebookManager(mockNote, mockOnNotebookChange)
       )
 
@@ -260,7 +267,7 @@ describe('useNotebookManager', () => {
     })
 
     it('should close notebook modal and clear search', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useNotebookManager(mockNote, mockOnNotebookChange)
       )
 
@@ -285,7 +292,7 @@ describe('useNotebookManager', () => {
 
   describe('Notebook Updates', () => {
     it('should update options when notebooks change', () => {
-      const { result, rerender } = renderHook(() => 
+      const { result, rerender } = renderHook(() =>
         useNotebookManager(mockNote, mockOnNotebookChange)
       )
 
@@ -318,7 +325,7 @@ describe('useNotebookManager', () => {
       expect(result.current.notebookOptions[3]).toEqual({
         value: 'notebook-4',
         label: 'New Notebook',
-        icon: 'Book'
+        icon: 'Book',
       })
     })
 
@@ -341,7 +348,7 @@ describe('useNotebookManager', () => {
 
   describe('State Management', () => {
     it('should maintain search state independently of modal state', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useNotebookManager(mockNote, mockOnNotebookChange)
       )
 
@@ -361,7 +368,7 @@ describe('useNotebookManager', () => {
     })
 
     it('should clear search when modal closes', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useNotebookManager(mockNote, mockOnNotebookChange)
       )
 
@@ -387,7 +394,7 @@ describe('useNotebookManager', () => {
         flatNotebooks: [],
       })
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useNotebookManager(mockNote, mockOnNotebookChange)
       )
 
@@ -397,7 +404,7 @@ describe('useNotebookManager', () => {
     })
 
     it('should handle null note', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useNotebookManager(null, mockOnNotebookChange)
       )
 
@@ -405,7 +412,7 @@ describe('useNotebookManager', () => {
     })
 
     it('should handle undefined note', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useNotebookManager(undefined, mockOnNotebookChange)
       )
 

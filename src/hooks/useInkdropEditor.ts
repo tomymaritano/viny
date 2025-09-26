@@ -9,8 +9,10 @@ import { EditorState, Compartment } from '@codemirror/state'
 import { createEditorExtensions } from '../config/editorExtensions'
 import { getThemeExtensions } from '../config/editorThemes'
 import { attachFormatSelection } from '../config/editorKeybindings'
+import { createImageSaveHandler } from '../config/editorSmartPaste'
 import { editorLogger } from '../utils/logger'
 import { useAppStore } from '../stores/newSimpleStore'
+import { useEditorImagePaste } from './useEditorImagePaste'
 
 interface EditorPreset {
   includeCore: boolean
@@ -49,10 +51,13 @@ export function useInkdropEditor({
   const viewRef = useRef<EditorView | null>(null)
   const onChangeRef = useRef(onChange)
   const themeCompartmentRef = useRef(new Compartment())
-  
+
   // Get current theme from store
   const { theme: currentTheme } = useAppStore()
   
+  // Get image paste handler
+  const { saveImageToStorage } = useEditorImagePaste()
+
   // Keep onChange ref current
   useEffect(() => {
     onChangeRef.current = onChange
@@ -65,11 +70,16 @@ export function useInkdropEditor({
     try {
       editorLogger.debug('Initializing editor with theme:', theme)
 
-      const extensions = createEditorExtensions({
+      // Create extensions with image handler
+      const baseExtensions = createEditorExtensions({
         placeholder,
         showLineNumbers,
-        theme: currentTheme
+        theme: currentTheme,
       })
+      
+      // Add image save handler
+      const imageHandler = createImageSaveHandler(saveImageToStorage)
+      const extensions = [...baseExtensions, imageHandler]
 
       const state = EditorState.create({
         doc: value,
@@ -77,7 +87,7 @@ export function useInkdropEditor({
           ...extensions,
           // Theme compartment for dynamic theme updates
           themeCompartmentRef.current.of(getThemeExtensions(currentTheme)),
-          EditorView.updateListener.of((update) => {
+          EditorView.updateListener.of(update => {
             if (update.docChanged) {
               const newValue = update.state.doc.toString()
               // Use a ref to avoid recreating the editor when onChange changes
@@ -85,13 +95,13 @@ export function useInkdropEditor({
                 onChangeRef.current(newValue)
               }
             }
-          })
-        ]
+          }),
+        ],
       })
 
       const view = new EditorView({
         state,
-        parent: editorRef.current
+        parent: editorRef.current,
       })
 
       viewRef.current = view
@@ -103,18 +113,18 @@ export function useInkdropEditor({
     } catch (error) {
       editorLogger.error('Failed to initialize editor:', error)
     }
-  }, [placeholder, showLineNumbers, currentTheme, preset])
+  }, [placeholder, showLineNumbers, currentTheme, preset, saveImageToStorage])
 
   // Update theme when it changes
   useEffect(() => {
     if (!viewRef.current) return
 
     editorLogger.debug('Updating editor theme to:', currentTheme)
-    
+
     try {
       const newThemeExtensions = getThemeExtensions(currentTheme)
       viewRef.current.dispatch({
-        effects: themeCompartmentRef.current.reconfigure(newThemeExtensions)
+        effects: themeCompartmentRef.current.reconfigure(newThemeExtensions),
       })
     } catch (error) {
       editorLogger.error('Failed to update editor theme:', error)
@@ -136,13 +146,13 @@ export function useInkdropEditor({
 
     const currentContent = viewRef.current.state.doc.toString()
     if (currentContent !== newValue) {
-      editorLogger.debug('Updating editor content')
+      // Removed debug log to prevent console spam on every keystroke
       viewRef.current.dispatch({
         changes: {
           from: 0,
           to: viewRef.current.state.doc.length,
-          insert: newValue
-        }
+          insert: newValue,
+        },
       })
     }
   }, [])
@@ -153,12 +163,12 @@ export function useInkdropEditor({
 
     const view = viewRef.current
     const { from, to } = view.state.selection.main
-    
+
     view.dispatch({
       changes: { from, to, insert: text },
-      selection: { anchor: from + text.length }
+      selection: { anchor: from + text.length },
     })
-    
+
     view.focus()
   }, [])
 
@@ -168,32 +178,42 @@ export function useInkdropEditor({
     const view = viewRef.current
     const { from, to } = view.state.selection.main
     const selectedText = view.state.doc.sliceString(from, to)
-    
+
     // Check if text is already formatted
-    const beforeText = view.state.doc.sliceString(Math.max(0, from - prefix.length), from)
-    const afterText = view.state.doc.sliceString(to, Math.min(view.state.doc.length, to + suffix.length))
-    
+    const beforeText = view.state.doc.sliceString(
+      Math.max(0, from - prefix.length),
+      from
+    )
+    const afterText = view.state.doc.sliceString(
+      to,
+      Math.min(view.state.doc.length, to + suffix.length)
+    )
+
     if (beforeText === prefix && afterText === suffix) {
       // Remove formatting
       view.dispatch({
         changes: [
           { from: from - prefix.length, to: from, insert: '' },
-          { from: to - prefix.length, to: to + suffix.length - prefix.length, insert: '' }
+          {
+            from: to - prefix.length,
+            to: to + suffix.length - prefix.length,
+            insert: '',
+          },
         ],
-        selection: { anchor: from - prefix.length, head: to - prefix.length }
+        selection: { anchor: from - prefix.length, head: to - prefix.length },
       })
     } else {
       // Add formatting
       const formattedText = `${prefix}${selectedText}${suffix}`
       view.dispatch({
         changes: { from, to, insert: formattedText },
-        selection: { 
-          anchor: from + prefix.length, 
-          head: to + prefix.length 
-        }
+        selection: {
+          anchor: from + prefix.length,
+          head: to + prefix.length,
+        },
       })
     }
-    
+
     view.focus()
   }, [])
 
@@ -232,12 +252,12 @@ export function useInkdropEditor({
     insertText,
     formatSelection,
     getView,
-    focus
+    focus,
   }
 
   return {
     editorRef,
-    methods
+    methods,
   }
 }
 

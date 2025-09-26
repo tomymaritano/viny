@@ -4,6 +4,7 @@ import TagContextMenu from '../../ui/TagContextMenu'
 import TagSettingsModal from '../tags/TagSettingsModal'
 import { useTagManager } from '../../../hooks/useTagManager'
 import { useAppStore } from '../../../stores/newSimpleStore'
+import { noteLogger } from '../../../utils/logger'
 
 interface TagManagerProps {
   note: any
@@ -11,8 +12,12 @@ interface TagManagerProps {
   isPreviewMode?: boolean
 }
 
-const TagManager: React.FC<TagManagerProps> = ({ note, onTagsChange, isPreviewMode = false }) => {
-  const { getTagColor } = useAppStore()
+const TagManager: React.FC<TagManagerProps> = ({
+  note,
+  onTagsChange,
+  isPreviewMode = false,
+}) => {
+  const { getTagColor, showError } = useAppStore()
   const {
     tagInput,
     showTagSuggestions,
@@ -20,6 +25,8 @@ const TagManager: React.FC<TagManagerProps> = ({ note, onTagsChange, isPreviewMo
     contextMenu,
     tagSettingsModal,
     filteredSuggestions,
+    loading,
+    error,
     setTagInput,
     setShowTagSuggestions,
     setContextMenu,
@@ -32,6 +39,23 @@ const TagManager: React.FC<TagManagerProps> = ({ note, onTagsChange, isPreviewMo
     handleTagColorSave,
   } = useTagManager(note, onTagsChange)
 
+  // Async wrappers for tag operations
+  const handleAddTagAsync = async () => {
+    try {
+      await handleAddTag()
+    } catch (error) {
+      noteLogger.error('Failed to add tag:', error)
+    }
+  }
+
+  const handleRemoveTagAsync = async (index: number) => {
+    try {
+      await handleRemoveTag(index)
+    } catch (error) {
+      noteLogger.error('Failed to remove tag:', error)
+    }
+  }
+
   if (isPreviewMode) {
     return (
       <div className="flex flex-wrap gap-1">
@@ -43,7 +67,9 @@ const TagManager: React.FC<TagManagerProps> = ({ note, onTagsChange, isPreviewMo
                 key={`${tag}-${index}`}
                 className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border"
                 style={{
-                  backgroundColor: tagColor ? `${tagColor}20` : 'var(--color-base01)',
+                  backgroundColor: tagColor
+                    ? `${tagColor}20`
+                    : 'var(--color-base01)',
                   borderColor: tagColor || 'var(--color-base01)',
                   color: tagColor || 'var(--color-base1)',
                 }}
@@ -68,17 +94,19 @@ const TagManager: React.FC<TagManagerProps> = ({ note, onTagsChange, isPreviewMo
           return (
             <span
               key={`${tag}-${index}`}
-              onContextMenu={(e) => handleTagContextMenu(e, tag, index)}
+              onContextMenu={e => handleTagContextMenu(e, tag, index)}
               className="group inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border cursor-pointer hover:opacity-80 transition-opacity"
               style={{
-                backgroundColor: tagColor ? `${tagColor}20` : 'var(--color-base01)',
+                backgroundColor: tagColor
+                  ? `${tagColor}20`
+                  : 'var(--color-base01)',
                 borderColor: tagColor || 'var(--color-base01)',
                 color: tagColor || 'var(--color-base1)',
               }}
             >
               {tag}
               <button
-                onClick={() => handleRemoveTag(index)}
+                onClick={() => handleRemoveTagAsync(index)}
                 className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-400"
                 title="Remove tag"
               >
@@ -97,7 +125,7 @@ const TagManager: React.FC<TagManagerProps> = ({ note, onTagsChange, isPreviewMo
               type="text"
               placeholder="Add tags..."
               value={tagInput}
-              onChange={(e) => {
+              onChange={e => {
                 setTagInput(e.target.value)
                 setShowTagSuggestions(e.target.value.length > 0)
               }}
@@ -105,7 +133,7 @@ const TagManager: React.FC<TagManagerProps> = ({ note, onTagsChange, isPreviewMo
               onFocus={() => tagInput.length > 0 && setShowTagSuggestions(true)}
               className="w-full px-3 py-2 text-sm border border-theme-border-primary rounded-md bg-theme-bg-secondary text-theme-text-primary placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent-primary focus:border-transparent"
             />
-            
+
             {/* Tag Suggestions */}
             {showTagSuggestions && filteredSuggestions.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-theme-bg-secondary border border-theme-border-primary rounded-md shadow-lg z-50 max-h-32 overflow-y-auto">
@@ -114,10 +142,12 @@ const TagManager: React.FC<TagManagerProps> = ({ note, onTagsChange, isPreviewMo
                     key={suggestion}
                     onClick={() => {
                       setTagInput(suggestion)
-                      handleAddTag()
+                      handleAddTagAsync()
                     }}
                     className={`w-full text-left px-3 py-2 text-sm hover:bg-theme-bg-tertiary transition-colors ${
-                      index === selectedSuggestionIndex ? 'bg-theme-bg-tertiary' : ''
+                      index === selectedSuggestionIndex
+                        ? 'bg-theme-bg-tertiary'
+                        : ''
                     }`}
                   >
                     {suggestion}
@@ -126,10 +156,10 @@ const TagManager: React.FC<TagManagerProps> = ({ note, onTagsChange, isPreviewMo
               </div>
             )}
           </div>
-          
+
           <button
-            onClick={handleAddTag}
-            disabled={!tagInput.trim()}
+            onClick={handleAddTagAsync}
+            disabled={!tagInput.trim() || loading}
             className="px-3 py-2 bg-theme-accent-primary text-white rounded-md hover:bg-theme-accent-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <Icons.Plus size={14} />
@@ -143,7 +173,9 @@ const TagManager: React.FC<TagManagerProps> = ({ note, onTagsChange, isPreviewMo
           x={contextMenu.x}
           y={contextMenu.y}
           onAction={handleContextMenuAction}
-          onClose={() => setContextMenu({ show: false, x: 0, y: 0, tag: null, index: null })}
+          onClose={() =>
+            setContextMenu({ show: false, x: 0, y: 0, tag: null, index: null })
+          }
         />
       )}
 
@@ -151,7 +183,9 @@ const TagManager: React.FC<TagManagerProps> = ({ note, onTagsChange, isPreviewMo
       {tagSettingsModal.show && (
         <TagSettingsModal
           isOpen={tagSettingsModal.show}
-          onClose={() => setTagSettingsModal({ show: false, tagName: '', tagIndex: null })}
+          onClose={() =>
+            setTagSettingsModal({ show: false, tagName: '', tagIndex: null })
+          }
           tagName={tagSettingsModal.tagName}
           onSave={handleTagColorSave}
         />

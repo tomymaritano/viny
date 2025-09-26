@@ -4,24 +4,17 @@ import LoginPage from './LoginPage'
 import LoadingSpinner from '../ui/LoadingSpinner'
 import { useToast } from '../../hooks/useToast'
 import { Icons } from '../Icons'
+import { apiLogger } from '../../utils/logger'
 
 interface AuthGuardProps {
   children: React.ReactNode
   fallback?: React.ReactNode
 }
 
-export const AuthGuard: React.FC<AuthGuardProps> = ({ 
-  children, 
-  fallback 
-}) => {
-  const { 
-    isAuthenticated, 
-    isLoading, 
-    user, 
-    verifyToken, 
-    accessToken 
-  } = useAppStore()
-  const { toast } = useToast()
+export const AuthGuard: React.FC<AuthGuardProps> = ({ children, fallback }) => {
+  const { isAuthenticated, isLoading, user, verifyToken, accessToken } =
+    useAppStore()
+  const { showWarning } = useToast()
   const [isInitializing, setIsInitializing] = useState(true)
   const [showAuthModal, setShowAuthModal] = useState(false)
 
@@ -33,10 +26,8 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
           const isValid = await verifyToken()
           if (!isValid) {
             setShowAuthModal(true)
-            toast({
-              type: 'warning',
-              title: 'Session Expired',
-              message: 'Please sign in again to continue.',
+            showWarning('Session Expired', {
+              details: 'Please sign in again to continue.',
             })
           }
         } else {
@@ -44,7 +35,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
           setShowAuthModal(true)
         }
       } catch (error) {
-        console.error('Auth initialization error:', error)
+        apiLogger.error('Auth initialization error:', error)
         setShowAuthModal(true)
       } finally {
         setIsInitializing(false)
@@ -52,7 +43,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
     }
 
     initializeAuth()
-  }, [accessToken, verifyToken, toast])
+  }, [accessToken, verifyToken, showWarning])
 
   // Show loading spinner during initialization
   if (isInitializing || isLoading) {
@@ -81,7 +72,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
   // Show login page if not authenticated
   if (!isAuthenticated || showAuthModal) {
     return (
-      <LoginPage 
+      <LoginPage
         onLoginSuccess={() => {
           setShowAuthModal(false)
         }}

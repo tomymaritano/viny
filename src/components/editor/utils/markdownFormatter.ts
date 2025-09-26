@@ -10,10 +10,18 @@
 export const createMarkdownFormatter = (insertText, formatSelection) => {
   return {
     // Text formatting - use formatSelection for better UX
-    insertBold: () => formatSelection ? formatSelection('**', '**') : insertText('**bold text**'),
-    insertItalic: () => formatSelection ? formatSelection('*', '*') : insertText('*italic text*'),
-    insertStrikethrough: () => formatSelection ? formatSelection('~~', '~~') : insertText('~~strikethrough text~~'),
-    insertCode: () => formatSelection ? formatSelection('`', '`') : insertText('`inline code`'),
+    insertBold: () =>
+      formatSelection
+        ? formatSelection('**', '**')
+        : insertText('**bold text**'),
+    insertItalic: () =>
+      formatSelection ? formatSelection('*', '*') : insertText('*italic text*'),
+    insertStrikethrough: () =>
+      formatSelection
+        ? formatSelection('~~', '~~')
+        : insertText('~~strikethrough text~~'),
+    insertCode: () =>
+      formatSelection ? formatSelection('`', '`') : insertText('`inline code`'),
 
     // Headings
     insertHeading: (level = 1) => {

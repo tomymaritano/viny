@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Icons } from '../../Icons'
-import BaseModal from '../../ui/BaseModal'
+import { StandardModal } from '../../ui/StandardModal'
 import CustomTag from '../../ui/CustomTag'
 import { getAvailableTagColors } from '../../../utils/customTagColors'
 import { useAppStore } from '../../../stores/newSimpleStore'
@@ -16,7 +16,7 @@ const TagSettingsModal: React.FC<TagSettingsModalProps> = ({
   isOpen,
   onClose,
   tagName,
-  onTagNameChange
+  onTagNameChange,
 }) => {
   const [localTagName, setLocalTagName] = useState(tagName || '')
   const { setTagColor } = useAppStore()
@@ -30,7 +30,7 @@ const TagSettingsModal: React.FC<TagSettingsModalProps> = ({
 
   const handleSave = () => {
     const trimmedName = localTagName.trim()
-    
+
     if (trimmedName && trimmedName !== tagName) {
       // Allow any change - validation will be handled in the parent component
       onTagNameChange(tagName, trimmedName)
@@ -43,7 +43,7 @@ const TagSettingsModal: React.FC<TagSettingsModalProps> = ({
     onClose()
   }
 
-  const handleColorChange = (colorKey) => {
+  const handleColorChange = colorKey => {
     setTagColor(tagName, colorKey)
   }
 
@@ -56,13 +56,29 @@ const TagSettingsModal: React.FC<TagSettingsModalProps> = ({
   }
 
   return (
-    <BaseModal
+    <StandardModal
       isOpen={isOpen}
       onClose={handleCancel}
       title="Tag Settings"
       icon={<Icons.Tag size={20} />}
-      maxWidth="sm"
+      size="sm"
       closeOnEscape={true}
+      footer={
+        <div className="flex gap-2">
+          <button
+            onClick={handleCancel}
+            className="px-3 py-2 text-sm text-theme-text-secondary hover:text-theme-text-primary transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            className="px-3 py-2 text-sm bg-theme-accent-primary text-white rounded-md hover:bg-theme-accent-primary/90 transition-colors"
+          >
+            Save
+          </button>
+        </div>
+      }
     >
       {/* Content */}
       <div className="p-4 space-y-4">
@@ -71,7 +87,7 @@ const TagSettingsModal: React.FC<TagSettingsModalProps> = ({
           <input
             type="text"
             value={localTagName}
-            onChange={(e) => setLocalTagName(e.target.value)}
+            onChange={e => setLocalTagName(e.target.value)}
             className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
             placeholder="Enter tag name..."
             autoFocus
@@ -93,7 +109,7 @@ const TagSettingsModal: React.FC<TagSettingsModalProps> = ({
                   className="w-6 h-6 rounded-full border-2 mb-1 transition-transform group-hover:scale-110"
                   style={{
                     backgroundColor: preview.bg,
-                    borderColor: preview.border
+                    borderColor: preview.border,
                   }}
                 />
                 <span className="text-xs text-theme-text-secondary text-center">
@@ -104,23 +120,7 @@ const TagSettingsModal: React.FC<TagSettingsModalProps> = ({
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <div className="flex items-center justify-end gap-2 p-4 border-t border-theme-border-primary">
-        <button
-          onClick={handleCancel}
-          className="px-3 py-2 text-sm text-theme-text-secondary hover:text-theme-text-primary transition-colors"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={handleSave}
-          className="px-3 py-2 text-sm bg-theme-accent-primary text-white rounded-md hover:bg-theme-accent-primary/90 transition-colors"
-        >
-          Save
-        </button>
-      </div>
-    </BaseModal>
+    </StandardModal>
   )
 }
 

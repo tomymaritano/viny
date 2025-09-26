@@ -52,26 +52,38 @@ const SettingsTabsWithSections: React.FC<SettingsTabsWithSectionsProps> = ({
               ? 'text-theme-text-primary relative'
               : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary'
           } ${isSubItem ? 'pl-10' : ''}`}
-          style={isActive && !hasSubItems ? {
-            backgroundColor: 'var(--color-active-bg)',
-            boxShadow: 'inset 3px 0 0 var(--color-active-border)'
-          } : {}}
+          style={
+            isActive && !hasSubItems
+              ? {
+                  backgroundColor: 'var(--color-active-bg)',
+                  boxShadow: 'inset 3px 0 0 var(--color-active-border)',
+                }
+              : {}
+          }
         >
           <div className="flex items-center space-x-3">
-            <div className={`w-4 h-4 flex-shrink-0 ${
-              isActive && !hasSubItems ? 'text-theme-accent-primary' : 'text-theme-text-muted'
-            }`}>
+            <div
+              className={`w-4 h-4 flex-shrink-0 ${
+                isActive && !hasSubItems
+                  ? 'text-theme-accent-primary'
+                  : 'text-theme-text-muted'
+              }`}
+            >
               {getIcon(tab.icon)}
             </div>
             <span className="text-sm">{tab.label}</span>
           </div>
           {hasSubItems && (
             <div className="text-theme-text-muted">
-              {isExpanded ? <Icons.ChevronDown size={14} /> : <Icons.ChevronRight size={14} />}
+              {isExpanded ? (
+                <Icons.ChevronDown size={14} />
+              ) : (
+                <Icons.ChevronRight size={14} />
+              )}
             </div>
           )}
         </button>
-        
+
         {/* Render sub-items if expanded */}
         {hasSubItems && isExpanded && (
           <div className="bg-theme-bg-tertiary/30">
@@ -87,7 +99,9 @@ const SettingsTabsWithSections: React.FC<SettingsTabsWithSectionsProps> = ({
       {tabs.map((tab, index) => (
         <div key={tab.id}>
           {/* Add separators for logical groupings */}
-          {(tab.id === 'plugins-section' || tab.id === 'tags' || tab.id === 'about') && (
+          {(tab.id === 'plugins-section' ||
+            tab.id === 'tags' ||
+            tab.id === 'about') && (
             <div className="my-2 mx-4 border-t border-theme-border-primary" />
           )}
           {renderTab(tab)}

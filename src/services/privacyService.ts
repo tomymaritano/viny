@@ -1,4 +1,9 @@
-import { createSettingsRepository, createDocumentRepository } from '../lib/repositories/RepositoryFactory'
+import {
+  createSettingsRepository,
+  createDocumentRepository,
+} from '../lib/repositories/RepositoryFactory'
+import { loggingService } from './LoggingService'
+import { storageService, StorageService } from './StorageService'
 
 interface UsageData {
   sessionStart: string
@@ -39,14 +44,14 @@ class PrivacyService {
   async clearUsageData(): Promise<void> {
     try {
       // Clear usage tracking data
-      localStorage.removeItem(this.USAGE_DATA_KEY)
-      localStorage.removeItem(this.CURRENT_SESSION_KEY)
-      
+      storageService.removeItem(this.USAGE_DATA_KEY)
+      storageService.removeItem(this.CURRENT_SESSION_KEY)
+
       // Clear any analytics data
-      localStorage.removeItem('viny_analytics')
-      localStorage.removeItem('viny_telemetry')
-      localStorage.removeItem('viny_crash_reports')
-      
+      storageService.removeItem(StorageService.KEYS.ANALYTICS)
+      storageService.removeItem(StorageService.KEYS.TELEMETRY)
+      storageService.removeItem(StorageService.KEYS.CRASH_REPORTS)
+
       // Clear browser data if available
       if ('serviceWorker' in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations()
@@ -54,18 +59,16 @@ class PrivacyService {
           await registration.unregister()
         }
       }
-      
+
       // Clear all caches
       if ('caches' in window) {
         const cacheNames = await caches.keys()
-        await Promise.all(
-          cacheNames.map(cacheName => caches.delete(cacheName))
-        )
+        await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)))
       }
-      
+
       // Usage data cleared successfully
     } catch (error) {
-      console.error('[PrivacyService] Error clearing usage data:', error)
+      loggingService.logError(error as Error, { context: 'clearUsageData' })
       throw new Error('Failed to clear usage data')
     }
   }
@@ -73,33 +76,36 @@ class PrivacyService {
   /**
    * Download user's data as JSON file
    */
-  async downloadUserData(includeMetadata: boolean = true, includeHistory: boolean = false): Promise<void> {
+  async downloadUserData(
+    includeMetadata = true,
+    includeHistory = false
+  ): Promise<void> {
     try {
       const settingsRepo = createSettingsRepository()
       const docRepo = createDocumentRepository()
       await docRepo.initialize()
-      
+
       const [notes, notebooks, settings, tagColors] = await Promise.all([
         docRepo.getNotes(),
         docRepo.getNotebooks(),
         settingsRepo.getSettings(),
-        settingsRepo.getTagColors()
+        settingsRepo.getTagColors(),
       ])
-      
+
       const exportData: PrivacyExportData = {
         userData: {
           notes,
           notebooks,
           settings,
-          tagColors
+          tagColors,
         },
         usageData: this.getUsageData(),
         metadata: {
           exportedAt: new Date().toISOString(),
           version: '1.0.0', // App version
           totalNotes: notes.length,
-          totalNotebooks: notebooks.length
-        }
+          totalNotebooks: notebooks.length,
+        },
       }
 
       // Filter out metadata if not requested
@@ -108,7 +114,7 @@ class PrivacyService {
           id: note.id,
           title: note.title,
           content: note.content,
-          tags: note.tags || []
+          tags: note.tags || [],
         }))
       }
 
@@ -117,28 +123,28 @@ class PrivacyService {
         exportData.userData.notes = exportData.userData.notes.map(note => ({
           ...note,
           history: undefined,
-          versions: undefined
+          versions: undefined,
         }))
       }
 
       // Create and download the file
       const dataStr = JSON.stringify(exportData, null, 2)
       const dataBlob = new Blob([dataStr], { type: 'application/json' })
-      
+
       const url = URL.createObjectURL(dataBlob)
       const link = document.createElement('a')
       link.href = url
       link.download = `viny-user-data-${new Date().toISOString().split('T')[0]}.json`
-      
+
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-      
+
       URL.revokeObjectURL(url)
-      
+
       // User data downloaded successfully
     } catch (error) {
-      console.error('[PrivacyService] Error downloading user data:', error)
+      loggingService.logError(error as Error, { context: 'downloadUserData' })
       throw new Error('Failed to download user data')
     }
   }
@@ -148,10 +154,10 @@ class PrivacyService {
    */
   private getUsageData(): UsageData[] {
     try {
-      const stored = localStorage.getItem(this.USAGE_DATA_KEY)
+      const stored = storageService.getItem(this.USAGE_DATA_KEY)
       return stored ? JSON.parse(stored) : []
     } catch (error) {
-      console.error('[PrivacyService] Error loading usage data:', error)
+      loggingService.logError(error as Error, { context: 'getUsageData' })
       return []
     }
   }
@@ -164,7 +170,7 @@ class PrivacyService {
       const settingsRepo = createSettingsRepository()
       const docRepo = createDocumentRepository()
       await docRepo.initialize()
-      
+
       for (const dataType of dataTypes) {
         switch (dataType) {
           case 'notes':
@@ -182,7 +188,7 @@ class PrivacyService {
             await settingsRepo.resetSettings()
             await settingsRepo.saveSettings({
               theme: 'dark',
-              language: 'en'
+              language: 'en',
             })
             break
           case 'tagColors':
@@ -192,12 +198,18 @@ class PrivacyService {
             await this.clearUsageData()
             break
           default:
-            console.warn(`[PrivacyService] Unknown data type: ${dataType}`)
+            loggingService.log('warn', 'Unknown data type', {
+              dataType,
+              context: 'clearSpecificData',
+            })
         }
       }
       // Specific data cleared successfully
     } catch (error) {
-      console.error('[PrivacyService] Error clearing specific data:', error)
+      loggingService.logError(error as Error, {
+        context: 'clearSpecificData',
+        dataTypes,
+      })
       throw new Error('Failed to clear specific data types')
     }
   }
@@ -208,24 +220,27 @@ class PrivacyService {
   getDataSizeInfo(): Record<string, number> {
     try {
       const sizeInfo: Record<string, number> = {}
-      
+
       // Calculate localStorage sizes
-      const notes = localStorage.getItem('viny_notes')
-      const notebooks = localStorage.getItem('viny_notebooks')
-      const settings = localStorage.getItem('viny-settings')
-      const tagColors = localStorage.getItem('viny_tag_colors')
-      const usage = localStorage.getItem(this.USAGE_DATA_KEY)
-      
+      const notes = storageService.getItem(StorageService.KEYS.NOTES)
+      const notebooks = storageService.getItem(StorageService.KEYS.NOTEBOOKS)
+      const settings = storageService.getItem(StorageService.KEYS.SETTINGS)
+      const tagColors = storageService.getItem(StorageService.KEYS.TAG_COLORS)
+      const usage = storageService.getItem(this.USAGE_DATA_KEY)
+
       sizeInfo.notes = notes ? new Blob([notes]).size : 0
       sizeInfo.notebooks = notebooks ? new Blob([notebooks]).size : 0
       sizeInfo.settings = settings ? new Blob([settings]).size : 0
       sizeInfo.tagColors = tagColors ? new Blob([tagColors]).size : 0
       sizeInfo.usage = usage ? new Blob([usage]).size : 0
-      sizeInfo.total = Object.values(sizeInfo).reduce((sum, size) => sum + size, 0)
-      
+      sizeInfo.total = Object.values(sizeInfo).reduce(
+        (sum, size) => sum + size,
+        0
+      )
+
       return sizeInfo
     } catch (error) {
-      console.error('[PrivacyService] Error calculating data sizes:', error)
+      loggingService.logError(error as Error, { context: 'getDataSizeInfo' })
       return { total: 0 }
     }
   }

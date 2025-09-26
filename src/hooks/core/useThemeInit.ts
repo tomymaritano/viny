@@ -1,11 +1,11 @@
 import { useEffect } from 'react'
 import { useAppStore } from '../../stores/newSimpleStore'
 import { initLogger as logger } from '../../utils/logger'
-import { 
-  resolveSystemTheme, 
-  applyThemeToDOM, 
+import {
+  resolveSystemTheme,
+  applyThemeToDOM,
   createSystemThemeListener,
-  type ThemeValue 
+  type ThemeValue,
 } from '../../utils/themeUtils'
 
 /**
@@ -15,18 +15,15 @@ import {
  * - Updates DOM theme attribute
  */
 export const useThemeInit = () => {
-  const { 
-    setTheme,
-    settings
-  } = useAppStore()
+  const { setTheme, settings } = useAppStore()
 
   useEffect(() => {
     const finalTheme = settings?.theme || 'dark'
     const resolvedTheme = resolveSystemTheme(finalTheme as ThemeValue)
-    
+
     // Apply theme to DOM using centralized utility
     applyThemeToDOM(finalTheme as ThemeValue)
-    
+
     logger.debug('Theme applied:', resolvedTheme)
   }, [settings?.theme])
 
@@ -44,6 +41,6 @@ export const useThemeInit = () => {
   }, [settings?.theme, setTheme])
 
   return {
-    currentTheme: useAppStore(state => state.settings.theme)
+    currentTheme: useAppStore(state => state.settings.theme),
   }
 }

@@ -8,18 +8,24 @@ export const GeneralSettings = lazy(() => import('./tabs/GeneralSettings'))
 export const ThemesSettings = lazy(() => import('./tabs/ThemesSettings'))
 export const EditingSettings = lazy(() => import('./tabs/EditingSettings'))
 export const PreviewSettings = lazy(() => import('./tabs/PreviewSettings'))
-export const KeybindingsSettings = lazy(() => import('./tabs/KeybindingsSettings'))
+export const KeybindingsSettings = lazy(
+  () => import('./tabs/KeybindingsSettings')
+)
 export const PluginsSettings = lazy(() => import('./tabs/PluginsSettings'))
 export const InstallSettings = lazy(() => import('./tabs/InstallSettings'))
 export const UpdatesSettings = lazy(() => import('./tabs/UpdatesSettings'))
 export const SyncSettings = lazy(() => import('./tabs/SyncSettings'))
 export const BackupSettings = lazy(() => import('./tabs/BackupSettings'))
 export const PrivacySettings = lazy(() => import('./tabs/PrivacySettings'))
-export const TagsSettingsSimple = lazy(() => import('./tabs/TagsSettingsSimple'))
+export const TagsSettingsSimple = lazy(
+  () => import('./tabs/TagsSettingsSimple')
+)
 export const AboutSettings = lazy(() => import('./tabs/AboutSettings'))
 
 // Advanced settings
-export const BackupManager = lazy(() => import('./BackupManager').then(module => ({ default: module.BackupManager })))
+export const BackupManager = lazy(() =>
+  import('./BackupManager').then(module => ({ default: module.BackupManager }))
+)
 
 // Legacy tabs - also lazy loaded
 export const EditorSettings = lazy(() => import('./tabs/EditorSettings'))

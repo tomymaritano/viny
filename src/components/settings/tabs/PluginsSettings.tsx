@@ -12,10 +12,11 @@ const PluginsSettings: React.FC = () => {
           Plugin System
         </h3>
         <p className="text-sm text-theme-text-secondary mb-4">
-          Extend Viny with powerful plugins. Install, manage, and configure plugins safely.
+          Extend Viny with powerful plugins. Install, manage, and configure
+          plugins safely.
         </p>
       </div>
-      
+
       <div className="bg-theme-bg-secondary rounded-lg p-6 border border-theme-border-primary">
         <div className="text-center">
           <Icons.Package size={48} className="mx-auto mb-4 text-theme-accent" />
@@ -23,16 +24,17 @@ const PluginsSettings: React.FC = () => {
             Enterprise Plugin System
           </h4>
           <p className="text-sm text-theme-text-secondary mb-4">
-            Secure, sandboxed plugin execution with enterprise-grade security monitoring.
+            Secure, sandboxed plugin execution with enterprise-grade security
+            monitoring.
           </p>
-          
+
           <button
             onClick={() => setIsPluginManagerOpen(true)}
             className="px-6 py-3 bg-theme-accent text-white rounded-lg hover:bg-theme-accent-dark transition-colors font-medium"
           >
             Open Plugin Manager
           </button>
-          
+
           <div className="mt-4 text-xs text-theme-text-muted">
             <p>Sandboxed execution • Permission system • Security monitoring</p>
           </div>
@@ -45,34 +47,46 @@ const PluginsSettings: React.FC = () => {
             <div className="w-8 h-8 mx-auto mb-2 bg-theme-accent rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-bold">S</span>
             </div>
-            <h5 className="font-medium text-theme-text-primary mb-1">Secure by Design</h5>
-            <p className="text-xs text-theme-text-secondary">Sandboxed execution with permission controls</p>
+            <h5 className="font-medium text-theme-text-primary mb-1">
+              Secure by Design
+            </h5>
+            <p className="text-xs text-theme-text-secondary">
+              Sandboxed execution with permission controls
+            </p>
           </div>
         </div>
-        
+
         <div className="bg-theme-bg-tertiary rounded-lg p-4 border border-theme-border">
           <div className="text-center">
             <div className="w-8 h-8 mx-auto mb-2 bg-theme-accent rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-bold">A</span>
             </div>
-            <h5 className="font-medium text-theme-text-primary mb-1">Rich API</h5>
-            <p className="text-xs text-theme-text-secondary">Full access to notes, UI, editor, and storage</p>
+            <h5 className="font-medium text-theme-text-primary mb-1">
+              Rich API
+            </h5>
+            <p className="text-xs text-theme-text-secondary">
+              Full access to notes, UI, editor, and storage
+            </p>
           </div>
         </div>
-        
+
         <div className="bg-theme-bg-tertiary rounded-lg p-4 border border-theme-border">
           <div className="text-center">
             <div className="w-8 h-8 mx-auto mb-2 bg-theme-accent rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-bold">M</span>
             </div>
-            <h5 className="font-medium text-theme-text-primary mb-1">Monitoring</h5>
-            <p className="text-xs text-theme-text-secondary">Real-time security and resource monitoring</p>
+            <h5 className="font-medium text-theme-text-primary mb-1">
+              Monitoring
+            </h5>
+            <p className="text-xs text-theme-text-secondary">
+              Real-time security and resource monitoring
+            </p>
           </div>
         </div>
       </div>
 
       {/* Plugin Manager Modal */}
-      <PluginManager 
+      <PluginManager
         isOpen={isPluginManagerOpen}
         onClose={() => setIsPluginManagerOpen(false)}
       />

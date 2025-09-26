@@ -2,11 +2,13 @@ import { useEffect, useRef } from 'react'
 import { useAppStore } from '../stores/newSimpleStore'
 import { useServices } from '../services/ServiceProvider'
 import { initLogger } from '../utils/logger'
+import { featureFlags } from '../config/featureFlags'
+import { useAppInitQuery } from './useAppInitQuery'
 
 /**
  * Hook responsible for application initialization coordination.
  * Manages the startup sequence including data loading, theme initialization, and error handling.
- * 
+ *
  * @description
  * This hook orchestrates the entire application initialization process using dependency injection
  * for better testability. It handles:
@@ -15,38 +17,42 @@ import { initLogger } from '../utils/logger'
  * - Loading tag colors
  * - Running diagnostics if needed
  * - Error state management
- * 
+ *
  * @returns {Object} Initialization state
  * @returns {boolean} returns.isInitializing - Whether the app is currently initializing
  * @returns {Error|null} returns.initError - Any error that occurred during initialization
- * 
+ *
  * @example
  * ```tsx
  * function App() {
  *   const { isInitializing, initError } = useAppInit();
- *   
+ *
  *   if (isInitializing) return <LoadingScreen />;
  *   if (initError) return <ErrorScreen error={initError} />;
- *   
+ *
  *   return <MainApp />;
  * }
  * ```
  */
 export const useAppInit = () => {
+  // Use query version if feature flags are enabled
+  if (featureFlags.useQueryForNotesList || featureFlags.useQueryForNotebooks) {
+    return useAppInitQuery()
+  }
   const storeState = useAppStore()
-  const { appInitializationService } = useServices()
+  const { appInitializationService, securityService } = useServices()
   const initializationAttempted = useRef(false)
-  
-  
-  const { 
-    setNotes, 
-    setLoading, 
-    setError, 
-    theme: currentTheme, 
+
+  const {
+    setNotes,
+    setLoading,
+    setError,
+    theme: currentTheme,
     setTheme,
     loadTagColors,
     settings,
-    updateSettings
+    updateSettings,
+    loadNotebooks,
   } = storeState
 
   // Initialize data using the injected service - only once
@@ -56,32 +62,49 @@ export const useAppInit = () => {
     }
 
     initializationAttempted.current = true
-    
+
     const initializeApp = async () => {
       initLogger.debug('Starting app initialization via injected service')
-      
+
+      // Initialize security service first
+      const securityAudit = securityService.performSecurityAudit()
+      if (!securityAudit.passed) {
+        initLogger.warn('Security audit found issues', { securityAudit })
+      }
+
       const dependencies = {
         loadNotes: storeState.loadNotes,
         loadSettings: storeState.loadSettings,
+        loadNotebooks,
         setLoading,
         setError,
         // Legacy compatibility (will be removed)
         setNotes,
         loadTagColors,
-        updateSettings
+        updateSettings,
       }
-      
+
       const result = await appInitializationService.initialize(dependencies)
-      
+
       if (!result.success) {
         initLogger.error('Initialization failed:', result.error)
       } else {
         initLogger.info('Initialization completed successfully')
       }
     }
-    
+
     initializeApp()
-  }, [appInitializationService, setNotes, setLoading, setError, loadTagColors, updateSettings])
+  }, [
+    appInitializationService,
+    securityService,
+    setNotes,
+    setLoading,
+    setError,
+    loadTagColors,
+    updateSettings,
+    loadNotebooks,
+    storeState,
+  ])
 
   // Theme initialization removed - now handled by useSettingsEffects
   // to prevent race conditions and multiple theme applications
@@ -89,6 +112,6 @@ export const useAppInit = () => {
   return {
     // Expose initialization status for components that need it
     isInitializing: useAppStore(state => state.isLoading),
-    initError: useAppStore(state => state.error)
+    initError: useAppStore(state => state.error),
   }
 }

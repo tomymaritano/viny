@@ -5,20 +5,30 @@ import LivePreviewControls from '../LivePreviewControls'
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({
   Check: ({ className }: { className?: string }) => (
-    <div data-testid="check-icon" className={className}>Check</div>
+    <div data-testid="check-icon" className={className}>
+      Check
+    </div>
   ),
   X: ({ className }: { className?: string }) => (
-    <div data-testid="x-icon" className={className}>X</div>
+    <div data-testid="x-icon" className={className}>
+      X
+    </div>
   ),
   RotateCcw: ({ className }: { className?: string }) => (
-    <div data-testid="rotate-icon" className={className}>RotateCcw</div>
+    <div data-testid="rotate-icon" className={className}>
+      RotateCcw
+    </div>
   ),
   Eye: ({ className }: { className?: string }) => (
-    <div data-testid="eye-icon" className={className}>Eye</div>
+    <div data-testid="eye-icon" className={className}>
+      Eye
+    </div>
   ),
   EyeOff: ({ className }: { className?: string }) => (
-    <div data-testid="eye-off-icon" className={className}>EyeOff</div>
-  )
+    <div data-testid="eye-off-icon" className={className}>
+      EyeOff
+    </div>
+  ),
 }))
 
 describe('LivePreviewControls', () => {
@@ -28,7 +38,7 @@ describe('LivePreviewControls', () => {
     modifiedKeys: ['theme'],
     onApply: vi.fn(),
     onRevert: vi.fn(),
-    onCancel: vi.fn()
+    onCancel: vi.fn(),
   }
 
   beforeEach(() => {
@@ -39,7 +49,7 @@ describe('LivePreviewControls', () => {
     const { container } = render(
       <LivePreviewControls {...defaultProps} isActive={false} />
     )
-    
+
     expect(container.firstChild).toBeNull()
   })
 
@@ -47,13 +57,13 @@ describe('LivePreviewControls', () => {
     const { container } = render(
       <LivePreviewControls {...defaultProps} modifiedCount={0} />
     )
-    
+
     expect(container.firstChild).toBeNull()
   })
 
   it('renders live preview controls when active with modifications', () => {
     render(<LivePreviewControls {...defaultProps} />)
-    
+
     expect(screen.getByText('Live Preview Active')).toBeInTheDocument()
     expect(screen.getByText('1 setting modified')).toBeInTheDocument()
     expect(screen.getByTestId('eye-icon')).toBeInTheDocument()
@@ -63,11 +73,11 @@ describe('LivePreviewControls', () => {
     const props = {
       ...defaultProps,
       modifiedCount: 3,
-      modifiedKeys: ['theme', 'fontSize', 'lineHeight']
+      modifiedKeys: ['theme', 'fontSize', 'lineHeight'],
     }
 
     render(<LivePreviewControls {...props} />)
-    
+
     expect(screen.getByText('3 settings modified')).toBeInTheDocument()
   })
 
@@ -75,38 +85,38 @@ describe('LivePreviewControls', () => {
     const props = {
       ...defaultProps,
       modifiedKeys: ['theme', 'fontSize'],
-      showDetails: true
+      showDetails: true,
     }
 
     render(<LivePreviewControls {...props} />)
-    
+
     expect(screen.getByText(/theme, fontSize/)).toBeInTheDocument()
   })
 
   it('calls onRevert when revert button is clicked', () => {
     render(<LivePreviewControls {...defaultProps} />)
-    
+
     const revertButton = screen.getByText('Revert')
     fireEvent.click(revertButton)
-    
+
     expect(defaultProps.onRevert).toHaveBeenCalledTimes(1)
   })
 
   it('calls onCancel when cancel button is clicked', () => {
     render(<LivePreviewControls {...defaultProps} />)
-    
+
     const cancelButton = screen.getByText('Cancel')
     fireEvent.click(cancelButton)
-    
+
     expect(defaultProps.onCancel).toHaveBeenCalledTimes(1)
   })
 
   it('calls onApply when apply button is clicked', () => {
     render(<LivePreviewControls {...defaultProps} />)
-    
+
     const applyButton = screen.getByText('Apply')
     fireEvent.click(applyButton)
-    
+
     expect(defaultProps.onApply).toHaveBeenCalledTimes(1)
   })
 
@@ -114,14 +124,14 @@ describe('LivePreviewControls', () => {
     const { container } = render(
       <LivePreviewControls {...defaultProps} className="custom-class" />
     )
-    
+
     const controlsElement = container.querySelector('.custom-class')
     expect(controlsElement).toBeInTheDocument()
   })
 
   it('renders all action buttons with correct icons', () => {
     render(<LivePreviewControls {...defaultProps} />)
-    
+
     expect(screen.getByTestId('rotate-icon')).toBeInTheDocument()
     expect(screen.getByTestId('x-icon')).toBeInTheDocument()
     expect(screen.getByTestId('check-icon')).toBeInTheDocument()
@@ -129,9 +139,13 @@ describe('LivePreviewControls', () => {
 
   it('displays help text about auto-revert', () => {
     render(<LivePreviewControls {...defaultProps} />)
-    
-    expect(screen.getByText(/Changes will auto-revert in a few seconds/)).toBeInTheDocument()
-    expect(screen.getByText(/Click Apply to make changes permanent/)).toBeInTheDocument()
+
+    expect(
+      screen.getByText(/Changes will auto-revert in a few seconds/)
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/Click Apply to make changes permanent/)
+    ).toBeInTheDocument()
   })
 
   it('handles singular vs plural correctly', () => {
@@ -139,7 +153,7 @@ describe('LivePreviewControls', () => {
     const singleProps = {
       ...defaultProps,
       modifiedCount: 1,
-      modifiedKeys: ['theme']
+      modifiedKeys: ['theme'],
     }
 
     const { rerender } = render(<LivePreviewControls {...singleProps} />)
@@ -149,7 +163,7 @@ describe('LivePreviewControls', () => {
     const multipleProps = {
       ...defaultProps,
       modifiedCount: 2,
-      modifiedKeys: ['theme', 'fontSize']
+      modifiedKeys: ['theme', 'fontSize'],
     }
 
     rerender(<LivePreviewControls {...multipleProps} />)
@@ -158,8 +172,13 @@ describe('LivePreviewControls', () => {
 
   it('renders with proper blue theme styling', () => {
     const { container } = render(<LivePreviewControls {...defaultProps} />)
-    
+
     const controlsContainer = container.firstChild as HTMLElement
-    expect(controlsContainer).toHaveClass('bg-blue-50', 'dark:bg-blue-900/20', 'border-blue-200', 'dark:border-blue-800')
+    expect(controlsContainer).toHaveClass(
+      'bg-blue-50',
+      'dark:bg-blue-900/20',
+      'border-blue-200',
+      'dark:border-blue-800'
+    )
   })
 })

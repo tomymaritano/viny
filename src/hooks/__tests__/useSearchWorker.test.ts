@@ -8,7 +8,7 @@ vi.mock('../../utils/logger', () => ({
   logger: {
     debug: vi.fn(),
     error: vi.fn(),
-  }
+  },
 }))
 
 const mockNotes = [
@@ -74,7 +74,7 @@ describe('useSearchWorker', () => {
     })
 
     it('should handle disabled worker option', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useSearchWorker(mockNotes, { enableWorker: false })
       )
 
@@ -84,7 +84,7 @@ describe('useSearchWorker', () => {
 
   describe('Fallback Search (Main Thread)', () => {
     it('should perform fallback search when worker is disabled', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useSearchWorker(mockNotes, { enableWorker: false })
       )
 
@@ -98,7 +98,7 @@ describe('useSearchWorker', () => {
     })
 
     it('should search in title', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useSearchWorker(mockNotes, { enableWorker: false })
       )
 
@@ -111,7 +111,7 @@ describe('useSearchWorker', () => {
     })
 
     it('should search in content', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useSearchWorker(mockNotes, { enableWorker: false })
       )
 
@@ -124,7 +124,7 @@ describe('useSearchWorker', () => {
     })
 
     it('should search in tags', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useSearchWorker(mockNotes, { enableWorker: false })
       )
 
@@ -137,7 +137,7 @@ describe('useSearchWorker', () => {
     })
 
     it('should be case insensitive', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useSearchWorker(mockNotes, { enableWorker: false })
       )
 
@@ -150,7 +150,7 @@ describe('useSearchWorker', () => {
     })
 
     it('should exclude trashed notes', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useSearchWorker(mockNotes, { enableWorker: false })
       )
 
@@ -168,7 +168,7 @@ describe('useSearchWorker', () => {
         title: `Test Note ${i}`,
       }))
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useSearchWorker(manyNotes, { enableWorker: false })
       )
 
@@ -180,7 +180,7 @@ describe('useSearchWorker', () => {
     })
 
     it('should clear results for empty query', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useSearchWorker(mockNotes, { enableWorker: false })
       )
 
@@ -193,7 +193,7 @@ describe('useSearchWorker', () => {
     })
 
     it('should measure search time', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useSearchWorker(mockNotes, { enableWorker: false })
       )
 
@@ -207,7 +207,7 @@ describe('useSearchWorker', () => {
 
   describe('Filter Function', () => {
     it('should filter by tags', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useSearchWorker(mockNotes, { enableWorker: false })
       )
 
@@ -220,7 +220,7 @@ describe('useSearchWorker', () => {
     })
 
     it('should filter by notebook', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useSearchWorker(mockNotes, { enableWorker: false })
       )
 
@@ -233,7 +233,7 @@ describe('useSearchWorker', () => {
     })
 
     it('should filter by multiple tags', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useSearchWorker(mockNotes, { enableWorker: false })
       )
 
@@ -245,7 +245,7 @@ describe('useSearchWorker', () => {
     })
 
     it('should handle empty filters', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useSearchWorker(mockNotes, { enableWorker: false })
       )
 
@@ -259,7 +259,7 @@ describe('useSearchWorker', () => {
 
   describe('Clear Results', () => {
     it('should clear all search state', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useSearchWorker(mockNotes, { enableWorker: false })
       )
 
@@ -281,8 +281,11 @@ describe('useSearchWorker', () => {
 
   describe('Error Handling', () => {
     it('should handle search errors gracefully', () => {
-      const { result } = renderHook(() => 
-        useSearchWorker(mockNotes, { enableWorker: false, fallbackToMainThread: false })
+      const { result } = renderHook(() =>
+        useSearchWorker(mockNotes, {
+          enableWorker: false,
+          fallbackToMainThread: false,
+        })
       )
 
       act(() => {
@@ -306,17 +309,17 @@ describe('useSearchWorker', () => {
 
       global.Worker = vi.fn(() => mockWorker) as any
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useSearchWorker(mockNotes, { enableWorker: true })
       )
 
       // Worker should be attempted to be created
       expect(global.Worker).toHaveBeenCalledWith('/search-worker.js')
-      
+
       // Should set up message handlers
       expect(mockWorker.postMessage).toHaveBeenCalledWith({
         type: 'INITIALIZE',
-        data: { notes: mockNotes }
+        data: { notes: mockNotes },
       })
     })
 
@@ -326,7 +329,7 @@ describe('useSearchWorker', () => {
         throw new Error('Worker creation failed')
       }) as any
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useSearchWorker(mockNotes, { enableWorker: true })
       )
 
@@ -340,7 +343,7 @@ describe('useSearchWorker', () => {
 
   describe('Options', () => {
     it('should respect enableWorker option', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useSearchWorker(mockNotes, { enableWorker: false })
       )
 
@@ -348,8 +351,11 @@ describe('useSearchWorker', () => {
     })
 
     it('should respect fallbackToMainThread option', () => {
-      const { result } = renderHook(() => 
-        useSearchWorker(mockNotes, { enableWorker: false, fallbackToMainThread: true })
+      const { result } = renderHook(() =>
+        useSearchWorker(mockNotes, {
+          enableWorker: false,
+          fallbackToMainThread: true,
+        })
       )
 
       act(() => {

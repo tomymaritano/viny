@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import BaseModal from '../ui/BaseModal'
+import { BaseModal } from '../ui/StandardModal'
 import { Icons } from '../Icons'
 
 interface RenameModalProps {
@@ -15,33 +15,33 @@ const RenameModal: React.FC<RenameModalProps> = ({
   onClose,
   currentName,
   title,
-  onRename
+  onRename,
 }) => {
-  const [newName, setNewName] = useState(currentName)
+  const [newName, setNewName] = useState(currentName || '')
   const [error, setError] = useState('')
 
   useEffect(() => {
     if (isOpen) {
-      setNewName(currentName)
+      setNewName(currentName || '')
       setError('')
     }
   }, [isOpen, currentName])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     const trimmedName = newName.trim()
-    
+
     if (!trimmedName) {
       setError('Name cannot be empty')
       return
     }
-    
+
     if (trimmedName === currentName) {
       onClose()
       return
     }
-    
+
     onRename(trimmedName)
     onClose()
   }
@@ -71,7 +71,7 @@ const RenameModal: React.FC<RenameModalProps> = ({
           <input
             type="text"
             value={newName}
-            onChange={(e) => {
+            onChange={e => {
               setNewName(e.target.value)
               setError('')
             }}
@@ -80,11 +80,9 @@ const RenameModal: React.FC<RenameModalProps> = ({
             className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
             autoFocus
           />
-          {error && (
-            <p className="mt-1 text-xs text-red-500">{error}</p>
-          )}
+          {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
         </div>
-        
+
         <div className="flex justify-end space-x-2">
           <button
             type="button"

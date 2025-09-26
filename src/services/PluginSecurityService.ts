@@ -14,7 +14,7 @@ export interface SecurityViolation {
 }
 
 export interface ResourceUsage {
-  memory: number      // bytes
+  memory: number // bytes
   executionTime: number // ms
   networkRequests: number
   storageUsed: number // bytes
@@ -38,7 +38,7 @@ export class PluginSecurityService {
   private auditLog: SecurityAuditLog[] = []
   private resourceMonitors: Map<string, ResourceMonitor> = new Map()
   private securityPolicies: Map<string, any> = new Map()
-  
+
   // Security configuration
   private readonly MAX_VIOLATIONS_PER_PLUGIN = 10
   private readonly MAX_AUDIT_LOG_SIZE = 1000
@@ -46,7 +46,7 @@ export class PluginSecurityService {
     low: 50,
     medium: 20,
     high: 5,
-    critical: 1
+    critical: 1,
   }
 
   constructor() {
@@ -70,13 +70,15 @@ export class PluginSecurityService {
     // Override dangerous functions to detect misuse
     const originalEval = window.eval
     window.eval = (code: string) => {
-      this.recordViolation('unknown', 'Attempted eval() usage', 'high', { code: code.substring(0, 100) })
+      this.recordViolation('unknown', 'Attempted eval() usage', 'high', {
+        code: code.substring(0, 100),
+      })
       throw new Error('eval() is not allowed in plugin context')
     }
 
     // Monitor Function constructor
     const originalFunction = window.Function
-    window.Function = function(...args: any[]) {
+    window.Function = function (...args: any[]) {
       logger.warn('PluginSecurityService: Function constructor usage detected')
       return originalFunction.apply(this, args)
     }
@@ -139,14 +141,16 @@ export class PluginSecurityService {
     const sandbox = {
       // Safe console
       console: this.createSecureConsole(pluginName),
-      
+
       // Restricted timers
-      setTimeout: policy.allowedPermissions.includes('timers') 
-        ? (fn: Function, delay: number) => this.secureSetTimeout(pluginName, fn, delay, monitor)
+      setTimeout: policy.allowedPermissions.includes('timers')
+        ? (fn: Function, delay: number) =>
+            this.secureSetTimeout(pluginName, fn, delay, monitor)
         : undefined,
-      
+
       setInterval: policy.allowedPermissions.includes('timers')
-        ? (fn: Function, delay: number) => this.secureSetInterval(pluginName, fn, delay, monitor)
+        ? (fn: Function, delay: number) =>
+            this.secureSetInterval(pluginName, fn, delay, monitor)
         : undefined,
 
       // Restricted DOM access
@@ -156,7 +160,8 @@ export class PluginSecurityService {
 
       // Restricted network access
       fetch: policy.allowedPermissions.includes('network')
-        ? (input: any, init?: any) => this.secureFetch(pluginName, input, init, monitor)
+        ? (input: any, init?: any) =>
+            this.secureFetch(pluginName, input, init, monitor)
         : undefined,
 
       // Plugin-specific storage
@@ -166,7 +171,7 @@ export class PluginSecurityService {
       JSON: JSON,
       Math: Math,
       Date: Date,
-      
+
       // Disable dangerous functions
       eval: undefined,
       Function: undefined,
@@ -178,7 +183,7 @@ export class PluginSecurityService {
       window: undefined,
       self: undefined,
       parent: undefined,
-      top: undefined
+      top: undefined,
     }
 
     // Record sandbox creation
@@ -190,7 +195,10 @@ export class PluginSecurityService {
   /**
    * Validate plugin code for security issues
    */
-  validatePluginCode(pluginName: string, code: string): { valid: boolean; issues: string[] } {
+  validatePluginCode(
+    pluginName: string,
+    code: string
+  ): { valid: boolean; issues: string[] } {
     const issues: string[] = []
 
     // Check for dangerous patterns
@@ -207,18 +215,21 @@ export class PluginSecurityService {
       { pattern: /require\s*\(/gi, message: 'Contains require call' },
       { pattern: /process\./gi, message: 'Attempts to access process object' },
       { pattern: /global\./gi, message: 'Attempts to access global object' },
-      { pattern: /window\./gi, message: 'Direct window object access' }
+      { pattern: /window\./gi, message: 'Direct window object access' },
     ]
 
     for (const { pattern, message } of dangerousPatterns) {
       if (pattern.test(code)) {
         issues.push(message)
-        this.recordViolation(pluginName, message, 'medium', { pattern: pattern.source })
+        this.recordViolation(pluginName, message, 'medium', {
+          pattern: pattern.source,
+        })
       }
     }
 
     // Check code size
-    if (code.length > 1024 * 1024) { // 1MB
+    if (code.length > 1024 * 1024) {
+      // 1MB
       issues.push('Plugin code exceeds size limit (1MB)')
       this.recordViolation(pluginName, 'Code size limit exceeded', 'medium')
     }
@@ -241,15 +252,17 @@ export class PluginSecurityService {
 
     if (obfuscationScore > 10) {
       issues.push('Plugin appears to be obfuscated')
-      this.recordViolation(pluginName, 'Obfuscated code detected', 'high', { score: obfuscationScore })
+      this.recordViolation(pluginName, 'Obfuscated code detected', 'high', {
+        score: obfuscationScore,
+      })
     }
 
     const isValid = issues.length === 0
-    
+
     this.recordAuditLog(pluginName, 'code_validation', 'security', isValid, {
       codeSize: code.length,
       issuesFound: issues.length,
-      obfuscationScore
+      obfuscationScore,
     })
 
     return { valid: isValid, issues }
@@ -265,13 +278,23 @@ export class PluginSecurityService {
       return false
     }
 
-    const hasPermission = policy.allowedPermissions.includes('*') || 
-                         policy.allowedPermissions.includes(permission)
+    const hasPermission =
+      policy.allowedPermissions.includes('*') ||
+      policy.allowedPermissions.includes(permission)
 
-    this.recordAuditLog(pluginName, 'permission_check', permission, hasPermission)
+    this.recordAuditLog(
+      pluginName,
+      'permission_check',
+      permission,
+      hasPermission
+    )
 
     if (!hasPermission) {
-      this.recordViolation(pluginName, `Permission denied: ${permission}`, 'medium')
+      this.recordViolation(
+        pluginName,
+        `Permission denied: ${permission}`,
+        'medium'
+      )
     }
 
     return hasPermission
@@ -310,14 +333,22 @@ export class PluginSecurityService {
    */
   shouldQuarantinePlugin(pluginName: string): boolean {
     const violations = this.getViolations(pluginName)
-    
+
     let score = 0
     for (const violation of violations) {
       switch (violation.severity) {
-        case 'critical': score += 10; break
-        case 'high': score += 5; break
-        case 'medium': score += 2; break
-        case 'low': score += 1; break
+        case 'critical':
+          score += 10
+          break
+        case 'high':
+          score += 5
+          break
+        case 'medium':
+          score += 2
+          break
+        case 'low':
+          score += 1
+          break
       }
     }
 
@@ -330,11 +361,11 @@ export class PluginSecurityService {
   cleanupPlugin(pluginName: string): void {
     this.resourceMonitors.delete(pluginName)
     this.securityPolicies.delete(pluginName)
-    
+
     // Remove old violations (keep recent ones for analysis)
-    const cutoff = Date.now() - (24 * 60 * 60 * 1000) // 24 hours
-    this.violations = this.violations.filter(v => 
-      v.pluginName !== pluginName || v.timestamp > cutoff
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000 // 24 hours
+    this.violations = this.violations.filter(
+      v => v.pluginName !== pluginName || v.timestamp > cutoff
     )
 
     logger.info(`Security cleanup completed for plugin: ${pluginName}`)
@@ -346,25 +377,32 @@ export class PluginSecurityService {
     return {
       log: (...args: any[]) => logger.info(`Plugin(${pluginName}):`, ...args),
       warn: (...args: any[]) => logger.warn(`Plugin(${pluginName}):`, ...args),
-      error: (...args: any[]) => logger.error(`Plugin(${pluginName}):`, ...args),
-      debug: (...args: any[]) => logger.debug(`Plugin(${pluginName}):`, ...args),
-      info: (...args: any[]) => logger.info(`Plugin(${pluginName}):`, ...args)
+      error: (...args: any[]) =>
+        logger.error(`Plugin(${pluginName}):`, ...args),
+      debug: (...args: any[]) =>
+        logger.debug(`Plugin(${pluginName}):`, ...args),
+      info: (...args: any[]) => logger.info(`Plugin(${pluginName}):`, ...args),
     } as Console
   }
 
   private secureSetTimeout(
-    pluginName: string, 
-    fn: Function, 
-    delay: number, 
+    pluginName: string,
+    fn: Function,
+    delay: number,
     monitor: ResourceMonitor
   ): NodeJS.Timeout {
     if (delay < 10) {
-      this.recordViolation(pluginName, 'Excessive setTimeout frequency', 'medium', { delay })
+      this.recordViolation(
+        pluginName,
+        'Excessive setTimeout frequency',
+        'medium',
+        { delay }
+      )
       delay = 10 // Minimum delay
     }
 
     monitor.incrementTimerUsage()
-    
+
     return setTimeout(() => {
       try {
         const start = performance.now()
@@ -372,7 +410,9 @@ export class PluginSecurityService {
         const executionTime = performance.now() - start
         monitor.recordExecution(executionTime)
       } catch (error) {
-        this.recordViolation(pluginName, 'Timer callback error', 'low', { error: String(error) })
+        this.recordViolation(pluginName, 'Timer callback error', 'low', {
+          error: String(error),
+        })
       }
     }, delay)
   }
@@ -384,7 +424,12 @@ export class PluginSecurityService {
     monitor: ResourceMonitor
   ): NodeJS.Timeout {
     if (delay < 100) {
-      this.recordViolation(pluginName, 'Excessive setInterval frequency', 'high', { delay })
+      this.recordViolation(
+        pluginName,
+        'Excessive setInterval frequency',
+        'high',
+        { delay }
+      )
       delay = 100 // Minimum delay for intervals
     }
 
@@ -397,7 +442,9 @@ export class PluginSecurityService {
         const executionTime = performance.now() - start
         monitor.recordExecution(executionTime)
       } catch (error) {
-        this.recordViolation(pluginName, 'Interval callback error', 'low', { error: String(error) })
+        this.recordViolation(pluginName, 'Interval callback error', 'low', {
+          error: String(error),
+        })
       }
     }, delay)
   }
@@ -407,15 +454,21 @@ export class PluginSecurityService {
     return {
       createElement: (tag: string) => {
         if (!['div', 'span', 'p', 'button'].includes(tag.toLowerCase())) {
-          this.recordViolation(pluginName, `Attempted to create restricted element: ${tag}`, 'medium')
+          this.recordViolation(
+            pluginName,
+            `Attempted to create restricted element: ${tag}`,
+            'medium'
+          )
           throw new Error(`Element type '${tag}' not allowed`)
         }
         return document.createElement(tag)
       },
-      
+
       querySelector: (selector: string) => {
         // Log selector for monitoring
-        this.recordAuditLog(pluginName, 'dom_query', 'dom.read', true, { selector })
+        this.recordAuditLog(pluginName, 'dom_query', 'dom.read', true, {
+          selector,
+        })
         return null // Restricted for security
       },
 
@@ -423,7 +476,7 @@ export class PluginSecurityService {
       write: undefined,
       writeln: undefined,
       open: undefined,
-      close: undefined
+      close: undefined,
     }
   }
 
@@ -434,10 +487,14 @@ export class PluginSecurityService {
     monitor: ResourceMonitor
   ): Promise<Response> {
     const url = typeof input === 'string' ? input : input.toString()
-    
+
     // Check URL whitelist
     if (!this.isUrlAllowed(url)) {
-      this.recordViolation(pluginName, `Blocked network request to: ${url}`, 'high')
+      this.recordViolation(
+        pluginName,
+        `Blocked network request to: ${url}`,
+        'high'
+      )
       throw new Error(`Network request to ${url} not allowed`)
     }
 
@@ -449,14 +506,17 @@ export class PluginSecurityService {
       monitor.recordNetworkResponse(response.status)
       return response
     } catch (error) {
-      this.recordViolation(pluginName, 'Network request failed', 'low', { url, error: String(error) })
+      this.recordViolation(pluginName, 'Network request failed', 'low', {
+        url,
+        error: String(error),
+      })
       throw error
     }
   }
 
   private createPluginStorage(pluginName: string): Storage {
     const storageKey = `viny_plugin_secure_${pluginName}`
-    
+
     return {
       getItem: (key: string) => {
         try {
@@ -468,7 +528,7 @@ export class PluginSecurityService {
           return null
         }
       },
-      
+
       setItem: (key: string, value: string) => {
         try {
           const data = localStorage.getItem(storageKey)
@@ -480,7 +540,7 @@ export class PluginSecurityService {
           throw new Error('Storage quota exceeded')
         }
       },
-      
+
       removeItem: (key: string) => {
         try {
           const data = localStorage.getItem(storageKey)
@@ -491,7 +551,7 @@ export class PluginSecurityService {
           this.recordViolation(pluginName, 'Storage remove error', 'low')
         }
       },
-      
+
       clear: () => {
         try {
           localStorage.removeItem(storageKey)
@@ -499,9 +559,9 @@ export class PluginSecurityService {
           this.recordViolation(pluginName, 'Storage clear error', 'low')
         }
       },
-      
+
       key: () => null,
-      length: 0
+      length: 0,
     }
   }
 
@@ -511,7 +571,7 @@ export class PluginSecurityService {
       'api.github.com',
       'raw.githubusercontent.com',
       'cdn.jsdelivr.net',
-      'unpkg.com'
+      'unpkg.com',
     ]
 
     try {
@@ -533,7 +593,7 @@ export class PluginSecurityService {
       violation,
       severity,
       timestamp: Date.now(),
-      details
+      details,
     }
 
     this.violations.push(securityViolation)
@@ -543,11 +603,15 @@ export class PluginSecurityService {
       this.violations = this.violations.slice(-500)
     }
 
-    logger.warn(`Security violation [${severity}] in plugin ${pluginName}: ${violation}`)
+    logger.warn(
+      `Security violation [${severity}] in plugin ${pluginName}: ${violation}`
+    )
 
     // Auto-quarantine for critical violations
     if (severity === 'critical') {
-      logger.error(`Critical security violation in plugin ${pluginName}, consider quarantine`)
+      logger.error(
+        `Critical security violation in plugin ${pluginName}, consider quarantine`
+      )
     }
   }
 
@@ -564,7 +628,7 @@ export class PluginSecurityService {
       permission,
       granted,
       timestamp: Date.now(),
-      resourceUsage: this.monitorResourceUsage(pluginName) || undefined
+      resourceUsage: this.monitorResourceUsage(pluginName) || undefined,
     }
 
     this.auditLog.push(logEntry)
@@ -575,8 +639,15 @@ export class PluginSecurityService {
     }
   }
 
-  private recordNetworkRequest(pluginName: string, url: string, method: string): void {
-    this.recordAuditLog(pluginName, 'network_request', 'network', true, { url, method })
+  private recordNetworkRequest(
+    pluginName: string,
+    url: string,
+    method: string
+  ): void {
+    this.recordAuditLog(pluginName, 'network_request', 'network', true, {
+      url,
+      method,
+    })
   }
 }
 
@@ -585,19 +656,22 @@ export class PluginSecurityService {
  */
 class ResourceMonitor {
   private startTime: number = Date.now()
-  private memoryPeek: number = 0
-  private executionTime: number = 0
-  private timerCount: number = 0
-  private networkRequests: number = 0
+  private memoryPeek = 0
+  private executionTime = 0
+  private timerCount = 0
+  private networkRequests = 0
   private limits: any
 
-  constructor(public pluginName: string, limits: any) {
+  constructor(
+    public pluginName: string,
+    limits: any
+  ) {
     this.limits = limits
   }
 
   updateMemoryUsage(currentMemory: number): void {
     this.memoryPeek = Math.max(this.memoryPeek, currentMemory)
-    
+
     if (this.memoryPeek > this.limits.memoryLimit * 1024 * 1024) {
       logger.warn(`Plugin ${this.pluginName} exceeded memory limit`)
     }
@@ -605,7 +679,7 @@ class ResourceMonitor {
 
   recordExecution(time: number): void {
     this.executionTime += time
-    
+
     if (time > this.limits.executionTimeout) {
       logger.warn(`Plugin ${this.pluginName} execution time exceeded limit`)
     }
@@ -613,7 +687,7 @@ class ResourceMonitor {
 
   incrementTimerUsage(): void {
     this.timerCount++
-    
+
     if (this.timerCount > 10) {
       logger.warn(`Plugin ${this.pluginName} created excessive timers`)
     }
@@ -621,7 +695,7 @@ class ResourceMonitor {
 
   incrementNetworkRequests(): void {
     this.networkRequests++
-    
+
     if (this.networkRequests > 50) {
       logger.warn(`Plugin ${this.pluginName} made excessive network requests`)
     }
@@ -638,7 +712,7 @@ class ResourceMonitor {
       memory: this.memoryPeek,
       executionTime: this.executionTime,
       networkRequests: this.networkRequests,
-      storageUsed: 0
+      storageUsed: 0,
     }
   }
 }

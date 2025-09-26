@@ -11,17 +11,17 @@ const mockFocus = vi.fn()
 
 // Mock the useInkdropEditor hook
 vi.mock('../../hooks/useInkdropEditor', () => ({
-  useInkdropEditor: vi.fn((props) => {
+  useInkdropEditor: vi.fn(props => {
     return {
       editorRef: { current: null },
       methods: {
         insertText: mockInsertText,
         formatSelection: mockFormatSelection,
         getView: mockGetView,
-        focus: mockFocus
-      }
+        focus: mockFocus,
+      },
     }
-  })
+  }),
 }))
 
 describe('InkdropEditor', () => {
@@ -31,7 +31,7 @@ describe('InkdropEditor', () => {
 
   it('renders with default props', () => {
     const { container } = render(<InkdropEditor />)
-    
+
     const editor = container.querySelector('.inkdrop-editor')
     expect(editor).toBeInTheDocument()
     expect(editor).toHaveClass('h-full')
@@ -39,19 +39,19 @@ describe('InkdropEditor', () => {
 
   it('applies correct styles', () => {
     const { container } = render(<InkdropEditor />)
-    
+
     const editor = container.querySelector('.inkdrop-editor')
     expect(editor).toHaveStyle({
       minHeight: '100%',
       fontSize: '16px',
-      lineHeight: '1.6'
+      lineHeight: '1.6',
     })
   })
 
   it('exposes methods through ref', () => {
     const ref = createRef<any>()
     render(<InkdropEditor ref={ref} />)
-    
+
     expect(ref.current).toBeDefined()
     expect(ref.current.insertText).toBe(mockInsertText)
     expect(ref.current.formatSelection).toBe(mockFormatSelection)
@@ -62,7 +62,7 @@ describe('InkdropEditor', () => {
   it('calls insertText method when exposed through ref', () => {
     const ref = createRef<any>()
     render(<InkdropEditor ref={ref} />)
-    
+
     ref.current.insertText('Hello World')
     expect(mockInsertText).toHaveBeenCalledWith('Hello World')
   })
@@ -70,7 +70,7 @@ describe('InkdropEditor', () => {
   it('calls formatSelection method when exposed through ref', () => {
     const ref = createRef<any>()
     render(<InkdropEditor ref={ref} />)
-    
+
     ref.current.formatSelection('**', '**')
     expect(mockFormatSelection).toHaveBeenCalledWith('**', '**')
   })
@@ -78,7 +78,7 @@ describe('InkdropEditor', () => {
   it('calls focus method when exposed through ref', () => {
     const ref = createRef<any>()
     render(<InkdropEditor ref={ref} />)
-    
+
     ref.current.focus()
     expect(mockFocus).toHaveBeenCalled()
   })
@@ -86,7 +86,7 @@ describe('InkdropEditor', () => {
   it('calls getView method when exposed through ref', () => {
     const ref = createRef<any>()
     render(<InkdropEditor ref={ref} />)
-    
+
     const result = ref.current.getView()
     expect(mockGetView).toHaveBeenCalled()
     expect(result).toBe(null)
@@ -133,7 +133,7 @@ describe('InkdropEditor', () => {
       includeKeyboard: true,
       includeFeatures: false,
       includeBehavior: false,
-      theme: 'light'
+      theme: 'light',
     }
     render(<InkdropEditor preset={preset} />)
     // Since the actual editor is mocked, we just verify the component renders
@@ -149,11 +149,11 @@ describe('InkdropEditor', () => {
   it('maintains ref stability across re-renders', () => {
     const ref = createRef<any>()
     const { rerender } = render(<InkdropEditor ref={ref} value="initial" />)
-    
+
     const initialMethods = ref.current
-    
+
     rerender(<InkdropEditor ref={ref} value="updated" />)
-    
+
     // Methods should remain the same references
     expect(ref.current.insertText).toBe(initialMethods.insertText)
     expect(ref.current.formatSelection).toBe(initialMethods.formatSelection)

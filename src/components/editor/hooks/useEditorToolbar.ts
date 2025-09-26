@@ -56,7 +56,7 @@ export const useEditorToolbar = (value, onChange, editorRef) => {
         editorRef.current.formatSelection(prefix, suffix)
         return
       }
-      
+
       // Fallback: just insert the formatted text
       insertText(prefix + 'text' + suffix)
     },

@@ -130,7 +130,8 @@ export const DIRECT_COLORS = {
 export const FONT_CONFIG = {
   EDITOR: "'SF Mono', 'Monaco', 'Consolas', 'Fira Code', monospace",
   UI: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-  MARKDOWN: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  MARKDOWN:
+    "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   KBD: "'SF Mono', 'Monaco', 'Consolas', 'Fira Code', monospace",
 } as const
 
@@ -140,13 +141,15 @@ export const KBD_STYLES = {
     backgroundColor: '#292828',
     color: '#ffffff',
     borderColor: '#1a1a1a',
-    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+    boxShadow:
+      '0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
   },
   LIGHT: {
     backgroundColor: '#f5f5f5',
     color: '#333333',
     borderColor: '#d0d0d0',
-    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
+    boxShadow:
+      '0 1px 2px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
   },
   COMMON: {
     padding: '0.1em 0.4em',
@@ -169,5 +172,5 @@ export const SIZE_CONFIG = {
   LINE_HEIGHT: '1.6',
 } as const
 
-export type ThemeType = typeof THEME_CONFIG.AVAILABLE[number]
+export type ThemeType = (typeof THEME_CONFIG.AVAILABLE)[number]
 export type StatusType = keyof typeof STATUS_COLORS

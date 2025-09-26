@@ -1,7 +1,8 @@
 /**
  * Higher-order component for wrapping lazy components with Suspense
  */
-import React, { Suspense, ComponentType } from 'react'
+import type { ComponentType } from 'react'
+import React, { Suspense } from 'react'
 import LoadingSpinner from '../LoadingSpinner'
 
 interface LazyWrapperProps {
@@ -18,9 +19,11 @@ export function withLazyWrapper<P extends object>(
 ) {
   const LazyComponent = (props: P & LazyWrapperProps) => {
     const { className, ...componentProps } = props
-    
+
     const defaultFallback = (
-      <div className={`flex items-center justify-center py-8 ${className || ''}`}>
+      <div
+        className={`flex items-center justify-center py-8 ${className || ''}`}
+      >
         <LoadingSpinner size="sm" />
       </div>
     )
@@ -33,7 +36,7 @@ export function withLazyWrapper<P extends object>(
   }
 
   LazyComponent.displayName = `LazyWrapper(${Component.displayName || Component.name})`
-  
+
   return LazyComponent
 }
 
@@ -44,10 +47,10 @@ interface LazyWrapperComponentProps extends LazyWrapperProps {
   children: React.ReactNode
 }
 
-export const LazyWrapper: React.FC<LazyWrapperComponentProps> = ({ 
-  children, 
-  fallback, 
-  className 
+export const LazyWrapper: React.FC<LazyWrapperComponentProps> = ({
+  children,
+  fallback,
+  className,
 }) => {
   const defaultFallback = (
     <div className={`flex items-center justify-center py-8 ${className || ''}`}>
@@ -55,11 +58,7 @@ export const LazyWrapper: React.FC<LazyWrapperComponentProps> = ({
     </div>
   )
 
-  return (
-    <Suspense fallback={fallback || defaultFallback}>
-      {children}
-    </Suspense>
-  )
+  return <Suspense fallback={fallback || defaultFallback}>{children}</Suspense>
 }
 
 export default LazyWrapper

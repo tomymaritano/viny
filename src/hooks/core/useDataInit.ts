@@ -13,7 +13,7 @@ export const useDataInit = () => {
   useEffect(() => {
     const initData = async () => {
       if (hasInitialized.current) return
-      
+
       try {
         logger.debug('Initializing default data if needed...')
         await initializeDefaultData()
@@ -23,11 +23,11 @@ export const useDataInit = () => {
         logger.error('Failed to initialize default data:', error)
       }
     }
-    
+
     initData()
   }, [])
 
   return {
-    isDataInitialized: hasInitialized.current
+    isDataInitialized: hasInitialized.current,
   }
 }

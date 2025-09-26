@@ -1,5 +1,5 @@
 import React from 'react'
-import BaseModal from '../ui/BaseModal'
+import { BaseModal } from '../ui/StandardModal'
 import { Icons } from '../Icons'
 
 interface ConfirmModalProps {
@@ -21,7 +21,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   message,
   confirmText = 'Confirm',
   cancelText = 'Cancel',
-  type = 'warning'
+  type = 'warning',
 }) => {
   if (!isOpen) return null
 
@@ -64,10 +64,8 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
       closeOnEscape={true}
     >
       <div className="p-4">
-        <p className="text-sm text-theme-text-secondary mb-4">
-          {message}
-        </p>
-        
+        <p className="text-sm text-theme-text-secondary mb-4">{message}</p>
+
         <div className="flex justify-end space-x-2">
           <button
             onClick={onClose}

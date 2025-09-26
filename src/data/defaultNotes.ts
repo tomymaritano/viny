@@ -1,4 +1,5 @@
-import { Note } from '../types'
+import type { Note } from '../types'
+import { logger } from '../utils/logger'
 
 export const defaultNotes: Note[] = [
   {
@@ -38,7 +39,9 @@ Visit the **"learn"** notebook for detailed guides on markdown syntax, shortcuts
 Happy note-taking! 📝`,
     notebook: 'inbox',
     tags: ['welcome', 'getting-started'],
-    pinned: true,
+    status: 'draft' as const,
+    isPinned: true,
+    isTrashed: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -100,7 +103,7 @@ Use \`backticks\` for inline code.
 ### Code Blocks
 \`\`\`javascript
 function hello() {
-  console.log("Hello, world!");
+  logger.info("Hello, world!");
 }
 \`\`\`
 
@@ -170,7 +173,9 @@ $$
 Happy writing! 📝✨`,
     notebook: 'learn',
     tags: ['markdown', 'guide', 'syntax', 'tutorial'],
-    pinned: true,
+    status: 'draft' as const,
+    isPinned: true,
+    isTrashed: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -259,7 +264,9 @@ If you enable Vim mode in settings:
 Remember: Practice makes perfect! The more you use these shortcuts, the faster you'll become. 🚀`,
     notebook: 'learn',
     tags: ['shortcuts', 'productivity', 'guide'],
-    pinned: false,
+    status: 'draft' as const,
+    isPinned: false,
+    isTrashed: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -406,7 +413,9 @@ Good note titles make finding information much easier.
 Remember: The best organization system is the one you'll actually use! Start simple and refine as you go. 📈`,
     notebook: 'learn',
     tags: ['organization', 'productivity', 'guide'],
-    pinned: false,
+    status: 'draft' as const,
+    isPinned: false,
+    isTrashed: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -467,7 +476,9 @@ Building a simple todo application to practice React and state management.
 - [Tailwind CSS](https://tailwindcss.com)`,
     notebook: 'projects',
     tags: ['react', 'javascript', 'todo-app', 'project'],
-    pinned: false,
+    status: 'draft' as const,
+    isPinned: false,
+    isTrashed: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -506,7 +517,9 @@ A simple recipe manager that:
 *Note: Move this to projects when ready to start development*`,
     notebook: 'inbox',
     tags: ['idea', 'app', 'recipe', 'cooking'],
-    pinned: false,
+    status: 'draft' as const,
+    isPinned: false,
+    isTrashed: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -538,7 +551,9 @@ A simple recipe manager that:
 *Template: Copy this template for daily standup notes*`,
     notebook: 'work',
     tags: ['template', 'standup', 'daily', 'work'],
-    pinned: false,
+    status: 'draft' as const,
+    isPinned: false,
+    isTrashed: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -598,7 +613,9 @@ A simple recipe manager that:
 *Remember: Goals should be specific, measurable, and realistic. Review and adjust quarterly.*`,
     notebook: 'personal',
     tags: ['goals', '2024', 'planning', 'personal'],
-    pinned: false,
+    status: 'draft' as const,
+    isPinned: false,
+    isTrashed: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },

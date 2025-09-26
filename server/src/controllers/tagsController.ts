@@ -6,7 +6,15 @@ import { createError } from '../middleware/errorHandler'
 // Get all tags
 export const getTags = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw createError('User not authenticated', 401)
+    }
+
     const tags = await prisma.tag.findMany({
+      where: {
+        userId: userId
+      },
       include: {
         _count: {
           select: {
@@ -35,6 +43,11 @@ export const getTags = async (req: Request, res: Response, next: NextFunction) =
 // Get tag by ID
 export const getTagById = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw createError('User not authenticated', 401)
+    }
+
     const { id } = req.params
     const tagId = parseInt(id)
 
@@ -42,8 +55,11 @@ export const getTagById = async (req: Request, res: Response, next: NextFunction
       throw createError('Invalid tag ID', 400)
     }
 
-    const tag = await prisma.tag.findUnique({
-      where: { id: tagId },
+    const tag = await prisma.tag.findFirst({
+      where: { 
+        id: tagId,
+        userId: userId
+      },
       include: {
         _count: {
           select: {
@@ -73,10 +89,18 @@ export const getTagById = async (req: Request, res: Response, next: NextFunction
 // Create new tag
 export const createTag = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw createError('User not authenticated', 401)
+    }
+
     const validatedData = CreateTagSchema.parse(req.body)
 
     const tag = await prisma.tag.create({
-      data: validatedData,
+      data: {
+        ...validatedData,
+        userId: userId
+      },
       include: {
         _count: {
           select: {
@@ -102,6 +126,11 @@ export const createTag = async (req: Request, res: Response, next: NextFunction)
 // Update tag
 export const updateTag = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw createError('User not authenticated', 401)
+    }
+
     const { id } = req.params
     const tagId = parseInt(id)
 
@@ -111,8 +140,11 @@ export const updateTag = async (req: Request, res: Response, next: NextFunction)
 
     const validatedData = UpdateTagSchema.parse(req.body)
 
-    const existingTag = await prisma.tag.findUnique({
-      where: { id: tagId }
+    const existingTag = await prisma.tag.findFirst({
+      where: { 
+        id: tagId,
+        userId: userId
+      }
     })
 
     if (!existingTag) {
@@ -147,6 +179,11 @@ export const updateTag = async (req: Request, res: Response, next: NextFunction)
 // Delete tag
 export const deleteTag = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw createError('User not authenticated', 401)
+    }
+
     const { id } = req.params
     const tagId = parseInt(id)
 
@@ -154,8 +191,11 @@ export const deleteTag = async (req: Request, res: Response, next: NextFunction)
       throw createError('Invalid tag ID', 400)
     }
 
-    const tag = await prisma.tag.findUnique({
-      where: { id: tagId }
+    const tag = await prisma.tag.findFirst({
+      where: { 
+        id: tagId,
+        userId: userId
+      }
     })
 
     if (!tag) {

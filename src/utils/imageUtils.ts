@@ -21,7 +21,8 @@
 // - For permanent images: Save locally and use relative paths
 
 /**
- * Converts a File object to a data URI
+
+import { storageLogger } from './logger' * Converts a File object to a data URI
  * @param {File} file - The image file
  * @returns {Promise<string>} - Promise that resolves to a data URI
  */
@@ -123,7 +124,7 @@ export function createSafeImageMarkdown(altText, url) {
 //    if (isImageUrlAllowed(url)) {
 //      insertText(`![Safe image](${url})`)
 //    } else {
-//      console.warn('External URL blocked for security')
+//      storageLogger.warn('External URL blocked for security')
 //    }
 //
 // TROUBLESHOOTING:

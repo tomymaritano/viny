@@ -7,7 +7,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { RepositoryFactory } from '../RepositoryFactory'
 import { DocumentRepository } from '../DocumentRepository'
 import { SettingsRepository } from '../SettingsRepository'
-import { RepositoryConfig } from '../interfaces/IEnhancedRepository'
+import type { RepositoryConfig } from '../interfaces/IEnhancedRepository'
 
 describe('RepositoryFactory', () => {
   let factory: RepositoryFactory
@@ -19,7 +19,7 @@ describe('RepositoryFactory', () => {
   describe('createDocumentRepository', () => {
     it('should create DocumentRepository with default config', () => {
       const repository = factory.createDocumentRepository()
-      
+
       expect(repository).toBeInstanceOf(DocumentRepository)
     })
 
@@ -33,19 +33,19 @@ describe('RepositoryFactory', () => {
           baseDelayMs: 200,
           maxDelayMs: 10000,
           exponentialBackoff: true,
-          jitter: true
-        }
+          jitter: true,
+        },
       }
 
       const repository = factory.createDocumentRepository(config)
-      
+
       expect(repository).toBeInstanceOf(DocumentRepository)
     })
 
     it('should create different instances for multiple calls', () => {
       const repo1 = factory.createDocumentRepository()
       const repo2 = factory.createDocumentRepository()
-      
+
       expect(repo1).not.toBe(repo2)
       expect(repo1).toBeInstanceOf(DocumentRepository)
       expect(repo2).toBeInstanceOf(DocumentRepository)
@@ -55,7 +55,7 @@ describe('RepositoryFactory', () => {
   describe('createSettingsRepository', () => {
     it('should create SettingsRepository with default config', () => {
       const repository = factory.createSettingsRepository()
-      
+
       expect(repository).toBeInstanceOf(SettingsRepository)
     })
 
@@ -64,18 +64,18 @@ describe('RepositoryFactory', () => {
         enableEncryption: true,
         encryptionKey: 'test-key',
         enableCache: false,
-        logLevel: 'debug'
+        logLevel: 'debug',
       }
 
       const repository = factory.createSettingsRepository(config)
-      
+
       expect(repository).toBeInstanceOf(SettingsRepository)
     })
 
     it('should create different instances for multiple calls', () => {
       const repo1 = factory.createSettingsRepository()
       const repo2 = factory.createSettingsRepository()
-      
+
       expect(repo1).not.toBe(repo2)
       expect(repo1).toBeInstanceOf(SettingsRepository)
       expect(repo2).toBeInstanceOf(SettingsRepository)
@@ -85,7 +85,7 @@ describe('RepositoryFactory', () => {
   describe('getDefaultConfig', () => {
     it('should provide comprehensive default configuration', () => {
       const config = factory.getDefaultConfig()
-      
+
       // Performance settings
       expect(config.enableCache).toBe(true)
       expect(config.cacheMaxSize).toBe(1000)
@@ -119,7 +119,7 @@ describe('RepositoryFactory', () => {
     it('should return same config object for multiple calls', () => {
       const config1 = factory.getDefaultConfig()
       const config2 = factory.getDefaultConfig()
-      
+
       expect(config1).toEqual(config2)
     })
 
@@ -127,15 +127,15 @@ describe('RepositoryFactory', () => {
       // Mock development environment
       const originalEnv = process.env.NODE_ENV
       process.env.NODE_ENV = 'development'
-      
+
       // Create new factory to pick up environment
       const devFactory = new RepositoryFactory()
       const config = devFactory.getDefaultConfig()
-      
+
       expect(config.environment).toBe('development')
       expect(config.logLevel).toBe('debug')
       expect(config.enableMetrics).toBe(true)
-      
+
       // Restore original environment
       process.env.NODE_ENV = originalEnv
     })
@@ -144,16 +144,16 @@ describe('RepositoryFactory', () => {
       // Mock test environment
       const originalEnv = process.env.NODE_ENV
       process.env.NODE_ENV = 'test'
-      
+
       // Create new factory to pick up environment
       const testFactory = new RepositoryFactory()
       const config = testFactory.getDefaultConfig()
-      
+
       expect(config.environment).toBe('test')
       expect(config.enableCache).toBe(false) // Disabled for predictable tests
       expect(config.enableMetrics).toBe(false) // Disabled for performance
       expect(config.logLevel).toBe('warn') // Reduced logging noise
-      
+
       // Restore original environment
       process.env.NODE_ENV = originalEnv
     })
@@ -168,28 +168,28 @@ describe('RepositoryFactory', () => {
           baseDelayMs: 50,
           maxDelayMs: 2000,
           exponentialBackoff: false,
-          jitter: false
-        }
+          jitter: false,
+        },
       }
 
       const repository = factory.createDocumentRepository(customConfig)
-      
+
       // Should use custom values where provided
       expect(repository).toBeInstanceOf(DocumentRepository)
-      
+
       // Verify the config was applied (would need access to internal config)
       // This test validates the factory accepts the config without error
     })
 
     it('should handle undefined config gracefully', () => {
       const repository = factory.createDocumentRepository(undefined)
-      
+
       expect(repository).toBeInstanceOf(DocumentRepository)
     })
 
     it('should handle empty config object', () => {
       const repository = factory.createDocumentRepository({})
-      
+
       expect(repository).toBeInstanceOf(DocumentRepository)
     })
   })
@@ -197,7 +197,7 @@ describe('RepositoryFactory', () => {
   describe('Repository Lifecycle', () => {
     it('should create repositories that can be initialized', async () => {
       const repository = factory.createDocumentRepository()
-      
+
       // Should not throw during initialization
       await expect(repository.initialize()).resolves.not.toThrow()
     })
@@ -205,7 +205,7 @@ describe('RepositoryFactory', () => {
     it('should create repositories that can be destroyed', async () => {
       const repository = factory.createDocumentRepository()
       await repository.initialize()
-      
+
       // Should not throw during destruction
       await expect(repository.destroy()).resolves.not.toThrow()
     })
@@ -219,8 +219,8 @@ describe('RepositoryFactory', () => {
           baseDelayMs: -100, // Invalid
           maxDelayMs: 50, // Less than base delay
           exponentialBackoff: true,
-          jitter: true
-        }
+          jitter: true,
+        },
       }
 
       // Should still create repository, factory should validate/correct config
@@ -232,7 +232,7 @@ describe('RepositoryFactory', () => {
       const invalidConfig: RepositoryConfig = {
         enableCache: true,
         cacheMaxSize: -1, // Invalid
-        cacheTtlMs: -1000 // Invalid
+        cacheTtlMs: -1000, // Invalid
       }
 
       const repository = factory.createDocumentRepository(invalidConfig)
@@ -242,7 +242,7 @@ describe('RepositoryFactory', () => {
     it('should handle invalid storage configuration', () => {
       const invalidConfig: RepositoryConfig = {
         maxStorageSize: -1, // Invalid
-        compressionEnabled: true
+        compressionEnabled: true,
       }
 
       const repository = factory.createDocumentRepository(invalidConfig)
@@ -254,19 +254,19 @@ describe('RepositoryFactory', () => {
     it('should not implement singleton pattern by default', () => {
       const repo1 = factory.createDocumentRepository()
       const repo2 = factory.createDocumentRepository()
-      
+
       expect(repo1).not.toBe(repo2)
     })
 
     it('should allow creating multiple factories', () => {
       const factory1 = new RepositoryFactory()
       const factory2 = new RepositoryFactory()
-      
+
       expect(factory1).not.toBe(factory2)
-      
+
       const repo1 = factory1.createDocumentRepository()
       const repo2 = factory2.createDocumentRepository()
-      
+
       expect(repo1).not.toBe(repo2)
     })
   })
@@ -277,15 +277,15 @@ describe('RepositoryFactory', () => {
       Object.defineProperty(global, 'window', {
         value: {
           electronAPI: {
-            isElectron: true
-          }
+            isElectron: true,
+          },
         },
-        configurable: true
+        configurable: true,
       })
 
       const repository = factory.createDocumentRepository()
       expect(repository).toBeInstanceOf(DocumentRepository)
-      
+
       // Clean up
       delete (global as any).window
     })
@@ -294,21 +294,21 @@ describe('RepositoryFactory', () => {
       // Mock browser environment
       Object.defineProperty(global, 'window', {
         value: {},
-        configurable: true
+        configurable: true,
       })
-      
+
       Object.defineProperty(global, 'localStorage', {
         value: {
           getItem: jest.fn(),
           setItem: jest.fn(),
-          removeItem: jest.fn()
+          removeItem: jest.fn(),
         },
-        configurable: true
+        configurable: true,
       })
 
       const repository = factory.createDocumentRepository()
       expect(repository).toBeInstanceOf(DocumentRepository)
-      
+
       // Clean up
       delete (global as any).window
       delete (global as any).localStorage
@@ -319,7 +319,7 @@ describe('RepositoryFactory', () => {
     it('should validate encryption configuration', () => {
       const configWithEncryption: RepositoryConfig = {
         enableEncryption: true,
-        encryptionKey: 'test-encryption-key-123'
+        encryptionKey: 'test-encryption-key-123',
       }
 
       const repository = factory.createSettingsRepository(configWithEncryption)
@@ -328,7 +328,7 @@ describe('RepositoryFactory', () => {
 
     it('should handle missing encryption key when encryption enabled', () => {
       const configWithoutKey: RepositoryConfig = {
-        enableEncryption: true
+        enableEncryption: true,
         // encryptionKey missing
       }
 
@@ -339,7 +339,10 @@ describe('RepositoryFactory', () => {
 
     it('should validate log level configuration', () => {
       const validLogLevels: Array<RepositoryConfig['logLevel']> = [
-        'debug', 'info', 'warn', 'error'
+        'debug',
+        'info',
+        'warn',
+        'error',
       ]
 
       validLogLevels.forEach(logLevel => {
@@ -351,7 +354,9 @@ describe('RepositoryFactory', () => {
 
     it('should validate environment configuration', () => {
       const validEnvironments: Array<RepositoryConfig['environment']> = [
-        'development', 'production', 'test'
+        'development',
+        'production',
+        'test',
       ]
 
       validEnvironments.forEach(environment => {

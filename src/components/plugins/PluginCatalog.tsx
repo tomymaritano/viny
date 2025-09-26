@@ -28,7 +28,7 @@ const PLUGIN_CATALOG: CatalogPlugin[] = [
     category: 'Development',
     features: ['Toast notifications', 'Basic API testing'],
     permissions: ['ui.toast'],
-    localPath: '/examples/simple-hello-test.js'
+    localPath: '/examples/simple-hello-test.js',
   },
   {
     id: 'test-note-counter',
@@ -39,7 +39,7 @@ const PLUGIN_CATALOG: CatalogPlugin[] = [
     category: 'Productivity',
     features: ['Note statistics', 'Sidebar integration', 'Storage persistence'],
     permissions: ['notes.read', 'ui.toast', 'ui.sidebar', 'storage.basic'],
-    localPath: '/examples/test-note-counter.js'
+    localPath: '/examples/test-note-counter.js',
   },
   {
     id: 'test-quick-note',
@@ -49,8 +49,15 @@ const PLUGIN_CATALOG: CatalogPlugin[] = [
     version: '1.0.0',
     category: 'Productivity',
     features: ['Quick note creation', 'Templates', 'Toolbar integration'],
-    permissions: ['notes.read', 'notes.write', 'ui.toast', 'ui.toolbar', 'editor.write', 'storage.basic'],
-    localPath: '/examples/test-quick-note.js'
+    permissions: [
+      'notes.read',
+      'notes.write',
+      'ui.toast',
+      'ui.toolbar',
+      'editor.write',
+      'storage.basic',
+    ],
+    localPath: '/examples/test-quick-note.js',
   },
   {
     id: 'test-advanced-search',
@@ -60,8 +67,14 @@ const PLUGIN_CATALOG: CatalogPlugin[] = [
     version: '1.0.0',
     category: 'Search',
     features: ['Advanced search', 'Search analytics', 'Custom filters'],
-    permissions: ['notes.read', 'ui.toast', 'ui.sidebar', 'ui.modal', 'storage.basic'],
-    localPath: '/examples/test-advanced-search.js'
+    permissions: [
+      'notes.read',
+      'ui.toast',
+      'ui.sidebar',
+      'ui.modal',
+      'storage.basic',
+    ],
+    localPath: '/examples/test-advanced-search.js',
   },
   {
     id: 'test-full-integration',
@@ -70,10 +83,25 @@ const PLUGIN_CATALOG: CatalogPlugin[] = [
     author: 'Viny Team',
     version: '1.0.0',
     category: 'Development',
-    features: ['Complete API testing', 'Performance monitoring', 'Error handling'],
-    permissions: ['notes.read', 'notes.write', 'ui.toast', 'ui.modal', 'ui.sidebar', 'ui.toolbar', 'editor.read', 'editor.write', 'storage.basic', 'network'],
-    localPath: '/examples/test-full-integration.js'
-  }
+    features: [
+      'Complete API testing',
+      'Performance monitoring',
+      'Error handling',
+    ],
+    permissions: [
+      'notes.read',
+      'notes.write',
+      'ui.toast',
+      'ui.modal',
+      'ui.sidebar',
+      'ui.toolbar',
+      'editor.read',
+      'editor.write',
+      'storage.basic',
+      'network',
+    ],
+    localPath: '/examples/test-full-integration.js',
+  },
 ]
 
 interface PluginCatalogProps {
@@ -81,9 +109,13 @@ interface PluginCatalogProps {
   onClose?: () => void
 }
 
-export const PluginCatalog: React.FC<PluginCatalogProps> = ({ onInstall, onClose }) => {
+export const PluginCatalog: React.FC<PluginCatalogProps> = ({
+  onInstall,
+  onClose,
+}) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
-  const [catalogPlugins, setCatalogPlugins] = useState<CatalogPlugin[]>(PLUGIN_CATALOG)
+  const [catalogPlugins, setCatalogPlugins] =
+    useState<CatalogPlugin[]>(PLUGIN_CATALOG)
   const [installing, setInstalling] = useState<string | null>(null)
 
   const categories = ['All', ...new Set(PLUGIN_CATALOG.map(p => p.category))]
@@ -93,11 +125,13 @@ export const PluginCatalog: React.FC<PluginCatalogProps> = ({ onInstall, onClose
     const updatePluginStatus = () => {
       const installedPlugins = pluginService.getPlugins()
       const updatedCatalog = PLUGIN_CATALOG.map(catalogPlugin => {
-        const installed = installedPlugins.find(p => p.manifest.name === catalogPlugin.id)
+        const installed = installedPlugins.find(
+          p => p.manifest.name === catalogPlugin.id
+        )
         return {
           ...catalogPlugin,
           installed: !!installed,
-          activated: installed?.activated || false
+          activated: installed?.activated || false,
         }
       })
       setCatalogPlugins(updatedCatalog)
@@ -109,8 +143,8 @@ export const PluginCatalog: React.FC<PluginCatalogProps> = ({ onInstall, onClose
     return () => clearInterval(interval)
   }, [])
 
-  const filteredPlugins = catalogPlugins.filter(plugin => 
-    selectedCategory === 'All' || plugin.category === selectedCategory
+  const filteredPlugins = catalogPlugins.filter(
+    plugin => selectedCategory === 'All' || plugin.category === selectedCategory
   )
 
   const handleInstall = async (plugin: CatalogPlugin) => {
@@ -122,7 +156,7 @@ export const PluginCatalog: React.FC<PluginCatalogProps> = ({ onInstall, onClose
     setInstalling(plugin.id)
     try {
       let success = false
-      
+
       if (plugin.localPath) {
         // Install from local path (for example plugins)
         const response = await fetch(plugin.localPath)
@@ -130,18 +164,20 @@ export const PluginCatalog: React.FC<PluginCatalogProps> = ({ onInstall, onClose
           const pluginCode = await response.text()
           // Create a temporary file-like object
           const blob = new Blob([pluginCode], { type: 'text/javascript' })
-          const file = new File([blob], `${plugin.id}.js`, { type: 'text/javascript' })
-          
+          const file = new File([blob], `${plugin.id}.js`, {
+            type: 'text/javascript',
+          })
+
           success = await pluginService.loadPlugin(file, {
             trusted: true, // Example plugins are trusted
-            permissions: plugin.permissions
+            permissions: plugin.permissions,
           })
         }
       } else if (plugin.sourceUrl) {
         // Install from URL
         success = await pluginService.loadPlugin(plugin.sourceUrl, {
           trusted: false,
-          permissions: plugin.permissions
+          permissions: plugin.permissions,
         })
       }
 
@@ -160,11 +196,11 @@ export const PluginCatalog: React.FC<PluginCatalogProps> = ({ onInstall, onClose
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      'Development': 'bg-blue-100 text-blue-800',
-      'Productivity': 'bg-green-100 text-green-800',
-      'Search': 'bg-purple-100 text-purple-800',
-      'Editor': 'bg-yellow-100 text-yellow-800',
-      'Utilities': 'bg-gray-100 text-gray-800'
+      Development: 'bg-blue-100 text-blue-800',
+      Productivity: 'bg-green-100 text-green-800',
+      Search: 'bg-purple-100 text-purple-800',
+      Editor: 'bg-yellow-100 text-yellow-800',
+      Utilities: 'bg-gray-100 text-gray-800',
     }
     return colors[category] || 'bg-gray-100 text-gray-800'
   }
@@ -172,7 +208,9 @@ export const PluginCatalog: React.FC<PluginCatalogProps> = ({ onInstall, onClose
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-theme-text-primary">Plugin Catalog</h2>
+        <h2 className="text-2xl font-bold text-theme-text-primary">
+          Plugin Catalog
+        </h2>
         {onClose && (
           <button
             onClick={onClose}
@@ -213,16 +251,24 @@ export const PluginCatalog: React.FC<PluginCatalogProps> = ({ onInstall, onClose
                 <h3 className="font-semibold text-theme-text-primary mb-1">
                   {plugin.name}
                 </h3>
-                <span className={`text-xs px-2 py-1 rounded ${getCategoryColor(plugin.category)}`}>
+                <span
+                  className={`text-xs px-2 py-1 rounded ${getCategoryColor(plugin.category)}`}
+                >
                   {plugin.category}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 {plugin.activated && (
-                  <div className="w-2 h-2 bg-green-500 rounded-full" title="Active" />
+                  <div
+                    className="w-2 h-2 bg-green-500 rounded-full"
+                    title="Active"
+                  />
                 )}
                 {plugin.installed && !plugin.activated && (
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full" title="Installed" />
+                  <div
+                    className="w-2 h-2 bg-yellow-500 rounded-full"
+                    title="Installed"
+                  />
                 )}
               </div>
             </div>
@@ -232,12 +278,16 @@ export const PluginCatalog: React.FC<PluginCatalogProps> = ({ onInstall, onClose
             </p>
 
             <div className="text-xs text-theme-text-muted mb-3">
-              <div>By {plugin.author} • v{plugin.version}</div>
+              <div>
+                By {plugin.author} • v{plugin.version}
+              </div>
             </div>
 
             {/* Features */}
             <div className="mb-3">
-              <div className="text-xs font-medium text-theme-text-secondary mb-1">Features:</div>
+              <div className="text-xs font-medium text-theme-text-secondary mb-1">
+                Features:
+              </div>
               <div className="flex flex-wrap gap-1">
                 {plugin.features.slice(0, 3).map((feature, index) => (
                   <span
@@ -276,8 +326,8 @@ export const PluginCatalog: React.FC<PluginCatalogProps> = ({ onInstall, onClose
                 plugin.installed
                   ? 'bg-green-100 text-green-800 cursor-not-allowed'
                   : installing === plugin.id
-                  ? 'bg-gray-100 text-gray-600 cursor-not-allowed'
-                  : 'bg-theme-accent text-white hover:bg-theme-accent-dark'
+                    ? 'bg-gray-100 text-gray-600 cursor-not-allowed'
+                    : 'bg-theme-accent text-white hover:bg-theme-accent-dark'
               }`}
             >
               {plugin.installed
@@ -285,9 +335,8 @@ export const PluginCatalog: React.FC<PluginCatalogProps> = ({ onInstall, onClose
                   ? 'Installed & Active'
                   : 'Installed'
                 : installing === plugin.id
-                ? 'Installing...'
-                : 'Install Plugin'
-              }
+                  ? 'Installing...'
+                  : 'Install Plugin'}
             </button>
           </div>
         ))}

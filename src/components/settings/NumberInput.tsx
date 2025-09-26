@@ -22,7 +22,7 @@ const NumberInput: React.FC<NumberInputProps> = ({
   <input
     type="number"
     value={value}
-    onChange={(e) => onChange(Number(e.target.value))}
+    onChange={e => onChange(Number(e.target.value))}
     min={min}
     max={max}
     step={step}

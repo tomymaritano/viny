@@ -3,7 +3,7 @@
  * Offloads search operations to a separate thread for better performance
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Note } from '../types'
+import type { Note } from '../types'
 import { logger } from '../utils/logger'
 
 interface SearchFilters {
@@ -25,16 +25,19 @@ interface UseSearchWorkerOptions {
   fallbackToMainThread?: boolean
 }
 
-export function useSearchWorker(notes: Note[], options: UseSearchWorkerOptions = {}) {
+export function useSearchWorker(
+  notes: Note[],
+  options: UseSearchWorkerOptions = {}
+) {
   const { enableWorker = true, fallbackToMainThread = true } = options
-  
+
   const [isInitialized, setIsInitialized] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [searchError, setSearchError] = useState<string | null>(null)
   const [searchTime, setSearchTime] = useState<number>(0)
   const [isWorkerSupported, setIsWorkerSupported] = useState(false)
-  
+
   const workerRef = useRef<Worker | null>(null)
   const pendingSearchRef = useRef<string>('')
 
@@ -49,10 +52,19 @@ export function useSearchWorker(notes: Note[], options: UseSearchWorkerOptions =
 
     try {
       workerRef.current = new Worker('/search-worker.js')
-      
+
       workerRef.current.onmessage = (e: MessageEvent) => {
-        const { type, results, query, totalResults, searchTime, error, success, notesCount } = e.data
-        
+        const {
+          type,
+          results,
+          query,
+          totalResults,
+          searchTime,
+          error,
+          success,
+          notesCount,
+        } = e.data
+
         switch (type) {
           case 'INITIALIZED':
             setIsInitialized(success)
@@ -60,27 +72,29 @@ export function useSearchWorker(notes: Note[], options: UseSearchWorkerOptions =
               logger.debug(`Search worker initialized with ${notesCount} notes`)
             }
             break
-            
+
           case 'SEARCH_RESULTS':
             if (query === pendingSearchRef.current) {
               setSearchResults(results || [])
               setSearchTime(searchTime || 0)
               setIsSearching(false)
-              logger.debug(`Search completed in ${searchTime?.toFixed(2)}ms with ${totalResults} results`)
+              logger.debug(
+                `Search completed in ${searchTime?.toFixed(2)}ms with ${totalResults} results`
+              )
             }
             break
-            
+
           case 'NOTES_UPDATED':
             if (success) {
               logger.debug(`Search worker updated with ${notesCount} notes`)
             }
             break
-            
+
           case 'FILTER_RESULTS':
             setSearchResults(results || [])
             setIsSearching(false)
             break
-            
+
           case 'ERROR':
             setSearchError(error)
             setIsSearching(false)
@@ -89,7 +103,7 @@ export function useSearchWorker(notes: Note[], options: UseSearchWorkerOptions =
         }
       }
 
-      workerRef.current.onerror = (error) => {
+      workerRef.current.onerror = error => {
         logger.error('Search worker error:', error)
         setSearchError('Search worker failed')
         setIsSearching(false)
@@ -98,9 +112,8 @@ export function useSearchWorker(notes: Note[], options: UseSearchWorkerOptions =
       // Initialize with current notes
       workerRef.current.postMessage({
         type: 'INITIALIZE',
-        data: { notes }
+        data: { notes },
       })
-
     } catch (error) {
       logger.error('Failed to create search worker:', error)
       setSearchError('Failed to initialize search')
@@ -119,98 +132,111 @@ export function useSearchWorker(notes: Note[], options: UseSearchWorkerOptions =
     if (workerRef.current && isInitialized) {
       workerRef.current.postMessage({
         type: 'UPDATE_NOTES',
-        data: { notes }
+        data: { notes },
       })
     }
   }, [notes, isInitialized])
 
   // Fallback search function (main thread)
-  const fallbackSearch = useCallback((query: string) => {
-    const startTime = performance.now()
-    
-    if (!query.trim()) {
-      const endTime = performance.now()
-      setSearchResults([])
-      setSearchTime(Math.max(endTime - startTime, 0.01)) // Ensure minimum time > 0
-      setIsSearching(false)
-      return
-    }
+  const fallbackSearch = useCallback(
+    (query: string) => {
+      const startTime = performance.now()
 
-    const searchLower = query.toLowerCase()
-    
-    const results = notes
-      .filter(note => !note.isTrashed) // Exclude trashed notes
-      .filter(note => 
-        note.title.toLowerCase().includes(searchLower) ||
-        note.content.toLowerCase().includes(searchLower) ||
-        note.tags.some(tag => tag.toLowerCase().includes(searchLower))
-      ).slice(0, 50) // Limit results
-    
-    const endTime = performance.now()
-    const searchTime = Math.max(endTime - startTime, 0.01) // Ensure minimum time > 0
-    
-    setSearchResults(results)
-    setSearchTime(searchTime)
-    setIsSearching(false)
-    
-    logger.debug(`Fallback search completed in ${searchTime.toFixed(2)}ms with ${results.length} results`)
-  }, [notes])
+      if (!query.trim()) {
+        const endTime = performance.now()
+        setSearchResults([])
+        setSearchTime(Math.max(endTime - startTime, 0.01)) // Ensure minimum time > 0
+        setIsSearching(false)
+        return
+      }
+
+      const searchLower = query.toLowerCase()
+
+      const results = notes
+        .filter(note => !note.isTrashed) // Exclude trashed notes
+        .filter(
+          note =>
+            note.title.toLowerCase().includes(searchLower) ||
+            note.content.toLowerCase().includes(searchLower) ||
+            note.tags.some(tag => tag.toLowerCase().includes(searchLower))
+        )
+        .slice(0, 50) // Limit results
+
+      const endTime = performance.now()
+      const searchTime = Math.max(endTime - startTime, 0.01) // Ensure minimum time > 0
+
+      setSearchResults(results)
+      setSearchTime(searchTime)
+      setIsSearching(false)
+
+      logger.debug(
+        `Fallback search completed in ${searchTime.toFixed(2)}ms with ${results.length} results`
+      )
+    },
+    [notes]
+  )
 
   // Search function
-  const search = useCallback((query: string) => {
-    setIsSearching(true)
-    setSearchError(null)
-    pendingSearchRef.current = query
+  const search = useCallback(
+    (query: string) => {
+      setIsSearching(true)
+      setSearchError(null)
+      pendingSearchRef.current = query
 
-    if (!query.trim()) {
-      setSearchResults([])
-      setIsSearching(false)
-      return
-    }
+      if (!query.trim()) {
+        setSearchResults([])
+        setIsSearching(false)
+        return
+      }
 
-    // Use worker if available and enabled
-    if (workerRef.current && isInitialized && enableWorker) {
-      workerRef.current.postMessage({
-        type: 'SEARCH',
-        data: { query, limit: 50 }
-      })
-    } else if (fallbackToMainThread) {
-      // Fallback to main thread search
-      fallbackSearch(query)
-    } else {
-      setSearchError('Search not available')
-      setIsSearching(false)
-    }
-  }, [isInitialized, enableWorker, fallbackToMainThread, fallbackSearch])
+      // Use worker if available and enabled
+      if (workerRef.current && isInitialized && enableWorker) {
+        workerRef.current.postMessage({
+          type: 'SEARCH',
+          data: { query, limit: 50 },
+        })
+      } else if (fallbackToMainThread) {
+        // Fallback to main thread search
+        fallbackSearch(query)
+      } else {
+        setSearchError('Search not available')
+        setIsSearching(false)
+      }
+    },
+    [isInitialized, enableWorker, fallbackToMainThread, fallbackSearch]
+  )
 
   // Filter function
-  const filter = useCallback((filters: SearchFilters) => {
-    setIsSearching(true)
-    setSearchError(null)
+  const filter = useCallback(
+    (filters: SearchFilters) => {
+      setIsSearching(true)
+      setSearchError(null)
 
-    if (workerRef.current && isInitialized && enableWorker) {
-      workerRef.current.postMessage({
-        type: 'FILTER',
-        data: { filters }
-      })
-    } else {
-      // Simple fallback filtering
-      let filtered = notes.filter(note => !note.isTrashed) // Exclude trashed notes
-      
-      if (filters.tags && filters.tags.length > 0) {
-        filtered = filtered.filter(note => 
-          filters.tags!.some(tag => note.tags.includes(tag))
-        )
+      if (workerRef.current && isInitialized && enableWorker) {
+        workerRef.current.postMessage({
+          type: 'FILTER',
+          data: { filters },
+        })
+      } else {
+        // Simple fallback filtering
+        let filtered = notes.filter(note => !note.isTrashed) // Exclude trashed notes
+
+        if (filters.tags && filters.tags.length > 0) {
+          filtered = filtered.filter(note =>
+            filters.tags!.some(tag => note.tags.includes(tag))
+          )
+        }
+
+        if (filters.notebook) {
+          filtered = filtered.filter(note => note.notebook === filters.notebook)
+        }
+
+        setSearchResults(filtered)
+        setIsSearching(false)
       }
-      
-      if (filters.notebook) {
-        filtered = filtered.filter(note => note.notebook === filters.notebook)
-      }
-      
-      setSearchResults(filtered)
-      setIsSearching(false)
-    }
-  }, [notes, isInitialized, enableWorker])
+    },
+    [notes, isInitialized, enableWorker]
+  )
 
   // Clear results
   const clearResults = useCallback(() => {
@@ -229,7 +255,7 @@ export function useSearchWorker(notes: Note[], options: UseSearchWorkerOptions =
     searchTime,
     isWorkerSupported,
     isUsingWorker: enableWorker && isWorkerSupported && isInitialized,
-    
+
     // Actions
     search,
     filter,

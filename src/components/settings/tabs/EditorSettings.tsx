@@ -1,5 +1,13 @@
 import React from 'react'
 import { useAppStore } from '../../../stores/newSimpleStore'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../ui/SelectRadix'
+import { SwitchWithLabel } from '../../ui/SwitchRadix'
 
 const EditorSettings: React.FC = () => {
   const { settings, updateSettings } = useAppStore()
@@ -10,21 +18,29 @@ const EditorSettings: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Editor Preferences
         </h3>
-        
+
         <div className="space-y-4">
           {/* Editor Mode */}
           <div>
             <label className="block text-sm font-medium text-theme-text-secondary mb-2">
               Default Editor Mode
             </label>
-            <select
+            <Select
               value={settings.defaultEditorMode || 'markdown'}
-              onChange={(e) => updateSettings({ defaultEditorMode: e.target.value as 'markdown' | 'monaco' })}
-              className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-theme-text-primary"
+              onValueChange={value =>
+                updateSettings({
+                  defaultEditorMode: value as 'markdown' | 'monaco',
+                })
+              }
             >
-              <option value="markdown">Markdown</option>
-              <option value="monaco">Monaco (Code Editor)</option>
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select editor mode" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="markdown">Markdown</SelectItem>
+                <SelectItem value="monaco">Monaco (Code Editor)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Tab Size */}
@@ -32,19 +48,25 @@ const EditorSettings: React.FC = () => {
             <label className="block text-sm font-medium text-theme-text-secondary mb-2">
               Tab Size
             </label>
-            <select
-              value={settings.tabSize || 2}
-              onChange={(e) => updateSettings({ tabSize: parseInt(e.target.value) })}
-              className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-theme-text-primary"
+            <Select
+              value={String(settings.tabSize || 2)}
+              onValueChange={value =>
+                updateSettings({ tabSize: parseInt(value) })
+              }
             >
-              <option value="2">2 spaces</option>
-              <option value="4">4 spaces</option>
-              <option value="8">8 spaces</option>
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select tab size" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="2">2 spaces</SelectItem>
+                <SelectItem value="4">4 spaces</SelectItem>
+                <SelectItem value="8">8 spaces</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Word Wrap */}
-          <label className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <div>
               <div className="text-sm font-medium text-theme-text-primary">
                 Word Wrap
@@ -53,16 +75,14 @@ const EditorSettings: React.FC = () => {
                 Wrap long lines in the editor
               </div>
             </div>
-            <input
-              type="checkbox"
+            <SwitchWithLabel
               checked={settings.wordWrap !== false}
-              onChange={(e) => updateSettings({ wordWrap: e.target.checked })}
-              className="w-4 h-4 text-theme-accent-primary bg-theme-bg-secondary border-theme-border-primary rounded"
+              onCheckedChange={checked => updateSettings({ wordWrap: checked })}
             />
-          </label>
+          </div>
 
           {/* Vim Mode */}
-          <label className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <div>
               <div className="text-sm font-medium text-theme-text-primary">
                 Vim Mode
@@ -71,13 +91,11 @@ const EditorSettings: React.FC = () => {
                 Enable Vim keybindings in the editor
               </div>
             </div>
-            <input
-              type="checkbox"
+            <SwitchWithLabel
               checked={settings.vimMode === true}
-              onChange={(e) => updateSettings({ vimMode: e.target.checked })}
-              className="w-4 h-4 text-theme-accent-primary bg-theme-bg-secondary border-theme-border-primary rounded"
+              onCheckedChange={checked => updateSettings({ vimMode: checked })}
             />
-          </label>
+          </div>
         </div>
       </div>
 
@@ -85,26 +103,34 @@ const EditorSettings: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Markdown Settings
         </h3>
-        
+
         <div className="space-y-4">
           {/* Preview Side */}
           <div>
             <label className="block text-sm font-medium text-theme-text-secondary mb-2">
               Preview Position
             </label>
-            <select
+            <Select
               value={settings.previewPosition || 'right'}
-              onChange={(e) => updateSettings({ previewPosition: e.target.value as 'right' | 'bottom' | 'hidden' })}
-              className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-theme-text-primary"
+              onValueChange={value =>
+                updateSettings({
+                  previewPosition: value as 'right' | 'bottom' | 'hidden',
+                })
+              }
             >
-              <option value="right">Right</option>
-              <option value="bottom">Bottom</option>
-              <option value="hidden">Hidden</option>
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select preview position" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="right">Right</SelectItem>
+                <SelectItem value="bottom">Bottom</SelectItem>
+                <SelectItem value="hidden">Hidden</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Live Preview */}
-          <label className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <div>
               <div className="text-sm font-medium text-theme-text-primary">
                 Live Preview
@@ -113,16 +139,16 @@ const EditorSettings: React.FC = () => {
                 Update preview as you type
               </div>
             </div>
-            <input
-              type="checkbox"
+            <SwitchWithLabel
               checked={settings.livePreview !== false}
-              onChange={(e) => updateSettings({ livePreview: e.target.checked })}
-              className="w-4 h-4 text-theme-accent-primary bg-theme-bg-secondary border-theme-border-primary rounded"
+              onCheckedChange={checked =>
+                updateSettings({ livePreview: checked })
+              }
             />
-          </label>
+          </div>
 
           {/* Syntax Highlighting */}
-          <label className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <div>
               <div className="text-sm font-medium text-theme-text-primary">
                 Syntax Highlighting
@@ -131,13 +157,13 @@ const EditorSettings: React.FC = () => {
                 Highlight code blocks in preview
               </div>
             </div>
-            <input
-              type="checkbox"
+            <SwitchWithLabel
               checked={settings.syntaxHighlighting !== false}
-              onChange={(e) => updateSettings({ syntaxHighlighting: e.target.checked })}
-              className="w-4 h-4 text-theme-accent-primary bg-theme-bg-secondary border-theme-border-primary rounded"
+              onCheckedChange={checked =>
+                updateSettings({ syntaxHighlighting: checked })
+              }
             />
-          </label>
+          </div>
         </div>
       </div>
     </div>

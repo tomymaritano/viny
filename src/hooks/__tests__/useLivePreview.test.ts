@@ -9,8 +9,8 @@ const mockSettings = { theme: 'dark', fontSize: 14 }
 vi.mock('../../stores/newSimpleStore', () => ({
   useAppStore: () => ({
     settings: mockSettings,
-    updateSettings: mockUpdateSettings
-  })
+    updateSettings: mockUpdateSettings,
+  }),
 }))
 
 describe('useLivePreview', () => {
@@ -24,9 +24,7 @@ describe('useLivePreview', () => {
   })
 
   it('should initialize with correct default state', () => {
-    const { result } = renderHook(() =>
-      useLivePreview(['theme', 'fontSize'])
-    )
+    const { result } = renderHook(() => useLivePreview(['theme', 'fontSize']))
 
     expect(result.current.isPreviewActive).toBe(false)
     expect(result.current.previewValues).toEqual({})
@@ -70,7 +68,10 @@ describe('useLivePreview', () => {
       result.current.startPreview('fontSize', 16)
     })
 
-    expect(result.current.previewValues).toEqual({ theme: 'light', fontSize: 16 })
+    expect(result.current.previewValues).toEqual({
+      theme: 'light',
+      fontSize: 16,
+    })
     expect(result.current.isPreviewActive).toBe(true)
     expect(result.current.getEffectiveValue('theme')).toBe('light')
     expect(result.current.getEffectiveValue('fontSize')).toBe(16)
@@ -116,10 +117,10 @@ describe('useLivePreview', () => {
 
   it('should support auto-revert configuration', () => {
     const { result } = renderHook(() =>
-      useLivePreview(['theme'], { 
-        previewDelay: 50, 
-        resetDelay: 200, 
-        autoRevert: true 
+      useLivePreview(['theme'], {
+        previewDelay: 50,
+        resetDelay: 200,
+        autoRevert: true,
       })
     )
 
@@ -128,7 +129,7 @@ describe('useLivePreview', () => {
     })
 
     expect(result.current.isPreviewActive).toBe(true)
-    
+
     // Fast forward to apply preview
     act(() => {
       vi.advanceTimersByTime(100)
@@ -139,9 +140,7 @@ describe('useLivePreview', () => {
   })
 
   it('should return effective values correctly', () => {
-    const { result } = renderHook(() =>
-      useLivePreview(['theme', 'fontSize'])
-    )
+    const { result } = renderHook(() => useLivePreview(['theme', 'fontSize']))
 
     expect(result.current.getEffectiveValue('theme')).toBe('dark')
     expect(result.current.getEffectiveValue('fontSize')).toBe(14)
@@ -155,9 +154,7 @@ describe('useLivePreview', () => {
   })
 
   it('should check if key is modified correctly', () => {
-    const { result } = renderHook(() =>
-      useLivePreview(['theme', 'fontSize'])
-    )
+    const { result } = renderHook(() => useLivePreview(['theme', 'fontSize']))
 
     expect(result.current.isKeyModified('theme')).toBe(false)
 
@@ -170,15 +167,13 @@ describe('useLivePreview', () => {
   })
 
   it('should provide correct preview status', () => {
-    const { result } = renderHook(() =>
-      useLivePreview(['theme', 'fontSize'])
-    )
+    const { result } = renderHook(() => useLivePreview(['theme', 'fontSize']))
 
     expect(result.current.getPreviewStatus()).toEqual({
       isActive: false,
       modifiedCount: 0,
       modifiedKeys: [],
-      hasChanges: false
+      hasChanges: false,
     })
 
     act(() => {
@@ -193,14 +188,12 @@ describe('useLivePreview', () => {
       isActive: true,
       modifiedCount: 2,
       modifiedKeys: ['theme', 'fontSize'],
-      hasChanges: true
+      hasChanges: true,
     })
   })
 
   it('should cancel preview without applying', () => {
-    const { result } = renderHook(() =>
-      useLivePreview(['theme'])
-    )
+    const { result } = renderHook(() => useLivePreview(['theme']))
 
     act(() => {
       result.current.startPreview('theme', 'light')
@@ -216,10 +209,10 @@ describe('useLivePreview', () => {
 
   it('should extend preview correctly', () => {
     const { result } = renderHook(() =>
-      useLivePreview(['theme'], { 
-        previewDelay: 100, 
-        resetDelay: 1000, 
-        autoRevert: true 
+      useLivePreview(['theme'], {
+        previewDelay: 100,
+        resetDelay: 1000,
+        autoRevert: true,
       })
     )
 

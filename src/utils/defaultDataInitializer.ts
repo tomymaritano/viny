@@ -1,8 +1,9 @@
 import { createDocumentRepository } from '../lib/repositories/RepositoryFactory'
 import { defaultNotes } from '../data/defaultNotes'
 import { logger } from './logger'
-import { Notebook } from '../types/notebook'
+import type { Notebook } from '../types/notebook'
 import { getCurrentTimestamp } from './dateUtils'
+import { storageService, StorageService } from '../services/StorageService'
 
 const defaultNotebooks: Notebook[] = [
   {
@@ -74,28 +75,30 @@ const defaultNotebooks: Notebook[] = [
 export async function initializeDefaultData(): Promise<void> {
   try {
     // Check if we've already initialized before
-    const initFlag = localStorage.getItem('viny-initialized')
+    const initFlag = storageService.getItem(StorageService.KEYS.INITIALIZED)
     if (initFlag) {
       logger.debug('Default data already initialized, skipping')
       return
     }
-    
+
     // Check if default notes already exist
     const repository = createDocumentRepository()
     await repository.initialize()
-    
+
     const existingNotes = await repository.getNotes()
-    const hasDefaultNotes = existingNotes && existingNotes.some(note => 
-      defaultNotes.some(defaultNote => defaultNote.id === note.id)
-    )
-    
+    const hasDefaultNotes =
+      existingNotes &&
+      existingNotes.some(note =>
+        defaultNotes.some(defaultNote => defaultNote.id === note.id)
+      )
+
     if (hasDefaultNotes) {
       logger.debug('Default notes already exist, skipping initialization')
       return
     }
-    
+
     logger.info('First run detected, initializing default data...')
-    
+
     // Initialize default notebooks first
     try {
       for (const notebook of defaultNotebooks) {
@@ -105,7 +108,7 @@ export async function initializeDefaultData(): Promise<void> {
     } catch (error) {
       logger.error('Failed to initialize default notebooks:', error)
     }
-    
+
     // Initialize default notes
     for (const note of defaultNotes) {
       try {
@@ -114,12 +117,11 @@ export async function initializeDefaultData(): Promise<void> {
         logger.error('Failed to save default note:', note.id, error)
       }
     }
-    
+
     // Set initialization flag
-    localStorage.setItem('viny-initialized', 'true')
-    
+    storageService.setItem(StorageService.KEYS.INITIALIZED, 'true')
+
     logger.info('Default data initialization completed successfully')
-    
   } catch (error) {
     logger.error('Failed to initialize default data:', error)
     // Don't throw - we don't want to break the app if default data fails
@@ -134,13 +136,13 @@ export async function resetToDefaultData(): Promise<void> {
     // Clear existing data
     const repository = createDocumentRepository()
     await repository.destroy()
-    
+
     // Remove initialization flag
-    localStorage.removeItem('viny-initialized')
-    
+    storageService.removeItem(StorageService.KEYS.INITIALIZED)
+
     // Re-initialize
     await initializeDefaultData()
-    
+
     logger.info('App reset to default state')
   } catch (error) {
     logger.error('Failed to reset to default data:', error)
@@ -151,5 +153,5 @@ export async function resetToDefaultData(): Promise<void> {
  * Checks if the app has been initialized with default data
  */
 export function isDefaultDataInitialized(): boolean {
-  return localStorage.getItem('viny-initialized') === 'true'
+  return storageService.getItem(StorageService.KEYS.INITIALIZED) === 'true'
 }

@@ -1,6 +1,8 @@
 import React from 'react'
 import { Icons } from '../Icons'
+import { ConfirmDialog } from '../ui/ConfirmDialog'
 import { logStorageError } from '../../services/errorLogger'
+import { storageLogger } from '../../utils/logger'
 // import { debugStorage, clearCorruptedData, backupAndClearStorage } from '../../utils/storageDebug' // removed
 
 interface StorageErrorBoundaryProps {
@@ -14,26 +16,45 @@ interface StorageErrorBoundaryState {
   hasError: boolean
   error: Error | null
   isRetrying: boolean
+  confirmDialog: {
+    isOpen: boolean
+    title: string
+    description: string
+    onConfirm: () => void
+    variant: 'default' | 'destructive'
+  }
 }
 
-class StorageErrorBoundary extends React.Component<StorageErrorBoundaryProps, StorageErrorBoundaryState> {
+class StorageErrorBoundary extends React.Component<
+  StorageErrorBoundaryProps,
+  StorageErrorBoundaryState
+> {
   constructor(props: StorageErrorBoundaryProps) {
     super(props)
     this.state = {
       hasError: false,
       error: null,
       isRetrying: false,
+      confirmDialog: {
+        isOpen: false,
+        title: '',
+        description: '',
+        onConfirm: () => {},
+        variant: 'default',
+      },
     }
   }
 
-  static getDerivedStateFromError(error: Error): Partial<StorageErrorBoundaryState> {
+  static getDerivedStateFromError(
+    error: Error
+  ): Partial<StorageErrorBoundaryState> {
     return { hasError: true }
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Storage Error:', error, errorInfo)
-    console.error('Error stack:', error.stack)
-    console.error('Component stack:', errorInfo.componentStack)
+    storageLogger.error('Storage Error:', error, errorInfo)
+    storageLogger.error('Error stack:', error.stack)
+    storageLogger.error('Component stack:', errorInfo.componentStack)
 
     this.setState({
       error: error,
@@ -42,7 +63,7 @@ class StorageErrorBoundary extends React.Component<StorageErrorBoundaryProps, St
     // Log to centralized error service
     logStorageError('boundary_catch', error, {
       clearStorageOnRetry: this.props.clearStorageOnRetry,
-      componentStack: errorInfo.componentStack
+      componentStack: errorInfo.componentStack,
     })
 
     if (this.props.onError) {
@@ -56,7 +77,7 @@ class StorageErrorBoundary extends React.Component<StorageErrorBoundaryProps, St
     try {
       // Try to clear localStorage if it's corrupted
       if (this.props.clearStorageOnRetry) {
-        localStorage.clear()
+        storageService.clear()
       }
 
       // Wait a moment
@@ -73,48 +94,87 @@ class StorageErrorBoundary extends React.Component<StorageErrorBoundaryProps, St
         this.props.onRetry()
       }
     } catch (retryError) {
-      console.error('Retry failed:', retryError)
+      storageLogger.error('Retry failed:', retryError)
       this.setState({ isRetrying: false })
     }
   }
 
+  showConfirmDialog = (
+    title: string,
+    description: string,
+    onConfirm: () => void,
+    variant: 'default' | 'destructive' = 'default'
+  ) => {
+    this.setState({
+      confirmDialog: {
+        isOpen: true,
+        title,
+        description,
+        onConfirm,
+        variant,
+      },
+    })
+  }
+
+  closeConfirmDialog = () => {
+    this.setState({
+      confirmDialog: {
+        isOpen: false,
+        title: '',
+        description: '',
+        onConfirm: () => {},
+        variant: 'default',
+      },
+    })
+  }
+
   handleClearData = () => {
-    if (window.confirm('This will clear all your local data. Are you sure?')) {
-      try {
-        localStorage.clear()
-        window.location.reload()
-      } catch (error) {
-        console.error('Failed to clear storage:', error)
-      }
-    }
+    this.showConfirmDialog(
+      'Clear All Data',
+      'This will clear all your local data. Are you sure?',
+      () => {
+        try {
+          storageService.clear()
+          window.location.reload()
+        } catch (error) {
+          storageLogger.error('Failed to clear storage:', error)
+        }
+      },
+      'destructive'
+    )
   }
 
   handleDebug = () => {
     // debugStorage() - removed
-    console.log('Storage debug function removed')
+    storageLogger.info('Storage debug function removed')
   }
 
   handleClearCorrupted = () => {
     // const cleared = clearCorruptedData() - removed
     // Clear localStorage as fallback
-    localStorage.clear()
+    storageService.clear()
     alert('Storage cleared. Reloading...')
     window.location.reload()
   }
 
   handleBackupAndClear = () => {
-    if (window.confirm('This will backup your data and then clear storage. Continue?')) {
-      // backupAndClearStorage() - removed
-      // Simple localStorage backup and clear
-      const backup = {}
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i)
-        if (key) backup[key] = localStorage.getItem(key)
-      }
-      console.log('Storage backup:', backup)
-      localStorage.clear()
-      window.location.reload()
-    }
+    this.showConfirmDialog(
+      'Backup & Clear Storage',
+      'This will backup your data and then clear storage. Continue?',
+      () => {
+        // backupAndClearStorage() - removed
+        // Simple localStorage backup and clear
+        const backup = {}
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i)
+          if (key) backup[key] = localStorage.getItem(key)
+        }
+        storageLogger.info('Storage backup:', backup)
+        storageService.clear()
+        window.location.reload()
+      },
+      'destructive'
+    )
   }
 
   render() {
@@ -194,6 +254,24 @@ class StorageErrorBoundary extends React.Component<StorageErrorBoundaryProps, St
               </button>
             </div>
           </div>
+
+          {/* Confirmation Dialog */}
+          <ConfirmDialog
+            isOpen={this.state.confirmDialog.isOpen}
+            onClose={this.closeConfirmDialog}
+            onConfirm={() => {
+              this.state.confirmDialog.onConfirm()
+              this.closeConfirmDialog()
+            }}
+            title={this.state.confirmDialog.title}
+            description={this.state.confirmDialog.description}
+            variant={this.state.confirmDialog.variant}
+            confirmText={
+              this.state.confirmDialog.variant === 'destructive'
+                ? 'Delete'
+                : 'Confirm'
+            }
+          />
         </div>
       )
     }

@@ -20,6 +20,8 @@ module.exports = {
         "slide-out-to-right": "slideOutToRight 0.3s ease-in",
         "zoom-in": "zoomIn 0.3s ease-out",
         "zoom-out": "zoomOut 0.3s ease-in",
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
       },
       keyframes: {
         fadeIn: {
@@ -65,6 +67,14 @@ module.exports = {
         zoomOut: {
           "0%": { transform: "scale(1)", opacity: "1" },
           "100%": { transform: "scale(0.95)", opacity: "0" },
+        },
+        "accordion-down": {
+          "0%": { height: "0" },
+          "100%": { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          "0%": { height: "var(--radix-accordion-content-height)" },
+          "100%": { height: "0" },
         },
       },
       backdropBlur: {

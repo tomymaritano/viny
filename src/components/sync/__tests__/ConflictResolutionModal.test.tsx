@@ -2,29 +2,62 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import React from 'react'
 import ConflictResolutionModal from '../ConflictResolutionModal'
-import { SyncConflict, ConflictResolution } from '../../../utils/syncManager'
-import { Note, Notebook } from '../../../types'
+import type { SyncConflict } from '../../../utils/syncManager'
+import { ConflictResolution } from '../../../utils/syncManager'
+import type { Note, Notebook } from '../../../types'
 
 // Mock dependencies
 vi.mock('../../ui/StandardModal', () => ({
-  default: ({ isOpen, onClose, title, children }: any) => 
+  default: ({ isOpen, onClose, title, children }: any) =>
     isOpen ? (
       <div data-testid="standard-modal">
         <div data-testid="modal-title">{title}</div>
         <div data-testid="modal-content">{children}</div>
       </div>
-    ) : null
+    ) : null,
 }))
 
 vi.mock('lucide-react', () => ({
-  AlertTriangle: ({ className }: any) => <div data-testid="alert-icon" className={className}>Alert</div>,
-  User: ({ className }: any) => <div data-testid="user-icon" className={className}>User</div>,
-  Cloud: ({ className }: any) => <div data-testid="cloud-icon" className={className}>Cloud</div>,
-  GitMerge: ({ className }: any) => <div data-testid="merge-icon" className={className}>Merge</div>,
-  Copy: ({ className }: any) => <div data-testid="copy-icon" className={className}>Copy</div>,
-  Clock: ({ className }: any) => <div data-testid="clock-icon" className={className}>Clock</div>,
-  FileText: ({ className }: any) => <div data-testid="file-icon" className={className}>File</div>,
-  Folder: ({ className }: any) => <div data-testid="folder-icon" className={className}>Folder</div>
+  AlertTriangle: ({ className }: any) => (
+    <div data-testid="alert-icon" className={className}>
+      Alert
+    </div>
+  ),
+  User: ({ className }: any) => (
+    <div data-testid="user-icon" className={className}>
+      User
+    </div>
+  ),
+  Cloud: ({ className }: any) => (
+    <div data-testid="cloud-icon" className={className}>
+      Cloud
+    </div>
+  ),
+  GitMerge: ({ className }: any) => (
+    <div data-testid="merge-icon" className={className}>
+      Merge
+    </div>
+  ),
+  Copy: ({ className }: any) => (
+    <div data-testid="copy-icon" className={className}>
+      Copy
+    </div>
+  ),
+  Clock: ({ className }: any) => (
+    <div data-testid="clock-icon" className={className}>
+      Clock
+    </div>
+  ),
+  FileText: ({ className }: any) => (
+    <div data-testid="file-icon" className={className}>
+      File
+    </div>
+  ),
+  Folder: ({ className }: any) => (
+    <div data-testid="folder-icon" className={className}>
+      Folder
+    </div>
+  ),
 }))
 
 // Test data
@@ -38,7 +71,7 @@ const createTestNote = (overrides?: Partial<Note>): Note => ({
   isArchived: false,
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T12:00:00Z',
-  ...overrides
+  ...overrides,
 })
 
 const createTestNotebook = (overrides?: Partial<Notebook>): Notebook => ({
@@ -52,7 +85,7 @@ const createTestNotebook = (overrides?: Partial<Notebook>): Notebook => ({
   icon: null,
   noteCount: 5,
   sortOrder: 0,
-  ...overrides
+  ...overrides,
 })
 
 const createNoteConflict = (): SyncConflict => ({
@@ -62,15 +95,15 @@ const createNoteConflict = (): SyncConflict => ({
   localVersion: createTestNote({
     title: 'Local Note Title',
     content: 'This is the local version with local changes',
-    updatedAt: '2024-01-01T12:00:00Z'
+    updatedAt: '2024-01-01T12:00:00Z',
   }),
   remoteVersion: createTestNote({
     title: 'Remote Note Title',
     content: 'This is the remote version with remote changes',
-    updatedAt: '2024-01-01T13:00:00Z'
+    updatedAt: '2024-01-01T13:00:00Z',
   }),
   timestamp: new Date('2024-01-01T14:00:00Z'),
-  resolved: false
+  resolved: false,
 })
 
 const createNotebookConflict = (): SyncConflict => ({
@@ -81,16 +114,16 @@ const createNotebookConflict = (): SyncConflict => ({
     name: 'Local Notebook',
     description: 'Local description',
     color: '#EF4444',
-    updatedAt: '2024-01-01T12:00:00Z'
+    updatedAt: '2024-01-01T12:00:00Z',
   }),
   remoteVersion: createTestNotebook({
     name: 'Remote Notebook',
     description: 'Remote description',
     color: '#10B981',
-    updatedAt: '2024-01-01T13:00:00Z'
+    updatedAt: '2024-01-01T13:00:00Z',
   }),
   timestamp: new Date('2024-01-01T14:00:00Z'),
-  resolved: false
+  resolved: false,
 })
 
 describe('ConflictResolutionModal', () => {
@@ -110,7 +143,7 @@ describe('ConflictResolutionModal', () => {
         onResolve={mockOnResolve}
       />
     )
-    
+
     expect(container.firstChild).toBeNull()
   })
 
@@ -123,7 +156,7 @@ describe('ConflictResolutionModal', () => {
         onResolve={mockOnResolve}
       />
     )
-    
+
     expect(screen.getByTestId('standard-modal')).toBeInTheDocument()
     expect(screen.getByText('Resolve Sync Conflict')).toBeInTheDocument()
     expect(screen.getByText('Note Conflict Detected')).toBeInTheDocument()
@@ -138,7 +171,7 @@ describe('ConflictResolutionModal', () => {
         onResolve={mockOnResolve}
       />
     )
-    
+
     expect(screen.queryByTestId('standard-modal')).not.toBeInTheDocument()
   })
 
@@ -151,7 +184,7 @@ describe('ConflictResolutionModal', () => {
         onResolve={mockOnResolve}
       />
     )
-    
+
     expect(screen.getByText('Local Version')).toBeInTheDocument()
     expect(screen.getByText('Remote Version')).toBeInTheDocument()
     expect(screen.getByText('Local Note Title')).toBeInTheDocument()
@@ -162,7 +195,7 @@ describe('ConflictResolutionModal', () => {
     const longContent = 'a'.repeat(250)
     const conflict = createNoteConflict()
     ;(conflict.localVersion as Note).content = longContent
-    
+
     render(
       <ConflictResolutionModal
         isOpen={true}
@@ -171,7 +204,7 @@ describe('ConflictResolutionModal', () => {
         onResolve={mockOnResolve}
       />
     )
-    
+
     const preview = screen.getByText(/^a{200}\.\.\./)
     expect(preview).toBeInTheDocument()
   })
@@ -185,7 +218,7 @@ describe('ConflictResolutionModal', () => {
         onResolve={mockOnResolve}
       />
     )
-    
+
     expect(screen.getByText('Notebook Conflict Detected')).toBeInTheDocument()
     expect(screen.getByText('Local Notebook')).toBeInTheDocument()
     expect(screen.getByText('Remote Notebook')).toBeInTheDocument()
@@ -202,7 +235,7 @@ describe('ConflictResolutionModal', () => {
         onResolve={mockOnResolve}
       />
     )
-    
+
     expect(screen.getByText('Use Local Version')).toBeInTheDocument()
     expect(screen.getByText('Use Remote Version')).toBeInTheDocument()
     expect(screen.getByText('Merge Changes')).toBeInTheDocument()
@@ -218,7 +251,7 @@ describe('ConflictResolutionModal', () => {
         onResolve={mockOnResolve}
       />
     )
-    
+
     const mergeRadio = screen.getByLabelText(/Merge Changes/)
     expect(mergeRadio).toBeChecked()
   })
@@ -232,11 +265,11 @@ describe('ConflictResolutionModal', () => {
         onResolve={mockOnResolve}
       />
     )
-    
+
     const localRadio = screen.getByLabelText(/Use Local Version/)
     fireEvent.click(localRadio)
     expect(localRadio).toBeChecked()
-    
+
     const remoteRadio = screen.getByLabelText(/Use Remote Version/)
     fireEvent.click(remoteRadio)
     expect(remoteRadio).toBeChecked()
@@ -244,7 +277,7 @@ describe('ConflictResolutionModal', () => {
 
   it('calls onResolve with correct parameters when resolving', () => {
     const conflict = createNoteConflict()
-    
+
     render(
       <ConflictResolutionModal
         isOpen={true}
@@ -253,18 +286,18 @@ describe('ConflictResolutionModal', () => {
         onResolve={mockOnResolve}
       />
     )
-    
+
     const useLocalRadio = screen.getByLabelText(/Use Local Version/)
     fireEvent.click(useLocalRadio)
-    
+
     const resolveButton = screen.getByText('Resolve Conflict')
     fireEvent.click(resolveButton)
-    
+
     expect(mockOnResolve).toHaveBeenCalledWith(
       'conflict-1',
       expect.objectContaining({
         strategy: 'use_local',
-        timestamp: expect.any(Date)
+        timestamp: expect.any(Date),
       })
     )
   })
@@ -278,10 +311,10 @@ describe('ConflictResolutionModal', () => {
         onResolve={mockOnResolve}
       />
     )
-    
+
     const resolveButton = screen.getByText('Resolve Conflict')
     fireEvent.click(resolveButton)
-    
+
     expect(mockOnClose).toHaveBeenCalled()
   })
 
@@ -294,10 +327,10 @@ describe('ConflictResolutionModal', () => {
         onResolve={mockOnResolve}
       />
     )
-    
+
     const cancelButton = screen.getByText('Cancel')
     fireEvent.click(cancelButton)
-    
+
     expect(mockOnClose).toHaveBeenCalled()
     expect(mockOnResolve).not.toHaveBeenCalled()
   })
@@ -311,10 +344,10 @@ describe('ConflictResolutionModal', () => {
         onResolve={mockOnResolve}
       />
     )
-    
+
     const testTags = screen.getAllByText('test')
     const mockTags = screen.getAllByText('mock')
-    
+
     expect(testTags).toHaveLength(2) // One for local, one for remote
     expect(mockTags).toHaveLength(2) // One for local, one for remote
   })
@@ -328,7 +361,7 @@ describe('ConflictResolutionModal', () => {
         onResolve={mockOnResolve}
       />
     )
-    
+
     // Check that date formatting is applied
     const dateElements = screen.getAllByText(/Modified:/)
     expect(dateElements.length).toBeGreaterThan(0)
@@ -343,7 +376,7 @@ describe('ConflictResolutionModal', () => {
         onResolve={mockOnResolve}
       />
     )
-    
+
     expect(screen.getByTestId('file-icon')).toBeInTheDocument()
   })
 
@@ -356,7 +389,7 @@ describe('ConflictResolutionModal', () => {
         onResolve={mockOnResolve}
       />
     )
-    
+
     expect(screen.getByTestId('folder-icon')).toBeInTheDocument()
   })
 
@@ -369,17 +402,25 @@ describe('ConflictResolutionModal', () => {
         onResolve={mockOnResolve}
       />
     )
-    
-    expect(screen.getByText('Keep your local changes and discard remote changes')).toBeInTheDocument()
-    expect(screen.getByText('Use the remote version and discard local changes')).toBeInTheDocument()
-    expect(screen.getByText('Automatically merge both versions (recommended)')).toBeInTheDocument()
-    expect(screen.getByText('Create separate copies of both versions')).toBeInTheDocument()
+
+    expect(
+      screen.getByText('Keep your local changes and discard remote changes')
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('Use the remote version and discard local changes')
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('Automatically merge both versions (recommended)')
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('Create separate copies of both versions')
+    ).toBeInTheDocument()
   })
 
   it('handles notebook without description', () => {
     const conflict = createNotebookConflict()
     ;(conflict.localVersion as Notebook).description = ''
-    
+
     render(
       <ConflictResolutionModal
         isOpen={true}
@@ -388,7 +429,7 @@ describe('ConflictResolutionModal', () => {
         onResolve={mockOnResolve}
       />
     )
-    
+
     expect(screen.getByText('No description')).toBeInTheDocument()
   })
 })

@@ -2,7 +2,11 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { Icons } from '../Icons'
 
-const FloatingViewControls = ({ viewMode, onViewModeChange, splitRatio = 50 }) => {
+const FloatingViewControls = ({
+  viewMode,
+  onViewModeChange,
+  splitRatio = 50,
+}) => {
   // Split view toggle - always toggles split on/off
   const handleSplitToggle = () => {
     if (viewMode === 'split') {
@@ -71,7 +75,9 @@ const FloatingViewControls = ({ viewMode, onViewModeChange, splitRatio = 50 }) =
             : 'border-white/20 text-white/80 hover:text-white hover:border-white/30'
         }`}
         title={viewMode === 'split' ? 'Exit Split View' : 'Toggle Split View'}
-        aria-label={viewMode === 'split' ? 'Exit Split View' : 'Toggle Split View'}
+        aria-label={
+          viewMode === 'split' ? 'Exit Split View' : 'Toggle Split View'
+        }
         data-testid="split-view-toggle"
       >
         {viewMode === 'split' && splitRatio > 50 ? (

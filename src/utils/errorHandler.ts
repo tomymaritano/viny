@@ -12,14 +12,14 @@ export enum ErrorType {
   IMPORT_EXPORT = 'import_export',
   SEARCH = 'search',
   FILE_SYSTEM = 'file_system',
-  UNKNOWN = 'unknown'
+  UNKNOWN = 'unknown',
 }
 
 export enum ErrorSeverity {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 export interface AppError {
@@ -59,22 +59,28 @@ export class ErrorHandler {
   }
 
   // Handle different types of errors
-  handleError(error: Error | AppError | string, context?: Record<string, any>): AppError {
+  handleError(
+    error: Error | AppError | string,
+    context?: Record<string, any>
+  ): AppError {
     const appError = this.normalizeError(error, context)
-    
+
     // Log error
     this.logError(appError)
-    
+
     // Store in history
     this.addToHistory(appError)
-    
+
     // Notify listeners
     this.notifyListeners(appError)
-    
+
     return appError
   }
 
-  private normalizeError(error: Error | AppError | string, context?: Record<string, any>): AppError {
+  private normalizeError(
+    error: Error | AppError | string,
+    context?: Record<string, any>
+  ): AppError {
     // If already an AppError, return as is
     if (this.isAppError(error)) {
       return error
@@ -91,7 +97,7 @@ export class ErrorHandler {
         severity: ErrorSeverity.MEDIUM,
         message: error,
         timestamp: new Date(),
-        context
+        context,
       }
     }
 
@@ -105,19 +111,25 @@ export class ErrorHandler {
       details: errorObj.message,
       timestamp: new Date(),
       context,
-      stack: errorObj.stack
+      stack: errorObj.stack,
     }
   }
 
   private isAppError(error: any): error is AppError {
-    return error && typeof error === 'object' && 'id' in error && 'type' in error
+    return (
+      error && typeof error === 'object' && 'id' in error && 'type' in error
+    )
   }
 
   private classifyError(error: Error): ErrorType {
     const message = error.message.toLowerCase()
     const name = error.name.toLowerCase()
 
-    if (message.includes('network') || message.includes('fetch') || name.includes('network')) {
+    if (
+      message.includes('network') ||
+      message.includes('fetch') ||
+      name.includes('network')
+    ) {
       return ErrorType.NETWORK
     }
     if (message.includes('permission') || message.includes('access')) {
@@ -145,13 +157,21 @@ export class ErrorHandler {
   private determineSeverity(error: Error): ErrorSeverity {
     const message = error.message.toLowerCase()
 
-    if (message.includes('critical') || message.includes('fatal') || message.includes('corruption')) {
+    if (
+      message.includes('critical') ||
+      message.includes('fatal') ||
+      message.includes('corruption')
+    ) {
       return ErrorSeverity.CRITICAL
     }
     if (message.includes('warning') || message.includes('deprecated')) {
       return ErrorSeverity.LOW
     }
-    if (message.includes('permission') || message.includes('quota') || message.includes('network')) {
+    if (
+      message.includes('permission') ||
+      message.includes('quota') ||
+      message.includes('network')
+    ) {
       return ErrorSeverity.HIGH
     }
 
@@ -201,11 +221,13 @@ export class ErrorHandler {
       id: error.id,
       details: error.details,
       context: error.context,
-      stack: error.stack
+      stack: error.stack,
     })
   }
 
-  private getLogMethod(severity: ErrorSeverity): (message: string, meta?: any) => void {
+  private getLogMethod(
+    severity: ErrorSeverity
+  ): (message: string, meta?: any) => void {
     switch (severity) {
       case ErrorSeverity.LOW:
         return (message: string, meta?: any) => logger.info(message, meta)
@@ -241,10 +263,12 @@ export class ErrorHandler {
     return [...this.errorHistory]
   }
 
-  getErrorsBy(filter: Partial<Pick<AppError, 'type' | 'severity'>>): AppError[] {
+  getErrorsBy(
+    filter: Partial<Pick<AppError, 'type' | 'severity'>>
+  ): AppError[] {
     return this.errorHistory.filter(error => {
-      return Object.entries(filter).every(([key, value]) => 
-        error[key as keyof AppError] === value
+      return Object.entries(filter).every(
+        ([key, value]) => error[key as keyof AppError] === value
       )
     })
   }
@@ -254,12 +278,18 @@ export class ErrorHandler {
   }
 
   // Helper methods for common error scenarios
-  static handleNetworkError(error: Error, context?: Record<string, any>): AppError {
+  static handleNetworkError(
+    error: Error,
+    context?: Record<string, any>
+  ): AppError {
     const handler = ErrorHandler.getInstance()
     return handler.handleError(error, { ...context, type: ErrorType.NETWORK })
   }
 
-  static handleValidationError(message: string, context?: Record<string, any>): AppError {
+  static handleValidationError(
+    message: string,
+    context?: Record<string, any>
+  ): AppError {
     const handler = ErrorHandler.getInstance()
     return handler.handleError({
       id: `validation_${Date.now()}`,
@@ -267,16 +297,22 @@ export class ErrorHandler {
       severity: ErrorSeverity.MEDIUM,
       message,
       timestamp: new Date(),
-      context
+      context,
     })
   }
 
-  static handleStorageError(error: Error, context?: Record<string, any>): AppError {
+  static handleStorageError(
+    error: Error,
+    context?: Record<string, any>
+  ): AppError {
     const handler = ErrorHandler.getInstance()
     return handler.handleError(error, { ...context, type: ErrorType.STORAGE })
   }
 
-  static handleSyncError(error: Error, context?: Record<string, any>): AppError {
+  static handleSyncError(
+    error: Error,
+    context?: Record<string, any>
+  ): AppError {
     const handler = ErrorHandler.getInstance()
     return handler.handleError(error, { ...context, type: ErrorType.SYNC })
   }
@@ -287,19 +323,22 @@ export const setupGlobalErrorHandler = () => {
   const errorHandler = ErrorHandler.getInstance()
 
   // Handle unhandled promise rejections
-  window.addEventListener('unhandledrejection', (event) => {
-    const error = event.reason instanceof Error ? event.reason : new Error(String(event.reason))
+  window.addEventListener('unhandledrejection', event => {
+    const error =
+      event.reason instanceof Error
+        ? event.reason
+        : new Error(String(event.reason))
     errorHandler.handleError(error, { source: 'unhandledrejection' })
   })
 
   // Handle global JavaScript errors
-  window.addEventListener('error', (event) => {
+  window.addEventListener('error', event => {
     const error = event.error || new Error(event.message)
-    errorHandler.handleError(error, { 
+    errorHandler.handleError(error, {
       source: 'global',
       filename: event.filename,
       lineno: event.lineno,
-      colno: event.colno
+      colno: event.colno,
     })
   })
 }

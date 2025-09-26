@@ -2,52 +2,75 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
 import AppLayout from '../AppLayout'
-import { Note, Notebook, Settings } from '../../../types'
-import { Toast } from '../../../stores/slices/uiSlice'
+import type { Note, Notebook, Settings } from '../../../types'
+import type { Toast } from '../../../stores/slices/uiSlice'
 
 // Mock all the child components
 vi.mock('../../ui/TitleBarCompact', () => ({
-  default: vi.fn(({ title }) => <div data-testid="title-bar">{title}</div>)
+  default: vi.fn(({ title }) => <div data-testid="title-bar">{title}</div>),
 }))
 
 vi.mock('../../ResizableLayout', () => ({
-  default: vi.fn(({ sidebar, notesList, mainContent, previewPanel, isPreviewVisible }) => (
-    <div data-testid="resizable-layout">
-      <div data-testid="sidebar-container">{sidebar}</div>
-      <div data-testid="notes-list-container">{notesList}</div>
-      <div data-testid="main-content-container">{mainContent}</div>
-      {isPreviewVisible && <div data-testid="preview-panel-container">{previewPanel}</div>}
-    </div>
-  ))
+  default: vi.fn(
+    ({ sidebar, notesList, mainContent, previewPanel, isPreviewVisible }) => (
+      <div data-testid="resizable-layout">
+        <div data-testid="sidebar-container">{sidebar}</div>
+        <div data-testid="notes-list-container">{notesList}</div>
+        <div data-testid="main-content-container">{mainContent}</div>
+        {isPreviewVisible && (
+          <div data-testid="preview-panel-container">{previewPanel}</div>
+        )}
+      </div>
+    )
+  ),
 }))
 
 vi.mock('../../features/SidebarSimple', () => ({
-  default: vi.fn(() => <div data-testid="sidebar-simple">Sidebar</div>)
+  default: vi.fn(() => <div data-testid="sidebar-simple">Sidebar</div>),
 }))
 
 vi.mock('../../features/NotesListSimple', () => ({
-  default: vi.fn((props) => (
+  default: vi.fn(props => (
     <div data-testid="notes-list-simple">
-      <button onClick={props.onNewNote} data-testid="new-note-button">New Note</button>
+      <button onClick={props.onNewNote} data-testid="new-note-button">
+        New Note
+      </button>
       {props.notes.map((note: Note) => (
         <div key={note.id} data-testid={`note-item-${note.id}`}>
-          <button onClick={() => props.onOpenNote(note.id)} data-testid={`open-note-${note.id}`}>
+          <button
+            onClick={() => props.onOpenNote(note.id)}
+            data-testid={`open-note-${note.id}`}
+          >
             {note.title}
           </button>
-          <button onClick={() => props.onDeleteNote(note)} data-testid={`delete-note-${note.id}`}>
+          <button
+            onClick={() => props.onDeleteNote(note)}
+            data-testid={`delete-note-${note.id}`}
+          >
             Delete
           </button>
-          <button onClick={() => props.onTogglePin(note)} data-testid={`pin-note-${note.id}`}>
+          <button
+            onClick={() => props.onTogglePin(note)}
+            data-testid={`pin-note-${note.id}`}
+          >
             Pin
           </button>
-          <button onClick={() => props.onDuplicateNote(note)} data-testid={`duplicate-note-${note.id}`}>
+          <button
+            onClick={() => props.onDuplicateNote(note)}
+            data-testid={`duplicate-note-${note.id}`}
+          >
             Duplicate
           </button>
         </div>
       ))}
-      <button onClick={() => props.onSortNotes('date')} data-testid="sort-notes">Sort</button>
+      <button
+        onClick={() => props.onSortNotes('date')}
+        data-testid="sort-notes"
+      >
+        Sort
+      </button>
     </div>
-  ))
+  )),
 }))
 
 vi.mock('../../NotePreview', () => ({
@@ -56,29 +79,49 @@ vi.mock('../../NotePreview', () => ({
       {note && (
         <>
           <div data-testid="preview-title">{note.title}</div>
-          <button onClick={() => onEdit(note)} data-testid="edit-button">Edit</button>
-          <button onClick={() => onTogglePin(note)} data-testid="preview-pin-button">Pin</button>
-          <button onClick={() => onDuplicate(note)} data-testid="preview-duplicate-button">Duplicate</button>
-          <button onClick={() => onDelete(note)} data-testid="preview-delete-button">Delete</button>
+          <button onClick={() => onEdit(note)} data-testid="edit-button">
+            Edit
+          </button>
+          <button
+            onClick={() => onTogglePin(note)}
+            data-testid="preview-pin-button"
+          >
+            Pin
+          </button>
+          <button
+            onClick={() => onDuplicate(note)}
+            data-testid="preview-duplicate-button"
+          >
+            Duplicate
+          </button>
+          <button
+            onClick={() => onDelete(note)}
+            data-testid="preview-delete-button"
+          >
+            Delete
+          </button>
         </>
       )}
     </div>
-  ))
+  )),
 }))
 
 vi.mock('../../features/LazyComponents', () => ({
-  MarkdownEditor: vi.fn((props) => (
+  MarkdownEditor: vi.fn(props => (
     <div data-testid="markdown-editor">
       <textarea
         value={props.value}
-        onChange={(e) => props.onChange(e.target.value)}
+        onChange={e => props.onChange(e.target.value)}
         data-testid="editor-textarea"
       />
-      <button onClick={() => props.onNotebookChange('new-notebook')} data-testid="change-notebook">
+      <button
+        onClick={() => props.onNotebookChange('new-notebook')}
+        data-testid="change-notebook"
+      >
         Change Notebook
       </button>
     </div>
-  ))
+  )),
 }))
 
 vi.mock('../../ToastContainer', () => ({
@@ -87,21 +130,26 @@ vi.mock('../../ToastContainer', () => ({
       {toasts.map((toast: Toast) => (
         <div key={toast.id} data-testid={`toast-${toast.id}`}>
           {toast.message}
-          <button onClick={() => onRemove(toast.id)} data-testid={`dismiss-toast-${toast.id}`}>
+          <button
+            onClick={() => onRemove(toast.id)}
+            data-testid={`dismiss-toast-${toast.id}`}
+          >
             Dismiss
           </button>
         </div>
       ))}
     </div>
-  ))
+  )),
 }))
 
 vi.mock('../../LoadingSpinner', () => ({
-  default: vi.fn(({ text }) => <div data-testid="loading-spinner">{text}</div>)
+  default: vi.fn(({ text }) => <div data-testid="loading-spinner">{text}</div>),
 }))
 
 vi.mock('../../ui/LazyWrapper', () => ({
-  default: vi.fn(({ children, className }) => <div className={className}>{children}</div>)
+  default: vi.fn(({ children, className }) => (
+    <div className={className}>{children}</div>
+  )),
 }))
 
 vi.mock('../../LazyComponents', () => ({
@@ -109,7 +157,7 @@ vi.mock('../../LazyComponents', () => ({
     <div ref={ref} data-testid="markdown-preview">
       Preview: {props.note?.title}
     </div>
-  ))
+  )),
 }))
 
 describe('AppLayout', () => {
@@ -134,21 +182,21 @@ describe('AppLayout', () => {
     tags: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    isPinned: false
+    isPinned: false,
   }
 
   const mockNotebooks: Notebook[] = [
     { id: '1', name: 'Work', createdAt: new Date().toISOString() },
-    { id: '2', name: 'Personal', createdAt: new Date().toISOString() }
+    { id: '2', name: 'Personal', createdAt: new Date().toISOString() },
   ]
 
   const mockSettings: Partial<Settings> = {
     theme: 'dark',
-    language: 'en'
+    language: 'en',
   }
 
   const mockToasts: Toast[] = [
-    { id: '1', message: 'Success!', type: 'success' }
+    { id: '1', message: 'Success!', type: 'success' },
   ]
 
   const defaultProps = {
@@ -170,7 +218,7 @@ describe('AppLayout', () => {
     handleRestoreNote: vi.fn(),
     handlePermanentDelete: vi.fn(),
     setModal: mockSetModal,
-    sortNotes: mockSortNotes
+    sortNotes: mockSortNotes,
   }
 
   beforeEach(() => {
@@ -195,7 +243,9 @@ describe('AppLayout', () => {
   })
 
   it('renders markdown editor when editor is open with current note', () => {
-    render(<AppLayout {...defaultProps} isEditorOpen={true} currentNote={mockNote} />)
+    render(
+      <AppLayout {...defaultProps} isEditorOpen={true} currentNote={mockNote} />
+    )
 
     expect(screen.getByTestId('markdown-editor')).toBeInTheDocument()
     expect(screen.queryByTestId('note-preview')).not.toBeInTheDocument()
@@ -203,7 +253,13 @@ describe('AppLayout', () => {
 
   it('passes correct props to NotesListSimple', () => {
     const filteredNotes = [mockNote]
-    render(<AppLayout {...defaultProps} filteredNotes={filteredNotes} currentNote={mockNote} />)
+    render(
+      <AppLayout
+        {...defaultProps}
+        filteredNotes={filteredNotes}
+        currentNote={mockNote}
+      />
+    )
 
     // Test new note button
     fireEvent.click(screen.getByTestId('new-note-button'))
@@ -231,7 +287,9 @@ describe('AppLayout', () => {
   })
 
   it('passes correct props to MarkdownEditor', () => {
-    render(<AppLayout {...defaultProps} isEditorOpen={true} currentNote={mockNote} />)
+    render(
+      <AppLayout {...defaultProps} isEditorOpen={true} currentNote={mockNote} />
+    )
 
     // Test content change
     const textarea = screen.getByTestId('editor-textarea')
@@ -270,13 +328,17 @@ describe('AppLayout', () => {
   it('shows loading spinner for editor when in suspense', () => {
     // This test would require more complex setup to test Suspense boundary
     // For now, we can at least verify the component structure
-    render(<AppLayout {...defaultProps} isEditorOpen={true} currentNote={mockNote} />)
-    
+    render(
+      <AppLayout {...defaultProps} isEditorOpen={true} currentNote={mockNote} />
+    )
+
     expect(screen.getByTestId('markdown-editor')).toBeInTheDocument()
   })
 
   it('uses selected note when current note is null in preview', () => {
-    render(<AppLayout {...defaultProps} currentNote={null} selectedNote={mockNote} />)
+    render(
+      <AppLayout {...defaultProps} currentNote={null} selectedNote={mockNote} />
+    )
 
     expect(screen.getByTestId('preview-title')).toHaveTextContent('Test Note')
   })
@@ -285,24 +347,39 @@ describe('AppLayout', () => {
 
   it('passes settings to ResizableLayout', () => {
     const { container } = render(<AppLayout {...defaultProps} />)
-    
+
     // Since ResizableLayout is mocked, we can't directly test props passing
     // But we can verify the component is rendered
     expect(screen.getByTestId('resizable-layout')).toBeInTheDocument()
   })
 
   it('renders with empty notebooks array', () => {
-    render(<AppLayout {...defaultProps} notebooks={[]} isEditorOpen={true} currentNote={mockNote} />)
-    
+    render(
+      <AppLayout
+        {...defaultProps}
+        notebooks={[]}
+        isEditorOpen={true}
+        currentNote={mockNote}
+      />
+    )
+
     expect(screen.getByTestId('markdown-editor')).toBeInTheDocument()
   })
 
   it('maintains editor key based on current note id', () => {
-    const { rerender } = render(<AppLayout {...defaultProps} isEditorOpen={true} currentNote={mockNote} />)
-    
+    const { rerender } = render(
+      <AppLayout {...defaultProps} isEditorOpen={true} currentNote={mockNote} />
+    )
+
     const updatedNote = { ...mockNote, id: '2' }
-    rerender(<AppLayout {...defaultProps} isEditorOpen={true} currentNote={updatedNote} />)
-    
+    rerender(
+      <AppLayout
+        {...defaultProps}
+        isEditorOpen={true}
+        currentNote={updatedNote}
+      />
+    )
+
     // The editor should re-render with new key
     expect(screen.getByTestId('markdown-editor')).toBeInTheDocument()
   })

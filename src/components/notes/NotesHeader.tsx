@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
+import { motion } from 'framer-motion'
 import { Icons } from '../Icons'
-import IconButton from '../ui/IconButton'
 import SortDropdown from '../ui/SortDropdown'
 
 type SortField = 'title' | 'date' | 'updated' | 'notebook'
@@ -25,7 +25,7 @@ const NotesHeader: React.FC<NotesHeaderProps> = ({
   onSort,
   onNewNote,
   searchTerm,
-  onSearchChange
+  onSearchChange,
 }) => {
   const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -65,50 +65,51 @@ const NotesHeader: React.FC<NotesHeaderProps> = ({
 
         {/* Right: New Note button */}
         <div className="flex items-center">
-          <IconButton
-            icon={Icons.NotebookPen}
+          <motion.button
             onClick={onNewNote}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="p-1.5 hover:bg-theme-bg-quaternary rounded transition-colors duration-150"
             title="Create new note"
-            size={14}
-            variant="default"
             aria-label="Create new note"
-            aria-pressed={false}
-            aria-keyshortcuts=""
-            className="p-1"
             data-testid="create-note-button"
-          />
+          >
+            <Icons.NotebookPen size={14} className="text-theme-text-muted" />
+          </motion.button>
         </div>
       </div>
 
       {/* Second row: Search */}
       <div className="px-2 pb-2">
         <div className="relative">
-          <Icons.Search 
-            size={16} 
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-theme-text-muted" 
+          <Icons.Search
+            size={16}
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-theme-text-muted"
           />
           <input
             ref={searchInputRef}
             type="text"
             placeholder="Search notes..."
             value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
+            onChange={e => onSearchChange(e.target.value)}
             data-testid="search-input"
             className="w-full pl-10 pr-16 py-2 bg-theme-bg-tertiary border border-theme-border-secondary 
               rounded-md text-sm text-theme-text-primary placeholder-theme-text-muted
               focus:outline-none focus:ring-2 focus:ring-theme-accent-primary focus:border-transparent"
           />
-          
+
           {/* Right side: Clear button and Cmd+K indicator */}
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
             {searchTerm && (
-              <button
+              <motion.button
                 onClick={() => onSearchChange('')}
-                className="text-theme-text-muted hover:text-theme-text-primary p-0.5"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="text-theme-text-muted hover:text-theme-text-primary p-0.5 transition-colors duration-150"
                 title="Clear search"
               >
                 <Icons.X size={14} />
-              </button>
+              </motion.button>
             )}
             <kbd className="inline-flex h-5 select-none items-center gap-1 rounded border bg-theme-bg-primary px-1.5 font-mono text-[10px] font-medium text-theme-text-muted border-theme-border-secondary">
               <span className="text-xs">⌘</span>K

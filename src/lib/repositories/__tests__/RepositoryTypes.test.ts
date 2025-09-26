@@ -4,37 +4,39 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import {
-  RepositoryError,
-  RepositoryErrorCode,
-  STORAGE_KEY_MAPPINGS,
+import type {
   OperationResult,
   MigrationResult,
   BackupData,
-  RestoreResult,
-  ExportResult,
   RepositoryMetrics,
   FilterOptions,
   SearchOptions,
   SearchResult,
   StorageKeyMapping,
   PluginStorageOptions,
-  PluginStorageQuota,
   RetryConfig,
   CircuitBreakerConfig,
-  ValidationRule,
   ValidationSchema,
   ValidationResult,
   RepositoryEvent,
   CacheEntry,
-  CacheStats
+  CacheStats,
+} from '../types/RepositoryTypes'
+import {
+  RepositoryError,
+  RepositoryErrorCode,
+  STORAGE_KEY_MAPPINGS,
+  RestoreResult,
+  ExportResult,
+  PluginStorageQuota,
+  ValidationRule,
 } from '../types/RepositoryTypes'
 
 describe('RepositoryError', () => {
   it('should create error with all properties', () => {
     const context = { userId: '123', action: 'save' }
     const cause = new Error('Original error')
-    
+
     const error = new RepositoryError(
       'Test error',
       RepositoryErrorCode.VALIDATION_ERROR,
@@ -70,7 +72,7 @@ describe('RepositoryError', () => {
         RepositoryErrorCode.NETWORK_ERROR,
         RepositoryErrorCode.TIMEOUT_ERROR,
         RepositoryErrorCode.STORAGE_FULL,
-        RepositoryErrorCode.CONFLICT_ERROR
+        RepositoryErrorCode.CONFLICT_ERROR,
       ]
 
       retryableErrors.forEach(code => {
@@ -84,7 +86,7 @@ describe('RepositoryError', () => {
         RepositoryErrorCode.VALIDATION_ERROR,
         RepositoryErrorCode.PERMISSION_DENIED,
         RepositoryErrorCode.ENCRYPTION_ERROR,
-        RepositoryErrorCode.NOT_FOUND
+        RepositoryErrorCode.NOT_FOUND,
       ]
 
       nonRetryableErrors.forEach(code => {
@@ -98,7 +100,7 @@ describe('RepositoryError', () => {
     it('should identify critical errors', () => {
       const criticalErrors = [
         RepositoryErrorCode.ENCRYPTION_ERROR,
-        RepositoryErrorCode.PERMISSION_DENIED
+        RepositoryErrorCode.PERMISSION_DENIED,
       ]
 
       criticalErrors.forEach(code => {
@@ -111,7 +113,7 @@ describe('RepositoryError', () => {
       const nonCriticalErrors = [
         RepositoryErrorCode.NETWORK_ERROR,
         RepositoryErrorCode.VALIDATION_ERROR,
-        RepositoryErrorCode.NOT_FOUND
+        RepositoryErrorCode.NOT_FOUND,
       ]
 
       nonCriticalErrors.forEach(code => {
@@ -137,7 +139,7 @@ describe('Storage Key Mappings', () => {
       'viny_search_history',
       'viny_analytics',
       'viny_telemetry',
-      'viny_error_reports'
+      'viny_error_reports',
     ]
 
     expectedKeys.forEach(key => {
@@ -150,7 +152,7 @@ describe('Storage Key Mappings', () => {
       expect(mapping).toHaveProperty('repositoryMethod')
       expect(mapping).toHaveProperty('priority')
       expect(['high', 'medium', 'low']).toContain(mapping.priority)
-      
+
       // Optional properties
       if (mapping.transform) {
         expect(typeof mapping.transform).toBe('function')
@@ -164,7 +166,7 @@ describe('Storage Key Mappings', () => {
   it('should correctly transform UI state values', () => {
     const sidebarMapping = STORAGE_KEY_MAPPINGS['inkrun-sidebar-width']
     expect(sidebarMapping.transform).toBeDefined()
-    
+
     if (sidebarMapping.transform) {
       const result = sidebarMapping.transform('300')
       expect(result).toEqual({ sidebarWidth: 300 })
@@ -174,7 +176,7 @@ describe('Storage Key Mappings', () => {
   it('should correctly validate numeric values', () => {
     const sidebarMapping = STORAGE_KEY_MAPPINGS['inkrun-sidebar-width']
     expect(sidebarMapping.validate).toBeDefined()
-    
+
     if (sidebarMapping.validate) {
       expect(sidebarMapping.validate('300')).toBe(true)
       expect(sidebarMapping.validate('invalid')).toBe(false)
@@ -184,7 +186,7 @@ describe('Storage Key Mappings', () => {
   it('should correctly validate JSON values', () => {
     const imagesMapping = STORAGE_KEY_MAPPINGS['viny-images']
     expect(imagesMapping.validate).toBeDefined()
-    
+
     if (imagesMapping.validate) {
       expect(imagesMapping.validate('{"valid": "json"}')).toBe(true)
       expect(imagesMapping.validate('invalid json')).toBe(false)
@@ -194,7 +196,7 @@ describe('Storage Key Mappings', () => {
   it('should transform JSON values correctly', () => {
     const imagesMapping = STORAGE_KEY_MAPPINGS['viny-images']
     expect(imagesMapping.transform).toBeDefined()
-    
+
     if (imagesMapping.transform) {
       const testData = '{"images": ["img1", "img2"]}'
       const result = imagesMapping.transform(testData)
@@ -220,7 +222,7 @@ describe('Type Definitions', () => {
         success: true,
         data: 'test data',
         timestamp: Date.now(),
-        operationId: 'op-123'
+        operationId: 'op-123',
       }
 
       expect(result.success).toBe(true)
@@ -229,12 +231,16 @@ describe('Type Definitions', () => {
     })
 
     it('should create failed operation result', () => {
-      const error = new RepositoryError('test', RepositoryErrorCode.UNKNOWN_ERROR, 'test')
+      const error = new RepositoryError(
+        'test',
+        RepositoryErrorCode.UNKNOWN_ERROR,
+        'test'
+      )
       const result: OperationResult<never> = {
         success: false,
         error,
         timestamp: Date.now(),
-        operationId: 'op-123'
+        operationId: 'op-123',
       }
 
       expect(result.success).toBe(false)
@@ -250,7 +256,7 @@ describe('Type Definitions', () => {
         failedKeys: ['key3'],
         totalProcessed: 3,
         errors: [],
-        duration: 1500
+        duration: 1500,
       }
 
       expect(result.migratedKeys).toHaveLength(2)
@@ -266,7 +272,7 @@ describe('Type Definitions', () => {
         timestamp: Date.now(),
         keys: ['settings', 'notes'],
         data: { settings: {}, notes: [] },
-        checksum: 'abc123'
+        checksum: 'abc123',
       }
 
       expect(backup.version).toBe('1.0')
@@ -288,7 +294,7 @@ describe('Type Definitions', () => {
         cacheHitRate: 0.85,
         lastOperation: Date.now(),
         isHealthy: true,
-        uptime: 86400000
+        uptime: 86400000,
       }
 
       expect(metrics.operationCount).toBe(100)
@@ -313,7 +319,7 @@ describe('Type Definitions', () => {
         limit: 10,
         offset: 0,
         include: ['id', 'name'],
-        exclude: ['createdAt']
+        exclude: ['createdAt'],
       }
 
       expect(filter.where?.name).toBe('test')
@@ -330,7 +336,7 @@ describe('Type Definitions', () => {
         fuzzy: true,
         limit: 20,
         offset: 0,
-        highlight: true
+        highlight: true,
       }
 
       expect(options.query).toBe('test search')
@@ -344,7 +350,7 @@ describe('Type Definitions', () => {
         total: 1,
         query: 'test',
         took: 50,
-        highlights: { '1': ['<mark>test</mark>'] }
+        highlights: { '1': ['<mark>test</mark>'] },
       }
 
       expect(result.items).toHaveLength(1)
@@ -360,7 +366,7 @@ describe('Type Definitions', () => {
         sandboxed: true,
         encrypted: true,
         maxSize: 1024000,
-        ttl: 86400000
+        ttl: 86400000,
       }
 
       expect(options.pluginId).toBe('my-plugin')
@@ -377,7 +383,7 @@ describe('Type Definitions', () => {
         baseDelayMs: 100,
         maxDelayMs: 5000,
         exponentialBackoff: true,
-        jitter: true
+        jitter: true,
       }
 
       expect(config.maxAttempts).toBe(3)
@@ -390,7 +396,7 @@ describe('Type Definitions', () => {
         enabled: true,
         failureThreshold: 5,
         resetTimeoutMs: 30000,
-        monitoringPeriodMs: 60000
+        monitoringPeriodMs: 60000,
       }
 
       expect(config.enabled).toBe(true)
@@ -407,13 +413,13 @@ describe('Type Definitions', () => {
           type: 'string',
           minLength: 1,
           maxLength: 100,
-          pattern: /^[a-zA-Z\s]+$/
+          pattern: /^[a-zA-Z\s]+$/,
         },
         age: {
           required: true,
           type: 'number',
-          validator: (value: number) => value >= 0 && value <= 150
-        }
+          validator: (value: number) => value >= 0 && value <= 150,
+        },
       }
 
       expect(schema.name.required).toBe(true)
@@ -426,7 +432,7 @@ describe('Type Definitions', () => {
         isValid: false,
         errors: ['Name is required'],
         warnings: ['Name should be capitalized'],
-        sanitizedData: { name: 'John' }
+        sanitizedData: { name: 'John' },
       }
 
       expect(result.isValid).toBe(false)
@@ -443,7 +449,7 @@ describe('Type Definitions', () => {
         entityId: 'note-123',
         data: { id: 'note-123', title: 'New Note' },
         timestamp: Date.now(),
-        source: 'repository'
+        source: 'repository',
       }
 
       expect(event.type).toBe('created')
@@ -460,7 +466,7 @@ describe('Type Definitions', () => {
         timestamp: Date.now(),
         ttl: 60000,
         size: 100,
-        hits: 5
+        hits: 5,
       }
 
       expect(entry.key).toBe('cache-key')
@@ -474,7 +480,7 @@ describe('Type Definitions', () => {
         totalSize: 1024000,
         hitRate: 0.85,
         missRate: 0.15,
-        evictions: 10
+        evictions: 10,
       }
 
       expect(stats.totalEntries).toBe(100)
@@ -487,42 +493,42 @@ describe('Type Definitions', () => {
 describe('Type Safety', () => {
   it('should enforce type constraints at compile time', () => {
     // These tests verify TypeScript type checking
-    
+
     // RepositoryErrorCode should be strongly typed
     const validCode: RepositoryErrorCode = RepositoryErrorCode.VALIDATION_ERROR
     expect(Object.values(RepositoryErrorCode)).toContain(validCode)
-    
+
     // StorageKeyMapping should enforce structure
     const mapping: StorageKeyMapping = {
       'test-key': {
         repositoryMethod: 'getSettings',
-        priority: 'high'
-      }
+        priority: 'high',
+      },
     }
     expect(mapping['test-key'].priority).toBe('high')
-    
+
     // FilterOptions should be generic
     interface TestType {
       id: string
       value: number
     }
-    
+
     const filter: FilterOptions<TestType> = {
       where: { value: 100 }, // Should only allow TestType properties
-      orderBy: 'id' // Should only allow TestType keys
+      orderBy: 'id', // Should only allow TestType keys
     }
     expect(filter.where?.value).toBe(100)
   })
 
   it('should provide proper error code enumeration', () => {
     const allCodes = Object.values(RepositoryErrorCode)
-    
+
     expect(allCodes).toContain(RepositoryErrorCode.STORAGE_NOT_AVAILABLE)
     expect(allCodes).toContain(RepositoryErrorCode.VALIDATION_ERROR)
     expect(allCodes).toContain(RepositoryErrorCode.NETWORK_ERROR)
     expect(allCodes).toContain(RepositoryErrorCode.PERMISSION_DENIED)
     expect(allCodes).toContain(RepositoryErrorCode.UNKNOWN_ERROR)
-    
+
     // Should be exactly the codes we defined
     expect(allCodes).toHaveLength(12)
   })

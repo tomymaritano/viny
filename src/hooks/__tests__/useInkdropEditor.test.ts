@@ -13,37 +13,37 @@ const mockEditorLogger = {
   debug: vi.fn(),
   error: vi.fn(),
   info: vi.fn(),
-  warn: vi.fn()
+  warn: vi.fn(),
 }
 
 vi.mock('../../utils/logger', () => ({
-  editorLogger: mockEditorLogger
+  editorLogger: mockEditorLogger,
 }))
 
 // Mock app store
 const mockTheme = 'dark'
 vi.mock('../../stores/newSimpleStore', () => ({
   useAppStore: vi.fn(() => ({
-    theme: mockTheme
-  }))
+    theme: mockTheme,
+  })),
 }))
 
 // Mock editor extensions
 const mockCreateEditorExtensions = vi.fn()
 vi.mock('../../config/editorExtensions', () => ({
-  createEditorExtensions: mockCreateEditorExtensions
+  createEditorExtensions: mockCreateEditorExtensions,
 }))
 
 // Mock editor themes
 const mockGetThemeExtensions = vi.fn()
 vi.mock('../../config/editorThemes', () => ({
-  getThemeExtensions: mockGetThemeExtensions
+  getThemeExtensions: mockGetThemeExtensions,
 }))
 
 // Mock editor keybindings
 const mockAttachFormatSelection = vi.fn()
 vi.mock('../../config/editorKeybindings', () => ({
-  attachFormatSelection: mockAttachFormatSelection
+  attachFormatSelection: mockAttachFormatSelection,
 }))
 
 // Mock CodeMirror
@@ -55,37 +55,37 @@ const mockEditorView = {
     doc: {
       toString: vi.fn(() => 'test content'),
       length: 12,
-      sliceString: vi.fn((from: number, to: number) => 'test')
+      sliceString: vi.fn((from: number, to: number) => 'test'),
     },
     selection: {
-      main: { from: 0, to: 4 }
-    }
-  }
+      main: { from: 0, to: 4 },
+    },
+  },
 }
 
 const mockEditorState = {
-  create: vi.fn(() => ({}))
+  create: vi.fn(() => ({})),
 }
 
 const mockCompartment = {
   of: vi.fn(),
-  reconfigure: vi.fn()
+  reconfigure: vi.fn(),
 }
 
 // Mock CodeMirror modules
 vi.mock('codemirror', () => ({
-  EditorView: vi.fn().mockImplementation(() => mockEditorView)
+  EditorView: vi.fn().mockImplementation(() => mockEditorView),
 }))
 
 vi.mock('@codemirror/state', () => ({
   EditorState: mockEditorState,
-  Compartment: vi.fn().mockImplementation(() => mockCompartment)
+  Compartment: vi.fn().mockImplementation(() => mockCompartment),
 }))
 
 // Mock DOM element
 const mockDOMElement = {
   focus: vi.fn(),
-  blur: vi.fn()
+  blur: vi.fn(),
 }
 
 // Mock useRef
@@ -96,19 +96,19 @@ describe('useInkdropEditor', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks()
-    
+
     // Setup default mocks
     mockCreateEditorExtensions.mockReturnValue([])
     mockGetThemeExtensions.mockReturnValue([])
     mockCompartment.of.mockReturnValue({})
     mockCompartment.reconfigure.mockReturnValue({})
-    
+
     // Mock DOM element reference
     mockUseRef.mockReturnValue({ current: mockDOMElement })
-    
+
     // Reset modules
     vi.resetModules()
-    
+
     // Import fresh hook
     const module = await import('../useInkdropEditor')
     useInkdropEditor = module.useInkdropEditor
@@ -130,7 +130,7 @@ describe('useInkdropEditor', () => {
       const { result } = renderHook(() => useInkdropEditor({}))
 
       const methods = result.current.methods
-      
+
       expect(typeof methods.insertText).toBe('function')
       expect(typeof methods.formatSelection).toBe('function')
       expect(typeof methods.getView).toBe('function')
@@ -142,7 +142,7 @@ describe('useInkdropEditor', () => {
         value: 'Initial content',
         placeholder: 'Custom placeholder',
         showLineNumbers: true,
-        theme: 'light'
+        theme: 'light',
       }
 
       const { result } = renderHook(() => useInkdropEditor(props))
@@ -157,7 +157,7 @@ describe('useInkdropEditor', () => {
       const props = {
         placeholder: 'Test placeholder',
         showLineNumbers: true,
-        theme: 'light'
+        theme: 'light',
       }
 
       const { result } = renderHook(() => useInkdropEditor(props))
@@ -174,7 +174,9 @@ describe('useInkdropEditor', () => {
     })
 
     it('should handle theme configuration', () => {
-      const { result } = renderHook(() => useInkdropEditor({ theme: 'solarized' }))
+      const { result } = renderHook(() =>
+        useInkdropEditor({ theme: 'solarized' })
+      )
 
       expect(result.current.editorRef).toBeDefined()
       expect(result.current.methods).toBeDefined()
@@ -192,7 +194,9 @@ describe('useInkdropEditor', () => {
 
     it('should handle onChange callback', () => {
       const mockOnChange = vi.fn()
-      const { result } = renderHook(() => useInkdropEditor({ onChange: mockOnChange }))
+      const { result } = renderHook(() =>
+        useInkdropEditor({ onChange: mockOnChange })
+      )
 
       // Verify that hook initializes with onChange
       expect(result.current.methods).toBeDefined()
@@ -211,12 +215,12 @@ describe('useInkdropEditor', () => {
       const { result } = renderHook(() => useInkdropEditor({}))
 
       expect(typeof result.current.methods.insertText).toBe('function')
-      
+
       // Test that method can be called without error
       act(() => {
         result.current.methods.insertText('Hello')
       })
-      
+
       // Method should exist and be callable
       expect(result.current.methods.insertText).toBeDefined()
     })
@@ -225,12 +229,12 @@ describe('useInkdropEditor', () => {
       const { result } = renderHook(() => useInkdropEditor({}))
 
       expect(typeof result.current.methods.formatSelection).toBe('function')
-      
+
       // Test that method can be called without error
       act(() => {
         result.current.methods.formatSelection('**', '**')
       })
-      
+
       expect(result.current.methods.formatSelection).toBeDefined()
     })
 
@@ -238,12 +242,12 @@ describe('useInkdropEditor', () => {
       const { result } = renderHook(() => useInkdropEditor({}))
 
       expect(typeof result.current.methods.focus).toBe('function')
-      
+
       // Test that method can be called
       act(() => {
         result.current.methods.focus()
       })
-      
+
       expect(result.current.methods.focus).toBeDefined()
     })
 
@@ -251,7 +255,7 @@ describe('useInkdropEditor', () => {
       const { result } = renderHook(() => useInkdropEditor({}))
 
       expect(typeof result.current.methods.getView).toBe('function')
-      
+
       // Test that method returns something
       const view = result.current.methods.getView()
       expect(view).toBeDefined()
@@ -317,7 +321,9 @@ describe('useInkdropEditor', () => {
     })
 
     it('should support theme configuration', () => {
-      const { result } = renderHook(() => useInkdropEditor({ theme: 'solarized' }))
+      const { result } = renderHook(() =>
+        useInkdropEditor({ theme: 'solarized' })
+      )
 
       expect(result.current.editorRef).toBeDefined()
       expect(result.current.methods).toBeDefined()
@@ -332,7 +338,7 @@ describe('useInkdropEditor', () => {
         includeFeatures: false,
         includeBehavior: true,
         lineNumbers: true,
-        theme: 'solarized'
+        theme: 'solarized',
       }
 
       const { result } = renderHook(() => useInkdropEditor({ preset }))
@@ -397,7 +403,7 @@ describe('useInkdropEditor', () => {
       const { result, unmount } = renderHook(() => useInkdropEditor({}))
 
       expect(result.current.methods).toBeDefined()
-      
+
       // Unmount should not throw errors
       unmount()
     })
@@ -465,8 +471,8 @@ describe('useInkdropEditor', () => {
           includeFeatures: true,
           includeBehavior: true,
           lineNumbers: true,
-          theme: 'solarized'
-        }
+          theme: 'solarized',
+        },
       }
 
       const { result } = renderHook(() => useInkdropEditor(props))

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useAdvancedValidation } from '../useAdvancedValidation'
-import { FieldValidation } from '../../utils/validation'
+import type { FieldValidation } from '../../utils/validation'
 
 describe('useAdvancedValidation', () => {
   const mockValidator = vi.fn()
@@ -11,7 +11,7 @@ describe('useAdvancedValidation', () => {
     mockValidator.mockReturnValue({
       field: 'test',
       value: 'test',
-      isValid: true
+      isValid: true,
     } as FieldValidation)
   })
 
@@ -20,8 +20,8 @@ describe('useAdvancedValidation', () => {
       useAdvancedValidation({
         initialValues: { name: 'John', age: 25 },
         validationRules: {
-          name: { validator: mockValidator }
-        }
+          name: { validator: mockValidator },
+        },
       })
     )
 
@@ -36,9 +36,9 @@ describe('useAdvancedValidation', () => {
       useAdvancedValidation({
         initialValues: { name: 'John' },
         validationRules: {
-          name: { validator: mockValidator }
+          name: { validator: mockValidator },
         },
-        validateOnMount: true
+        validateOnMount: true,
       })
     )
 
@@ -50,9 +50,9 @@ describe('useAdvancedValidation', () => {
       useAdvancedValidation({
         initialValues: { name: '' },
         validationRules: {
-          name: { validator: mockValidator }
+          name: { validator: mockValidator },
         },
-        validateOnChange: true
+        validateOnChange: true,
       })
     )
 
@@ -69,16 +69,16 @@ describe('useAdvancedValidation', () => {
       field: 'name',
       value: '',
       isValid: false,
-      error: 'Name is required'
+      error: 'Name is required',
     } as FieldValidation)
 
     const { result } = renderHook(() =>
       useAdvancedValidation({
         initialValues: { name: '' },
         validationRules: {
-          name: { validator: errorValidator }
+          name: { validator: errorValidator },
         },
-        validateOnMount: true
+        validateOnMount: true,
       })
     )
 
@@ -91,16 +91,16 @@ describe('useAdvancedValidation', () => {
       field: 'name',
       value: 'Jo',
       isValid: true,
-      warning: 'Name is very short'
+      warning: 'Name is very short',
     } as FieldValidation)
 
     const { result } = renderHook(() =>
       useAdvancedValidation({
         initialValues: { name: 'Jo' },
         validationRules: {
-          name: { validator: warningValidator }
+          name: { validator: warningValidator },
         },
-        validateOnMount: true
+        validateOnMount: true,
       })
     )
 
@@ -113,16 +113,16 @@ describe('useAdvancedValidation', () => {
       field: 'name',
       value: '',
       isValid: false,
-      error: 'Name is required'
+      error: 'Name is required',
     } as FieldValidation)
 
     const { result } = renderHook(() =>
       useAdvancedValidation({
         initialValues: { name: '' },
         validationRules: {
-          name: { validator: errorValidator }
+          name: { validator: errorValidator },
         },
-        validateOnMount: true
+        validateOnMount: true,
       })
     )
 
@@ -141,8 +141,8 @@ describe('useAdvancedValidation', () => {
       useAdvancedValidation({
         initialValues: { name: 'John' },
         validationRules: {
-          name: { validator: mockValidator }
-        }
+          name: { validator: mockValidator },
+        },
       })
     )
 
@@ -166,13 +166,13 @@ describe('useAdvancedValidation', () => {
       useAdvancedValidation({
         initialValues: { name: 'John' },
         validationRules: {
-          name: { validator: mockValidator }
-        }
+          name: { validator: mockValidator },
+        },
       })
     )
 
     const fieldProps = result.current.getFieldProps('name')
-    
+
     expect(fieldProps.value).toBe('John')
     expect(typeof fieldProps.onChange).toBe('function')
     expect(typeof fieldProps.onBlur).toBe('function')
@@ -184,13 +184,13 @@ describe('useAdvancedValidation', () => {
       field: 'name',
       value: '',
       isValid: false,
-      error: 'Name is required'
+      error: 'Name is required',
     } as FieldValidation)
 
     const ageValidator = vi.fn().mockReturnValue({
       field: 'age',
       value: 25,
-      isValid: true
+      isValid: true,
     } as FieldValidation)
 
     const { result } = renderHook(() =>
@@ -198,8 +198,8 @@ describe('useAdvancedValidation', () => {
         initialValues: { name: '', age: 25 },
         validationRules: {
           name: { validator: nameValidator },
-          age: { validator: ageValidator }
-        }
+          age: { validator: ageValidator },
+        },
       })
     )
 
@@ -216,21 +216,21 @@ describe('useAdvancedValidation', () => {
 
   it('should handle debounced validation', async () => {
     vi.useFakeTimers()
-    
+
     const debouncedValidator = vi.fn().mockReturnValue({
       field: 'name',
       value: 'John',
-      isValid: true
+      isValid: true,
     } as FieldValidation)
 
     const { result } = renderHook(() =>
       useAdvancedValidation({
         initialValues: { name: '' },
         validationRules: {
-          name: { validator: debouncedValidator, debounceMs: 100 }
+          name: { validator: debouncedValidator, debounceMs: 100 },
         },
         validateOnChange: true,
-        debounceMs: 100
+        debounceMs: 100,
       })
     )
 
@@ -255,7 +255,7 @@ describe('useAdvancedValidation', () => {
 
     expect(debouncedValidator).toHaveBeenCalledTimes(1)
     expect(debouncedValidator).toHaveBeenCalledWith('John')
-    
+
     vi.useRealTimers()
   })
 })

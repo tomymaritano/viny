@@ -2,25 +2,35 @@ import React, { lazy, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { AppSimple as App } from './AppSimple.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
+import { QueryProvider } from './lib/queryClientWithPersistence'
+import { featureFlags } from './config/featureFlags'
 
 // Storage recovery handled by repository pattern
 
 // Lazy load standalone components for better initial performance
-const SettingsStandalone = lazy(() => 
-  import('./SettingsStandalone.tsx').then(module => ({ default: module.SettingsStandalone }))
+const SettingsStandalone = lazy(() =>
+  import('./SettingsStandalone.tsx').then(module => ({
+    default: module.SettingsStandalone,
+  }))
 )
-const NoteStandalone = lazy(() => 
-  import('./NoteStandalone.tsx').then(module => ({ default: module.NoteStandalone }))
+const NoteStandalone = lazy(() =>
+  import('./NoteStandalone.tsx').then(module => ({
+    default: module.NoteStandalone,
+  }))
 )
 import { ServiceProvider } from './services/ServiceProvider'
+import { ServiceProviderV2 } from './contexts/ServiceProviderV2'
+import { ModalProvider } from './contexts/ModalContext'
 // import { MigrationService } from './lib/migration' // removed - not needed with new architecture
 import { logComponentError } from './services/errorLogger'
 import { setupDevHelpers } from './utils/devHelpers'
+import './utils/debugNotebooks' // Import debug utilities
 // import './utils/notebookDebug' // Import debug utilities - removed
 // import './utils/notebookTesting' // Import testing utilities - removed
 
 // Import simple titlebar CSS for manual dragging
 import './styles/titlebar-simple.css'
+import { initLogger } from './utils/logger'
 
 // Add loading screen styles
 const loadingStyles = `
@@ -61,7 +71,12 @@ document.head.appendChild(styleSheet)
 // Setup development helpers
 setupDevHelpers()
 
-console.log('🚀 MAIN.TSX LOADED - APP STARTING')
+// Import AI test utility for development
+if (import.meta.env.DEV) {
+  import('./utils/ai-test')
+}
+
+initLogger.info('🚀 MAIN.TSX LOADED - APP STARTING')
 
 // Preload popular syntax highlighting languages after app loads
 import('./lib/markdown').then(module => {
@@ -70,34 +85,57 @@ import('./lib/markdown').then(module => {
   }
 })
 
+// Preload critical components after initial render
+import('./components/LazyComponents').then(module => {
+  if (module.preloadCriticalComponents) {
+    // Wait a bit before preloading to not interfere with initial render
+    setTimeout(() => {
+      module.preloadCriticalComponents()
+    }, 1000)
+  }
+})
+
 // Check which route to render based on URL hash
 const isSettingsRoute = window.location.hash === '#/settings'
 const isNoteRoute = window.location.hash.startsWith('#/note/')
 
+// Select service provider based on feature flag
+const ServiceProviderWrapper = featureFlags.useCleanArchitecture ? ServiceProviderV2 : ServiceProvider
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ServiceProvider>
-        <ErrorBoundary
-          onError={(error, errorInfo) => {
-            // Log to centralized error service
-            logComponentError('Global', error, errorInfo, {
-              route: window.location.hash,
-              timestamp: new Date().toISOString()
-            })
-          }}
-        >
-          {isSettingsRoute ? (
-            <Suspense fallback={<div className="loading-screen">Loading Settings...</div>}>
-              <SettingsStandalone />
-            </Suspense>
-          ) : isNoteRoute ? (
-            <Suspense fallback={<div className="loading-screen">Loading Note...</div>}>
-              <NoteStandalone />
-            </Suspense>
-          ) : (
-            <App />
-          )}
-        </ErrorBoundary>
-    </ServiceProvider>
+    <QueryProvider>
+      <ServiceProviderWrapper>
+        <ModalProvider>
+          <ErrorBoundary
+            onError={(error, errorInfo) => {
+              // Log to centralized error service
+              logComponentError('Global', error, errorInfo, {
+                route: window.location.hash,
+                timestamp: new Date().toISOString(),
+              })
+            }}
+          >
+            {isSettingsRoute ? (
+              <Suspense
+                fallback={
+                  <div className="loading-screen">Loading Settings...</div>
+                }
+              >
+                <SettingsStandalone />
+              </Suspense>
+            ) : isNoteRoute ? (
+              <Suspense
+                fallback={<div className="loading-screen">Loading Note...</div>}
+              >
+                <NoteStandalone />
+              </Suspense>
+            ) : (
+              <App />
+            )}
+          </ErrorBoundary>
+        </ModalProvider>
+      </ServiceProviderWrapper>
+    </QueryProvider>
   </React.StrictMode>
 )

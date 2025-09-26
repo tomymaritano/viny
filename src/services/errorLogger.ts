@@ -3,6 +3,12 @@
  * Handles error reporting, logging, and monitoring for production environments
  */
 
+import { loggingService } from './LoggingService'
+import { StorageService } from './StorageService'
+
+// Get singleton instance
+const storageService = StorageService.getInstance()
+
 export interface ErrorReport {
   error: Error
   errorInfo?: React.ErrorInfo
@@ -36,12 +42,14 @@ class ErrorLogger {
       enabled: process.env.NODE_ENV === 'production',
       logToConsole: process.env.NODE_ENV === 'development',
       maxReports: 100,
-      environment: (process.env.NODE_ENV as 'development' | 'production' | 'test') || 'development',
-      ...config
+      environment:
+        (process.env.NODE_ENV as 'development' | 'production' | 'test') ||
+        'development',
+      ...config,
     }
 
     this.sessionId = this.generateSessionId()
-    
+
     // Set up global error handlers
     if (this.config.enabled) {
       this.setupGlobalErrorHandlers()
@@ -80,8 +88,8 @@ class ErrorLogger {
         ...options.metadata,
         notesCount: this.getNotesCount(),
         memoryUsage: this.getMemoryUsage(),
-        connectionType: this.getConnectionType()
-      }
+        connectionType: this.getConnectionType(),
+      },
     }
 
     // Console logging for development
@@ -112,7 +120,7 @@ class ErrorLogger {
       errorInfo,
       context: `Component: ${component}`,
       severity: 'medium',
-      metadata
+      metadata,
     })
   }
 
@@ -130,8 +138,8 @@ class ErrorLogger {
       metadata: {
         ...metadata,
         operation,
-        storageType: this.getStorageType()
-      }
+        storageType: this.getStorageType(),
+      },
     })
   }
 
@@ -149,8 +157,8 @@ class ErrorLogger {
       metadata: {
         ...metadata,
         searchQuery: query,
-        queryLength: query.length
-      }
+        queryLength: query.length,
+      },
     })
   }
 
@@ -178,16 +186,22 @@ class ErrorLogger {
     recent: ErrorReport[]
   } {
     const total = this.errorQueue.length
-    const bySeverity = this.errorQueue.reduce((acc, report) => {
-      acc[report.severity] = (acc[report.severity] || 0) + 1
-      return acc
-    }, {} as Record<string, number>)
+    const bySeverity = this.errorQueue.reduce(
+      (acc, report) => {
+        acc[report.severity] = (acc[report.severity] || 0) + 1
+        return acc
+      },
+      {} as Record<string, number>
+    )
 
-    const byComponent = this.errorQueue.reduce((acc, report) => {
-      const component = report.component || 'Unknown'
-      acc[component] = (acc[component] || 0) + 1
-      return acc
-    }, {} as Record<string, number>)
+    const byComponent = this.errorQueue.reduce(
+      (acc, report) => {
+        const component = report.component || 'Unknown'
+        acc[component] = (acc[component] || 0) + 1
+        return acc
+      },
+      {} as Record<string, number>
+    )
 
     const recent = this.errorQueue.slice(-10).reverse()
 
@@ -200,7 +214,7 @@ class ErrorLogger {
 
   private determineSeverity(error: Error): ErrorReport['severity'] {
     const message = error.message.toLowerCase()
-    
+
     if (message.includes('storage') || message.includes('quota')) {
       return 'critical'
     }
@@ -210,24 +224,22 @@ class ErrorLogger {
     if (message.includes('render') || message.includes('component')) {
       return 'medium'
     }
-    
+
     return 'low'
   }
 
   private logToConsole(errorReport: ErrorReport): void {
     const { error, component, context, severity, metadata } = errorReport
-    
-    const style = this.getConsoleStyle(severity)
-    console.group(`%c🚨 ${severity.toUpperCase()} ERROR`, style)
-    console.log(`Context: ${context}`)
-    if (component) console.log(`Component: ${component}`)
-    console.log(`Message: ${error.message}`)
-    if (metadata) console.log('Metadata:', metadata)
-    console.log('Full Error:', error)
-    if (errorReport.errorInfo) {
-      console.log('Component Stack:', errorReport.errorInfo.componentStack)
-    }
-    console.groupEnd()
+
+    // Use LoggingService instead of direct console access
+    loggingService.logError(error, {
+      context: `${context}${component ? ` [${component}]` : ''}`,
+      severity,
+      metadata: {
+        ...metadata,
+        componentStack: errorReport.errorInfo?.componentStack,
+      },
+    })
   }
 
   private getConsoleStyle(severity: ErrorReport['severity']): string {
@@ -235,14 +247,14 @@ class ErrorLogger {
       low: 'color: #3b82f6; font-weight: bold;',
       medium: 'color: #f59e0b; font-weight: bold;',
       high: 'color: #ef4444; font-weight: bold;',
-      critical: 'color: #dc2626; font-weight: bold; background: #fee2e2;'
+      critical: 'color: #dc2626; font-weight: bold; background: #fee2e2;',
     }
     return styles[severity]
   }
 
   private storeErrorReport(errorReport: ErrorReport): void {
     this.errorQueue.push(errorReport)
-    
+
     // Keep only the most recent reports
     if (this.errorQueue.length > this.config.maxReports) {
       this.errorQueue = this.errorQueue.slice(-this.config.maxReports)
@@ -250,22 +262,32 @@ class ErrorLogger {
 
     // Store in localStorage for persistence
     try {
-      const stored = localStorage.getItem('viny_error_reports')
+      const stored = storageService.getItem(StorageService.KEYS.ERROR_REPORTS)
       const reports = stored ? JSON.parse(stored) : []
       reports.push({
         ...errorReport,
         error: {
           name: errorReport.error.name,
           message: errorReport.error.message,
-          stack: errorReport.error.stack
-        }
+          stack: errorReport.error.stack,
+        },
       })
-      
+
       // Keep only recent reports in localStorage
       const recentReports = reports.slice(-20)
-      localStorage.setItem('viny_error_reports', JSON.stringify(recentReports))
+      storageService.setItem(
+        StorageService.KEYS.ERROR_REPORTS,
+        JSON.stringify(recentReports)
+      )
     } catch (storageError) {
-      console.warn('Failed to store error report in localStorage:', storageError)
+      loggingService.log(
+        'warn',
+        'Failed to store error report in localStorage',
+        {
+          error: (storageError as Error).message,
+          context: 'storeErrorReport',
+        }
+      )
     }
   }
 
@@ -281,39 +303,46 @@ class ErrorLogger {
           error: {
             name: errorReport.error.name,
             message: errorReport.error.message,
-            stack: errorReport.error.stack
-          }
-        })
+            stack: errorReport.error.stack,
+          },
+        }),
       })
 
       if (!response.ok) {
         throw new Error(`Failed to send error report: ${response.status}`)
       }
     } catch (sendError) {
-      console.warn('Failed to send error report to external service:', sendError)
+      loggingService.log(
+        'warn',
+        'Failed to send error report to external service',
+        {
+          error: (sendError as Error).message,
+          context: 'sendErrorReport',
+        }
+      )
     }
   }
 
   private setupGlobalErrorHandlers(): void {
     // Handle unhandled promise rejections
-    window.addEventListener('unhandledrejection', (event) => {
+    window.addEventListener('unhandledrejection', event => {
       this.logError(new Error(event.reason), {
         context: 'Unhandled Promise Rejection',
         severity: 'high',
-        metadata: { reason: event.reason }
+        metadata: { reason: event.reason },
       })
     })
 
     // Handle global JavaScript errors
-    window.addEventListener('error', (event) => {
+    window.addEventListener('error', event => {
       this.logError(event.error || new Error(event.message), {
         context: 'Global JavaScript Error',
         severity: 'high',
         metadata: {
           filename: event.filename,
           lineno: event.lineno,
-          colno: event.colno
-        }
+          colno: event.colno,
+        },
       })
     })
   }
@@ -321,21 +350,27 @@ class ErrorLogger {
   private getNotesCount(): number {
     try {
       // Try to get notes count from storage
-      const notes = localStorage.getItem('viny_notes')
+      const notes = storageService.getItem(StorageService.KEYS.NOTES)
       return notes ? JSON.parse(notes).length : 0
     } catch {
       return 0
     }
   }
 
-  private getMemoryUsage(): { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number } | null {
+  private getMemoryUsage(): {
+    usedJSHeapSize: number
+    totalJSHeapSize: number
+    jsHeapSizeLimit: number
+  } | null {
     try {
       // @ts-ignore - performance.memory is not in all browsers
-      return performance.memory ? {
-        usedJSHeapSize: performance.memory.usedJSHeapSize,
-        totalJSHeapSize: performance.memory.totalJSHeapSize,
-        jsHeapSizeLimit: performance.memory.jsHeapSizeLimit
-      } : null
+      return performance.memory
+        ? {
+            usedJSHeapSize: performance.memory.usedJSHeapSize,
+            totalJSHeapSize: performance.memory.totalJSHeapSize,
+            jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
+          }
+        : null
     } catch {
       return null
     }
@@ -364,4 +399,3 @@ export const logError = errorLogger.logError.bind(errorLogger)
 export const logComponentError = errorLogger.logComponentError.bind(errorLogger)
 export const logStorageError = errorLogger.logStorageError.bind(errorLogger)
 export const logSearchError = errorLogger.logSearchError.bind(errorLogger)
-

@@ -21,10 +21,20 @@ describe('Settings Slice Theme Consolidation', () => {
     // Test the hash function logic directly
     const hashTagToColor = (tag: string): string => {
       const colorOptions = [
-        'ocean', 'forest', 'royal', 'sunset', 'cherry', 'golden',
-        'lavender', 'turquoise', 'rose', 'sage', 'steel', 'copper'
+        'ocean',
+        'forest',
+        'royal',
+        'sunset',
+        'cherry',
+        'golden',
+        'lavender',
+        'turquoise',
+        'rose',
+        'sage',
+        'steel',
+        'copper',
       ]
-      
+
       let hash = 0
       for (let i = 0; i < tag.length; i++) {
         hash = tag.charCodeAt(i) + ((hash << 5) - hash)
@@ -36,28 +46,38 @@ describe('Settings Slice Theme Consolidation', () => {
     it('should generate consistent colors for same tag', () => {
       const color1 = hashTagToColor('test-tag')
       const color2 = hashTagToColor('test-tag')
-      
+
       expect(color1).toBe(color2)
     })
 
     it('should generate different colors for different tags', () => {
       const color1 = hashTagToColor('tag1')
       const color2 = hashTagToColor('tag2')
-      
+
       // This might occasionally fail due to hash collisions, but very unlikely
       expect(color1).not.toBe(color2)
     })
 
     it('should always return a valid color option', () => {
       const validColors = [
-        'ocean', 'forest', 'royal', 'sunset', 'cherry', 'golden',
-        'lavender', 'turquoise', 'rose', 'sage', 'steel', 'copper'
+        'ocean',
+        'forest',
+        'royal',
+        'sunset',
+        'cherry',
+        'golden',
+        'lavender',
+        'turquoise',
+        'rose',
+        'sage',
+        'steel',
+        'copper',
       ]
-      
+
       const color1 = hashTagToColor('random-tag-1')
       const color2 = hashTagToColor('another-tag')
       const color3 = hashTagToColor('')
-      
+
       expect(validColors).toContain(color1)
       expect(validColors).toContain(color2)
       expect(validColors).toContain(color3)
@@ -66,16 +86,16 @@ describe('Settings Slice Theme Consolidation', () => {
 
   describe('Predefined Tag Colors', () => {
     const predefinedTagColors = {
-      'project': 'ocean',
-      'work': 'steel',
-      'personal': 'forest',
-      'urgent': 'cherry',
-      'important': 'sunset',
-      'idea': 'golden',
-      'note': 'sage',
-      'todo': 'royal',
-      'meeting': 'turquoise',
-      'draft': 'lavender'
+      project: 'ocean',
+      work: 'steel',
+      personal: 'forest',
+      urgent: 'cherry',
+      important: 'sunset',
+      idea: 'golden',
+      note: 'sage',
+      todo: 'royal',
+      meeting: 'turquoise',
+      draft: 'lavender',
     }
 
     it('should have predefined colors for common tags', () => {
@@ -85,10 +105,18 @@ describe('Settings Slice Theme Consolidation', () => {
     })
 
     it('should cover all essential tag types', () => {
-      const essentialTags = ['project', 'work', 'personal', 'urgent', 'important']
-      
+      const essentialTags = [
+        'project',
+        'work',
+        'personal',
+        'urgent',
+        'important',
+      ]
+
       essentialTags.forEach(tag => {
-        expect(predefinedTagColors[tag as keyof typeof predefinedTagColors]).toBeDefined()
+        expect(
+          predefinedTagColors[tag as keyof typeof predefinedTagColors]
+        ).toBeDefined()
       })
     })
   })
@@ -105,14 +133,14 @@ describe('Theme System Consolidation Verification', () => {
     } catch (error) {
       // Expected - file should not exist
     }
-    
+
     expect(themeSliceExists).toBe(false)
   })
 
   it('should have consolidated theme functionality in settings slice', async () => {
     // Verify the settings slice exports the expected interface
     const settingsSliceModule = await import('../settingsSlice')
-    
+
     expect(settingsSliceModule.createSettingsSlice).toBeDefined()
     expect(typeof settingsSliceModule.createSettingsSlice).toBe('function')
   })

@@ -9,7 +9,7 @@ describe('SettingRow', () => {
         <button>Test Button</button>
       </SettingRow>
     )
-    
+
     expect(screen.getByText('Test Setting')).toBeInTheDocument()
   })
 
@@ -19,21 +19,18 @@ describe('SettingRow', () => {
         <button data-testid="test-button">Test Button</button>
       </SettingRow>
     )
-    
+
     expect(screen.getByTestId('test-button')).toBeInTheDocument()
     expect(screen.getByText('Test Button')).toBeInTheDocument()
   })
 
   it('renders description when provided', () => {
     render(
-      <SettingRow 
-        title="Test Setting" 
-        description="This is a test description"
-      >
+      <SettingRow title="Test Setting" description="This is a test description">
         <button>Test Button</button>
       </SettingRow>
     )
-    
+
     expect(screen.getByText('This is a test description')).toBeInTheDocument()
   })
 
@@ -43,8 +40,10 @@ describe('SettingRow', () => {
         <button>Test Button</button>
       </SettingRow>
     )
-    
-    expect(screen.queryByText('This is a test description')).not.toBeInTheDocument()
+
+    expect(
+      screen.queryByText('This is a test description')
+    ).not.toBeInTheDocument()
   })
 
   it('applies custom className', () => {
@@ -53,7 +52,7 @@ describe('SettingRow', () => {
         <button>Test Button</button>
       </SettingRow>
     )
-    
+
     const settingRow = container.firstChild
     expect(settingRow).toHaveClass('custom-class')
   })
@@ -64,7 +63,7 @@ describe('SettingRow', () => {
         <button>Test Button</button>
       </SettingRow>
     )
-    
+
     const settingRow = container.firstChild
     expect(settingRow).toHaveClass('flex', 'items-center', 'justify-between')
   })
@@ -75,22 +74,23 @@ describe('SettingRow', () => {
         <button>Test Button</button>
       </SettingRow>
     )
-    
+
     const title = screen.getByText('Test Setting')
-    expect(title).toHaveClass('text-sm', 'font-medium', 'text-theme-text-primary')
+    expect(title).toHaveClass(
+      'text-sm',
+      'font-medium',
+      'text-theme-text-primary'
+    )
     expect(title.tagName).toBe('H4')
   })
 
   it('renders description with correct styling', () => {
     render(
-      <SettingRow 
-        title="Test Setting" 
-        description="Test description"
-      >
+      <SettingRow title="Test Setting" description="Test description">
         <button>Test Button</button>
       </SettingRow>
     )
-    
+
     const description = screen.getByText('Test description')
     expect(description).toHaveClass('text-xs', 'text-theme-text-muted', 'mt-1')
     expect(description.tagName).toBe('P')
@@ -102,10 +102,10 @@ describe('SettingRow', () => {
         <button>Test Button</button>
       </SettingRow>
     )
-    
+
     const leftColumn = container.querySelector('.flex-1.pr-4')
     expect(leftColumn).toBeInTheDocument()
-    
+
     const rightColumn = container.querySelector('.flex-shrink-0')
     expect(rightColumn).toBeInTheDocument()
   })
@@ -117,7 +117,7 @@ describe('SettingRow', () => {
         <button>Button 2</button>
       </SettingRow>
     )
-    
+
     expect(screen.getByText('Button 1')).toBeInTheDocument()
     expect(screen.getByText('Button 2')).toBeInTheDocument()
   })
@@ -134,35 +134,34 @@ describe('SettingRow', () => {
         </div>
       </SettingRow>
     )
-    
+
     expect(screen.getByTestId('checkbox')).toBeInTheDocument()
     expect(screen.getByTestId('select')).toBeInTheDocument()
   })
 
   it('handles long title text gracefully', () => {
-    const longTitle = 'This is a very long title that might wrap to multiple lines in a narrow container'
-    
+    const longTitle =
+      'This is a very long title that might wrap to multiple lines in a narrow container'
+
     render(
       <SettingRow title={longTitle}>
         <button>Test Button</button>
       </SettingRow>
     )
-    
+
     expect(screen.getByText(longTitle)).toBeInTheDocument()
   })
 
   it('handles long description text gracefully', () => {
-    const longDescription = 'This is a very long description that provides detailed information about the setting and might wrap to multiple lines'
-    
+    const longDescription =
+      'This is a very long description that provides detailed information about the setting and might wrap to multiple lines'
+
     render(
-      <SettingRow 
-        title="Test Setting" 
-        description={longDescription}
-      >
+      <SettingRow title="Test Setting" description={longDescription}>
         <button>Test Button</button>
       </SettingRow>
     )
-    
+
     expect(screen.getByText(longDescription)).toBeInTheDocument()
   })
 
@@ -172,7 +171,7 @@ describe('SettingRow', () => {
         <></>
       </SettingRow>
     )
-    
+
     expect(screen.getByText('Test Setting')).toBeInTheDocument()
   })
 
@@ -182,7 +181,7 @@ describe('SettingRow', () => {
         <button>Test Button</button>
       </SettingRow>
     )
-    
+
     const settingRow = container.firstChild
     expect(settingRow).toHaveClass('flex', 'items-center', 'justify-between')
     // Should not have any extra classes beyond the default ones

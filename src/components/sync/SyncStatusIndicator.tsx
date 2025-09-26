@@ -1,12 +1,12 @@
 import React from 'react'
-import { 
-  Cloud, 
-  CloudOff, 
-  RefreshCw, 
-  AlertTriangle, 
-  CheckCircle, 
+import {
+  Cloud,
+  CloudOff,
+  RefreshCw,
+  AlertTriangle,
+  CheckCircle,
   WifiOff,
-  Clock
+  Clock,
 } from 'lucide-react'
 import { useSyncStatus } from '../../hooks/useSync'
 import { SyncStatus } from '../../utils/syncManager'
@@ -20,9 +20,10 @@ interface SyncStatusIndicatorProps {
 const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({
   showText = false,
   size = 'md',
-  className = ''
+  className = '',
 }) => {
-  const { status, isOnline, isSyncing, lastSync, hasConflicts, progress } = useSyncStatus()
+  const { status, isOnline, isSyncing, lastSync, hasConflicts, progress } =
+    useSyncStatus()
 
   const getIcon = () => {
     const iconSize = size === 'sm' ? 14 : size === 'md' ? 16 : 20
@@ -33,7 +34,9 @@ const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({
 
     switch (status) {
       case SyncStatus.SYNCING:
-        return <RefreshCw size={iconSize} className="text-blue-500 animate-spin" />
+        return (
+          <RefreshCw size={iconSize} className="text-blue-500 animate-spin" />
+        )
       case SyncStatus.SUCCESS:
         return <CheckCircle size={iconSize} className="text-green-500" />
       case SyncStatus.CONFLICT:
@@ -41,7 +44,9 @@ const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({
       case SyncStatus.ERROR:
         return <CloudOff size={iconSize} className="text-red-500" />
       default:
-        return <Cloud size={iconSize} className="text-gray-500 dark:text-gray-400" />
+        return (
+          <Cloud size={iconSize} className="text-gray-500 dark:text-gray-400" />
+        )
     }
   }
 
@@ -85,11 +90,13 @@ const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({
 
   const getLastSyncText = () => {
     if (!lastSync) return null
-    
+
     const now = new Date()
     const syncTime = new Date(lastSync)
-    const diffMinutes = Math.floor((now.getTime() - syncTime.getTime()) / (1000 * 60))
-    
+    const diffMinutes = Math.floor(
+      (now.getTime() - syncTime.getTime()) / (1000 * 60)
+    )
+
     if (diffMinutes < 1) {
       return 'Just now'
     } else if (diffMinutes < 60) {
@@ -103,13 +110,13 @@ const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({
   return (
     <div className={`flex items-center space-x-2 ${className}`}>
       {getIcon()}
-      
+
       {showText && (
         <div className="flex flex-col">
           <span className={`text-sm font-medium ${getStatusColor()}`}>
             {getStatusText()}
           </span>
-          
+
           {lastSync && status !== SyncStatus.SYNCING && (
             <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
               <Clock size={10} className="mr-1" />

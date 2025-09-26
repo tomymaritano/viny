@@ -24,7 +24,7 @@ const Toast: React.FC<ToastProps> = ({
   details,
   dismissible = true,
   actions = [],
-  onDismiss
+  onDismiss,
 }) => {
   const getAccentStyles = () => {
     switch (type) {
@@ -32,31 +32,31 @@ const Toast: React.FC<ToastProps> = ({
         return {
           bar: 'bg-theme-accent-green',
           icon: 'text-theme-accent-green',
-          button: 'text-theme-accent-green'
+          button: 'text-theme-accent-green',
         }
       case 'error':
         return {
           bar: 'bg-theme-accent-red',
           icon: 'text-theme-accent-red',
-          button: 'text-theme-accent-red'
+          button: 'text-theme-accent-red',
         }
       case 'warning':
         return {
           bar: 'bg-theme-accent-yellow',
           icon: 'text-theme-accent-yellow',
-          button: 'text-theme-accent-yellow'
+          button: 'text-theme-accent-yellow',
         }
       case 'info':
         return {
           bar: 'bg-theme-accent-primary',
           icon: 'text-theme-accent-primary',
-          button: 'text-theme-accent-primary'
+          button: 'text-theme-accent-primary',
         }
     }
   }
 
   const styles = getAccentStyles()
-  
+
   const getIcon = () => {
     switch (type) {
       case 'success':
@@ -69,22 +69,22 @@ const Toast: React.FC<ToastProps> = ({
         return <Info className={`w-5 h-5 ${styles.icon}`} />
     }
   }
-  
+
   return (
-    <div className={`
+    <div
+      className={`
       relative max-w-sm w-full pointer-events-auto
       bg-theme-bg-primary border border-theme-border-primary
       rounded-lg shadow-lg overflow-hidden
       transform transition-all duration-300 ease-in-out
-    `}>
+    `}
+    >
       {/* Accent bar */}
       <div className={`absolute left-0 top-0 bottom-0 w-1 ${styles.bar}`} />
-      
+
       <div className="pl-4 pr-3 py-3">
         <div className="flex items-start">
-          <div className="flex-shrink-0 mt-0.5">
-            {getIcon()}
-          </div>
+          <div className="flex-shrink-0 mt-0.5">{getIcon()}</div>
           <div className="ml-3 flex-1 min-w-0">
             <p className="text-sm font-medium text-theme-text-primary">
               {message}

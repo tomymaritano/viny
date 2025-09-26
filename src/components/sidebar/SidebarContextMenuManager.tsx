@@ -3,7 +3,7 @@ import TagContextMenu from '../ui/TagContextMenu'
 import NotebookContextMenu from '../ui/NotebookContextMenu'
 import DropdownMenu, { DropdownMenuItem } from '../ui/DropdownMenu'
 import { Icons } from '../Icons'
-import { NotebookWithCounts } from '../../types/notebook'
+import type { NotebookWithCounts } from '../../types/notebook'
 
 export interface ContextMenuState {
   tag: {
@@ -27,7 +27,7 @@ interface SidebarContextMenuManagerProps {
   contextMenuState: ContextMenuState
   onTagRemove: () => void
   onTagSettings: () => void
-  onNotebookRename: () => void
+  onNotebookEdit: () => void
   onNotebookDelete: () => void
   onEmptyTrash: () => void
   onCloseAll: () => void
@@ -40,10 +40,10 @@ const SidebarContextMenuManager: React.FC<SidebarContextMenuManagerProps> = ({
   contextMenuState,
   onTagRemove,
   onTagSettings,
-  onNotebookRename,
+  onNotebookEdit,
   onNotebookDelete,
   onEmptyTrash,
-  onCloseAll
+  onCloseAll,
 }) => {
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -72,7 +72,7 @@ const SidebarContextMenuManager: React.FC<SidebarContextMenuManagerProps> = ({
         isVisible={contextMenuState.notebook.isVisible}
         position={contextMenuState.notebook.position}
         notebookName={contextMenuState.notebook.notebook?.name || ''}
-        onRename={onNotebookRename}
+        onRename={onNotebookEdit}
         onDelete={onNotebookDelete}
         onClose={onCloseAll}
       />
@@ -87,7 +87,7 @@ const SidebarContextMenuManager: React.FC<SidebarContextMenuManagerProps> = ({
             left: contextMenuState.trash.position.x,
             top: contextMenuState.trash.position.y,
           }}
-          onClick={(e) => e.stopPropagation()}
+          onClick={e => e.stopPropagation()}
         >
           <DropdownMenuItem
             onClick={onEmptyTrash}

@@ -5,9 +5,14 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { logger } from '../utils/logger'
-import { pluginService } from '../services/PluginService'
-import type { PluginInstance, PluginError } from '../services/PluginService'
+import {
+  pluginService,
+  type PluginInstance,
+  type PluginError,
+} from '../services/PluginService'
 import type { SecurityViolation } from '../services/PluginSecurityService'
+import { CheckboxWithLabel } from './ui/CheckboxRadix'
+import { RadioGroupWithLabels } from './ui/RadioGroupRadix'
 
 interface PluginManagerProps {
   isOpen: boolean
@@ -25,16 +30,22 @@ const defaultInstallation: PluginInstallation = {
   method: 'file',
   source: null,
   trusted: false,
-  permissions: ['notes.read', 'ui.toast', 'storage.basic']
+  permissions: ['notes.read', 'ui.toast', 'storage.basic'],
 }
 
-export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose }) => {
+export const PluginManager: React.FC<PluginManagerProps> = ({
+  isOpen,
+  onClose,
+}) => {
   const [plugins, setPlugins] = useState<PluginInstance[]>([])
   const [errors, setErrors] = useState<PluginError[]>([])
   const [violations, setViolations] = useState<SecurityViolation[]>([])
-  const [installation, setInstallation] = useState<PluginInstallation>(defaultInstallation)
+  const [installation, setInstallation] =
+    useState<PluginInstallation>(defaultInstallation)
   const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState<'installed' | 'install' | 'security'>('installed')
+  const [activeTab, setActiveTab] = useState<
+    'installed' | 'install' | 'security'
+  >('installed')
   const [selectedPlugin, setSelectedPlugin] = useState<string | null>(null)
 
   // Refresh plugin data
@@ -58,7 +69,7 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
     try {
       const success = await pluginService.loadPlugin(installation.source, {
         trusted: installation.trusted,
-        permissions: installation.permissions
+        permissions: installation.permissions,
       })
 
       if (success) {
@@ -85,7 +96,10 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
       }
       refreshData()
     } catch (error) {
-      logger.error(`Failed to ${activate ? 'activate' : 'deactivate'} plugin:`, error)
+      logger.error(
+        `Failed to ${activate ? 'activate' : 'deactivate'} plugin:`,
+        error
+      )
     } finally {
       setLoading(false)
     }
@@ -119,10 +133,12 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
   const getSecurityStatus = (pluginName: string) => {
     const pluginViolations = violations.filter(v => v.pluginName === pluginName)
     const quarantine = pluginService.shouldQuarantinePlugin(pluginName)
-    
+
     if (quarantine) return { status: 'critical', text: 'Quarantined' }
-    if (pluginViolations.some(v => v.severity === 'high')) return { status: 'warning', text: 'Security Issues' }
-    if (pluginViolations.length > 0) return { status: 'info', text: 'Minor Issues' }
+    if (pluginViolations.some(v => v.severity === 'high'))
+      return { status: 'warning', text: 'Security Issues' }
+    if (pluginViolations.length > 0)
+      return { status: 'info', text: 'Minor Issues' }
     return { status: 'success', text: 'Secure' }
   }
 
@@ -149,7 +165,7 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
           {[
             { id: 'installed', label: 'Installed Plugins', icon: 'PKG' },
             { id: 'install', label: 'Install Plugin', icon: 'DL' },
-            { id: 'security', label: 'Security', icon: 'SEC' }
+            { id: 'security', label: 'Security', icon: 'SEC' },
           ].map(tab => (
             <button
               key={tab.id}
@@ -172,15 +188,21 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
               <div className="space-y-4">
                 {plugins.length === 0 ? (
                   <div className="text-center py-12 text-theme-text-secondary">
-                    <div className="text-4xl mb-4 text-theme-text-muted">[ ]</div>
+                    <div className="text-4xl mb-4 text-theme-text-muted">
+                      [ ]
+                    </div>
                     <p>No plugins installed</p>
-                    <p className="text-sm mt-2">Install your first plugin to get started</p>
+                    <p className="text-sm mt-2">
+                      Install your first plugin to get started
+                    </p>
                   </div>
                 ) : (
                   plugins.map(plugin => {
                     const security = getSecurityStatus(plugin.manifest.name)
-                    const resourceUsage = pluginService.getPluginResourceUsage(plugin.manifest.name)
-                    
+                    const resourceUsage = pluginService.getPluginResourceUsage(
+                      plugin.manifest.name
+                    )
+
                     return (
                       <div
                         key={plugin.manifest.name}
@@ -195,33 +217,48 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
                               <span className="text-xs px-2 py-1 bg-theme-bg-tertiary rounded text-theme-text-secondary">
                                 v{plugin.manifest.version}
                               </span>
-                              <span className={`text-xs px-2 py-1 rounded ${
-                                security.status === 'success' ? 'bg-green-100 text-green-800' :
-                                security.status === 'warning' ? 'bg-yellow-100 text-yellow-800' :
-                                security.status === 'critical' ? 'bg-red-100 text-red-800' :
-                                'bg-blue-100 text-blue-800'
-                              }`}>
+                              <span
+                                className={`text-xs px-2 py-1 rounded ${
+                                  security.status === 'success'
+                                    ? 'bg-green-100 text-green-800'
+                                    : security.status === 'warning'
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : security.status === 'critical'
+                                        ? 'bg-red-100 text-red-800'
+                                        : 'bg-blue-100 text-blue-800'
+                                }`}
+                              >
                                 {security.text}
                               </span>
                             </div>
-                            
+
                             <p className="text-theme-text-secondary text-sm mb-3">
                               {plugin.manifest.description}
                             </p>
-                            
+
                             <div className="flex items-center gap-4 text-xs text-theme-text-secondary">
                               <span>Author: {plugin.manifest.author}</span>
-                              <span>Loaded: {new Date(plugin.loadedAt).toLocaleDateString()}</span>
+                              <span>
+                                Loaded:{' '}
+                                {new Date(plugin.loadedAt).toLocaleDateString()}
+                              </span>
                               {plugin.activatedAt && (
-                                <span>Activated: {new Date(plugin.activatedAt).toLocaleDateString()}</span>
+                                <span>
+                                  Activated:{' '}
+                                  {new Date(
+                                    plugin.activatedAt
+                                  ).toLocaleDateString()}
+                                </span>
                               )}
                             </div>
 
                             {resourceUsage && (
                               <div className="mt-2 text-xs text-theme-text-secondary">
-                                Memory: {Math.round(resourceUsage.memory / 1024 / 1024)}MB | 
-                                Requests: {resourceUsage.networkRequests} | 
-                                Execution: {Math.round(resourceUsage.executionTime)}ms
+                                Memory:{' '}
+                                {Math.round(resourceUsage.memory / 1024 / 1024)}
+                                MB | Requests: {resourceUsage.networkRequests} |
+                                Execution:{' '}
+                                {Math.round(resourceUsage.executionTime)}ms
                               </div>
                             )}
 
@@ -234,7 +271,12 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
 
                           <div className="flex items-center gap-2 ml-4">
                             <button
-                              onClick={() => handleTogglePlugin(plugin.manifest.name, !plugin.activated)}
+                              onClick={() =>
+                                handleTogglePlugin(
+                                  plugin.manifest.name,
+                                  !plugin.activated
+                                )
+                              }
                               disabled={loading}
                               className={`px-3 py-1 text-xs rounded transition-colors ${
                                 plugin.activated
@@ -244,18 +286,24 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
                             >
                               {plugin.activated ? 'Deactivate' : 'Activate'}
                             </button>
-                            
+
                             <button
-                              onClick={() => setSelectedPlugin(
-                                selectedPlugin === plugin.manifest.name ? null : plugin.manifest.name
-                              )}
+                              onClick={() =>
+                                setSelectedPlugin(
+                                  selectedPlugin === plugin.manifest.name
+                                    ? null
+                                    : plugin.manifest.name
+                                )
+                              }
                               className="px-3 py-1 text-xs bg-theme-bg-tertiary text-theme-text-primary rounded hover:bg-theme-bg-quaternary"
                             >
                               Details
                             </button>
-                            
+
                             <button
-                              onClick={() => handleUninstallPlugin(plugin.manifest.name)}
+                              onClick={() =>
+                                handleUninstallPlugin(plugin.manifest.name)
+                              }
                               disabled={loading}
                               className="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200"
                             >
@@ -269,13 +317,17 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
                           <div className="mt-4 pt-4 border-t border-theme-border">
                             <div className="grid grid-cols-2 gap-4 text-sm">
                               <div>
-                                <h4 className="font-medium text-theme-text-primary mb-2">Manifest</h4>
+                                <h4 className="font-medium text-theme-text-primary mb-2">
+                                  Manifest
+                                </h4>
                                 <pre className="bg-theme-bg-tertiary p-3 rounded text-xs overflow-auto">
                                   {JSON.stringify(plugin.manifest, null, 2)}
                                 </pre>
                               </div>
                               <div>
-                                <h4 className="font-medium text-theme-text-primary mb-2">Configuration</h4>
+                                <h4 className="font-medium text-theme-text-primary mb-2">
+                                  Configuration
+                                </h4>
                                 <pre className="bg-theme-bg-tertiary p-3 rounded text-xs overflow-auto">
                                   {JSON.stringify(plugin.config, null, 2)}
                                 </pre>
@@ -303,30 +355,28 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
                   <label className="block text-sm font-medium text-theme-text-primary mb-2">
                     Installation Method
                   </label>
-                  <div className="flex gap-4">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="method"
-                        value="file"
-                        checked={installation.method === 'file'}
-                        onChange={(e) => setInstallation({ ...installation, method: 'file' as const })}
-                        className="mr-2"
-                      />
-                      Upload File
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="method"
-                        value="url"
-                        checked={installation.method === 'url'}
-                        onChange={(e) => setInstallation({ ...installation, method: 'url' as const })}
-                        className="mr-2"
-                      />
-                      From URL
-                    </label>
-                  </div>
+                  <RadioGroupWithLabels
+                    value={installation.method}
+                    onValueChange={value =>
+                      setInstallation({
+                        ...installation,
+                        method: value as 'file' | 'url',
+                      })
+                    }
+                    orientation="horizontal"
+                    options={[
+                      {
+                        value: 'file',
+                        label: 'Upload File',
+                        description: 'Install from a local plugin file',
+                      },
+                      {
+                        value: 'url',
+                        label: 'From URL',
+                        description: 'Install from a remote URL',
+                      },
+                    ]}
+                  />
                 </div>
 
                 {/* Source Input */}
@@ -345,8 +395,17 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
                     <input
                       type="url"
                       placeholder="https://example.com/plugin.js"
-                      value={typeof installation.source === 'string' ? installation.source : ''}
-                      onChange={(e) => setInstallation({ ...installation, source: e.target.value })}
+                      value={
+                        typeof installation.source === 'string'
+                          ? installation.source
+                          : ''
+                      }
+                      onChange={e =>
+                        setInstallation({
+                          ...installation,
+                          source: e.target.value,
+                        })
+                      }
                       className="w-full p-3 border border-theme-border rounded-lg bg-theme-bg-secondary"
                     />
                   )}
@@ -357,19 +416,19 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
                   <label className="block text-sm font-medium text-theme-text-primary mb-2">
                     Security Settings
                   </label>
-                  
+
                   <div className="space-y-3">
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={installation.trusted}
-                        onChange={(e) => setInstallation({ ...installation, trusted: e.target.checked })}
-                        className="mr-2"
-                      />
-                      <span className="text-sm">
-                        Trusted Plugin (grants additional permissions)
-                      </span>
-                    </label>
+                    <CheckboxWithLabel
+                      checked={installation.trusted}
+                      onCheckedChange={checked =>
+                        setInstallation({
+                          ...installation,
+                          trusted: checked,
+                        })
+                      }
+                      label="Trusted Plugin"
+                      description="Grants additional permissions for enhanced functionality"
+                    />
                   </div>
                 </div>
 
@@ -378,32 +437,79 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
                   <label className="block text-sm font-medium text-theme-text-primary mb-2">
                     Permissions
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-3">
                     {[
-                      'notes.read', 'notes.write', 'ui.toast', 'ui.modal', 'ui.sidebar',
-                      'editor.read', 'editor.write', 'storage.basic', 'network', 'timers'
+                      {
+                        id: 'notes.read',
+                        label: 'Read Notes',
+                        description: 'Access to read note content',
+                      },
+                      {
+                        id: 'notes.write',
+                        label: 'Write Notes',
+                        description: 'Permission to create and modify notes',
+                      },
+                      {
+                        id: 'ui.toast',
+                        label: 'Show Toasts',
+                        description: 'Display notification messages',
+                      },
+                      {
+                        id: 'ui.modal',
+                        label: 'Show Modals',
+                        description: 'Open dialog windows',
+                      },
+                      {
+                        id: 'ui.sidebar',
+                        label: 'Sidebar Access',
+                        description: 'Interact with the sidebar',
+                      },
+                      {
+                        id: 'editor.read',
+                        label: 'Read Editor',
+                        description: 'Access editor content and state',
+                      },
+                      {
+                        id: 'editor.write',
+                        label: 'Write Editor',
+                        description: 'Modify editor content and settings',
+                      },
+                      {
+                        id: 'storage.basic',
+                        label: 'Basic Storage',
+                        description: 'Store plugin configuration',
+                      },
+                      {
+                        id: 'network',
+                        label: 'Network Access',
+                        description: 'Make HTTP requests',
+                      },
+                      {
+                        id: 'timers',
+                        label: 'Timers',
+                        description: 'Use setTimeout and setInterval',
+                      },
                     ].map(permission => (
-                      <label key={permission} className="flex items-center text-sm">
-                        <input
-                          type="checkbox"
-                          checked={installation.permissions.includes(permission)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setInstallation({
-                                ...installation,
-                                permissions: [...installation.permissions, permission]
-                              })
-                            } else {
-                              setInstallation({
-                                ...installation,
-                                permissions: installation.permissions.filter(p => p !== permission)
-                              })
-                            }
-                          }}
-                          className="mr-2"
-                        />
-                        {permission}
-                      </label>
+                      <CheckboxWithLabel
+                        key={permission.id}
+                        checked={installation.permissions.includes(
+                          permission.id
+                        )}
+                        onCheckedChange={checked => {
+                          const newPermissions = checked
+                            ? [...installation.permissions, permission.id]
+                            : installation.permissions.filter(
+                                p => p !== permission.id
+                              )
+                          setInstallation({
+                            ...installation,
+                            permissions: newPermissions,
+                          })
+                        }}
+                        label={permission.label}
+                        description={permission.description}
+                        size="sm"
+                      />
                     ))}
                   </div>
                 </div>
@@ -419,19 +525,25 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
 
                 {/* Plugin Examples */}
                 <div className="mt-8 p-4 bg-theme-bg-secondary rounded-lg">
-                  <h4 className="font-medium text-theme-text-primary mb-3">Example Plugins</h4>
+                  <h4 className="font-medium text-theme-text-primary mb-3">
+                    Example Plugins
+                  </h4>
                   <div className="space-y-2 text-sm">
                     <div>
-                      <strong>Hello World:</strong> public/examples/hello-world-plugin.js
+                      <strong>Hello World:</strong>{' '}
+                      public/examples/hello-world-plugin.js
                     </div>
                     <div>
-                      <strong>Vim Mode:</strong> public/examples/vim-mode-plugin.js
+                      <strong>Vim Mode:</strong>{' '}
+                      public/examples/vim-mode-plugin.js
                     </div>
                     <div>
-                      <strong>Emoji Picker:</strong> public/examples/emoji-picker-plugin.js
+                      <strong>Emoji Picker:</strong>{' '}
+                      public/examples/emoji-picker-plugin.js
                     </div>
                     <div>
-                      <strong>Note Counter:</strong> public/examples/note-counter-plugin.js
+                      <strong>Note Counter:</strong>{' '}
+                      public/examples/note-counter-plugin.js
                     </div>
                   </div>
                 </div>
@@ -451,34 +563,53 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
                   <div className="text-2xl font-bold text-theme-text-primary">
                     {plugins.length}
                   </div>
-                  <div className="text-sm text-theme-text-secondary">Active Plugins</div>
+                  <div className="text-sm text-theme-text-secondary">
+                    Active Plugins
+                  </div>
                 </div>
                 <div className="bg-theme-bg-secondary p-4 rounded-lg">
                   <div className="text-2xl font-bold text-red-600">
-                    {violations.filter(v => v.severity === 'high' || v.severity === 'critical').length}
+                    {
+                      violations.filter(
+                        v => v.severity === 'high' || v.severity === 'critical'
+                      ).length
+                    }
                   </div>
-                  <div className="text-sm text-theme-text-secondary">High-Risk Violations</div>
+                  <div className="text-sm text-theme-text-secondary">
+                    High-Risk Violations
+                  </div>
                 </div>
                 <div className="bg-theme-bg-secondary p-4 rounded-lg">
                   <div className="text-2xl font-bold text-yellow-600">
-                    {plugins.filter(p => pluginService.shouldQuarantinePlugin(p.manifest.name)).length}
+                    {
+                      plugins.filter(p =>
+                        pluginService.shouldQuarantinePlugin(p.manifest.name)
+                      ).length
+                    }
                   </div>
-                  <div className="text-sm text-theme-text-secondary">Quarantined Plugins</div>
+                  <div className="text-sm text-theme-text-secondary">
+                    Quarantined Plugins
+                  </div>
                 </div>
               </div>
 
               {/* Security Violations */}
               <div className="mb-6">
-                <h4 className="font-medium text-theme-text-primary mb-3">Recent Security Violations</h4>
+                <h4 className="font-medium text-theme-text-primary mb-3">
+                  Recent Security Violations
+                </h4>
                 <div className="space-y-2">
                   {violations.slice(0, 10).map((violation, index) => (
                     <div
                       key={index}
                       className={`p-3 rounded-lg border-l-4 ${
-                        violation.severity === 'critical' ? 'border-red-500 bg-red-50' :
-                        violation.severity === 'high' ? 'border-orange-500 bg-orange-50' :
-                        violation.severity === 'medium' ? 'border-yellow-500 bg-yellow-50' :
-                        'border-blue-500 bg-blue-50'
+                        violation.severity === 'critical'
+                          ? 'border-red-500 bg-red-50'
+                          : violation.severity === 'high'
+                            ? 'border-orange-500 bg-orange-50'
+                            : violation.severity === 'medium'
+                              ? 'border-yellow-500 bg-yellow-50'
+                              : 'border-blue-500 bg-blue-50'
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -490,12 +621,17 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
                             {new Date(violation.timestamp).toLocaleString()}
                           </div>
                         </div>
-                        <span className={`px-2 py-1 text-xs rounded ${
-                          violation.severity === 'critical' ? 'bg-red-100 text-red-800' :
-                          violation.severity === 'high' ? 'bg-orange-100 text-orange-800' :
-                          violation.severity === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-blue-100 text-blue-800'
-                        }`}>
+                        <span
+                          className={`px-2 py-1 text-xs rounded ${
+                            violation.severity === 'critical'
+                              ? 'bg-red-100 text-red-800'
+                              : violation.severity === 'high'
+                                ? 'bg-orange-100 text-orange-800'
+                                : violation.severity === 'medium'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-blue-100 text-blue-800'
+                          }`}
+                        >
                           {violation.severity.toUpperCase()}
                         </span>
                       </div>
@@ -512,10 +648,15 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
 
               {/* Plugin Errors */}
               <div>
-                <h4 className="font-medium text-theme-text-primary mb-3">Plugin Errors</h4>
+                <h4 className="font-medium text-theme-text-primary mb-3">
+                  Plugin Errors
+                </h4>
                 <div className="space-y-2">
                   {errors.slice(0, 10).map((error, index) => (
-                    <div key={index} className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <div
+                      key={index}
+                      className="p-3 bg-red-50 border border-red-200 rounded-lg"
+                    >
                       <div className="font-medium text-red-900">
                         {error.plugin}: {error.error}
                       </div>
@@ -524,7 +665,9 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ isOpen, onClose })
                       </div>
                       {error.stack && (
                         <details className="mt-2">
-                          <summary className="text-sm text-red-600 cursor-pointer">Stack Trace</summary>
+                          <summary className="text-sm text-red-600 cursor-pointer">
+                            Stack Trace
+                          </summary>
                           <pre className="text-xs mt-1 text-red-700 whitespace-pre-wrap">
                             {error.stack}
                           </pre>

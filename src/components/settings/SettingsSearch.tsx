@@ -15,7 +15,11 @@ interface SearchResult {
   matchType: 'label' | 'description' | 'key' | 'category'
 }
 
-export const SettingsSearch: React.FC<SettingsSearchProps> = ({ onNavigate, onClose, isModal = false }) => {
+export const SettingsSearch: React.FC<SettingsSearchProps> = ({
+  onNavigate,
+  onClose,
+  isModal = false,
+}) => {
   const [query, setQuery] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const { schemas } = useSettings()
@@ -83,14 +87,20 @@ export const SettingsSearch: React.FC<SettingsSearchProps> = ({ onNavigate, onCl
   const highlightMatch = (text: string, query: string): React.ReactElement => {
     if (!query.trim()) return <span>{text}</span>
 
-    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+    const regex = new RegExp(
+      `(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,
+      'gi'
+    )
     const parts = text.split(regex)
 
     return (
       <span>
         {parts.map((part, index) =>
           regex.test(part) ? (
-            <mark key={index} className="bg-yellow-200 dark:bg-yellow-800 px-1 rounded">
+            <mark
+              key={index}
+              className="bg-yellow-200 dark:bg-yellow-800 px-1 rounded"
+            >
               {part}
             </mark>
           ) : (
@@ -122,7 +132,7 @@ export const SettingsSearch: React.FC<SettingsSearchProps> = ({ onNavigate, onCl
       themes: 'Themes',
       editor: 'Editor',
       preview: 'Preview',
-      privacy: 'Privacy'
+      privacy: 'Privacy',
     }
     return categoryMap[categoryId] || categoryId
   }
@@ -154,15 +164,15 @@ export const SettingsSearch: React.FC<SettingsSearchProps> = ({ onNavigate, onCl
             <input
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={e => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Search settings..."
               className="w-full pl-10 pr-10 py-3 bg-theme-bg-secondary border border-theme-border-primary rounded-lg text-sm text-theme-text-primary placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent-primary focus:border-transparent"
               autoFocus
             />
-            <Icons.Search 
-              size={16} 
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-theme-text-muted" 
+            <Icons.Search
+              size={16}
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-theme-text-muted"
             />
             {query && (
               <button
@@ -180,7 +190,7 @@ export const SettingsSearch: React.FC<SettingsSearchProps> = ({ onNavigate, onCl
           {query.trim() ? (
             searchResults.length > 0 ? (
               <div className="p-2">
-                {searchResults.map((result) => (
+                {searchResults.map(result => (
                   <button
                     key={`${result.schema.category}-${result.schema.key}`}
                     onClick={() => {
@@ -200,15 +210,18 @@ export const SettingsSearch: React.FC<SettingsSearchProps> = ({ onNavigate, onCl
                             {getCategoryDisplayName(result.schema.category)}
                           </span>
                         </div>
-                        
+
                         {result.schema.description && (
                           <p className="text-xs text-theme-text-muted line-clamp-2">
                             {highlightMatch(result.schema.description, query)}
                           </p>
                         )}
                       </div>
-                      
-                      <Icons.ChevronRight size={14} className="text-theme-text-muted ml-2 flex-shrink-0" />
+
+                      <Icons.ChevronRight
+                        size={14}
+                        className="text-theme-text-muted ml-2 flex-shrink-0"
+                      />
                     </div>
                   </button>
                 ))}
@@ -217,22 +230,28 @@ export const SettingsSearch: React.FC<SettingsSearchProps> = ({ onNavigate, onCl
               <div className="px-4 py-12 text-center text-theme-text-muted">
                 <Icons.Search size={32} className="mx-auto mb-3 opacity-50" />
                 <p className="text-sm">No settings found for "{query}"</p>
-                <p className="text-xs mt-1">Try searching for features like "font", "theme", or "backup"</p>
+                <p className="text-xs mt-1">
+                  Try searching for features like "font", "theme", or "backup"
+                </p>
               </div>
             )
           ) : (
             <div className="p-6">
-              <h3 className="text-sm font-medium text-theme-text-secondary mb-4">Popular Settings</h3>
+              <h3 className="text-sm font-medium text-theme-text-secondary mb-4">
+                Popular Settings
+              </h3>
               <div className="grid gap-2">
-                {['Theme', 'Font Size', 'Auto Save', 'Privacy', 'Backup'].map((item) => (
-                  <button
-                    key={item}
-                    onClick={() => setQuery(item.toLowerCase())}
-                    className="text-left px-3 py-2 text-sm text-theme-text-secondary hover:text-theme-text-primary hover:bg-theme-bg-secondary rounded-lg transition-colors"
-                  >
-                    {item}
-                  </button>
-                ))}
+                {['Theme', 'Font Size', 'Auto Save', 'Privacy', 'Backup'].map(
+                  item => (
+                    <button
+                      key={item}
+                      onClick={() => setQuery(item.toLowerCase())}
+                      className="text-left px-3 py-2 text-sm text-theme-text-secondary hover:text-theme-text-primary hover:bg-theme-bg-secondary rounded-lg transition-colors"
+                    >
+                      {item}
+                    </button>
+                  )
+                )}
               </div>
             </div>
           )}
@@ -249,7 +268,7 @@ export const SettingsSearch: React.FC<SettingsSearchProps> = ({ onNavigate, onCl
         <input
           type="text"
           value={query}
-          onChange={(e) => {
+          onChange={e => {
             setQuery(e.target.value)
             setIsOpen(true)
           }}
@@ -258,9 +277,9 @@ export const SettingsSearch: React.FC<SettingsSearchProps> = ({ onNavigate, onCl
           placeholder="Search settings..."
           className="w-full pl-10 pr-4 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm text-theme-text-primary placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent-primary focus:border-transparent"
         />
-        <Icons.Search 
-          size={16} 
-          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-theme-text-muted" 
+        <Icons.Search
+          size={16}
+          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-theme-text-muted"
         />
         {query && (
           <button
@@ -297,27 +316,30 @@ export const SettingsSearch: React.FC<SettingsSearchProps> = ({ onNavigate, onCl
                           {getCategoryDisplayName(result.schema.category)}
                         </span>
                       </div>
-                      
+
                       {result.schema.description && (
                         <p className="text-xs text-theme-text-muted line-clamp-2">
                           {highlightMatch(result.schema.description, query)}
                         </p>
                       )}
-                      
+
                       {result.matchType === 'key' && (
                         <p className="text-xs text-theme-text-muted mt-1 font-mono">
                           Key: {highlightMatch(result.schema.key, query)}
                         </p>
                       )}
                     </div>
-                    
+
                     <div className="flex items-center space-x-2 ml-3">
                       {result.schema.experimental && (
                         <span className="text-xs text-yellow-600 bg-yellow-100 dark:bg-yellow-900 dark:text-yellow-400 px-2 py-1 rounded">
                           Beta
                         </span>
                       )}
-                      <Icons.ChevronRight size={14} className="text-theme-text-muted" />
+                      <Icons.ChevronRight
+                        size={14}
+                        className="text-theme-text-muted"
+                      />
                     </div>
                   </div>
                 </button>
@@ -327,7 +349,9 @@ export const SettingsSearch: React.FC<SettingsSearchProps> = ({ onNavigate, onCl
             <div className="px-4 py-8 text-center text-theme-text-muted">
               <Icons.Search size={32} className="mx-auto mb-2 opacity-50" />
               <p className="text-sm">No settings found for "{query}"</p>
-              <p className="text-xs mt-1">Try searching for features like "font", "theme", or "backup"</p>
+              <p className="text-xs mt-1">
+                Try searching for features like "font", "theme", or "backup"
+              </p>
             </div>
           )}
         </div>
@@ -335,10 +359,7 @@ export const SettingsSearch: React.FC<SettingsSearchProps> = ({ onNavigate, onCl
 
       {/* Click outside to close */}
       {isOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsOpen(false)}
-        />
+        <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
       )}
     </div>
   )
@@ -355,20 +376,24 @@ export const QuickSearch: React.FC<QuickSearchProps> = ({ onNavigate }) => {
     { label: 'Auto save', category: 'editor', key: 'autoSave' },
     { label: 'Privacy settings', category: 'privacy' },
     { label: 'Backup settings', category: 'general' },
-    { label: 'Preview theme', category: 'preview', key: 'previewTheme' }
+    { label: 'Preview theme', category: 'preview', key: 'previewTheme' },
   ]
 
   return (
     <div className="space-y-3">
-      <h4 className="text-sm font-medium text-theme-text-secondary">Quick Access</h4>
+      <h4 className="text-sm font-medium text-theme-text-secondary">
+        Quick Access
+      </h4>
       <div className="grid grid-cols-2 gap-2">
-        {commonSearches.map((search) => (
+        {commonSearches.map(search => (
           <button
             key={`${search.category}-${search.key || 'all'}`}
             onClick={() => onNavigate(search.category, search.key)}
             className="p-3 text-left bg-theme-bg-secondary border border-theme-border-primary rounded-md hover:bg-theme-bg-tertiary transition-colors"
           >
-            <span className="text-sm text-theme-text-primary">{search.label}</span>
+            <span className="text-sm text-theme-text-primary">
+              {search.label}
+            </span>
           </button>
         ))}
       </div>

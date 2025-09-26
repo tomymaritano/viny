@@ -6,7 +6,11 @@ interface SettingItemProps {
   description?: string
 }
 
-const SettingItem: React.FC<SettingItemProps> = ({ label, children, description }) => (
+const SettingItem: React.FC<SettingItemProps> = ({
+  label,
+  children,
+  description,
+}) => (
   <div className="setting-item py-3 border-b border-theme-border-primary last:border-b-0">
     <div className="flex items-center justify-between">
       <div className="flex-1">

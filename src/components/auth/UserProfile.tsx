@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
-import { BaseModal } from '../ui/BaseModal'
+import { BaseModal } from '../ui/StandardModal'
 import { useStyles } from '../../hooks/useStyles'
 import { useAppStore } from '../../stores/newSimpleStore'
 import { Icons } from '../Icons'
 import StyledButton from '../ui/StyledButton'
 import { useToast } from '../../hooks/useToast'
+import { apiLogger } from '../../utils/logger'
 
 interface UserProfileProps {
   isOpen: boolean
@@ -45,14 +46,14 @@ export const UserProfile: React.FC<UserProfileProps> = ({
     confirm: false,
   })
 
-  const { 
-    user, 
-    isLoading, 
-    error, 
-    clearError, 
-    updateProfile, 
-    changePassword, 
-    logout 
+  const {
+    user,
+    isLoading,
+    error,
+    clearError,
+    updateProfile,
+    changePassword,
+    logout,
   } = useAppStore()
   const { showSuccess, showError } = useToast()
   const styles = useStyles()
@@ -119,7 +120,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
       })
       showSuccess('Your profile has been updated successfully.')
     } catch (error) {
-      console.error('Profile update error:', error)
+      apiLogger.error('Profile update error:', error)
     }
   }
 
@@ -132,11 +133,16 @@ export const UserProfile: React.FC<UserProfileProps> = ({
     }
 
     try {
-      await changePassword(passwordData.currentPassword, passwordData.newPassword)
-      showSuccess('Your password has been changed successfully. Please sign in again.')
+      await changePassword(
+        passwordData.currentPassword,
+        passwordData.newPassword
+      )
+      showSuccess(
+        'Your password has been changed successfully. Please sign in again.'
+      )
       onClose()
     } catch (error) {
-      console.error('Password change error:', error)
+      apiLogger.error('Password change error:', error)
     }
   }
 
@@ -146,7 +152,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
       showSuccess('You have been signed out successfully.')
       onClose()
     } catch (error) {
-      console.error('Logout error:', error)
+      apiLogger.error('Logout error:', error)
     }
   }
 
@@ -156,7 +162,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
     } else if (activeTab === 'password') {
       setPasswordData(prev => ({ ...prev, [field]: value }))
     }
-    
+
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }))
@@ -173,14 +179,17 @@ export const UserProfile: React.FC<UserProfileProps> = ({
   const renderProfileTab = () => (
     <form onSubmit={handleProfileSubmit} className="space-y-4">
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-theme-text-primary mb-2">
+        <label
+          htmlFor="name"
+          className="block text-sm font-medium text-theme-text-primary mb-2"
+        >
           Full Name
         </label>
         <input
           type="text"
           id="name"
           value={profileData.name}
-          onChange={(e) => handleInputChange('name', e.target.value)}
+          onChange={e => handleInputChange('name', e.target.value)}
           className={styles.cn(
             'w-full px-3 py-2 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-theme-accent-primary',
             errors.name
@@ -196,7 +205,10 @@ export const UserProfile: React.FC<UserProfileProps> = ({
       </div>
 
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-theme-text-primary mb-2">
+        <label
+          htmlFor="email"
+          className="block text-sm font-medium text-theme-text-primary mb-2"
+        >
           Email Address
         </label>
         <input
@@ -227,11 +239,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
             'Update Profile'
           )}
         </StyledButton>
-        <StyledButton
-          variant="outline"
-          onClick={onClose}
-          disabled={isLoading}
-        >
+        <StyledButton variant="outline" onClick={onClose} disabled={isLoading}>
           Cancel
         </StyledButton>
       </div>
@@ -241,7 +249,10 @@ export const UserProfile: React.FC<UserProfileProps> = ({
   const renderPasswordTab = () => (
     <form onSubmit={handlePasswordSubmit} className="space-y-4">
       <div>
-        <label htmlFor="currentPassword" className="block text-sm font-medium text-theme-text-primary mb-2">
+        <label
+          htmlFor="currentPassword"
+          className="block text-sm font-medium text-theme-text-primary mb-2"
+        >
           Current Password
         </label>
         <div className="relative">
@@ -249,7 +260,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
             type={showPasswords.current ? 'text' : 'password'}
             id="currentPassword"
             value={passwordData.currentPassword}
-            onChange={(e) => handleInputChange('currentPassword', e.target.value)}
+            onChange={e => handleInputChange('currentPassword', e.target.value)}
             className={styles.cn(
               'w-full px-3 py-2 pr-10 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-theme-accent-primary',
               errors.currentPassword
@@ -265,7 +276,11 @@ export const UserProfile: React.FC<UserProfileProps> = ({
             className="absolute right-2 top-2 p-1 text-theme-text-secondary hover:text-theme-text-primary"
             disabled={isLoading}
           >
-            {showPasswords.current ? <Icons.EyeOff size={18} /> : <Icons.Eye size={18} />}
+            {showPasswords.current ? (
+              <Icons.EyeOff size={18} />
+            ) : (
+              <Icons.Eye size={18} />
+            )}
           </button>
         </div>
         {errors.currentPassword && (
@@ -274,7 +289,10 @@ export const UserProfile: React.FC<UserProfileProps> = ({
       </div>
 
       <div>
-        <label htmlFor="newPassword" className="block text-sm font-medium text-theme-text-primary mb-2">
+        <label
+          htmlFor="newPassword"
+          className="block text-sm font-medium text-theme-text-primary mb-2"
+        >
           New Password
         </label>
         <div className="relative">
@@ -282,7 +300,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
             type={showPasswords.new ? 'text' : 'password'}
             id="newPassword"
             value={passwordData.newPassword}
-            onChange={(e) => handleInputChange('newPassword', e.target.value)}
+            onChange={e => handleInputChange('newPassword', e.target.value)}
             className={styles.cn(
               'w-full px-3 py-2 pr-10 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-theme-accent-primary',
               errors.newPassword
@@ -298,7 +316,11 @@ export const UserProfile: React.FC<UserProfileProps> = ({
             className="absolute right-2 top-2 p-1 text-theme-text-secondary hover:text-theme-text-primary"
             disabled={isLoading}
           >
-            {showPasswords.new ? <Icons.EyeOff size={18} /> : <Icons.Eye size={18} />}
+            {showPasswords.new ? (
+              <Icons.EyeOff size={18} />
+            ) : (
+              <Icons.Eye size={18} />
+            )}
           </button>
         </div>
         {errors.newPassword && (
@@ -307,7 +329,10 @@ export const UserProfile: React.FC<UserProfileProps> = ({
       </div>
 
       <div>
-        <label htmlFor="confirmPassword" className="block text-sm font-medium text-theme-text-primary mb-2">
+        <label
+          htmlFor="confirmPassword"
+          className="block text-sm font-medium text-theme-text-primary mb-2"
+        >
           Confirm New Password
         </label>
         <div className="relative">
@@ -315,7 +340,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
             type={showPasswords.confirm ? 'text' : 'password'}
             id="confirmPassword"
             value={passwordData.confirmPassword}
-            onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+            onChange={e => handleInputChange('confirmPassword', e.target.value)}
             className={styles.cn(
               'w-full px-3 py-2 pr-10 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-theme-accent-primary',
               errors.confirmPassword
@@ -331,7 +356,11 @@ export const UserProfile: React.FC<UserProfileProps> = ({
             className="absolute right-2 top-2 p-1 text-theme-text-secondary hover:text-theme-text-primary"
             disabled={isLoading}
           >
-            {showPasswords.confirm ? <Icons.EyeOff size={18} /> : <Icons.Eye size={18} />}
+            {showPasswords.confirm ? (
+              <Icons.EyeOff size={18} />
+            ) : (
+              <Icons.Eye size={18} />
+            )}
           </button>
         </div>
         {errors.confirmPassword && (
@@ -355,11 +384,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
             'Change Password'
           )}
         </StyledButton>
-        <StyledButton
-          variant="outline"
-          onClick={onClose}
-          disabled={isLoading}
-        >
+        <StyledButton variant="outline" onClick={onClose} disabled={isLoading}>
           Cancel
         </StyledButton>
       </div>
@@ -375,23 +400,33 @@ export const UserProfile: React.FC<UserProfileProps> = ({
         <div className="space-y-3">
           <div className="flex justify-between items-center p-3 bg-theme-bg-secondary rounded-lg">
             <div>
-              <p className="text-sm font-medium text-theme-text-primary">Email</p>
+              <p className="text-sm font-medium text-theme-text-primary">
+                Email
+              </p>
               <p className="text-sm text-theme-text-secondary">{user?.email}</p>
             </div>
           </div>
           <div className="flex justify-between items-center p-3 bg-theme-bg-secondary rounded-lg">
             <div>
-              <p className="text-sm font-medium text-theme-text-primary">Member Since</p>
+              <p className="text-sm font-medium text-theme-text-primary">
+                Member Since
+              </p>
               <p className="text-sm text-theme-text-secondary">
-                {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                {user?.createdAt
+                  ? new Date(user.createdAt).toLocaleDateString()
+                  : 'N/A'}
               </p>
             </div>
           </div>
           <div className="flex justify-between items-center p-3 bg-theme-bg-secondary rounded-lg">
             <div>
-              <p className="text-sm font-medium text-theme-text-primary">Last Login</p>
+              <p className="text-sm font-medium text-theme-text-primary">
+                Last Login
+              </p>
               <p className="text-sm text-theme-text-secondary">
-                {user?.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'N/A'}
+                {user?.lastLogin
+                  ? new Date(user.lastLogin).toLocaleDateString()
+                  : 'N/A'}
               </p>
             </div>
           </div>
@@ -441,7 +476,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
             { id: 'profile', label: 'Profile', icon: Icons.User },
             { id: 'password', label: 'Password', icon: Icons.Lock },
             { id: 'account', label: 'Account', icon: Icons.Settings },
-          ].map((tab) => (
+          ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as TabType)}

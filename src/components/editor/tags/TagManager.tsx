@@ -12,7 +12,7 @@ import { Z_INDEX, THEME_COLORS } from '../../../constants/theme'
 
 // Constants
 const MAX_SUGGESTIONS = 5
-const SUGGESTIONS_MAX_HEIGHT = "max-h-32"
+const SUGGESTIONS_MAX_HEIGHT = 'max-h-32'
 
 interface TagManagerProps {
   tags?: string[]
@@ -33,8 +33,17 @@ const TagManager: React.FC<TagManagerProps> = ({
   const [isInputVisible, setIsInputVisible] = useState(false)
   const [suggestions, setSuggestions] = useState([])
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1)
-  const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0, tag: null, index: null })
-  const [tagSettingsModal, setTagSettingsModal] = useState({ show: false, tagName: '' })
+  const [contextMenu, setContextMenu] = useState({
+    show: false,
+    x: 0,
+    y: 0,
+    tag: null,
+    index: null,
+  })
+  const [tagSettingsModal, setTagSettingsModal] = useState({
+    show: false,
+    tagName: '',
+  })
   const inputRef = useRef(null)
   const { setTagColor } = useAppStore()
 
@@ -153,7 +162,6 @@ const TagManager: React.FC<TagManagerProps> = ({
     }
   }
 
-
   const handleContextRemove = () => {
     if (contextMenu.index !== null) {
       handleRemoveTag(contextMenu.index)
@@ -183,10 +191,12 @@ const TagManager: React.FC<TagManagerProps> = ({
         {tags.map((tag, index) => (
           <div key={`${tag}-${index}`} className="relative">
             {isEditing(index) ? (
-              <div className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-md border transition-colors ${THEME_COLORS.RING_FOCUS}`}>
+              <div
+                className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-md border transition-colors ${THEME_COLORS.RING_FOCUS}`}
+              >
                 <TagEditInput
                   value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
+                  onChange={e => setEditValue(e.target.value)}
                   onKeyDown={handleEditKeyDown}
                   onBlur={handleSaveEdit}
                   inputRef={editInputRef}
@@ -203,8 +213,9 @@ const TagManager: React.FC<TagManagerProps> = ({
                   size="sm"
                   removable={!disabled}
                   onRemove={() => handleRemoveTag(index)}
-                  onClick={(e) => {
-                    if (e && e.detail === 2) { // Double click to edit
+                  onClick={e => {
+                    if (e && e.detail === 2) {
+                      // Double click to edit
                       handleEditTag(index, tag)
                     }
                   }}
@@ -274,7 +285,9 @@ const TagManager: React.FC<TagManagerProps> = ({
         position={{ x: contextMenu.x, y: contextMenu.y }}
         tagName={contextMenu.tag || ''}
         onRemove={handleContextRemove}
-        onClose={() => setContextMenu({ show: false, x: 0, y: 0, tag: null, index: null })}
+        onClose={() =>
+          setContextMenu({ show: false, x: 0, y: 0, tag: null, index: null })
+        }
         onTagSettings={handleTagSettings}
       />
 

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
-import { Note } from '../types'
+import type { Note } from '../types'
 import { logger } from '../utils/logger'
 
 interface AutoSaveOptions {
@@ -39,64 +39,73 @@ export const useAutoSave = (options: AutoSaveOptions) => {
     }
   }, [])
 
-  const performSave = useCallback(async (note: Note) => {
-    if (!onSave || isSaving) return
+  const performSave = useCallback(
+    async (note: Note) => {
+      if (!onSave || isSaving) return
 
-    try {
-      setIsSaving(true)
-      setHasUnsavedChanges(false)
+      try {
+        setIsSaving(true)
+        setHasUnsavedChanges(false)
 
-      if (onSaveStart) {
-        onSaveStart()
+        if (onSaveStart) {
+          onSaveStart()
+        }
+
+        await onSave(note)
+
+        if (onSaveComplete) {
+          onSaveComplete()
+        }
+      } catch (error) {
+        logger.error('Auto-save failed:', error)
+        setHasUnsavedChanges(true)
+
+        if (onSaveError) {
+          onSaveError(error as Error)
+        }
+      } finally {
+        setIsSaving(false)
       }
-
-      await onSave(note)
-
-      if (onSaveComplete) {
-        onSaveComplete()
-      }
-    } catch (error) {
-      logger.error('Auto-save failed:', error)
-      setHasUnsavedChanges(true)
-
-      if (onSaveError) {
-        onSaveError(error as Error)
-      }
-    } finally {
-      setIsSaving(false)
-    }
-  }, [onSave, onSaveStart, onSaveComplete, onSaveError, isSaving])
+    },
+    [onSave, onSaveStart, onSaveComplete, onSaveError, isSaving]
+  )
 
   // Debounced auto-save function that can be called with a note
-  const debouncedAutoSave = useCallback((note: Note) => {
-    if (!enabled) return
-    
-    setHasUnsavedChanges(true)
+  const debouncedAutoSave = useCallback(
+    (note: Note) => {
+      if (!enabled) return
 
-    // Clear existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
+      setHasUnsavedChanges(true)
 
-    // Save immediately if requested
-    if (immediate) {
-      performSave(note)
-      return
-    }
+      // Clear existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
 
-    // Set up debounced save
-    timeoutRef.current = setTimeout(() => {
-      performSave(note)
-    }, debounceMs)
-  }, [performSave, immediate, debounceMs, enabled])
+      // Save immediately if requested
+      if (immediate) {
+        performSave(note)
+        return
+      }
+
+      // Set up debounced save
+      timeoutRef.current = setTimeout(() => {
+        performSave(note)
+      }, debounceMs)
+    },
+    [performSave, immediate, debounceMs, enabled]
+  )
 
   // Manual save function
-  const saveNow = useCallback((note: Note) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
-    performSave(note)
-  }, [performSave])
+  const saveNow = useCallback(
+    (note: Note) => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+      performSave(note)
+    },
+    [performSave]
+  )
 
   // Force save on page unload
   useEffect(() => {
@@ -124,4 +133,3 @@ export const useAutoSave = (options: AutoSaveOptions) => {
     hasUnsavedChanges,
   }
 }
-

@@ -1,7 +1,7 @@
 /**
  * Synchronization manager for handling data conflicts and sync operations
  */
-import { Note, Notebook } from '../types'
+import type { Note, Notebook } from '../types'
 import { logger } from './logger'
 import { errorHandler } from './errorHandler'
 
@@ -27,7 +27,7 @@ export enum SyncStatus {
   SYNCING = 'syncing',
   CONFLICT = 'conflict',
   ERROR = 'error',
-  SUCCESS = 'success'
+  SUCCESS = 'success',
 }
 
 export interface SyncState {
@@ -49,7 +49,7 @@ export class SyncManager {
     errors: [],
     progress: 0,
     totalItems: 0,
-    syncedItems: 0
+    syncedItems: 0,
   }
   private listeners: ((state: SyncState) => void)[] = []
 
@@ -104,14 +104,16 @@ export class SyncManager {
           localVersion: localNote,
           remoteVersion: remoteNote,
           timestamp: new Date(),
-          resolved: false
+          resolved: false,
         })
       }
     }
 
     // Check notebook conflicts
     for (const localNotebook of localNotebooks) {
-      const remoteNotebook = remoteNotebooks.find(r => r.id === localNotebook.id)
+      const remoteNotebook = remoteNotebooks.find(
+        r => r.id === localNotebook.id
+      )
       if (remoteNotebook && this.hasConflict(localNotebook, remoteNotebook)) {
         conflicts.push({
           id: `conflict_${localNotebook.id}_${Date.now()}`,
@@ -120,7 +122,7 @@ export class SyncManager {
           localVersion: localNotebook,
           remoteVersion: remoteNotebook,
           timestamp: new Date(),
-          resolved: false
+          resolved: false,
         })
       }
     }
@@ -129,11 +131,14 @@ export class SyncManager {
   }
 
   // Check if two items have conflicts
-  private hasConflict(local: Note | Notebook, remote: Note | Notebook): boolean {
+  private hasConflict(
+    local: Note | Notebook,
+    remote: Note | Notebook
+  ): boolean {
     // Compare timestamps
     const localUpdated = new Date(local.updatedAt).getTime()
     const remoteUpdated = new Date(remote.updatedAt).getTime()
-    
+
     // No conflict if timestamps are the same
     if (localUpdated === remoteUpdated) {
       return false
@@ -141,15 +146,19 @@ export class SyncManager {
 
     // Check if content differs
     if (this.isNote(local) && this.isNote(remote)) {
-      return local.content !== remote.content || 
-             local.title !== remote.title ||
-             JSON.stringify(local.tags) !== JSON.stringify(remote.tags)
+      return (
+        local.content !== remote.content ||
+        local.title !== remote.title ||
+        JSON.stringify(local.tags) !== JSON.stringify(remote.tags)
+      )
     }
 
     if (this.isNotebook(local) && this.isNotebook(remote)) {
-      return local.name !== remote.name ||
-             local.color !== remote.color ||
-             local.description !== remote.description
+      return (
+        local.name !== remote.name ||
+        local.color !== remote.color ||
+        local.description !== remote.description
+      )
     }
 
     return false
@@ -177,7 +186,7 @@ export class SyncManager {
         const resolvedConflict: SyncConflict = {
           ...conflict,
           resolved: true,
-          resolution
+          resolution,
         }
         resolved.push(resolvedConflict)
       } catch (error) {
@@ -196,7 +205,7 @@ export class SyncManager {
   ): Promise<ConflictResolution> {
     const resolution: ConflictResolution = {
       strategy,
-      timestamp: new Date()
+      timestamp: new Date(),
     }
 
     switch (strategy) {
@@ -247,7 +256,7 @@ export class SyncManager {
   private mergeNotes(local: Note, remote: Note): Note {
     // Use the most recent timestamp
     const useRemote = new Date(remote.updatedAt) > new Date(local.updatedAt)
-    
+
     return {
       ...local,
       // Merge content intelligently
@@ -263,14 +272,14 @@ export class SyncManager {
         ...local.metadata,
         ...remote.metadata,
         conflictResolved: true,
-        conflictResolvedAt: new Date().toISOString()
-      }
+        conflictResolvedAt: new Date().toISOString(),
+      },
     }
   }
 
   private mergeNotebooks(local: Notebook, remote: Notebook): Notebook {
     const useRemote = new Date(remote.updatedAt) > new Date(local.updatedAt)
-    
+
     return {
       ...local,
       name: useRemote ? remote.name : local.name,
@@ -282,8 +291,8 @@ export class SyncManager {
         ...local.metadata,
         ...remote.metadata,
         conflictResolved: true,
-        conflictResolvedAt: new Date().toISOString()
-      }
+        conflictResolvedAt: new Date().toISOString(),
+      },
     }
   }
 
@@ -322,7 +331,7 @@ export class SyncManager {
       progress: 0,
       totalItems: localNotes.length + localNotebooks.length,
       syncedItems: 0,
-      errors: []
+      errors: [],
     })
 
     try {
@@ -337,23 +346,25 @@ export class SyncManager {
       if (conflicts.length > 0) {
         this.updateSyncState({
           status: SyncStatus.CONFLICT,
-          conflicts
+          conflicts,
         })
 
         // Try to resolve conflicts automatically
         const { resolved, failed } = await this.resolveConflicts(conflicts)
-        
+
         if (failed.length > 0) {
           this.updateSyncState({
             status: SyncStatus.CONFLICT,
-            conflicts: failed
+            conflicts: failed,
           })
-          throw new Error(`${failed.length} conflicts could not be resolved automatically`)
+          throw new Error(
+            `${failed.length} conflicts could not be resolved automatically`
+          )
         }
 
         // Update conflicts with resolutions
         this.updateSyncState({
-          conflicts: resolved
+          conflicts: resolved,
         })
       }
 
@@ -365,24 +376,23 @@ export class SyncManager {
         status: SyncStatus.SUCCESS,
         lastSync: new Date(),
         progress: 100,
-        syncedItems: syncedNotes.length + syncedNotebooks.length
+        syncedItems: syncedNotes.length + syncedNotebooks.length,
       })
 
       return {
         syncedNotes,
         syncedNotebooks,
-        conflicts: this.syncState.conflicts
+        conflicts: this.syncState.conflicts,
       }
-
     } catch (error) {
       this.updateSyncState({
         status: SyncStatus.ERROR,
-        errors: [error instanceof Error ? error.message : String(error)]
+        errors: [error instanceof Error ? error.message : String(error)],
       })
-      
+
       errorHandler.handleError(error as Error, {
         context: 'sync_manager',
-        operation: 'startSync'
+        operation: 'startSync',
       })
 
       throw error
@@ -403,7 +413,10 @@ export class SyncManager {
     // Add remote items, preferring newer versions
     for (const item of remote) {
       const existing = merged.get(item.id)
-      if (!existing || new Date(item.updatedAt) > new Date(existing.updatedAt)) {
+      if (
+        !existing ||
+        new Date(item.updatedAt) > new Date(existing.updatedAt)
+      ) {
         merged.set(item.id, item)
       }
     }
@@ -424,20 +437,20 @@ export class SyncManager {
     const resolvedConflict: SyncConflict = {
       ...conflict,
       resolved: true,
-      resolution
+      resolution,
     }
 
     this.updateSyncState({
-      conflicts: this.syncState.conflicts.map(c => 
+      conflicts: this.syncState.conflicts.map(c =>
         c.id === conflictId ? resolvedConflict : c
-      )
+      ),
     })
   }
 
   // Clear resolved conflicts
   clearResolvedConflicts(): void {
     this.updateSyncState({
-      conflicts: this.syncState.conflicts.filter(c => !c.resolved)
+      conflicts: this.syncState.conflicts.filter(c => !c.resolved),
     })
   }
 
@@ -450,7 +463,7 @@ export class SyncManager {
       errors: [],
       progress: 0,
       totalItems: 0,
-      syncedItems: 0
+      syncedItems: 0,
     })
   }
 }

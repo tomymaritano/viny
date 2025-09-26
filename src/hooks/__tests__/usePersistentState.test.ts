@@ -1,6 +1,9 @@
 import { renderHook, act } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { usePersistentState, usePersistentSettings } from '../usePersistentState'
+import {
+  usePersistentState,
+  usePersistentSettings,
+} from '../usePersistentState'
 import { logger } from '../../utils/logger'
 
 // Mock logger
@@ -9,7 +12,7 @@ vi.mock('../../utils/logger', () => ({
     warn: vi.fn(),
     error: vi.fn(),
     debug: vi.fn(),
-  }
+  },
 }))
 
 describe('usePersistentState', () => {
@@ -27,7 +30,7 @@ describe('usePersistentState', () => {
 
   describe('Basic Functionality', () => {
     it('should initialize with default value when localStorage is empty', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePersistentState(mockKey, mockDefaultValue)
       )
 
@@ -39,7 +42,7 @@ describe('usePersistentState', () => {
       const storedValue = { count: 5, name: 'stored' }
       localStorage.setItem(mockKey, JSON.stringify(storedValue))
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePersistentState(mockKey, mockDefaultValue)
       )
 
@@ -48,7 +51,7 @@ describe('usePersistentState', () => {
     })
 
     it('should update state and localStorage', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePersistentState(mockKey, mockDefaultValue)
       )
 
@@ -63,7 +66,7 @@ describe('usePersistentState', () => {
     })
 
     it('should update state with function updater', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePersistentState(mockKey, mockDefaultValue)
       )
 
@@ -72,14 +75,16 @@ describe('usePersistentState', () => {
       })
 
       expect(result.current[0]).toEqual({ count: 1, name: 'test' })
-      expect(localStorage.getItem(mockKey)).toBe(JSON.stringify({ count: 1, name: 'test' }))
+      expect(localStorage.getItem(mockKey)).toBe(
+        JSON.stringify({ count: 1, name: 'test' })
+      )
     })
 
     it('should clear state and localStorage', () => {
       const storedValue = { count: 5, name: 'stored' }
       localStorage.setItem(mockKey, JSON.stringify(storedValue))
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePersistentState(mockKey, mockDefaultValue)
       )
 
@@ -94,11 +99,16 @@ describe('usePersistentState', () => {
 
   describe('Custom Serialization', () => {
     it('should use custom serialize function', () => {
-      const serialize = vi.fn((value) => `custom:${JSON.stringify(value)}`)
-      const deserialize = vi.fn((value) => JSON.parse(value.replace('custom:', '')))
+      const serialize = vi.fn(value => `custom:${JSON.stringify(value)}`)
+      const deserialize = vi.fn(value =>
+        JSON.parse(value.replace('custom:', ''))
+      )
 
-      const { result } = renderHook(() => 
-        usePersistentState(mockKey, mockDefaultValue, { serialize, deserialize })
+      const { result } = renderHook(() =>
+        usePersistentState(mockKey, mockDefaultValue, {
+          serialize,
+          deserialize,
+        })
       )
 
       const newValue = { count: 5, name: 'custom' }
@@ -108,18 +118,25 @@ describe('usePersistentState', () => {
       })
 
       expect(serialize).toHaveBeenCalledWith(newValue)
-      expect(localStorage.getItem(mockKey)).toBe(`custom:${JSON.stringify(newValue)}`)
+      expect(localStorage.getItem(mockKey)).toBe(
+        `custom:${JSON.stringify(newValue)}`
+      )
     })
 
     it('should use custom deserialize function', () => {
       const customData = 'custom:{"count":5,"name":"custom"}'
       localStorage.setItem(mockKey, customData)
 
-      const serialize = vi.fn((value) => `custom:${JSON.stringify(value)}`)
-      const deserialize = vi.fn((value) => JSON.parse(value.replace('custom:', '')))
+      const serialize = vi.fn(value => `custom:${JSON.stringify(value)}`)
+      const deserialize = vi.fn(value =>
+        JSON.parse(value.replace('custom:', ''))
+      )
 
-      const { result } = renderHook(() => 
-        usePersistentState(mockKey, mockDefaultValue, { serialize, deserialize })
+      const { result } = renderHook(() =>
+        usePersistentState(mockKey, mockDefaultValue, {
+          serialize,
+          deserialize,
+        })
       )
 
       expect(deserialize).toHaveBeenCalledWith(customData)
@@ -132,14 +149,18 @@ describe('usePersistentState', () => {
       const validData = { count: 5, name: 'valid' }
       localStorage.setItem(mockKey, JSON.stringify(validData))
 
-      const validateSchema = vi.fn((value): value is typeof mockDefaultValue => {
-        return typeof value === 'object' && 
-               value !== null && 
-               typeof value.count === 'number' && 
-               typeof value.name === 'string'
-      })
+      const validateSchema = vi.fn(
+        (value): value is typeof mockDefaultValue => {
+          return (
+            typeof value === 'object' &&
+            value !== null &&
+            typeof value.count === 'number' &&
+            typeof value.name === 'string'
+          )
+        }
+      )
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePersistentState(mockKey, mockDefaultValue, { validateSchema })
       )
 
@@ -151,14 +172,18 @@ describe('usePersistentState', () => {
       const invalidData = { count: 'invalid', name: 123 }
       localStorage.setItem(mockKey, JSON.stringify(invalidData))
 
-      const validateSchema = vi.fn((value): value is typeof mockDefaultValue => {
-        return typeof value === 'object' && 
-               value !== null && 
-               typeof value.count === 'number' && 
-               typeof value.name === 'string'
-      })
+      const validateSchema = vi.fn(
+        (value): value is typeof mockDefaultValue => {
+          return (
+            typeof value === 'object' &&
+            value !== null &&
+            typeof value.count === 'number' &&
+            typeof value.name === 'string'
+          )
+        }
+      )
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePersistentState(mockKey, mockDefaultValue, { validateSchema })
       )
 
@@ -178,7 +203,7 @@ describe('usePersistentState', () => {
         throw new Error('localStorage read error')
       })
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePersistentState(mockKey, mockDefaultValue)
       )
 
@@ -199,7 +224,7 @@ describe('usePersistentState', () => {
         throw new Error('localStorage write error')
       })
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePersistentState(mockKey, mockDefaultValue)
       )
 
@@ -222,7 +247,7 @@ describe('usePersistentState', () => {
     it('should handle JSON parse errors', () => {
       localStorage.setItem(mockKey, 'invalid json')
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePersistentState(mockKey, mockDefaultValue)
       )
 
@@ -240,7 +265,7 @@ describe('usePersistentState', () => {
         throw new Error('localStorage remove error')
       })
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePersistentState(mockKey, mockDefaultValue)
       )
 
@@ -261,7 +286,7 @@ describe('usePersistentState', () => {
 
   describe('Loading State', () => {
     it('should start with loading true and set to false after initialization', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePersistentState(mockKey, mockDefaultValue)
       )
 
@@ -271,7 +296,7 @@ describe('usePersistentState', () => {
     it('should handle loading state during async operations', async () => {
       // We can't easily test the loading state transition since it happens synchronously
       // but we can test the final state
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePersistentState(mockKey, mockDefaultValue)
       )
 
@@ -328,7 +353,7 @@ describe('usePersistentSettings', () => {
         sidebarWidth: 280,
         showLineNumbers: false,
         wordWrap: true,
-        customColors: {}
+        customColors: {},
       })
     })
 
@@ -349,7 +374,7 @@ describe('usePersistentSettings', () => {
         result.current.setSettings(prev => ({
           ...prev,
           fontSize: 18,
-          fontFamily: 'Monaco'
+          fontFamily: 'Monaco',
         }))
       })
 
@@ -382,7 +407,9 @@ describe('usePersistentSettings', () => {
         result.current.updateSetting('fontSize', 16)
       })
 
-      expect(document.documentElement.style.getPropertyValue('--editor-font-size')).toBe('16px')
+      expect(
+        document.documentElement.style.getPropertyValue('--editor-font-size')
+      ).toBe('16px')
     })
 
     it('should update font family CSS variable', () => {
@@ -392,7 +419,9 @@ describe('usePersistentSettings', () => {
         result.current.updateSetting('fontFamily', 'Monaco')
       })
 
-      expect(document.documentElement.style.getPropertyValue('--editor-font-family')).toBe('Monaco')
+      expect(
+        document.documentElement.style.getPropertyValue('--editor-font-family')
+      ).toBe('Monaco')
     })
 
     it('should update sidebar width CSS variable', () => {
@@ -402,7 +431,9 @@ describe('usePersistentSettings', () => {
         result.current.updateSetting('sidebarWidth', 300)
       })
 
-      expect(document.documentElement.style.getPropertyValue('--sidebar-width')).toBe('300px')
+      expect(
+        document.documentElement.style.getPropertyValue('--sidebar-width')
+      ).toBe('300px')
     })
 
     it('should not update CSS variables while loading', () => {
@@ -424,7 +455,7 @@ describe('usePersistentSettings', () => {
 
       const stored = localStorage.getItem('viny-settings')
       expect(stored).toBeTruthy()
-      
+
       const parsed = JSON.parse(stored!)
       expect(parsed.fontSize).toBe(20)
     })
@@ -439,7 +470,7 @@ describe('usePersistentSettings', () => {
         sidebarWidth: 250,
         showLineNumbers: true,
         wordWrap: false,
-        customColors: { primary: '#ff0000' }
+        customColors: { primary: '#ff0000' },
       }
 
       localStorage.setItem('viny-settings', JSON.stringify(customSettings))

@@ -2,16 +2,21 @@
  * React hook for synchronization management
  */
 import { useState, useEffect, useCallback } from 'react'
-import { syncManager, SyncState, SyncConflict, ConflictResolution } from '../utils/syncManager'
+import type {
+  SyncState,
+  SyncConflict,
+  ConflictResolution,
+} from '../utils/syncManager'
+import { syncManager } from '../utils/syncManager'
 import { useAppStore } from '../stores/newSimpleStore'
-import { Note, Notebook } from '../types'
+import type { Note, Notebook } from '../types'
 import { logger } from '../utils/logger'
 
 export interface UseSyncOptions {
   autoSync?: boolean
   syncInterval?: number // in milliseconds
   conflictResolutionStrategy?: ConflictResolution['strategy']
-  fetchRemoteData?: () => Promise<{ notes: Note[], notebooks: Notebook[] }>
+  fetchRemoteData?: () => Promise<{ notes: Note[]; notebooks: Notebook[] }>
 }
 
 export function useSync(options: UseSyncOptions = {}) {
@@ -19,11 +24,13 @@ export function useSync(options: UseSyncOptions = {}) {
     autoSync = false,
     syncInterval = 30000, // 30 seconds
     // conflictResolutionStrategy = 'merge' // Currently unused
-    fetchRemoteData: customFetchRemoteData
+    fetchRemoteData: customFetchRemoteData,
   } = options
 
   const { notes, setNotes, showError, showSuccess } = useAppStore()
-  const [syncState, setSyncState] = useState<SyncState>(syncManager.getSyncState())
+  const [syncState, setSyncState] = useState<SyncState>(
+    syncManager.getSyncState()
+  )
   const [isOnline, setIsOnline] = useState(navigator.onLine)
 
   // Subscribe to sync state changes
@@ -69,7 +76,7 @@ export function useSync(options: UseSyncOptions = {}) {
       // In a real app, this would be an API call
       const fetchFn = customFetchRemoteData || fetchRemoteData
       const remoteData = await fetchFn()
-      
+
       const result = await syncManager.startSync(
         notes,
         [], // notebooks not implemented in store yet
@@ -87,11 +94,15 @@ export function useSync(options: UseSyncOptions = {}) {
         const unresolvedConflicts = result.conflicts.filter(c => !c.resolved)
 
         if (resolvedConflicts.length > 0) {
-          showSuccess(`Sync completed. ${resolvedConflicts.length} conflicts resolved automatically.`)
+          showSuccess(
+            `Sync completed. ${resolvedConflicts.length} conflicts resolved automatically.`
+          )
         }
 
         if (unresolvedConflicts.length > 0) {
-          showError(`${unresolvedConflicts.length} conflicts require manual resolution`)
+          showError(
+            `${unresolvedConflicts.length} conflicts require manual resolution`
+          )
         }
       } else {
         showSuccess('Sync completed successfully')
@@ -106,33 +117,35 @@ export function useSync(options: UseSyncOptions = {}) {
   }, [notes, setNotes, showError, showSuccess, isOnline])
 
   // Resolve conflict manually
-  const resolveConflict = useCallback(async (
-    conflictId: string,
-    resolution: ConflictResolution
-  ) => {
-    try {
-      await syncManager.resolveConflictManually(conflictId, resolution)
-      
-      // Apply resolution to local data
-      const conflict = syncState.conflicts.find(c => c.id === conflictId)
-      if (conflict && resolution.resolvedItem) {
-        if (conflict.type === 'note') {
-          const updatedNotes = notes.map(note => 
-            note.id === conflict.itemId ? resolution.resolvedItem as Note : note
-          )
-          setNotes(updatedNotes)
-        } else if (conflict.type === 'notebook') {
-          // Notebook management not implemented in store yet
-          // TODO: Implement notebook sync when notebook store is available
-        }
-      }
+  const resolveConflict = useCallback(
+    async (conflictId: string, resolution: ConflictResolution) => {
+      try {
+        await syncManager.resolveConflictManually(conflictId, resolution)
 
-      showSuccess('Conflict resolved successfully')
-    } catch (error) {
-      logger.error('Failed to resolve conflict:', error)
-      showError('Failed to resolve conflict')
-    }
-  }, [syncState.conflicts, notes, setNotes, showError, showSuccess])
+        // Apply resolution to local data
+        const conflict = syncState.conflicts.find(c => c.id === conflictId)
+        if (conflict && resolution.resolvedItem) {
+          if (conflict.type === 'note') {
+            const updatedNotes = notes.map(note =>
+              note.id === conflict.itemId
+                ? (resolution.resolvedItem as Note)
+                : note
+            )
+            setNotes(updatedNotes)
+          } else if (conflict.type === 'notebook') {
+            // Notebook management not implemented in store yet
+            // TODO: Implement notebook sync when notebook store is available
+          }
+        }
+
+        showSuccess('Conflict resolved successfully')
+      } catch (error) {
+        logger.error('Failed to resolve conflict:', error)
+        showError('Failed to resolve conflict')
+      }
+    },
+    [syncState.conflicts, notes, setNotes, showError, showSuccess]
+  )
 
   // Force sync
   const forceSync = useCallback(() => {
@@ -150,9 +163,12 @@ export function useSync(options: UseSyncOptions = {}) {
   }, [])
 
   // Get conflict by ID
-  const getConflict = useCallback((conflictId: string): SyncConflict | undefined => {
-    return syncState.conflicts.find(c => c.id === conflictId)
-  }, [syncState.conflicts])
+  const getConflict = useCallback(
+    (conflictId: string): SyncConflict | undefined => {
+      return syncState.conflicts.find(c => c.id === conflictId)
+    },
+    [syncState.conflicts]
+  )
 
   // Get unresolved conflicts
   const getUnresolvedConflicts = useCallback((): SyncConflict[] => {
@@ -167,22 +183,22 @@ export function useSync(options: UseSyncOptions = {}) {
     hasConflicts: syncState.conflicts.length > 0,
     hasUnresolvedConflicts: getUnresolvedConflicts().length > 0,
     lastSync: syncState.lastSync,
-    
+
     // Actions
     performSync,
     forceSync,
     resolveConflict,
     clearResolvedConflicts,
     resetSync,
-    
+
     // Getters
     getConflict,
     getUnresolvedConflicts,
-    
+
     // Computed values
     syncProgress: syncState.progress,
     conflictCount: syncState.conflicts.length,
-    unresolvedConflictCount: getUnresolvedConflicts().length
+    unresolvedConflictCount: getUnresolvedConflicts().length,
   }
 }
 
@@ -193,18 +209,20 @@ export async function fetchRemoteData(): Promise<{
 }> {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 1000))
-  
+
   // In a real app, this would be an actual API call
   // For now, return empty arrays to simulate no remote changes
   return {
     notes: [],
-    notebooks: []
+    notebooks: [],
   }
 }
 
 // Hook for sync status only (lighter version)
 export function useSyncStatus() {
-  const [syncState, setSyncState] = useState<SyncState>(syncManager.getSyncState())
+  const [syncState, setSyncState] = useState<SyncState>(
+    syncManager.getSyncState()
+  )
   const [isOnline, setIsOnline] = useState(navigator.onLine)
 
   useEffect(() => {
@@ -232,6 +250,6 @@ export function useSyncStatus() {
     lastSync: syncState.lastSync,
     hasConflicts: syncState.conflicts.length > 0,
     conflictCount: syncState.conflicts.length,
-    progress: syncState.progress
+    progress: syncState.progress,
   }
 }

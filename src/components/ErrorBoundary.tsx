@@ -1,7 +1,8 @@
-import React, { ErrorInfo, ReactNode } from 'react'
+import React, { Component, type ErrorInfo, type ReactNode } from 'react'
 import { Icons } from './Icons'
 import StyledButton from './ui/StyledButton'
 import { logComponentError } from '../services/errorLogger'
+import { loggingService } from '../services/LoggingService'
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -16,7 +17,10 @@ interface ErrorBoundaryState {
   errorInfo: ErrorInfo | null
 }
 
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props)
     this.state = {
@@ -32,8 +36,11 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // Log error details
-    console.error('Error caught by boundary:', error, errorInfo)
+    // Log error details using centralized logging
+    loggingService.logError(error, {
+      context: 'ErrorBoundary',
+      errorInfo: errorInfo.componentStack,
+    })
 
     this.setState({
       error: error,
@@ -43,7 +50,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     // Log to centralized error service
     logComponentError('ErrorBoundary', error, errorInfo, {
       props: Object.keys(this.props),
-      hasCustomFallback: !!this.props.fallback
+      hasCustomFallback: !!this.props.fallback,
     })
 
     // You can also log the error to an error reporting service here
@@ -71,7 +78,10 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           <div className="max-w-2xl w-full bg-theme-bg-secondary rounded-lg border border-theme-border-primary p-8">
             <div className="flex items-center mb-6">
               <div className="w-12 h-12 bg-theme-accent-red/20 rounded-full flex items-center justify-center mr-4">
-                <Icons.AlertTriangle size={24} className="text-theme-accent-red" />
+                <Icons.AlertTriangle
+                  size={24}
+                  className="text-theme-accent-red"
+                />
               </div>
               <div>
                 <h1 className="text-2xl font-semibold text-theme-text-primary">
@@ -96,18 +106,20 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               </div>
             )}
 
-            {(this.props.showDetails ?? process.env.NODE_ENV === 'development') && this.state.errorInfo && (
-              <details className="mb-6">
-                <summary className="cursor-pointer text-sm text-theme-text-secondary hover:text-theme-text-primary">
-                  View stack trace
-                </summary>
-                <div className="mt-2 bg-theme-bg-primary rounded p-4 border border-theme-border-primary overflow-x-auto">
-                  <pre className="text-xs text-theme-text-muted font-mono">
-                    {this.state.errorInfo.componentStack}
-                  </pre>
-                </div>
-              </details>
-            )}
+            {(this.props.showDetails ??
+              process.env.NODE_ENV === 'development') &&
+              this.state.errorInfo && (
+                <details className="mb-6">
+                  <summary className="cursor-pointer text-sm text-theme-text-secondary hover:text-theme-text-primary">
+                    View stack trace
+                  </summary>
+                  <div className="mt-2 bg-theme-bg-primary rounded p-4 border border-theme-border-primary overflow-x-auto">
+                    <pre className="text-xs text-theme-text-muted font-mono">
+                      {this.state.errorInfo.componentStack}
+                    </pre>
+                  </div>
+                </details>
+              )}
 
             <div className="flex gap-4">
               <StyledButton
@@ -140,7 +152,8 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
             <div className="mt-6 pt-6 border-t border-theme-border-primary">
               <p className="text-xs text-theme-text-muted">
-                If this problem persists, please try clearing your browser cache or contact support.
+                If this problem persists, please try clearing your browser cache
+                or contact support.
               </p>
             </div>
           </div>
@@ -154,7 +167,6 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
 // Default props - using static defaultProps for class components
 
-
 // Hook version for functional components
 export const useErrorHandler = () => {
   const [error, setError] = React.useState<Error | null>(null)
@@ -164,7 +176,7 @@ export const useErrorHandler = () => {
   }, [])
 
   const captureError = React.useCallback((error: Error) => {
-    console.error('Error captured:', error)
+    loggingService.logError(error, { context: 'useErrorHandler' })
     setError(error)
   }, [])
 

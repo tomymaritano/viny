@@ -4,7 +4,11 @@
  */
 
 import React, { useImperativeHandle, forwardRef } from 'react'
-import { useInkdropEditor, type EditorPreset, type InkdropEditorMethods } from '../hooks/useInkdropEditor'
+import {
+  useInkdropEditor,
+  type EditorPreset,
+  type InkdropEditorMethods,
+} from '../hooks/useInkdropEditor'
 
 interface InkdropEditorProps {
   value?: string

@@ -6,8 +6,12 @@ import {
   updateTag,
   deleteTag
 } from '../controllers/tagsController'
+import { authenticate, injectUserId } from '../middleware/authMiddleware'
 
 const router = Router()
+
+// Apply authentication to all routes
+router.use(authenticate)
 
 // GET /api/tags - Get all tags
 router.get('/', getTags)
@@ -16,7 +20,7 @@ router.get('/', getTags)
 router.get('/:id', getTagById)
 
 // POST /api/tags - Create new tag
-router.post('/', createTag)
+router.post('/', injectUserId, createTag)
 
 // PUT /api/tags/:id - Update tag
 router.put('/:id', updateTag)

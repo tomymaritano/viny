@@ -20,14 +20,15 @@ const EmptyNotesState: React.FC<EmptyNotesStateProps> = ({
   currentSortBy,
   currentSortDirection,
   onSort,
-  onNewNote
+  onNewNote,
 }) => {
   const getEmptyStateContent = () => {
     if (currentSection === 'trash') {
       return {
         title: 'Trash is empty',
-        description: 'Deleted notes will appear here. You can restore them or delete them permanently.',
-        showCreateButton: false
+        description:
+          'Deleted notes will appear here. You can restore them or delete them permanently.',
+        showCreateButton: false,
       }
     }
 
@@ -36,7 +37,7 @@ const EmptyNotesState: React.FC<EmptyNotesStateProps> = ({
       return {
         title: 'No notes found',
         description: `No notes with the tag "${tagName}" yet.`,
-        showCreateButton: true
+        showCreateButton: true,
       }
     }
 
@@ -44,18 +45,22 @@ const EmptyNotesState: React.FC<EmptyNotesStateProps> = ({
       return {
         title: 'No notes found',
         description: 'No notes in this notebook yet.',
-        showCreateButton: true
+        showCreateButton: true,
       }
     }
 
     return {
       title: 'No notes found',
       description: 'Create your first note to get started with Viny.',
-      showCreateButton: true
+      showCreateButton: true,
     }
   }
 
-  const { title: emptyTitle, description, showCreateButton } = getEmptyStateContent()
+  const {
+    title: emptyTitle,
+    description,
+    showCreateButton,
+  } = getEmptyStateContent()
 
   return (
     <div className="h-full flex flex-col bg-theme-bg-primary">
@@ -73,7 +78,10 @@ const EmptyNotesState: React.FC<EmptyNotesStateProps> = ({
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="text-center max-w-md">
           <div className="w-20 h-20 mx-auto mb-6 bg-theme-bg-secondary/30 rounded-full flex items-center justify-center">
-            <Icons.NotebookText size={32} className="text-theme-text-muted/50" />
+            <Icons.NotebookText
+              size={32}
+              className="text-theme-text-muted/50"
+            />
           </div>
           <h3 className="text-xl font-medium text-theme-text-secondary mb-3">
             {emptyTitle}
@@ -81,7 +89,7 @@ const EmptyNotesState: React.FC<EmptyNotesStateProps> = ({
           <p className="text-sm text-theme-text-muted mb-6 leading-relaxed">
             {description}
           </p>
-          
+
           {showCreateButton && (
             <div className="space-y-4">
               <button
@@ -91,20 +99,28 @@ const EmptyNotesState: React.FC<EmptyNotesStateProps> = ({
                 <Icons.Plus size={16} className="inline mr-2" />
                 Create your first note
               </button>
-              
+
               <div className="text-xs text-theme-text-muted">
                 <div className="flex items-center justify-center gap-2">
                   <span>Press</span>
-                  <kbd className="px-2 py-1 bg-theme-bg-tertiary text-theme-text-muted rounded text-xs">Ctrl</kbd>
+                  <kbd className="px-2 py-1 bg-theme-bg-tertiary text-theme-text-muted rounded text-xs">
+                    Ctrl
+                  </kbd>
                   <span>+</span>
-                  <kbd className="px-2 py-1 bg-theme-bg-tertiary text-theme-text-muted rounded text-xs">N</kbd>
+                  <kbd className="px-2 py-1 bg-theme-bg-tertiary text-theme-text-muted rounded text-xs">
+                    N
+                  </kbd>
                   <span className="ml-1">to create a note, or</span>
                 </div>
                 <div className="flex items-center justify-center gap-2 mt-1">
                   <span>Press</span>
-                  <kbd className="px-2 py-1 bg-theme-bg-tertiary text-theme-text-muted rounded text-xs">Ctrl</kbd>
+                  <kbd className="px-2 py-1 bg-theme-bg-tertiary text-theme-text-muted rounded text-xs">
+                    Ctrl
+                  </kbd>
                   <span>+</span>
-                  <kbd className="px-2 py-1 bg-theme-bg-tertiary text-theme-text-muted rounded text-xs">K</kbd>
+                  <kbd className="px-2 py-1 bg-theme-bg-tertiary text-theme-text-muted rounded text-xs">
+                    K
+                  </kbd>
                   <span className="ml-1">to search</span>
                 </div>
               </div>

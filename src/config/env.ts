@@ -2,6 +2,8 @@
 // All environment variables accessed through this module
 
 // Vite environment variables type definition
+import { initLogger } from '../utils/logger'
+
 interface ImportMetaEnv {
   readonly VITE_APP_NAME: string
   readonly VITE_APP_VERSION: string
@@ -35,7 +37,8 @@ export const env = {
   // App Configuration
   APP_NAME: import.meta.env.VITE_APP_NAME || 'Viny',
   APP_VERSION: import.meta.env.VITE_APP_VERSION || '1.4.1',
-  APP_DESCRIPTION: import.meta.env.VITE_APP_DESCRIPTION || 'Professional markdown editor',
+  APP_DESCRIPTION:
+    import.meta.env.VITE_APP_DESCRIPTION || 'Professional markdown editor',
 
   // API Configuration
   API_BASE_URL: import.meta.env.VITE_API_BASE_URL || '',
@@ -49,7 +52,9 @@ export const env = {
 
   // Theme Configuration
   DEFAULT_THEME: import.meta.env.VITE_DEFAULT_THEME || 'dark',
-  AVAILABLE_THEMES: (import.meta.env.VITE_AVAILABLE_THEMES || 'dark,light,solarized').split(','),
+  AVAILABLE_THEMES: (
+    import.meta.env.VITE_AVAILABLE_THEMES || 'dark,light,solarized'
+  ).split(','),
 
   // Editor Configuration
   DEFAULT_EDITOR: import.meta.env.VITE_DEFAULT_EDITOR || 'markdown-it',
@@ -84,19 +89,31 @@ export function validateEnvironment() {
   // }
 
   if (errors.length > 0) {
-    console.error('Environment validation failed:')
-    errors.forEach(error => console.error(`- ${error}`))
+    initLogger.error('Environment validation failed:')
+    errors.forEach(error => initLogger.error(`- ${error}`))
     throw new Error('Invalid environment configuration')
   }
 
   if (env.DEBUG_MODE) {
-    console.log('Environment configuration:', env)
+    initLogger.info('Environment configuration:', env)
   }
 }
 
 // Helper functions for common checks
 export const isProduction = () => env.PROD
 export const isDevelopment = () => env.DEV
-export const isFeatureEnabled = (feature: keyof Pick<Environment, 'ENABLE_ANALYTICS' | 'ENABLE_TELEMETRY' | 'ENABLE_PLUGINS' | 'ENABLE_SYNC' | 'ENABLE_VIM_MODE' | 'ENABLE_LIVE_PREVIEW' | 'DEBUG_MODE' | 'ENABLE_LOGGING'>) => env[feature]
+export const isFeatureEnabled = (
+  feature: keyof Pick<
+    Environment,
+    | 'ENABLE_ANALYTICS'
+    | 'ENABLE_TELEMETRY'
+    | 'ENABLE_PLUGINS'
+    | 'ENABLE_SYNC'
+    | 'ENABLE_VIM_MODE'
+    | 'ENABLE_LIVE_PREVIEW'
+    | 'DEBUG_MODE'
+    | 'ENABLE_LOGGING'
+  >
+) => env[feature]
 
 export default env

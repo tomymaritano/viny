@@ -5,8 +5,8 @@ import StorageErrorBoundary from '../StorageErrorBoundary'
 // Mock logger
 vi.mock('../../../utils/logger', () => ({
   logger: {
-    error: vi.fn()
-  }
+    error: vi.fn(),
+  },
 }))
 
 // Component that throws on render
@@ -27,15 +27,15 @@ describe('StorageErrorBoundary - Simple', () => {
   it('catches and displays errors', () => {
     // Suppress console errors for this test
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    
+
     render(
       <StorageErrorBoundary>
         <ThrowError />
       </StorageErrorBoundary>
     )
-    
+
     expect(screen.getByText('Storage Error')).toBeInTheDocument()
-    
+
     consoleSpy.mockRestore()
   })
 })

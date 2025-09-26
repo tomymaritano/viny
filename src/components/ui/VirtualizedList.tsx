@@ -33,7 +33,7 @@ function VirtualizedList<T>({
     const start = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan)
     const visibleCount = Math.ceil(containerHeight / itemHeight)
     const end = Math.min(items.length - 1, start + visibleCount + overscan * 2)
-    
+
     return { start, end }
   }, [scrollTop, itemHeight, containerHeight, items.length, overscan])
 
@@ -46,20 +46,26 @@ function VirtualizedList<T>({
   const totalHeight = items.length * itemHeight
 
   // Handle scroll events
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const newScrollTop = e.currentTarget.scrollTop
-    setScrollTop(newScrollTop)
-    onScroll?.(newScrollTop)
-  }, [onScroll])
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const newScrollTop = e.currentTarget.scrollTop
+      setScrollTop(newScrollTop)
+      onScroll?.(newScrollTop)
+    },
+    [onScroll]
+  )
 
   // Scroll to specific item
-  const scrollToItem = useCallback((index: number) => {
-    if (scrollElementRef.current) {
-      const targetScrollTop = index * itemHeight
-      scrollElementRef.current.scrollTop = targetScrollTop
-      setScrollTop(targetScrollTop)
-    }
-  }, [itemHeight])
+  const scrollToItem = useCallback(
+    (index: number) => {
+      if (scrollElementRef.current) {
+        const targetScrollTop = index * itemHeight
+        scrollElementRef.current.scrollTop = targetScrollTop
+        setScrollTop(targetScrollTop)
+      }
+    },
+    [itemHeight]
+  )
 
   // Expose scroll methods
   useEffect(() => {
@@ -130,14 +136,14 @@ export function useVirtualization<T>({
     const container = containerRef.current
     if (!container) return
 
-    const resizeObserver = new ResizeObserver((entries) => {
+    const resizeObserver = new ResizeObserver(entries => {
       for (const entry of entries) {
         setContainerHeight(entry.contentRect.height)
       }
     })
 
     resizeObserver.observe(container)
-    
+
     // Set initial height
     setContainerHeight(container.clientHeight)
 

@@ -10,12 +10,20 @@ import {
   placeholder as placeholderExtension,
   lineNumbers,
 } from '@codemirror/view'
-import { history, defaultKeymap, historyKeymap, insertNewlineAndIndent } from '@codemirror/commands'
+import {
+  history,
+  defaultKeymap,
+  historyKeymap,
+  insertNewlineAndIndent,
+} from '@codemirror/commands'
 import { searchKeymap, search } from '@codemirror/search'
 import { markdown } from '@codemirror/lang-markdown'
 import { getThemeExtensions } from './editorThemes'
 import { imageWidgetPlugin } from './editorImageWidget'
-import { markdownKeybindings } from './editorKeybindings'
+import { enhancedMarkdownKeybindings } from './editorKeybindingsEnhanced'
+import { smartPasteExtension } from './editorSmartPaste'
+import { slashMenuExtension } from './editorSlashMenu'
+import { linkPreviewExtension, linkClickHandler, autoLinkExtension } from './editorLinkPreview'
 
 /**
  * Creates the core set of editor extensions
@@ -45,13 +53,18 @@ export const createEditorExtensions = ({
     history(),
 
     // Keyboard shortcuts (custom keybindings first to have priority)
-    markdownKeybindings, // Custom markdown formatting shortcuts
+    enhancedMarkdownKeybindings, // Enhanced markdown formatting shortcuts with Tab support
     keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap]),
 
     // Features
     search(),
     markdown(),
     imageWidgetPlugin, // Display images inline
+    smartPasteExtension, // Smart paste with HTML to Markdown conversion
+    slashMenuExtension, // Slash menu with visual feedback
+    linkPreviewExtension, // Show link preview on hover
+    linkClickHandler, // Handle link clicks
+    autoLinkExtension, // Auto-detect and convert URLs to links
 
     // Theme and appearance
     ...getThemeExtensions(theme),
@@ -89,7 +102,7 @@ export const extensionCategories = {
 
   keyboard: [keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap])],
 
-  features: [search(), markdown(), imageWidgetPlugin],
+  features: [search(), markdown(), imageWidgetPlugin, smartPasteExtension, slashMenuExtension, linkPreviewExtension, linkClickHandler, autoLinkExtension],
 
   behavior: [EditorView.lineWrapping],
 
@@ -124,7 +137,9 @@ interface ExtensionCategoriesOptions {
  * @param {Object} options - Configuration options
  * @returns {Array} CodeMirror extensions
  */
-export const createExtensionsFromCategories = (options: ExtensionCategoriesOptions = {}) => {
+export const createExtensionsFromCategories = (
+  options: ExtensionCategoriesOptions = {}
+) => {
   const {
     includeCore = true,
     includeKeyboard = true,

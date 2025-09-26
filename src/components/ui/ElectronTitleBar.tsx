@@ -12,10 +12,11 @@ const ElectronTitleBar: React.FC<ElectronTitleBarProps> = ({
   title = 'Viny',
   onMinimize,
   onMaximize,
-  onClose
+  onClose,
 }) => {
-  const isElectron = typeof window !== 'undefined' && (window.electronAPI || window.electron)
-  
+  const isElectron =
+    typeof window !== 'undefined' && (window.electronAPI || window.electron)
+
   // Get platform safely
   const platform = React.useMemo(() => {
     if (typeof window !== 'undefined' && window.electronAPI?.platform) {
@@ -28,18 +29,24 @@ const ElectronTitleBar: React.FC<ElectronTitleBarProps> = ({
     return null
   }
 
-  // Add electron class to body for CSS targeting
+  // Add electron and platform classes to body for CSS targeting
   React.useEffect(() => {
     if (isElectron) {
       document.body.classList.add('electron')
+      if (platform) {
+        document.body.classList.add(`platform-${platform}`)
+      }
     }
     return () => {
       document.body.classList.remove('electron')
+      document.body.classList.remove('platform-darwin')
+      document.body.classList.remove('platform-win32')
+      document.body.classList.remove('platform-linux')
     }
-  }, [isElectron])
+  }, [isElectron, platform])
 
   return (
-    <div 
+    <div
       className="electron-titlebar"
       style={{
         width: '100%',
@@ -54,31 +61,31 @@ const ElectronTitleBar: React.FC<ElectronTitleBarProps> = ({
         left: 0,
         right: 0,
         zIndex: 10000,
-        borderBottom: '1px solid #333'
+        borderBottom: '1px solid #333',
       }}
     >
       {/* Left side - Empty for macOS */}
       <div style={{ width: '70px' }} />
-      
+
       {/* Center - Title */}
-      <div 
+      <div
         style={{
           fontSize: '13px',
           color: '#ffffff',
           fontWeight: 500,
           textAlign: 'center',
-          userSelect: 'none'
+          userSelect: 'none',
         }}
       >
         {title}
       </div>
-      
+
       {/* Right side - Window controls (for Windows/Linux) */}
-      <div 
-        style={{ 
-          display: 'flex', 
+      <div
+        style={{
+          display: 'flex',
           alignItems: 'center',
-          WebkitAppRegion: 'no-drag'
+          WebkitAppRegion: 'no-drag',
         }}
       >
         {platform !== 'darwin' && (
@@ -94,18 +101,18 @@ const ElectronTitleBar: React.FC<ElectronTitleBarProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
-              onMouseEnter={(e) => {
+              onMouseEnter={e => {
                 e.currentTarget.style.background = '#333'
               }}
-              onMouseLeave={(e) => {
+              onMouseLeave={e => {
                 e.currentTarget.style.background = 'transparent'
               }}
             >
               <Icons.Minus size={12} />
             </button>
-            
+
             <button
               onClick={onMaximize}
               style={{
@@ -117,18 +124,18 @@ const ElectronTitleBar: React.FC<ElectronTitleBarProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
-              onMouseEnter={(e) => {
+              onMouseEnter={e => {
                 e.currentTarget.style.background = '#333'
               }}
-              onMouseLeave={(e) => {
+              onMouseLeave={e => {
                 e.currentTarget.style.background = 'transparent'
               }}
             >
               <Icons.Square size={12} />
             </button>
-            
+
             <button
               onClick={onClose}
               style={{
@@ -140,12 +147,12 @@ const ElectronTitleBar: React.FC<ElectronTitleBarProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
-              onMouseEnter={(e) => {
+              onMouseEnter={e => {
                 e.currentTarget.style.background = '#e74c3c'
               }}
-              onMouseLeave={(e) => {
+              onMouseLeave={e => {
                 e.currentTarget.style.background = 'transparent'
               }}
             >
@@ -153,11 +160,9 @@ const ElectronTitleBar: React.FC<ElectronTitleBarProps> = ({
             </button>
           </>
         )}
-        
+
         {/* For macOS, just add some padding */}
-        {platform === 'darwin' && (
-          <div style={{ width: '70px' }} />
-        )}
+        {platform === 'darwin' && <div style={{ width: '70px' }} />}
       </div>
     </div>
   )

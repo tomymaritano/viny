@@ -4,6 +4,9 @@
  */
 
 import { vi, describe, it, expect, beforeEach } from 'vitest'
+
+// Set longer test timeout for async operations
+vi.setConfig({ testTimeout: 10000 })
 import {
   RepositoryErrorHandler,
   RetryHandler,
@@ -20,15 +23,14 @@ import {
   isStorageNotAvailableError,
   isValidationError,
   isConflictError,
-  isNotFoundError
+  isNotFoundError,
 } from '../errors/RepositoryErrorHandler'
 
-import {
-  RepositoryError,
-  RepositoryErrorCode,
+import type {
   RetryConfig,
-  CircuitBreakerConfig
+  CircuitBreakerConfig,
 } from '../types/RepositoryTypes'
+import { RepositoryError, RepositoryErrorCode } from '../types/RepositoryTypes'
 
 describe('RepositoryErrorHandler', () => {
   let errorHandler: RepositoryErrorHandler
@@ -40,14 +42,14 @@ describe('RepositoryErrorHandler', () => {
       baseDelayMs: 10, // Fast tests
       maxDelayMs: 100,
       exponentialBackoff: true,
-      jitter: false // Predictable timing for tests
+      jitter: false, // Predictable timing for tests
     }
 
     const circuitBreakerConfig: CircuitBreakerConfig = {
       enabled: true,
       failureThreshold: 2,
       resetTimeoutMs: 100,
-      monitoringPeriodMs: 50
+      monitoringPeriodMs: 50,
     }
 
     errorHandler = new RepositoryErrorHandler(retryConfig, circuitBreakerConfig)
@@ -66,7 +68,9 @@ describe('RepositoryErrorHandler', () => {
 
       expect(classification.category).toBe('transient')
       expect(classification.isRetryable).toBe(true)
-      expect(classification.suggestedAction).toBe('Retry with exponential backoff')
+      expect(classification.suggestedAction).toBe(
+        'Retry with exponential backoff'
+      )
     })
 
     it('should classify security errors as non-retryable', () => {
@@ -80,7 +84,9 @@ describe('RepositoryErrorHandler', () => {
 
       expect(classification.category).toBe('security')
       expect(classification.isRetryable).toBe(false)
-      expect(classification.suggestedAction).toBe('Check authentication and permissions')
+      expect(classification.suggestedAction).toBe(
+        'Check authentication and permissions'
+      )
     })
 
     it('should classify permanent errors as non-retryable', () => {
@@ -94,7 +100,9 @@ describe('RepositoryErrorHandler', () => {
 
       expect(classification.category).toBe('permanent')
       expect(classification.isRetryable).toBe(false)
-      expect(classification.suggestedAction).toBe('Fix data or request parameters')
+      expect(classification.suggestedAction).toBe(
+        'Fix data or request parameters'
+      )
     })
   })
 
@@ -113,7 +121,10 @@ describe('RepositoryErrorHandler', () => {
         return Promise.resolve('success')
       })
 
-      const result = await errorHandler.executeOperation(mockOperation, 'testOperation')
+      const result = await errorHandler.executeOperation(
+        mockOperation,
+        'testOperation'
+      )
 
       expect(result.success).toBe(true)
       expect(result.data).toBe('success')
@@ -130,7 +141,10 @@ describe('RepositoryErrorHandler', () => {
         )
       )
 
-      const result = await errorHandler.executeOperation(mockOperation, 'testOperation')
+      const result = await errorHandler.executeOperation(
+        mockOperation,
+        'testOperation'
+      )
 
       expect(result.success).toBe(false)
       expect(result.error).toBeInstanceOf(RepositoryError)
@@ -146,7 +160,10 @@ describe('RepositoryErrorHandler', () => {
         )
       )
 
-      const result = await errorHandler.executeOperation(mockOperation, 'testOperation')
+      const result = await errorHandler.executeOperation(
+        mockOperation,
+        'testOperation'
+      )
 
       expect(result.success).toBe(false)
       expect(result.error).toBeInstanceOf(RepositoryError)
@@ -196,7 +213,7 @@ describe('RepositoryErrorHandler', () => {
       // Should attempt operation again
       mockOperation.mockResolvedValue('success')
       const result = await errorHandler.executeOperation(mockOperation, 'test')
-      
+
       expect(result.success).toBe(true)
       expect(result.data).toBe('success')
     })
@@ -247,7 +264,7 @@ describe('RetryHandler', () => {
       baseDelayMs: 10,
       maxDelayMs: 100,
       exponentialBackoff: true,
-      jitter: false
+      jitter: false,
     }
     retryHandler = new RetryHandler(config)
   })
@@ -260,7 +277,11 @@ describe('RetryHandler', () => {
       const mockOperation = vi.fn().mockImplementation(() => {
         attempts++
         if (attempts <= 2) {
-          throw new RepositoryError('test', RepositoryErrorCode.NETWORK_ERROR, 'test')
+          throw new RepositoryError(
+            'test',
+            RepositoryErrorCode.NETWORK_ERROR,
+            'test'
+          )
         }
         return Promise.resolve('success')
       })
@@ -280,14 +301,14 @@ describe('RetryHandler', () => {
         baseDelayMs: 100,
         maxDelayMs: 200,
         exponentialBackoff: true,
-        jitter: false
+        jitter: false,
       }
-      
+
       const handler = new RetryHandler(config)
-      
+
       // Access private method for testing
       const calculateDelay = (handler as any).calculateDelay.bind(handler)
-      
+
       // High attempt should be capped at maxDelayMs
       const delay = calculateDelay(10)
       expect(delay).toBeLessThanOrEqual(200)
@@ -296,7 +317,8 @@ describe('RetryHandler', () => {
 
   describe('Timeout Handling', () => {
     it.skip('should timeout long-running operations', async () => {
-      const longOperation = () => new Promise(resolve => setTimeout(resolve, 15000))
+      const longOperation = () =>
+        new Promise(resolve => setTimeout(resolve, 15000))
 
       await expect(
         retryHandler.executeWithRetry(longOperation, 'longTest')
@@ -313,7 +335,7 @@ describe('CircuitBreaker', () => {
       enabled: true,
       failureThreshold: 2,
       resetTimeoutMs: 100,
-      monitoringPeriodMs: 50
+      monitoringPeriodMs: 50,
     }
     circuitBreaker = new CircuitBreaker(config)
   })
@@ -322,11 +344,15 @@ describe('CircuitBreaker', () => {
     const failingOperation = () => Promise.reject(new Error('Service down'))
 
     // First failure
-    await expect(circuitBreaker.execute(failingOperation, 'test')).rejects.toThrow()
+    await expect(
+      circuitBreaker.execute(failingOperation, 'test')
+    ).rejects.toThrow()
     expect(circuitBreaker.getState().state).toBe('closed')
 
     // Second failure - should open circuit
-    await expect(circuitBreaker.execute(failingOperation, 'test')).rejects.toThrow()
+    await expect(
+      circuitBreaker.execute(failingOperation, 'test')
+    ).rejects.toThrow()
     expect(circuitBreaker.getState().state).toBe('open')
   })
 
@@ -334,8 +360,12 @@ describe('CircuitBreaker', () => {
     const failingOperation = () => Promise.reject(new Error('Service down'))
 
     // Open circuit
-    await expect(circuitBreaker.execute(failingOperation, 'test')).rejects.toThrow()
-    await expect(circuitBreaker.execute(failingOperation, 'test')).rejects.toThrow()
+    await expect(
+      circuitBreaker.execute(failingOperation, 'test')
+    ).rejects.toThrow()
+    await expect(
+      circuitBreaker.execute(failingOperation, 'test')
+    ).rejects.toThrow()
 
     // Wait for reset timeout
     await new Promise(resolve => setTimeout(resolve, 150))
@@ -343,7 +373,7 @@ describe('CircuitBreaker', () => {
     // Should be half-open and allow next attempt
     const successOperation = () => Promise.resolve('success')
     const result = await circuitBreaker.execute(successOperation, 'test')
-    
+
     expect(result).toBe('success')
     expect(circuitBreaker.getState().state).toBe('closed')
   })
@@ -353,53 +383,71 @@ describe('CircuitBreaker', () => {
       enabled: false,
       failureThreshold: 1,
       resetTimeoutMs: 100,
-      monitoringPeriodMs: 50
+      monitoringPeriodMs: 50,
     }
-    
+
     const disabledBreaker = new CircuitBreaker(config)
     const failingOperation = () => Promise.reject(new Error('Service down'))
 
     // Should allow all operations through
-    await expect(disabledBreaker.execute(failingOperation, 'test')).rejects.toThrow('Service down')
-    await expect(disabledBreaker.execute(failingOperation, 'test')).rejects.toThrow('Service down')
-    await expect(disabledBreaker.execute(failingOperation, 'test')).rejects.toThrow('Service down')
+    await expect(
+      disabledBreaker.execute(failingOperation, 'test')
+    ).rejects.toThrow('Service down')
+    await expect(
+      disabledBreaker.execute(failingOperation, 'test')
+    ).rejects.toThrow('Service down')
+    await expect(
+      disabledBreaker.execute(failingOperation, 'test')
+    ).rejects.toThrow('Service down')
   })
 })
 
 describe('Error Factory', () => {
   it('should create typed errors with proper context', () => {
-    const notFoundError = RepositoryErrorFactory.notFound('Note', 'note-123', 'getNote')
-    
+    const notFoundError = RepositoryErrorFactory.notFound(
+      'Note',
+      'note-123',
+      'getNote'
+    )
+
     expect(notFoundError).toBeInstanceOf(NotFoundError)
     expect(notFoundError.code).toBe(RepositoryErrorCode.NOT_FOUND)
     expect(notFoundError.operation).toBe('getNote')
     expect(notFoundError.context).toEqual({
       entityId: 'note-123',
-      entityType: 'Note'
+      entityType: 'Note',
     })
   })
 
   it('should create validation errors with details', () => {
     const errors = ['Title is required', 'Content too long']
     const data = { title: '', content: 'x'.repeat(10000) }
-    
-    const validationError = RepositoryErrorFactory.validationFailed('saveNote', errors, data)
-    
+
+    const validationError = RepositoryErrorFactory.validationFailed(
+      'saveNote',
+      errors,
+      data
+    )
+
     expect(validationError).toBeInstanceOf(ValidationError)
     expect(validationError.code).toBe(RepositoryErrorCode.VALIDATION_ERROR)
     expect(validationError.context).toEqual({
       validationErrors: errors,
-      data
+      data,
     })
   })
 
   it('should create storage errors with usage info', () => {
-    const storageError = RepositoryErrorFactory.storageFull('saveNote', 1000000, 1048576)
-    
+    const storageError = RepositoryErrorFactory.storageFull(
+      'saveNote',
+      1000000,
+      1048576
+    )
+
     expect(storageError.code).toBe(RepositoryErrorCode.STORAGE_FULL)
     expect(storageError.context).toEqual({
       usedSpace: 1000000,
-      totalSpace: 1048576
+      totalSpace: 1048576,
     })
   })
 })
@@ -427,17 +475,33 @@ describe('Type Guards', () => {
 
 describe('Error Properties', () => {
   it('should correctly identify retryable errors', () => {
-    const networkError = new RepositoryError('test', RepositoryErrorCode.NETWORK_ERROR, 'test')
-    const validationError = new RepositoryError('test', RepositoryErrorCode.VALIDATION_ERROR, 'test')
-    
+    const networkError = new RepositoryError(
+      'test',
+      RepositoryErrorCode.NETWORK_ERROR,
+      'test'
+    )
+    const validationError = new RepositoryError(
+      'test',
+      RepositoryErrorCode.VALIDATION_ERROR,
+      'test'
+    )
+
     expect(networkError.isRetryable).toBe(true)
     expect(validationError.isRetryable).toBe(false)
   })
 
   it('should correctly identify critical errors', () => {
-    const encryptionError = new RepositoryError('test', RepositoryErrorCode.ENCRYPTION_ERROR, 'test')
-    const networkError = new RepositoryError('test', RepositoryErrorCode.NETWORK_ERROR, 'test')
-    
+    const encryptionError = new RepositoryError(
+      'test',
+      RepositoryErrorCode.ENCRYPTION_ERROR,
+      'test'
+    )
+    const networkError = new RepositoryError(
+      'test',
+      RepositoryErrorCode.NETWORK_ERROR,
+      'test'
+    )
+
     expect(encryptionError.isCritical).toBe(true)
     expect(networkError.isCritical).toBe(false)
   })

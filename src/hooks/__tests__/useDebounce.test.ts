@@ -18,7 +18,7 @@ describe('useDebounce', () => {
   describe('useDebounce value hook', () => {
     it('should return initial value immediately', () => {
       const { result } = renderHook(() => useDebounce('initial', 500))
-      
+
       expect(result.current).toBe('initial')
     })
 
@@ -32,7 +32,7 @@ describe('useDebounce', () => {
 
       // Change value
       rerender({ value: 'updated', delay: 500 })
-      
+
       // Value should still be initial before delay
       expect(result.current).toBe('initial')
 
@@ -53,25 +53,25 @@ describe('useDebounce', () => {
 
       // Rapid changes
       rerender({ value: 'first', delay: 500 })
-      
+
       act(() => {
         vi.advanceTimersByTime(250)
       })
-      
+
       rerender({ value: 'second', delay: 500 })
-      
+
       act(() => {
         vi.advanceTimersByTime(250)
       })
-      
+
       // Should still be initial because timer was reset
       expect(result.current).toBe('initial')
-      
+
       // Complete the delay
       act(() => {
         vi.advanceTimersByTime(250)
       })
-      
+
       // Should now be the latest value
       expect(result.current).toBe('second')
     })
@@ -83,17 +83,17 @@ describe('useDebounce', () => {
       )
 
       rerender({ value: 'updated', delay: 100 })
-      
+
       act(() => {
         vi.advanceTimersByTime(50)
       })
-      
+
       expect(result.current).toBe('initial')
-      
+
       act(() => {
         vi.advanceTimersByTime(50)
       })
-      
+
       expect(result.current).toBe('updated')
     })
 
@@ -104,11 +104,11 @@ describe('useDebounce', () => {
       )
 
       rerender({ value: 'updated', delay: 0 })
-      
+
       act(() => {
         vi.runAllTimers()
       })
-      
+
       expect(result.current).toBe('updated')
     })
 
@@ -120,28 +120,28 @@ describe('useDebounce', () => {
       )
 
       numberRerender({ value: 42, delay: 100 })
-      
+
       act(() => {
         vi.advanceTimersByTime(100)
       })
-      
+
       expect(numberResult.current).toBe(42)
 
       // Test with object
       const initialObject = { id: 1, name: 'test' }
       const updatedObject = { id: 2, name: 'updated' }
-      
+
       const { result: objectResult, rerender: objectRerender } = renderHook(
         ({ value, delay }) => useDebounce(value, delay),
         { initialProps: { value: initialObject, delay: 100 } }
       )
 
       objectRerender({ value: updatedObject, delay: 100 })
-      
+
       act(() => {
         vi.advanceTimersByTime(100)
       })
-      
+
       expect(objectResult.current).toEqual(updatedObject)
     })
 
@@ -152,11 +152,11 @@ describe('useDebounce', () => {
       )
 
       rerender({ value: ['c', 'd'], delay: 100 })
-      
+
       act(() => {
         vi.advanceTimersByTime(100)
       })
-      
+
       expect(result.current).toEqual(['c', 'd'])
     })
 
@@ -167,15 +167,15 @@ describe('useDebounce', () => {
       )
 
       rerender({ value: 'updated', delay: 500 })
-      
+
       // Unmount before timer completes
       unmount()
-      
+
       // Timer should be cleaned up, no errors should occur
       act(() => {
         vi.advanceTimersByTime(500)
       })
-      
+
       // This shouldn't throw an error
       expect(() => vi.runAllTimers()).not.toThrow()
     })
@@ -184,7 +184,9 @@ describe('useDebounce', () => {
   describe('useDebouncedCallback hook', () => {
     it('should debounce function calls', () => {
       const mockCallback = vi.fn()
-      const { result } = renderHook(() => useDebouncedCallback(mockCallback, 500))
+      const { result } = renderHook(() =>
+        useDebouncedCallback(mockCallback, 500)
+      )
 
       // Call the debounced function
       act(() => {
@@ -206,32 +208,34 @@ describe('useDebounce', () => {
 
     it('should cancel previous calls on rapid invocations', () => {
       const mockCallback = vi.fn()
-      const { result } = renderHook(() => useDebouncedCallback(mockCallback, 500))
+      const { result } = renderHook(() =>
+        useDebouncedCallback(mockCallback, 500)
+      )
 
       // Rapid calls
       act(() => {
         result.current('first')
       })
-      
+
       act(() => {
         vi.advanceTimersByTime(250)
       })
-      
+
       act(() => {
         result.current('second')
       })
-      
+
       act(() => {
         vi.advanceTimersByTime(250)
       })
-      
+
       // Should not be called yet
       expect(mockCallback).not.toHaveBeenCalled()
-      
+
       act(() => {
         vi.advanceTimersByTime(250)
       })
-      
+
       // Should only be called with the latest argument
       expect(mockCallback).toHaveBeenCalledWith('second')
       expect(mockCallback).toHaveBeenCalledTimes(1)
@@ -239,7 +243,9 @@ describe('useDebounce', () => {
 
     it('should handle multiple arguments', () => {
       const mockCallback = vi.fn()
-      const { result } = renderHook(() => useDebouncedCallback(mockCallback, 500))
+      const { result } = renderHook(() =>
+        useDebouncedCallback(mockCallback, 500)
+      )
 
       act(() => {
         result.current('arg1', 'arg2', 'arg3')
@@ -254,7 +260,9 @@ describe('useDebounce', () => {
 
     it('should handle no arguments', () => {
       const mockCallback = vi.fn()
-      const { result } = renderHook(() => useDebouncedCallback(mockCallback, 500))
+      const { result } = renderHook(() =>
+        useDebouncedCallback(mockCallback, 500)
+      )
 
       act(() => {
         result.current()
@@ -269,7 +277,9 @@ describe('useDebounce', () => {
 
     it('should handle different delay values', () => {
       const mockCallback = vi.fn()
-      const { result } = renderHook(() => useDebouncedCallback(mockCallback, 100))
+      const { result } = renderHook(() =>
+        useDebouncedCallback(mockCallback, 100)
+      )
 
       act(() => {
         result.current('test')
@@ -290,7 +300,9 @@ describe('useDebounce', () => {
 
     it('should cleanup timer on unmount', () => {
       const mockCallback = vi.fn()
-      const { result, unmount } = renderHook(() => useDebouncedCallback(mockCallback, 500))
+      const { result, unmount } = renderHook(() =>
+        useDebouncedCallback(mockCallback, 500)
+      )
 
       act(() => {
         result.current('test')
@@ -311,7 +323,7 @@ describe('useDebounce', () => {
     it('should handle callback function changes', () => {
       const mockCallback1 = vi.fn()
       const mockCallback2 = vi.fn()
-      
+
       const { result, rerender } = renderHook(
         ({ callback, delay }) => useDebouncedCallback(callback, delay),
         { initialProps: { callback: mockCallback1, delay: 500 } }
@@ -350,7 +362,9 @@ describe('useDebounce', () => {
 
     it('should preserve function context', () => {
       const mockCallback = vi.fn()
-      const { result } = renderHook(() => useDebouncedCallback(mockCallback, 500))
+      const { result } = renderHook(() =>
+        useDebouncedCallback(mockCallback, 500)
+      )
 
       // Call multiple times with different contexts
       act(() => {
@@ -374,7 +388,7 @@ describe('useDebounce', () => {
 
       // Simulate rapid typing
       const values = ['a', 'ab', 'abc', 'abcd', 'abcde']
-      
+
       values.forEach(value => {
         rerender({ value, delay: 100 })
         act(() => {
@@ -397,9 +411,13 @@ describe('useDebounce', () => {
     it('should handle concurrent debounced callbacks', () => {
       const mockCallback1 = vi.fn()
       const mockCallback2 = vi.fn()
-      
-      const { result: result1 } = renderHook(() => useDebouncedCallback(mockCallback1, 300))
-      const { result: result2 } = renderHook(() => useDebouncedCallback(mockCallback2, 500))
+
+      const { result: result1 } = renderHook(() =>
+        useDebouncedCallback(mockCallback1, 300)
+      )
+      const { result: result2 } = renderHook(() =>
+        useDebouncedCallback(mockCallback2, 500)
+      )
 
       act(() => {
         result1.current('test1')
@@ -447,7 +465,9 @@ describe('useDebounce', () => {
   describe('TypeScript type safety', () => {
     it('should maintain type safety for different value types', () => {
       // String type
-      const { result: stringResult } = renderHook(() => useDebounce('test', 100))
+      const { result: stringResult } = renderHook(() =>
+        useDebounce('test', 100)
+      )
       expect(typeof stringResult.current).toBe('string')
 
       // Number type
@@ -462,8 +482,10 @@ describe('useDebounce', () => {
 
     it('should maintain type safety for callback functions', () => {
       const stringCallback = (str: string) => str.toUpperCase()
-      const { result } = renderHook(() => useDebouncedCallback(stringCallback, 100))
-      
+      const { result } = renderHook(() =>
+        useDebouncedCallback(stringCallback, 100)
+      )
+
       // TypeScript should enforce correct argument types
       expect(typeof result.current).toBe('function')
     })

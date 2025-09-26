@@ -3,25 +3,34 @@ import { Icons } from '../../Icons'
 
 const KeyboardSettings: React.FC = () => {
   const shortcuts = [
-    { category: 'General', items: [
-      { action: 'Create New Note', keys: ['⌘', 'N'] },
-      { action: 'Search Notes', keys: ['⌘', 'K'] },
-      { action: 'Toggle Sidebar', keys: ['⌘', 'B'] },
-      { action: 'Settings', keys: ['⌘', ','] },
-    ]},
-    { category: 'Editor', items: [
-      { action: 'Bold', keys: ['⌘', 'B'] },
-      { action: 'Italic', keys: ['⌘', 'I'] },
-      { action: 'Insert Link', keys: ['⌘', 'K'] },
-      { action: 'Toggle Preview', keys: ['⌘', 'P'] },
-      { action: 'Save Note', keys: ['⌘', 'S'] },
-    ]},
-    { category: 'Navigation', items: [
-      { action: 'Next Note', keys: ['⌘', '↓'] },
-      { action: 'Previous Note', keys: ['⌘', '↑'] },
-      { action: 'Focus Editor', keys: ['⌘', 'E'] },
-      { action: 'Focus Notes List', keys: ['⌘', 'L'] },
-    ]},
+    {
+      category: 'General',
+      items: [
+        { action: 'Create New Note', keys: ['⌘', 'N'] },
+        { action: 'Search Notes', keys: ['⌘', 'K'] },
+        { action: 'Toggle Sidebar', keys: ['⌘', 'B'] },
+        { action: 'Settings', keys: ['⌘', ','] },
+      ],
+    },
+    {
+      category: 'Editor',
+      items: [
+        { action: 'Bold', keys: ['⌘', 'B'] },
+        { action: 'Italic', keys: ['⌘', 'I'] },
+        { action: 'Insert Link', keys: ['⌘', 'K'] },
+        { action: 'Toggle Preview', keys: ['⌘', 'P'] },
+        { action: 'Save Note', keys: ['⌘', 'S'] },
+      ],
+    },
+    {
+      category: 'Navigation',
+      items: [
+        { action: 'Next Note', keys: ['⌘', '↓'] },
+        { action: 'Previous Note', keys: ['⌘', '↑'] },
+        { action: 'Focus Editor', keys: ['⌘', 'E'] },
+        { action: 'Focus Notes List', keys: ['⌘', 'L'] },
+      ],
+    },
   ]
 
   return (
@@ -35,13 +44,13 @@ const KeyboardSettings: React.FC = () => {
         </p>
       </div>
 
-      {shortcuts.map((category) => (
+      {shortcuts.map(category => (
         <div key={category.category}>
           <h4 className="text-sm font-medium text-theme-text-primary mb-3">
             {category.category}
           </h4>
           <div className="space-y-2">
-            {category.items.map((shortcut) => (
+            {category.items.map(shortcut => (
               <div
                 key={shortcut.action}
                 className="flex items-center justify-between py-2 px-3 rounded hover:bg-theme-bg-secondary"

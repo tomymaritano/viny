@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { useSettingsService } from '../../../hooks/useSettingsService'
+import { useSettingsDialogs } from './useSettingsDialogs'
 
 export const useSettingsForm = (initialTab = 'general') => {
   const { settings, setSetting, resetCategory } = useSettingsService()
   const [activeTab, setActiveTab] = useState(initialTab)
+  const { showConfirmDialog, showToast, DialogComponents } =
+    useSettingsDialogs()
 
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId)
@@ -14,13 +17,16 @@ export const useSettingsForm = (initialTab = 'general') => {
   }
 
   const handleResetSettings = () => {
-    if (
-      window.confirm(
-        'Are you sure you want to reset all settings to default? This action cannot be undone.'
-      )
-    ) {
-      resetCategory()
-    }
+    showConfirmDialog(
+      'Reset Settings',
+      'Are you sure you want to reset all settings to default? This action cannot be undone.',
+      () => {
+        resetCategory()
+        showToast('Settings have been reset to default values.')
+      },
+      'destructive',
+      'Reset'
+    )
   }
 
   const handleExportSettings = () => {
@@ -41,7 +47,7 @@ export const useSettingsForm = (initialTab = 'general') => {
     if (!file) return
 
     const reader = new FileReader()
-    reader.onload = (e) => {
+    reader.onload = e => {
       try {
         const importedSettings = JSON.parse(e.target?.result as string)
 
@@ -53,13 +59,14 @@ export const useSettingsForm = (initialTab = 'general') => {
               updateSetting(key, importedSettings[key])
             }
           })
-          alert('Settings imported successfully!')
+          showToast('Settings imported successfully!')
         } else {
-          alert('Invalid settings file format.')
+          showToast('Invalid settings file format.', 'error')
         }
       } catch (error) {
-        alert(
-          "Error reading settings file. Please make sure it's a valid JSON file."
+        showToast(
+          "Error reading settings file. Please make sure it's a valid JSON file.",
+          'error'
         )
       }
     }
@@ -77,5 +84,6 @@ export const useSettingsForm = (initialTab = 'general') => {
     handleResetSettings,
     handleExportSettings,
     handleImportSettings,
+    DialogComponents,
   }
 }

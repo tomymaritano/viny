@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { Icons } from './Icons'
 import { useElectronExport } from '../hooks/useElectronExport'
 import { useSettings } from '../hooks/useSettings'
-import { Note } from '../types' // Use the proper Note type instead of local interface
+import { StandardModal } from './ui/StandardModal'
+import { RadioGroup, RadioGroupItem } from './ui/RadioGroupRadix'
+import { SwitchWithLabel } from './ui/SwitchRadix'
+import type { Note } from '../types' // Use the proper Note type instead of local interface
 
 interface ExportDialogProps {
   isVisible: boolean
@@ -30,8 +32,13 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
   selectedNotes = [],
   type = 'single',
 }) => {
-  const { exportToHTML, exportToPDF, exportToMarkdown, exportMultipleNotes, isElectron } =
-    useElectronExport()
+  const {
+    exportToHTML,
+    exportToPDF,
+    exportToMarkdown,
+    exportMultipleNotes,
+    isElectron,
+  } = useElectronExport()
   const { settings } = useSettings()
 
   const [exportFormat, setExportFormat] = useState<ExportFormat>(
@@ -81,7 +88,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
           // For multiple notes in PDF, we'll create HTML and let user print
           exportMultipleNotes(notesToExport, 'html', {
             ...options,
-            filename: customFilename || 'inkrun_notes_export',
+            filename: customFilename || 'viny_notes_export',
           })
           alert(
             "Multiple notes exported as HTML. Use your browser's print function to save as PDF."
@@ -89,7 +96,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
         } else {
           exportMultipleNotes(notesToExport, exportFormat, {
             ...options,
-            filename: customFilename || 'inkrun_notes_export',
+            filename: customFilename || 'viny_notes_export',
           })
         }
       }
@@ -97,7 +104,8 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
       onClose()
     } catch (error) {
       // Export failed - show user-friendly error
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error'
       alert(`Export failed: ${errorMessage}`)
     } finally {
       setIsExporting(false)
@@ -111,7 +119,9 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
       description: 'Print-ready document format',
       icon: <Icons.FileText size={20} />,
       note: isSingleNote
-        ? (isElectron ? 'Generates native PDF file' : 'Opens print dialog')
+        ? isElectron
+          ? 'Generates native PDF file'
+          : 'Opens print dialog'
         : 'Exports as HTML for printing',
     },
     {
@@ -135,156 +145,123 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
       const note = notesToExport[0]
       return note?.title?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'note'
     } else {
-      return 'inkrun_notes_export'
+      return 'viny_notes_export'
     }
   }
 
-  const handleFormatChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setExportFormat(e.target.value as ExportFormat)
+  const handleFormatChange = (value: string): void => {
+    setExportFormat(value as ExportFormat)
   }
 
-  const handleFilenameChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleFilenameChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ): void => {
     setCustomFilename(e.target.value)
   }
 
   return (
-    <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-      >
-        <motion.div
-          data-testid="export-dialog"
-          className="bg-theme-bg-secondary border border-theme-border-primary rounded-lg shadow-xl w-full max-w-md"
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          onClick={e => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-theme-border-primary">
-            <div>
-              <h2 className="text-lg font-semibold text-theme-text-primary">
-                Export {isSingleNote ? 'Note' : 'Notes'}
-              </h2>
-              {isSingleNote && (
-                <p className="text-xs text-theme-text-tertiary mt-0.5 truncate max-w-[200px]">
-                  {notesToExport[0]?.title}
-                </p>
-              )}
-            </div>
-            <button
-              onClick={onClose}
-              className="p-1.5 text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary rounded transition-colors"
-            >
-              <Icons.X size={16} />
-            </button>
+    <StandardModal
+      isOpen={isVisible}
+      onClose={onClose}
+      title={`Export ${isSingleNote ? 'Note' : 'Notes'}`}
+      size="md"
+      data-testid="export-dialog"
+      footer={
+        <div className="flex items-center justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="px-3 py-1.5 text-sm text-theme-text-tertiary hover:bg-theme-bg-tertiary rounded transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleExport}
+            disabled={isExporting || notesToExport.length === 0}
+            className="px-3 py-1.5 text-sm bg-theme-accent-primary text-theme-text-primary rounded hover:bg-theme-accent-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
+          >
+            {isExporting ? (
+              <>
+                <div className="w-3 h-3 border-2 border-theme-text-primary border-t-transparent rounded-full animate-spin" />
+                <span>Exporting...</span>
+              </>
+            ) : (
+              <>
+                <Icons.Download size={14} />
+                <span>Export</span>
+              </>
+            )}
+          </button>
+        </div>
+      }
+    >
+      {/* Content */}
+      <div className="p-3 space-y-3">
+        {/* Note title for single note export */}
+        {isSingleNote && (
+          <div className="mb-3 p-2 bg-theme-bg-primary rounded-lg">
+            <p className="text-xs text-theme-text-tertiary">Exporting note:</p>
+            <p className="text-sm font-medium text-theme-text-primary truncate">
+              {notesToExport[0]?.title}
+            </p>
           </div>
+        )}
 
-          {/* Content */}
-          <div className="p-3 space-y-3">
-            {/* Format Selection */}
-            <div>
-              <label className="block text-sm font-medium text-theme-text-secondary mb-1.5">
-                Format
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {formatOptions.map(format => (
-                  <label
-                    key={format.value}
-                    className={`flex flex-col items-center p-2.5 border rounded-lg cursor-pointer transition-colors ${
-                      exportFormat === format.value
-                        ? 'border-theme-accent-primary bg-theme-accent-primary/10'
-                        : 'border-theme-border-primary hover:border-theme-text-tertiary'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="exportFormat"
-                      value={format.value}
-                      checked={exportFormat === format.value}
-                      onChange={handleFormatChange}
-                      className="sr-only"
-                    />
-                    <div
-                      className={`mb-1.5 ${exportFormat === format.value ? 'text-theme-accent-primary' : 'text-theme-text-tertiary'}`}
-                    >
-                      {format.icon}
-                    </div>
-                    <div
-                      className={`text-xs font-medium text-center ${exportFormat === format.value ? 'text-theme-accent-primary' : 'text-theme-text-secondary'}`}
-                    >
-                      {format.label}
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Options */}
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-theme-text-secondary">Include Metadata</span>
-                <button
-                  onClick={() => setIncludeMetadata(!includeMetadata)}
-                  className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${
-                    includeMetadata
-                      ? 'bg-theme-accent-primary'
-                      : 'bg-theme-bg-tertiary'
-                  }`}
+        {/* Format Selection */}
+        <div>
+          <label className="block text-sm font-medium text-theme-text-secondary mb-1.5">
+            Format
+          </label>
+          <RadioGroup
+            value={exportFormat}
+            onValueChange={handleFormatChange}
+            className="grid grid-cols-3 gap-2"
+          >
+            {formatOptions.map(format => (
+              <label
+                key={format.value}
+                className={`flex flex-col items-center p-2.5 border rounded-lg cursor-pointer transition-colors ${
+                  exportFormat === format.value
+                    ? 'border-theme-accent-primary bg-theme-accent-primary/10'
+                    : 'border-theme-border-primary hover:border-theme-text-tertiary'
+                }`}
+              >
+                <RadioGroupItem value={format.value} className="sr-only" />
+                <div
+                  className={`mb-1.5 ${exportFormat === format.value ? 'text-theme-accent-primary' : 'text-theme-text-tertiary'}`}
                 >
-                  <span
-                    className={`inline-block h-2.5 w-2.5 transform rounded-full bg-white transition-transform ${
-                      includeMetadata ? 'translate-x-4' : 'translate-x-0.5'
-                    }`}
-                  />
-                </button>
-              </div>
+                  {format.icon}
+                </div>
+                <div
+                  className={`text-xs font-medium text-center ${exportFormat === format.value ? 'text-theme-accent-primary' : 'text-theme-text-secondary'}`}
+                >
+                  {format.label}
+                </div>
+              </label>
+            ))}
+          </RadioGroup>
+        </div>
 
-              <div>
-                <input
-                  type="text"
-                  value={customFilename}
-                  onChange={handleFilenameChange}
-                  placeholder={`Filename (default: ${generateDefaultFilename()})`}
-                  className="w-full px-2.5 py-1.5 text-sm bg-theme-bg-primary border border-theme-border-primary rounded text-theme-text-secondary focus:border-theme-accent-primary focus:outline-none"
-                />
-              </div>
-            </div>
-          </div>
+        {/* Options */}
+        <div className="space-y-2.5">
+          <SwitchWithLabel
+            checked={includeMetadata}
+            onCheckedChange={setIncludeMetadata}
+            label="Include Metadata"
+            size="sm"
+          />
 
-          {/* Footer */}
-          <div className="flex items-center justify-end gap-2 p-3 border-t border-theme-border-primary">
-            <button
-              onClick={onClose}
-              className="px-3 py-1.5 text-sm text-theme-text-tertiary hover:bg-theme-bg-tertiary rounded transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleExport}
-              disabled={isExporting || notesToExport.length === 0}
-              className="px-3 py-1.5 text-sm bg-theme-accent-primary text-theme-text-primary rounded hover:bg-theme-accent-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
-            >
-              {isExporting ? (
-                <>
-                  <div className="w-3 h-3 border-2 border-theme-text-primary border-t-transparent rounded-full animate-spin" />
-                  <span>Exporting...</span>
-                </>
-              ) : (
-                <>
-                  <Icons.Download size={14} />
-                  <span>Export</span>
-                </>
-              )}
-            </button>
+          <div>
+            <input
+              type="text"
+              value={customFilename}
+              onChange={handleFilenameChange}
+              placeholder={`Filename (default: ${generateDefaultFilename()})`}
+              className="w-full px-2.5 py-1.5 text-sm bg-theme-bg-primary border border-theme-border-primary rounded text-theme-text-secondary focus:border-theme-accent-primary focus:outline-none"
+            />
           </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+        </div>
+      </div>
+    </StandardModal>
   )
 }
 

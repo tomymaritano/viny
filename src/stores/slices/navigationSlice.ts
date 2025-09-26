@@ -1,4 +1,4 @@
-import { StateCreator } from 'zustand'
+import type { StateCreator } from 'zustand'
 
 export interface NavigationSlice {
   // Navigation state
@@ -17,29 +17,32 @@ export interface NavigationSlice {
   collapseAllSections: () => void
 }
 
-export const createNavigationSlice: StateCreator<NavigationSlice> = (set) => ({
+export const createNavigationSlice: StateCreator<NavigationSlice> = set => ({
   // Initial state
   activeSection: 'all-notes',
   expandedSections: {
     notebooks: true,
     status: false,
-    tags: false
+    tags: false,
   },
 
   // Actions
-  setActiveSection: (activeSection) => set({ activeSection }),
-  
+  setActiveSection: activeSection => set({ activeSection }),
+
   setExpandedSection: (section, expanded) =>
-    set((state) => ({
-      expandedSections: { ...state.expandedSections, [section]: expanded }
+    set(state => ({
+      expandedSections: { ...state.expandedSections, [section]: expanded },
     })),
 
-  toggleExpandedSection: (section) =>
-    set((state) => ({
-      expandedSections: { 
-        ...state.expandedSections, 
-        [section]: !state.expandedSections[section as keyof typeof state.expandedSections]
-      }
+  toggleExpandedSection: section =>
+    set(state => ({
+      expandedSections: {
+        ...state.expandedSections,
+        [section]:
+          !state.expandedSections[
+            section as keyof typeof state.expandedSections
+          ],
+      },
     })),
 
   expandAllSections: () =>
@@ -47,8 +50,8 @@ export const createNavigationSlice: StateCreator<NavigationSlice> = (set) => ({
       expandedSections: {
         notebooks: true,
         status: true,
-        tags: true
-      }
+        tags: true,
+      },
     }),
 
   collapseAllSections: () =>
@@ -56,7 +59,7 @@ export const createNavigationSlice: StateCreator<NavigationSlice> = (set) => ({
       expandedSections: {
         notebooks: false,
         status: false,
-        tags: false
-      }
-    })
+        tags: false,
+      },
+    }),
 })

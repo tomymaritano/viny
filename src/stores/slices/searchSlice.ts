@@ -1,4 +1,4 @@
-import { StateCreator } from 'zustand'
+import type { StateCreator } from 'zustand'
 
 export interface SearchSlice {
   // Search state
@@ -18,7 +18,7 @@ export interface SearchSlice {
   clearSearch: () => void
 }
 
-export const createSearchSlice: StateCreator<SearchSlice> = (set) => ({
+export const createSearchSlice: StateCreator<SearchSlice> = set => ({
   // Initial state
   searchQuery: '',
   filterTags: [],
@@ -26,39 +26,42 @@ export const createSearchSlice: StateCreator<SearchSlice> = (set) => ({
   maxHistoryItems: 10,
 
   // Actions
-  setSearchQuery: (searchQuery) => set({ searchQuery }),
-  setFilterTags: (filterTags) => set({ filterTags }),
+  setSearchQuery: searchQuery => set({ searchQuery }),
+  setFilterTags: filterTags => set({ filterTags }),
 
-  addTagToFilter: (tag) =>
-    set((state) => ({
-      filterTags: state.filterTags.includes(tag) 
-        ? state.filterTags 
-        : [...state.filterTags, tag]
+  addTagToFilter: tag =>
+    set(state => ({
+      filterTags: state.filterTags.includes(tag)
+        ? state.filterTags
+        : [...state.filterTags, tag],
     })),
 
-  removeTagFromFilter: (tag) =>
-    set((state) => ({
-      filterTags: state.filterTags.filter(t => t !== tag)
+  removeTagFromFilter: tag =>
+    set(state => ({
+      filterTags: state.filterTags.filter(t => t !== tag),
     })),
 
   clearFilterTags: () => set({ filterTags: [] }),
 
-  addToSearchHistory: (query) =>
-    set((state) => {
+  addToSearchHistory: query =>
+    set(state => {
       if (!query.trim() || state.searchHistory.includes(query)) {
         return state
       }
-      
-      const newHistory = [query, ...state.searchHistory.filter(h => h !== query)]
-        .slice(0, state.maxHistoryItems)
-      
+
+      const newHistory = [
+        query,
+        ...state.searchHistory.filter(h => h !== query),
+      ].slice(0, state.maxHistoryItems)
+
       return { searchHistory: newHistory }
     }),
 
   clearSearchHistory: () => set({ searchHistory: [] }),
 
-  clearSearch: () => set({ 
-    searchQuery: '', 
-    filterTags: [] 
-  })
+  clearSearch: () =>
+    set({
+      searchQuery: '',
+      filterTags: [],
+    }),
 })

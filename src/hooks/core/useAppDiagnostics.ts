@@ -11,14 +11,16 @@ export const useAppDiagnostics = () => {
   useEffect(() => {
     const runDiagnostics = async () => {
       if (process.env.NODE_ENV !== 'development') return
-      
+
       try {
         logger.debug('Running storage diagnostics...')
-        const { diagnoseSaveIssues, checkStorageAvailability } = await import('../../lib/storageUtils')
-        
+        const { diagnoseSaveIssues, checkStorageAvailability } = await import(
+          '../../lib/storageUtils'
+        )
+
         const storageInfo = checkStorageAvailability()
         logger.debug('Storage availability:', storageInfo)
-        
+
         const issues = await diagnoseSaveIssues()
         if (issues.length > 0) {
           logger.warn('Storage issues detected:', issues)
@@ -30,7 +32,7 @@ export const useAppDiagnostics = () => {
         logger.error('Failed to run diagnostics:', error)
       }
     }
-    
+
     runDiagnostics()
   }, [])
 

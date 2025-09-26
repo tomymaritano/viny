@@ -1,5 +1,23 @@
 /* Theme Variables and Base Styles */
 
+/* Slash Commands Menu Styles */
+.slash-command-menu {
+  /* Uses CSS variables from theme */
+  background: var(--color-bg-secondary) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.slash-command-item:hover {
+  background: var(--color-bg-hover) !important;
+}
+
+/* Electron-specific styles */
+body.electron {
+  /* Add padding for window controls */
+  --electron-titlebar-height: 30px;
+}
+
 /* CSS Variables for theme support */
 :root {
   /* Default to dark theme - Inkdrop-inspired */
@@ -21,6 +39,41 @@
   --color-red: #ff4d4f;
   --color-magenta: #eb2f96;
   --color-violet: #b794f4; /* Lighter violet for better visibility in dark theme */
+
+  /* RGB VALUES - Critical for glassmorphism and transparency */
+  --color-base03-rgb: 26, 26, 26;
+  --color-base02-rgb: 42, 42, 42;
+  --color-base01-rgb: 58, 58, 58;
+  --color-base00-rgb: 74, 74, 74;
+  --color-base0-rgb: 102, 102, 102;
+  --color-base1-rgb: 136, 136, 136;
+  --color-base2-rgb: 204, 204, 204;
+  --color-base3-rgb: 224, 224, 224;
+  --color-base4-rgb: 240, 240, 240;
+  --color-base5-rgb: 255, 255, 255;
+  --color-blue-rgb: 93, 173, 226;
+  --color-cyan-rgb: 72, 201, 176;
+  --color-green-rgb: 82, 196, 26;
+  --color-yellow-rgb: 250, 219, 20;
+  --color-orange-rgb: 250, 140, 22;
+  --color-red-rgb: 255, 77, 79;
+  --color-magenta-rgb: 235, 47, 150;
+  --color-violet-rgb: 183, 148, 244;
+
+  /* THEME MAPPED RGB VALUES */
+  --theme-bg-primary-rgb: var(--color-base03-rgb);
+  --theme-bg-secondary-rgb: var(--color-base02-rgb);
+  --theme-bg-tertiary-rgb: var(--color-base01-rgb);
+  --theme-bg-quaternary-rgb: var(--color-base00-rgb);
+  --theme-text-primary-rgb: var(--color-base5-rgb);
+  --theme-text-secondary-rgb: var(--color-base3-rgb);
+  --theme-text-tertiary-rgb: var(--color-base1-rgb);
+  --theme-text-muted-rgb: var(--color-base0-rgb);
+  --theme-accent-primary-rgb: var(--color-blue-rgb);
+  --theme-accent-secondary-rgb: var(--color-cyan-rgb);
+  --theme-accent-cyan-rgb: var(--color-cyan-rgb);
+  --theme-border-primary-rgb: var(--color-base01-rgb);
+  --theme-border-secondary-rgb: var(--color-base00-rgb);
 
   /* Modern sidebar color */
   --color-sidebar: #221f21;
@@ -62,6 +115,40 @@
   --color-orange: #ea580c;
   --color-red: #dc2626;
   --color-magenta: #c026d3;
+
+  /* RGB VALUES - Light theme */
+  --color-base03-rgb: 255, 255, 255;
+  --color-base02-rgb: 248, 249, 250;
+  --color-base01-rgb: 233, 236, 239;
+  --color-base00-rgb: 222, 226, 230;
+  --color-base0-rgb: 108, 117, 125;
+  --color-base1-rgb: 73, 80, 87;
+  --color-base2-rgb: 52, 58, 64;
+  --color-base3-rgb: 33, 37, 41;
+  --color-base4-rgb: 17, 17, 17;
+  --color-base5-rgb: 0, 0, 0;
+  --color-blue-rgb: 0, 102, 204;
+  --color-cyan-rgb: 8, 145, 178;
+  --color-green-rgb: 5, 150, 105;
+  --color-yellow-rgb: 217, 119, 6;
+  --color-orange-rgb: 234, 88, 12;
+  --color-red-rgb: 220, 38, 38;
+  --color-magenta-rgb: 192, 38, 211;
+
+  /* THEME MAPPED RGB VALUES - Light theme */
+  --theme-bg-primary-rgb: var(--color-base03-rgb);
+  --theme-bg-secondary-rgb: var(--color-base02-rgb);
+  --theme-bg-tertiary-rgb: var(--color-base01-rgb);
+  --theme-bg-quaternary-rgb: var(--color-base00-rgb);
+  --theme-text-primary-rgb: var(--color-base5-rgb);
+  --theme-text-secondary-rgb: var(--color-base3-rgb);
+  --theme-text-tertiary-rgb: var(--color-base1-rgb);
+  --theme-text-muted-rgb: var(--color-base0-rgb);
+  --theme-accent-primary-rgb: var(--color-blue-rgb);
+  --theme-accent-secondary-rgb: var(--color-cyan-rgb);
+  --theme-accent-cyan-rgb: var(--color-cyan-rgb);
+  --theme-border-primary-rgb: var(--color-base01-rgb);
+  --theme-border-secondary-rgb: var(--color-base00-rgb);
   --color-violet: #7c3aed;
 
   /* Modern sidebar color for light theme */
@@ -137,4 +224,176 @@
   --color-active-bg: #252525;
   --color-active-border: #4a90e2; /* Professional blue accent */
   --color-active-text: #f0f0f0;
+}
+
+/* Modern sidebar styles */
+.sidebar-container {
+  background-color: var(--color-base03);
+}
+
+/* Breadcrumb dropdown shadow */
+.breadcrumb-dropdown {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Animation Classes for Smooth Transitions */
+@keyframes animate-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-left-1 {
+  from {
+    opacity: 0;
+    transform: translateX(-0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-from-left-2 {
+  from {
+    opacity: 0;
+    transform: translateX(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-from-top-1 {
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: animate-in 0.3s ease-out;
+}
+
+.fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.slide-in-from-left-1 {
+  animation: slide-in-from-left-1 0.3s ease-out;
+}
+
+.slide-in-from-left-2 {
+  animation: slide-in-from-left-2 0.3s ease-out;
+}
+
+.slide-in-from-top-1 {
+  animation: slide-in-from-top-1 0.2s ease-out;
+}
+
+/* Utility classes for delayed animations */
+.delay-75 {
+  animation-delay: 75ms;
+}
+
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-150 {
+  animation-delay: 150ms;
+}
+
+/* Ripple effect for buttons */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: scale(0);
+  animation: ripple-effect 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes ripple-effect {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Smooth height transitions for collapsible elements */
+.transition-height {
+  transition:
+    height 0.3s ease-out,
+    opacity 0.3s ease-out;
+}
+
+/* Focus ring animations */
+.focus-ring-animated {
+  transition: box-shadow 0.2s ease-out;
+}
+
+.focus-ring-animated:focus {
+  box-shadow: 0 0 0 3px rgba(93, 173, 226, 0.3);
+}
+
+/* Breadcrumb specific animations */
+@keyframes breadcrumb-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes breadcrumb-fade-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Breadcrumb text transitions */
+.breadcrumb-text-transition {
+  transition:
+    opacity 0.3s ease-out,
+    transform 0.3s ease-out;
+}
+
+.breadcrumb-text-enter {
+  opacity: 0;
+  transform: translateY(0.25rem);
+}
+
+.breadcrumb-text-active {
+  opacity: 1;
+  transform: translateY(0);
 }

@@ -15,7 +15,7 @@ describe('useAutoSave', () => {
     updatedAt: new Date().toISOString(),
     tags: [],
     notebook: 'default',
-    status: 'none'
+    status: 'none',
   }
 
   let mockOnSave: ReturnType<typeof vi.fn>
@@ -40,7 +40,7 @@ describe('useAutoSave', () => {
       useAutoSave({
         onSave: mockOnSave,
         debounceMs: 1000,
-        enabled: true
+        enabled: true,
       })
     )
 
@@ -68,7 +68,7 @@ describe('useAutoSave', () => {
       useAutoSave({
         onSave: mockOnSave,
         debounceMs: 1000,
-        enabled: true
+        enabled: true,
       })
     )
 
@@ -87,7 +87,10 @@ describe('useAutoSave', () => {
     // Should only save once with the latest note
     await vi.waitFor(() => {
       expect(mockOnSave).toHaveBeenCalledTimes(1)
-      expect(mockOnSave).toHaveBeenCalledWith({ ...mockNote, title: 'Updated 2' })
+      expect(mockOnSave).toHaveBeenCalledWith({
+        ...mockNote,
+        title: 'Updated 2',
+      })
     })
   })
 
@@ -97,7 +100,7 @@ describe('useAutoSave', () => {
         onSave: mockOnSave,
         debounceMs: 1000,
         enabled: true,
-        immediate: true
+        immediate: true,
       })
     )
 
@@ -116,7 +119,7 @@ describe('useAutoSave', () => {
       useAutoSave({
         onSave: mockOnSave,
         debounceMs: 1000,
-        enabled: false
+        enabled: false,
       })
     )
 
@@ -139,7 +142,7 @@ describe('useAutoSave', () => {
         enabled: true,
         onSaveStart: mockOnSaveStart,
         onSaveComplete: mockOnSaveComplete,
-        onSaveError: mockOnSaveError
+        onSaveError: mockOnSaveError,
       })
     )
 
@@ -169,7 +172,7 @@ describe('useAutoSave', () => {
         enabled: true,
         onSaveStart: mockOnSaveStart,
         onSaveComplete: mockOnSaveComplete,
-        onSaveError: mockOnSaveError
+        onSaveError: mockOnSaveError,
       })
     )
 
@@ -190,7 +193,7 @@ describe('useAutoSave', () => {
 
   it('should provide saving state', async () => {
     let resolveSave: (value: void) => void
-    const pendingSave = new Promise<void>((resolve) => {
+    const pendingSave = new Promise<void>(resolve => {
       resolveSave = resolve
     })
     mockOnSave.mockReturnValue(pendingSave)
@@ -199,7 +202,7 @@ describe('useAutoSave', () => {
       useAutoSave({
         onSave: mockOnSave,
         debounceMs: 100,
-        enabled: true
+        enabled: true,
       })
     )
 
@@ -235,7 +238,7 @@ describe('useAutoSave', () => {
       useAutoSave({
         onSave: mockOnSave,
         debounceMs: 1000,
-        enabled: true
+        enabled: true,
       })
     )
 
@@ -259,7 +262,7 @@ describe('useAutoSave', () => {
       useAutoSave({
         onSave: mockOnSave,
         debounceMs: 1000,
-        enabled: true
+        enabled: true,
       })
     )
 
@@ -292,7 +295,7 @@ describe('useAutoSave', () => {
       useAutoSave({
         onSave: mockOnSave,
         debounceMs: 1000,
-        enabled: true
+        enabled: true,
       })
     )
 
@@ -321,7 +324,7 @@ describe('useAutoSave', () => {
       useAutoSave({
         onSave: mockOnSave,
         debounceMs: 100,
-        enabled: true
+        enabled: true,
       })
     )
 
@@ -344,8 +347,11 @@ describe('useAutoSave', () => {
     })
 
     // Should handle concurrent saves appropriately
-    await vi.waitFor(() => {
-      expect(saveCount).toBeGreaterThan(0)
-    }, { timeout: 2000 })
+    await vi.waitFor(
+      () => {
+        expect(saveCount).toBeGreaterThan(0)
+      },
+      { timeout: 2000 }
+    )
   })
 })

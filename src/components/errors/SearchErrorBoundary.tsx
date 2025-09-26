@@ -1,6 +1,7 @@
 import React from 'react'
 import { Icons } from '../Icons'
 import { logSearchError } from '../../services/errorLogger'
+import { searchLogger } from '../../utils/logger'
 
 interface SearchErrorBoundaryProps {
   children: React.ReactNode
@@ -16,7 +17,10 @@ interface SearchErrorBoundaryState {
   error: Error | null
 }
 
-class SearchErrorBoundary extends React.Component<SearchErrorBoundaryProps, SearchErrorBoundaryState> {
+class SearchErrorBoundary extends React.Component<
+  SearchErrorBoundaryProps,
+  SearchErrorBoundaryState
+> {
   constructor(props: SearchErrorBoundaryProps) {
     super(props)
     this.state = {
@@ -25,12 +29,14 @@ class SearchErrorBoundary extends React.Component<SearchErrorBoundaryProps, Sear
     }
   }
 
-  static getDerivedStateFromError(error: Error): Partial<SearchErrorBoundaryState> {
+  static getDerivedStateFromError(
+    error: Error
+  ): Partial<SearchErrorBoundaryState> {
     return { hasError: true }
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Search Error:', error, errorInfo)
+    searchLogger.error('Search Error:', error, errorInfo)
 
     this.setState({
       error: error,
@@ -40,7 +46,7 @@ class SearchErrorBoundary extends React.Component<SearchErrorBoundaryProps, Sear
     logSearchError('unknown_query', error, {
       fallbackMessage: this.props.fallbackMessage,
       showDetails: this.props.showDetails,
-      componentStack: errorInfo.componentStack
+      componentStack: errorInfo.componentStack,
     })
 
     if (this.props.onError) {

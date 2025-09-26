@@ -16,25 +16,25 @@ export enum RepositoryErrorCode {
   STORAGE_NOT_AVAILABLE = 'STORAGE_NOT_AVAILABLE',
   STORAGE_FULL = 'STORAGE_FULL',
   STORAGE_CORRUPT = 'STORAGE_CORRUPT',
-  
+
   // Data errors
   NOT_FOUND = 'NOT_FOUND',
   VALIDATION_ERROR = 'VALIDATION_ERROR',
   CONFLICT_ERROR = 'CONFLICT_ERROR',
   SCHEMA_ERROR = 'SCHEMA_ERROR',
-  
+
   // Network/sync errors
   NETWORK_ERROR = 'NETWORK_ERROR',
   SYNC_ERROR = 'SYNC_ERROR',
   TIMEOUT_ERROR = 'TIMEOUT_ERROR',
-  
+
   // Security errors
   PERMISSION_DENIED = 'PERMISSION_DENIED',
   ENCRYPTION_ERROR = 'ENCRYPTION_ERROR',
-  
+
   // System errors
   INITIALIZATION_ERROR = 'INITIALIZATION_ERROR',
-  UNKNOWN_ERROR = 'UNKNOWN_ERROR'
+  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
 }
 
 export class RepositoryError extends Error {
@@ -47,7 +47,7 @@ export class RepositoryError extends Error {
   ) {
     super(message)
     this.name = 'RepositoryError'
-    
+
     // Preserve stack trace
     if (cause?.stack) {
       this.stack = `${this.stack}\nCaused by: ${cause.stack}`
@@ -62,7 +62,7 @@ export class RepositoryError extends Error {
       RepositoryErrorCode.NETWORK_ERROR,
       RepositoryErrorCode.TIMEOUT_ERROR,
       RepositoryErrorCode.STORAGE_FULL,
-      RepositoryErrorCode.CONFLICT_ERROR
+      RepositoryErrorCode.CONFLICT_ERROR,
     ].includes(this.code)
   }
 
@@ -72,7 +72,7 @@ export class RepositoryError extends Error {
   get isCritical(): boolean {
     return [
       RepositoryErrorCode.ENCRYPTION_ERROR,
-      RepositoryErrorCode.PERMISSION_DENIED
+      RepositoryErrorCode.PERMISSION_DENIED,
     ].includes(this.code)
   }
 }
@@ -129,12 +129,12 @@ export interface RepositoryMetrics {
   averageResponseTime: number
   p95ResponseTime: number
   errorRate: number
-  
+
   // Storage metrics
   totalStorageUsed: number
   availableStorage: number
   cacheHitRate: number
-  
+
   // Health metrics
   lastOperation: number
   isHealthy: boolean
@@ -200,55 +200,55 @@ export const STORAGE_KEY_MAPPINGS: StorageKeyMapping = {
   // Settings & Configuration
   'viny-settings': {
     repositoryMethod: 'getSettings',
-    priority: 'high'
+    priority: 'high',
   },
-  'language': {
+  language: {
     repositoryMethod: 'getUIState',
-    transform: (value) => ({ language: value }),
-    priority: 'medium'
+    transform: value => ({ language: value }),
+    priority: 'medium',
   },
-  'theme': {
+  theme: {
     repositoryMethod: 'getUIState',
-    transform: (value) => ({ theme: value }),
-    priority: 'medium'
+    transform: value => ({ theme: value }),
+    priority: 'medium',
   },
   'viny-initialized': {
     repositoryMethod: 'getSettings',
-    transform: (value) => ({ initialized: value === 'true' }),
-    priority: 'low'
+    transform: value => ({ initialized: value === 'true' }),
+    priority: 'low',
   },
-  
+
   // Plugin System
-  'viny_security_config': {
+  viny_security_config: {
     repositoryMethod: 'getPluginData',
-    priority: 'high'
+    priority: 'high',
   },
-  
+
   // UI State
   'inkrun-sidebar-width': {
     repositoryMethod: 'getUIState',
-    transform: (value) => ({ sidebarWidth: parseInt(value) }),
-    validate: (value) => !isNaN(parseInt(value)),
-    priority: 'low'
+    transform: value => ({ sidebarWidth: parseInt(value) }),
+    validate: value => !isNaN(parseInt(value)),
+    priority: 'low',
   },
   'inkrun-noteslist-width': {
     repositoryMethod: 'getUIState',
-    transform: (value) => ({ notesListWidth: parseInt(value) }),
-    validate: (value) => !isNaN(parseInt(value)),
-    priority: 'low'
+    transform: value => ({ notesListWidth: parseInt(value) }),
+    validate: value => !isNaN(parseInt(value)),
+    priority: 'low',
   },
   'viny-split-ratio': {
     repositoryMethod: 'getUIState',
-    transform: (value) => ({ splitRatio: parseFloat(value) }),
-    validate: (value) => !isNaN(parseFloat(value)),
-    priority: 'low'
+    transform: value => ({ splitRatio: parseFloat(value) }),
+    validate: value => !isNaN(parseFloat(value)),
+    priority: 'low',
   },
-  
+
   // Content & Media
   'viny-images': {
     repositoryMethod: 'getContentData',
-    transform: (value) => JSON.parse(value),
-    validate: (value) => {
+    transform: value => JSON.parse(value),
+    validate: value => {
       try {
         JSON.parse(value)
         return true
@@ -256,30 +256,30 @@ export const STORAGE_KEY_MAPPINGS: StorageKeyMapping = {
         return false
       }
     },
-    priority: 'medium'
+    priority: 'medium',
   },
-  
+
   // Search & Analytics
-  'viny_search_history': {
+  viny_search_history: {
     repositoryMethod: 'getAnalyticsData',
-    transform: (value) => JSON.parse(value),
-    priority: 'low'
+    transform: value => JSON.parse(value),
+    priority: 'low',
   },
-  'viny_analytics': {
+  viny_analytics: {
     repositoryMethod: 'getAnalyticsData',
-    priority: 'low'
+    priority: 'low',
   },
-  'viny_telemetry': {
+  viny_telemetry: {
     repositoryMethod: 'getAnalyticsData',
-    priority: 'low'
+    priority: 'low',
   },
-  
+
   // Error Handling
-  'viny_error_reports': {
+  viny_error_reports: {
     repositoryMethod: 'getErrorData',
-    transform: (value) => JSON.parse(value),
-    priority: 'low'
-  }
+    transform: value => JSON.parse(value),
+    priority: 'low',
+  },
 }
 
 // =============================================================================
@@ -358,7 +358,9 @@ export interface RepositoryEvent<T = any> {
   source: string
 }
 
-export type RepositoryEventHandler<T = any> = (event: RepositoryEvent<T>) => void
+export type RepositoryEventHandler<T = any> = (
+  event: RepositoryEvent<T>
+) => void
 
 export interface SubscriptionOptions {
   entityTypes?: string[]

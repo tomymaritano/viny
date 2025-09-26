@@ -16,69 +16,74 @@ interface MainSectionsProps {
   onTrashRightClick?: (e: React.MouseEvent) => void
 }
 
-const MainSections: React.FC<MainSectionsProps> = memo(({
-  sections,
-  activeSection,
-  onSectionClick,
-  onTrashRightClick
-}) => {
-  const renderIcon = (iconName: string, size = 16) => {
-    const IconComponent = Icons[iconName as keyof typeof Icons] as any
-    return IconComponent ? <IconComponent size={size} /> : null
-  }
+const MainSections: React.FC<MainSectionsProps> = memo(
+  ({ sections, activeSection, onSectionClick, onTrashRightClick }) => {
+    const renderIcon = (iconName: string, size = 16) => {
+      const IconComponent = Icons[iconName as keyof typeof Icons] as any
+      return IconComponent ? <IconComponent size={size} /> : null
+    }
 
-  return (
-    <>
-      {sections?.map((section) => {
-        const isActive = activeSection === section.id
+    return (
+      <>
+        {sections?.map(section => {
+          const isActive = activeSection === section.id
 
-        return (
-          <button
-            key={section.id}
-            className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left transition-all duration-200 ${
-              isActive
-                ? 'text-theme-text-primary relative'
-                : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary'
-            }`}
-            style={isActive ? {
-              backgroundColor: 'var(--color-active-bg)',
-              boxShadow: 'inset 3px 0 0 var(--color-active-border)'
-            } : {}}
-            onClick={() => onSectionClick(section.id)}
-            onContextMenu={(e) => {
-              if (window.electronAPI?.isElectron && section.id === 'trash') {
-                e.preventDefault()
-                window.electronAPI.showContextMenu('trash')
-              } else if (section.onRightClick) {
-                section.onRightClick(e)
-              } else if (section.id === 'trash' && onTrashRightClick) {
-                onTrashRightClick(e)
+          return (
+            <button
+              key={section.id}
+              className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left transition-all duration-200 ${
+                isActive
+                  ? 'text-theme-text-primary relative'
+                  : 'text-theme-text-tertiary hover:text-theme-text-secondary hover:bg-theme-bg-tertiary'
+              }`}
+              style={
+                isActive
+                  ? {
+                      backgroundColor: 'var(--color-active-bg)',
+                      boxShadow: 'inset 3px 0 0 var(--color-active-border)',
+                    }
+                  : {}
               }
-            }}
-          >
-            <div className="flex items-center space-x-3">
-              <div className={`w-4 h-4 flex-shrink-0 ${
-                isActive ? 'text-theme-accent-primary' : 'text-theme-text-muted'
-              }`}>
-                {renderIcon(section.icon)}
+              onClick={() => onSectionClick(section.id)}
+              onContextMenu={e => {
+                if (window.electronAPI?.isElectron && section.id === 'trash') {
+                  e.preventDefault()
+                  window.electronAPI.showContextMenu('trash')
+                } else if (section.onRightClick) {
+                  section.onRightClick(e)
+                } else if (section.id === 'trash' && onTrashRightClick) {
+                  onTrashRightClick(e)
+                }
+              }}
+            >
+              <div className="flex items-center space-x-3">
+                <div
+                  className={`w-4 h-4 flex-shrink-0 ${
+                    isActive
+                      ? 'text-theme-accent-primary'
+                      : 'text-theme-text-muted'
+                  }`}
+                >
+                  {renderIcon(section.icon)}
+                </div>
+                <span className="text-sm">{section.label}</span>
               </div>
-              <span className="text-sm">{section.label}</span>
-            </div>
-            
-            {section.count !== undefined && section.count > 0 && (
-              <span 
-                className="text-xs px-1.5 py-0.5 bg-theme-accent-primary/20 text-theme-accent-primary rounded-full min-w-[20px] text-center"
-                title={`${section.count} items`}
-              >
-                {section.count}
-              </span>
-            )}
-          </button>
-        )
-      })}
-    </>
-  )
-})
+
+              {section.count !== undefined && section.count > 0 && (
+                <span
+                  className="text-xs px-1.5 py-0.5 bg-theme-accent-primary/20 text-theme-accent-primary rounded-full min-w-[20px] text-center"
+                  title={`${section.count} items`}
+                >
+                  {section.count}
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </>
+    )
+  }
+)
 
 MainSections.displayName = 'MainSections'
 

@@ -5,13 +5,14 @@
 
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { DocumentRepository } from '../DocumentRepository'
-import { Note, Notebook } from '../../../types'
-import { RepositoryErrorCode, RetryConfig } from '../types/RepositoryTypes'
-import { 
+import type { Note, Notebook } from '../../../types'
+import type { RetryConfig } from '../types/RepositoryTypes'
+import { RepositoryErrorCode } from '../types/RepositoryTypes'
+import {
   StorageNotAvailableError,
   ConflictError,
   NotFoundError,
-  RepositoryErrorFactory 
+  RepositoryErrorFactory,
 } from '../errors/RepositoryErrorHandler'
 
 // Mock PouchDB
@@ -24,8 +25,8 @@ vi.mock('pouchdb', () => {
       remove: vi.fn(),
       bulkDocs: vi.fn(),
       createIndex: vi.fn(),
-      destroy: vi.fn()
-    }))
+      destroy: vi.fn(),
+    })),
   }
 })
 
@@ -38,8 +39,8 @@ const mockElectronAPI = {
     saveNote: vi.fn(),
     deleteNote: vi.fn(),
     loadNotebooks: vi.fn(),
-    saveNotebooks: vi.fn()
-  }
+    saveNotebooks: vi.fn(),
+  },
 }
 
 describe('DocumentRepository', () => {
@@ -53,7 +54,7 @@ describe('DocumentRepository', () => {
     type: 'note',
     createdAt: '2023-01-01T00:00:00Z',
     updatedAt: '2023-01-01T00:00:00Z',
-    notebook: 'default'
+    notebook: 'default',
   }
 
   const sampleNotebook: Notebook = {
@@ -61,24 +62,24 @@ describe('DocumentRepository', () => {
     name: 'Test Notebook',
     type: 'notebook',
     createdAt: '2023-01-01T00:00:00Z',
-    updatedAt: '2023-01-01T00:00:00Z'
+    updatedAt: '2023-01-01T00:00:00Z',
   }
 
   beforeEach(() => {
     // Reset mocks
     vi.clearAllMocks()
-    
+
     // Configure fast retry for tests
     const retryConfig: RetryConfig = {
       maxAttempts: 2,
       baseDelayMs: 1,
       maxDelayMs: 10,
       exponentialBackoff: false,
-      jitter: false
+      jitter: false,
     }
-    
+
     repository = new DocumentRepository(retryConfig)
-    
+
     // Mock database instance
     mockDB = {
       allDocs: jest.fn(),
@@ -87,9 +88,9 @@ describe('DocumentRepository', () => {
       remove: jest.fn(),
       bulkDocs: jest.fn(),
       createIndex: jest.fn(),
-      destroy: jest.fn()
+      destroy: jest.fn(),
     }
-    
+
     // Set up repository internals
     ;(repository as any).db = mockDB
     ;(repository as any).isInitialized = true
@@ -104,7 +105,7 @@ describe('DocumentRepository', () => {
       // Mock Electron environment
       Object.defineProperty(window, 'electronAPI', {
         value: mockElectronAPI,
-        configurable: true
+        configurable: true,
       })
 
       await repository.initialize()
@@ -115,13 +116,13 @@ describe('DocumentRepository', () => {
       // Mock browser environment
       Object.defineProperty(window, 'electronAPI', {
         value: undefined,
-        configurable: true
+        configurable: true,
       })
-      
+
       // Mock IndexedDB availability
       Object.defineProperty(global, 'indexedDB', {
         value: {},
-        configurable: true
+        configurable: true,
       })
 
       await repository.initialize()
@@ -132,14 +133,16 @@ describe('DocumentRepository', () => {
       // Mock browser without IndexedDB
       Object.defineProperty(window, 'electronAPI', {
         value: undefined,
-        configurable: true
+        configurable: true,
       })
       Object.defineProperty(global, 'indexedDB', {
         value: undefined,
-        configurable: true
+        configurable: true,
       })
 
-      await expect(repository.initialize()).rejects.toThrow('IndexedDB not available')
+      await expect(repository.initialize()).rejects.toThrow(
+        'IndexedDB not available'
+      )
     })
   })
 
@@ -148,7 +151,7 @@ describe('DocumentRepository', () => {
       // Mock Electron environment for consistent testing
       Object.defineProperty(window, 'electronAPI', {
         value: mockElectronAPI,
-        configurable: true
+        configurable: true,
       })
     })
 
@@ -166,19 +169,19 @@ describe('DocumentRepository', () => {
         // Mock browser environment
         Object.defineProperty(window, 'electronAPI', {
           value: undefined,
-          configurable: true
+          configurable: true,
         })
 
         mockDB.allDocs.mockResolvedValue({
           rows: [
             {
-              doc: { 
+              doc: {
                 _id: 'note-1',
                 ...sampleNote,
-                type: 'note'
-              }
-            }
-          ]
+                type: 'note',
+              },
+            },
+          ],
         })
 
         const notes = await repository.getNotes()
@@ -188,12 +191,14 @@ describe('DocumentRepository', () => {
         expect(mockDB.allDocs).toHaveBeenCalledWith({
           include_docs: true,
           startkey: 'note_',
-          endkey: 'note_\ufff0'
+          endkey: 'note_\ufff0',
         })
       })
 
       it('should handle storage not available error', async () => {
-        mockElectronAPI.storage.loadAllNotes.mockRejectedValue(new Error('Storage unavailable'))
+        mockElectronAPI.storage.loadAllNotes.mockRejectedValue(
+          new Error('Storage unavailable')
+        )
 
         await expect(repository.getNotes()).rejects.toThrow()
       })
@@ -232,13 +237,13 @@ describe('DocumentRepository', () => {
         // Mock browser environment
         Object.defineProperty(window, 'electronAPI', {
           value: undefined,
-          configurable: true
+          configurable: true,
         })
 
         mockDB.get.mockResolvedValue({
           _id: 'note-1',
           ...sampleNote,
-          type: 'note'
+          type: 'note',
         })
 
         const note = await repository.getNote('note-1')
@@ -256,7 +261,9 @@ describe('DocumentRepository', () => {
 
         expect(savedNote.id).toBe(sampleNote.id)
         expect(savedNote.updatedAt).toBeDefined()
-        expect(mockElectronAPI.storage.saveNote).toHaveBeenCalledWith(sampleNote)
+        expect(mockElectronAPI.storage.saveNote).toHaveBeenCalledWith(
+          sampleNote
+        )
       })
 
       it('should handle Electron API save failure', async () => {
@@ -269,7 +276,7 @@ describe('DocumentRepository', () => {
         // Mock browser environment
         Object.defineProperty(window, 'electronAPI', {
           value: undefined,
-          configurable: true
+          configurable: true,
         })
 
         // First attempt fails with conflict
@@ -291,7 +298,7 @@ describe('DocumentRepository', () => {
         // Mock browser environment
         Object.defineProperty(window, 'electronAPI', {
           value: undefined,
-          configurable: true
+          configurable: true,
         })
 
         const quotaError = new Error('QuotaExceededError')
@@ -305,7 +312,7 @@ describe('DocumentRepository', () => {
         // Mock browser environment
         Object.defineProperty(window, 'electronAPI', {
           value: undefined,
-          configurable: true
+          configurable: true,
         })
 
         // Both initial save and conflict resolution fail
@@ -322,7 +329,9 @@ describe('DocumentRepository', () => {
 
         await repository.deleteNote('note-1')
 
-        expect(mockElectronAPI.storage.deleteNote).toHaveBeenCalledWith('note-1')
+        expect(mockElectronAPI.storage.deleteNote).toHaveBeenCalledWith(
+          'note-1'
+        )
       })
 
       it('should handle deletion of non-existent note gracefully', async () => {
@@ -336,7 +345,7 @@ describe('DocumentRepository', () => {
         // Mock browser environment
         Object.defineProperty(window, 'electronAPI', {
           value: undefined,
-          configurable: true
+          configurable: true,
         })
 
         const docToDelete = { _id: 'note-1', _rev: 'rev-1' }
@@ -353,7 +362,7 @@ describe('DocumentRepository', () => {
         // Mock browser environment
         Object.defineProperty(window, 'electronAPI', {
           value: undefined,
-          configurable: true
+          configurable: true,
         })
 
         mockDB.get.mockRejectedValue({ status: 404 })
@@ -389,13 +398,13 @@ describe('DocumentRepository', () => {
         // Mock browser environment
         Object.defineProperty(window, 'electronAPI', {
           value: undefined,
-          configurable: true
+          configurable: true,
         })
 
         const notes = [sampleNote, { ...sampleNote, id: 'note-2' }]
         mockDB.bulkDocs.mockResolvedValue([
           { ok: true, rev: 'rev-1' },
-          { ok: true, rev: 'rev-2' }
+          { ok: true, rev: 'rev-2' },
         ])
 
         const savedNotes = await repository.saveNotes(notes)
@@ -404,7 +413,7 @@ describe('DocumentRepository', () => {
         expect(mockDB.bulkDocs).toHaveBeenCalledWith(
           expect.arrayContaining([
             expect.objectContaining({ _id: 'note-1' }),
-            expect.objectContaining({ _id: 'note-2' })
+            expect.objectContaining({ _id: 'note-2' }),
           ])
         )
       })
@@ -414,7 +423,12 @@ describe('DocumentRepository', () => {
       it('should search notes by query', async () => {
         const notes = [
           sampleNote,
-          { ...sampleNote, id: 'note-2', title: 'Another Note', content: 'Different content' }
+          {
+            ...sampleNote,
+            id: 'note-2',
+            title: 'Another Note',
+            content: 'Different content',
+          },
         ]
         mockElectronAPI.storage.loadAllNotes.mockResolvedValue(notes)
 
@@ -427,7 +441,13 @@ describe('DocumentRepository', () => {
       it('should search in title, content, and tags', async () => {
         const notes = [
           { ...sampleNote, tags: ['important'] },
-          { ...sampleNote, id: 'note-2', title: 'Other', content: 'No match', tags: ['work'] }
+          {
+            ...sampleNote,
+            id: 'note-2',
+            title: 'Other',
+            content: 'No match',
+            tags: ['work'],
+          },
         ]
         mockElectronAPI.storage.loadAllNotes.mockResolvedValue(notes)
 
@@ -441,7 +461,7 @@ describe('DocumentRepository', () => {
         const notes = [
           { ...sampleNote, title: 'Test Important Note' },
           { ...sampleNote, id: 'note-2', title: 'Test Note' },
-          { ...sampleNote, id: 'note-3', title: 'Important Document' }
+          { ...sampleNote, id: 'note-3', title: 'Important Document' },
         ]
         mockElectronAPI.storage.loadAllNotes.mockResolvedValue(notes)
 
@@ -457,13 +477,15 @@ describe('DocumentRepository', () => {
     beforeEach(() => {
       Object.defineProperty(window, 'electronAPI', {
         value: mockElectronAPI,
-        configurable: true
+        configurable: true,
       })
     })
 
     describe('getNotebooks', () => {
       it('should get notebooks via Electron API', async () => {
-        mockElectronAPI.storage.loadNotebooks.mockResolvedValue([sampleNotebook])
+        mockElectronAPI.storage.loadNotebooks.mockResolvedValue([
+          sampleNotebook,
+        ])
 
         const notebooks = await repository.getNotebooks()
 
@@ -475,19 +497,19 @@ describe('DocumentRepository', () => {
         // Mock browser environment
         Object.defineProperty(window, 'electronAPI', {
           value: undefined,
-          configurable: true
+          configurable: true,
         })
 
         mockDB.allDocs.mockResolvedValue({
           rows: [
             {
-              doc: { 
+              doc: {
                 _id: 'notebook-1',
                 ...sampleNotebook,
-                type: 'notebook'
-              }
-            }
-          ]
+                type: 'notebook',
+              },
+            },
+          ],
         })
 
         const notebooks = await repository.getNotebooks()
@@ -500,7 +522,9 @@ describe('DocumentRepository', () => {
     describe('saveNotebook', () => {
       it('should save notebook via Electron API', async () => {
         mockElectronAPI.storage.loadNotebooks.mockResolvedValue([])
-        mockElectronAPI.storage.saveNotebooks.mockResolvedValue({ success: true })
+        mockElectronAPI.storage.saveNotebooks.mockResolvedValue({
+          success: true,
+        })
 
         const savedNotebook = await repository.saveNotebook(sampleNotebook)
 
@@ -510,7 +534,9 @@ describe('DocumentRepository', () => {
 
       it('should handle save failure via Electron API', async () => {
         mockElectronAPI.storage.loadNotebooks.mockResolvedValue([])
-        mockElectronAPI.storage.saveNotebooks.mockResolvedValue({ success: false })
+        mockElectronAPI.storage.saveNotebooks.mockResolvedValue({
+          success: false,
+        })
 
         await expect(repository.saveNotebook(sampleNotebook)).rejects.toThrow()
       })
@@ -518,8 +544,12 @@ describe('DocumentRepository', () => {
 
     describe('deleteNotebook', () => {
       it('should delete notebook via Electron API', async () => {
-        mockElectronAPI.storage.loadNotebooks.mockResolvedValue([sampleNotebook])
-        mockElectronAPI.storage.saveNotebooks.mockResolvedValue({ success: true })
+        mockElectronAPI.storage.loadNotebooks.mockResolvedValue([
+          sampleNotebook,
+        ])
+        mockElectronAPI.storage.saveNotebooks.mockResolvedValue({
+          success: true,
+        })
 
         await repository.deleteNotebook('notebook-1')
 
@@ -528,7 +558,9 @@ describe('DocumentRepository', () => {
 
       it('should handle deletion of non-existent notebook', async () => {
         mockElectronAPI.storage.loadNotebooks.mockResolvedValue([])
-        mockElectronAPI.storage.saveNotebooks.mockResolvedValue({ success: false })
+        mockElectronAPI.storage.saveNotebooks.mockResolvedValue({
+          success: false,
+        })
 
         // Should not throw
         await repository.deleteNotebook('nonexistent')
@@ -540,14 +572,16 @@ describe('DocumentRepository', () => {
     beforeEach(() => {
       Object.defineProperty(window, 'electronAPI', {
         value: mockElectronAPI,
-        configurable: true
+        configurable: true,
       })
     })
 
     describe('exportAll', () => {
       it('should export all documents as JSON', async () => {
         mockElectronAPI.storage.loadAllNotes.mockResolvedValue([sampleNote])
-        mockElectronAPI.storage.loadNotebooks.mockResolvedValue([sampleNotebook])
+        mockElectronAPI.storage.loadNotebooks.mockResolvedValue([
+          sampleNotebook,
+        ])
 
         const exportData = await repository.exportAll()
         const parsed = JSON.parse(exportData)
@@ -564,16 +598,20 @@ describe('DocumentRepository', () => {
         const importData = {
           version: '1.0',
           notes: [sampleNote],
-          notebooks: [sampleNotebook]
+          notebooks: [sampleNotebook],
         }
 
         mockElectronAPI.storage.saveNote.mockResolvedValue({ success: true })
         mockElectronAPI.storage.loadNotebooks.mockResolvedValue([])
-        mockElectronAPI.storage.saveNotebooks.mockResolvedValue({ success: true })
+        mockElectronAPI.storage.saveNotebooks.mockResolvedValue({
+          success: true,
+        })
 
         await repository.importAll(JSON.stringify(importData))
 
-        expect(mockElectronAPI.storage.saveNote).toHaveBeenCalledWith(sampleNote)
+        expect(mockElectronAPI.storage.saveNote).toHaveBeenCalledWith(
+          sampleNote
+        )
         expect(mockElectronAPI.storage.saveNotebooks).toHaveBeenCalled()
       })
 
@@ -587,7 +625,7 @@ describe('DocumentRepository', () => {
         // Mock browser environment
         Object.defineProperty(window, 'electronAPI', {
           value: undefined,
-          configurable: true
+          configurable: true,
         })
 
         mockDB.destroy.mockResolvedValue({ ok: true })
@@ -612,7 +650,7 @@ describe('DocumentRepository', () => {
     beforeEach(() => {
       Object.defineProperty(window, 'electronAPI', {
         value: mockElectronAPI,
-        configurable: true
+        configurable: true,
       })
     })
 
@@ -634,7 +672,7 @@ describe('DocumentRepository', () => {
       mockElectronAPI.storage.saveNote.mockRejectedValue(validationError)
 
       await expect(repository.saveNote(sampleNote)).rejects.toThrow()
-      
+
       // Should only be called once (no retry for validation errors)
       expect(mockElectronAPI.storage.saveNote).toHaveBeenCalledTimes(1)
     })

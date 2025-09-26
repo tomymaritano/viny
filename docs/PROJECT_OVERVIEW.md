@@ -1,8 +1,8 @@
-# Inkrun - Markdown Editor Project
+# Viny - Markdown Editor Project
 
 ## Project Overview
 
-Inkrun is a minimalist markdown editor built with Electron, React, and Vite, inspired by craftzdog's Inkdrop. It provides a professional IDE-style markdown editing experience with live preview capabilities.
+Viny is a minimalist markdown editor built with Electron, React, and Vite, inspired by craftzdog's Inkdrop. It provides a professional IDE-style markdown editing experience with live preview capabilities.
 
 ## Key Features
 
@@ -49,7 +49,7 @@ Inkrun is a minimalist markdown editor built with Electron, React, and Vite, ins
 ## Project Structure
 
 ```
-inkrun/
+viny/
 ├── src/
 │   ├── components/          # React components
 │   │   ├── Sidebar.jsx      # Navigation sidebar

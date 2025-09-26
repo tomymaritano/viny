@@ -110,7 +110,7 @@ export const generateCreateTimestamps = () => {
   const now = getCurrentTimestamp()
   return {
     createdAt: now,
-    updatedAt: now
+    updatedAt: now,
   }
 }
 
@@ -119,7 +119,7 @@ export const generateCreateTimestamps = () => {
  */
 export const generateUpdateTimestamp = () => {
   return {
-    updatedAt: getCurrentTimestamp()
+    updatedAt: getCurrentTimestamp(),
   }
 }
 
@@ -138,7 +138,10 @@ export const isValidTimestamp = (timestamp: string): boolean => {
 /**
  * Gets time difference in milliseconds
  */
-export const getTimeDifference = (timestamp1: string, timestamp2: string): number => {
+export const getTimeDifference = (
+  timestamp1: string,
+  timestamp2: string
+): number => {
   try {
     const date1 = new Date(timestamp1)
     const date2 = new Date(timestamp2)

@@ -1,4 +1,4 @@
-# Inkrun Setup Guide
+# Viny Setup Guide
 
 ## Prerequisites
 
@@ -177,7 +177,7 @@ module.exports = {
 ### Recommended Folder Structure
 
 ```
-inkrun/
+viny/
 ├── src/
 │   ├── components/          # React components
 │   │   ├── Sidebar.jsx

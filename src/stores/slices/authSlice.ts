@@ -1,4 +1,5 @@
-import { StateCreator } from 'zustand'
+import type { StateCreator } from 'zustand'
+import { apiLogger } from '../../utils/logger'
 
 export interface User {
   id: number
@@ -29,7 +30,10 @@ export interface AuthActions {
   setUser: (user: User | null) => void
   setAccessToken: (token: string | null) => void
   updateProfile: (data: { name?: string; avatar?: string }) => Promise<void>
-  changePassword: (currentPassword: string, newPassword: string) => Promise<void>
+  changePassword: (
+    currentPassword: string,
+    newPassword: string
+  ) => Promise<void>
   verifyToken: () => Promise<boolean>
 }
 
@@ -43,12 +47,13 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
   isAuthenticated: false,
   isLoading: false,
   error: null,
-  accessToken: localStorage.getItem('accessToken'),
+  accessToken:
+    typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null,
 
   // Actions
   login: async (email: string, password: string) => {
     set({ isLoading: true, error: null })
-    
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
@@ -65,10 +70,10 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
       }
 
       const data = await response.json()
-      
+
       // Store access token
       localStorage.setItem('accessToken', data.data.accessToken)
-      
+
       set({
         user: data.data.user,
         isAuthenticated: true,
@@ -91,7 +96,7 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
 
   register: async (email: string, password: string, name?: string) => {
     set({ isLoading: true, error: null })
-    
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
@@ -108,10 +113,10 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
       }
 
       const data = await response.json()
-      
+
       // Store access token
       localStorage.setItem('accessToken', data.data.accessToken)
-      
+
       set({
         user: data.data.user,
         isAuthenticated: true,
@@ -134,20 +139,20 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
 
   logout: async () => {
     set({ isLoading: true })
-    
+
     try {
       const { accessToken } = get()
       if (accessToken) {
         await fetch(`${API_BASE_URL}/api/auth/logout`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
+            Authorization: `Bearer ${accessToken}`,
           },
           credentials: 'include',
         })
       }
     } catch (error) {
-      console.error('Logout error:', error)
+      apiLogger.error('Logout error:', error)
     } finally {
       // Clear local state regardless of API call success
       localStorage.removeItem('accessToken')
@@ -173,15 +178,15 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
       }
 
       const data = await response.json()
-      
+
       // Store new access token
       localStorage.setItem('accessToken', data.data.accessToken)
-      
+
       set({
         accessToken: data.data.accessToken,
         error: null,
       })
-      
+
       return data.data.accessToken
     } catch (error) {
       // If refresh fails, logout user
@@ -198,7 +203,7 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
 
   updateProfile: async (data: { name?: string; avatar?: string }) => {
     set({ isLoading: true, error: null })
-    
+
     try {
       const { accessToken } = get()
       if (!accessToken) {
@@ -209,7 +214,7 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(data),
         credentials: 'include',
@@ -221,7 +226,7 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
       }
 
       const responseData = await response.json()
-      
+
       set({
         user: responseData.data.user,
         isLoading: false,
@@ -238,7 +243,7 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
 
   changePassword: async (currentPassword: string, newPassword: string) => {
     set({ isLoading: true, error: null })
-    
+
     try {
       const { accessToken } = get()
       if (!accessToken) {
@@ -249,7 +254,7 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ currentPassword, newPassword }),
         credentials: 'include',
@@ -272,7 +277,8 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Password change failed',
+        error:
+          error instanceof Error ? error.message : 'Password change failed',
       })
       throw error
     }
@@ -288,7 +294,7 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
       const response = await fetch(`${API_BASE_URL}/api/auth/verify-token`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         credentials: 'include',
       })
@@ -298,13 +304,13 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
       }
 
       const data = await response.json()
-      
+
       set({
         user: data.data.user,
         isAuthenticated: true,
         error: null,
       })
-      
+
       return true
     } catch (error) {
       localStorage.removeItem('accessToken')
@@ -333,7 +339,8 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
 
 // Initialize auth state from localStorage
 export const initializeAuth = (store: AuthSlice) => {
-  const token = localStorage.getItem('accessToken')
+  const token =
+    typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
   if (token) {
     store.setAccessToken(token)
     // Verify token on initialization

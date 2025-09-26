@@ -1,0 +1,70 @@
+{
+  "timestamp": "2025-07-21T11:20:42.955Z",
+  "summary": {
+    "filesModified": 12,
+    "totalChanges": 18,
+    "filesSkipped": 102
+  },
+  "migrated": [
+    {
+      "migrated": true,
+      "changeCount": 1,
+      "file": "utils/markdownRenderer.ts"
+    },
+    {
+      "migrated": true,
+      "changeCount": 1,
+      "file": "utils/devHelpers.ts"
+    },
+    {
+      "migrated": true,
+      "changeCount": 3,
+      "file": "services/errorLogger.ts"
+    },
+    {
+      "migrated": true,
+      "changeCount": 1,
+      "file": "services/ai/RAGService.ts"
+    },
+    {
+      "migrated": true,
+      "changeCount": 1,
+      "file": "lib/markdown.ts"
+    },
+    {
+      "migrated": true,
+      "changeCount": 2,
+      "file": "lib/repositories/RepositoryFactory.ts"
+    },
+    {
+      "migrated": true,
+      "changeCount": 1,
+      "file": "hooks/useErrorHandler.ts"
+    },
+    {
+      "migrated": true,
+      "changeCount": 1,
+      "file": "config/editorImageWidget.ts"
+    },
+    {
+      "migrated": true,
+      "changeCount": 1,
+      "file": "components/settings/SettingsReset.tsx"
+    },
+    {
+      "migrated": true,
+      "changeCount": 1,
+      "file": "components/settings/DatabaseMigration.tsx"
+    },
+    {
+      "migrated": true,
+      "changeCount": 4,
+      "file": "components/errors/StorageErrorBoundary.tsx"
+    },
+    {
+      "migrated": true,
+      "changeCount": 1,
+      "file": "components/editor/toolbar/EditorToolbar.tsx"
+    }
+  ]
+}

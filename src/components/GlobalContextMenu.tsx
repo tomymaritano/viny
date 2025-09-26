@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useAppStore } from '../stores/newSimpleStore'
 import { useNoteActions } from '../hooks/useNoteActions'
 import { useToast } from '../hooks/useToast'
@@ -6,124 +6,161 @@ import { useNotebooks } from '../hooks/useNotebooks'
 import RenameModal from './modals/RenameModal'
 import ConfirmModal from './modals/ConfirmModal'
 import TagColorModal from './modals/TagColorModal'
+import { logger } from '../utils/logger'
 
 const GlobalContextMenu: React.FC = () => {
-  const { setModal, setActiveSection, removeTagFromAllNotes, notes } = useAppStore()
-  const { createNewNote, handlePermanentDelete, handleEmptyTrash: handleEmptyTrashAction } = useNoteActions()
+  const { setModal, setActiveSection, removeTagFromAllNotes, notes } =
+    useAppStore()
+  const {
+    createNewNote,
+    handlePermanentDelete,
+    handleEmptyTrash: handleEmptyTrashAction,
+  } = useNoteActions()
   const { showToast } = useToast()
   const { updateNotebook, deleteNotebook, getNotebook } = useNotebooks()
   const navStore = useAppStore()
-  
+
   // Rename modal state
   const [renameModal, setRenameModal] = useState({
     isOpen: false,
     type: '' as 'notebook' | 'tag',
     id: '',
-    currentName: ''
+    currentName: '',
   })
-  
+
   // Confirm modal state
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
     title: '',
     message: '',
     onConfirm: () => {},
-    type: 'warning' as 'danger' | 'warning' | 'info'
+    type: 'warning' as 'danger' | 'warning' | 'info',
   })
-  
+
   // Tag color modal state
   const [tagColorModal, setTagColorModal] = useState({
     isOpen: false,
-    tagName: ''
+    tagName: '',
   })
-  
+
   useEffect(() => {
     if (!window.electronAPI?.isElectron) return
-    
+
     // Handle general context menu actions
-    const handleCreateNewNote = () => {
-      createNewNote()
+    const handleCreateNewNote = async () => {
+      logger.info('GlobalContextMenu: Creating new note via context menu')
+      try {
+        await createNewNote()
+        logger.info('GlobalContextMenu: Successfully created new note')
+      } catch (error) {
+        logger.error('GlobalContextMenu: Failed to create new note', { error })
+        // Error already handled by useNoteActions
+      }
     }
-    
+
     const handleOpenSearch = () => {
+      logger.info('GlobalContextMenu: Opening search modal')
       setModal('search', true)
     }
-    
+
     const handleOpenSettingsModal = () => {
       setModal('settings', true)
     }
-    
+
     const handleCreateNewNotebook = () => {
+      logger.info('GlobalContextMenu: Opening notebook manager for creation')
       setModal('notebookManager', true)
     }
-    
+
     const handleCollapseAllNotebooks = () => {
+      logger.info('GlobalContextMenu: Collapsing all notebooks')
       navStore.collapseAllSections()
       showToast('All notebooks collapsed', 'success')
     }
-    
+
     const handleExpandAllNotebooks = () => {
+      logger.info('GlobalContextMenu: Expanding all notebooks')
       navStore.expandAllSections()
       showToast('All notebooks expanded', 'success')
     }
-    
-    const handleCreateNoteInNotebook = (notebookId: string) => {
-      // Create a new note and assign it to the notebook
-      const newNote = createNewNote()
-      if (newNote) {
-        // TODO: Update note with notebook
-        showToast('Note created in notebook', 'success')
+
+    const handleCreateNoteInNotebook = async (notebookId: string) => {
+      logger.info('GlobalContextMenu: Creating note in specific notebook', {
+        notebookId,
+      })
+      try {
+        // Create a new note and assign it to the notebook
+        const newNote = await createNewNote()
+        if (newNote) {
+          logger.info(
+            'GlobalContextMenu: Successfully created note in notebook',
+            {
+              noteId: newNote.id,
+              notebookId,
+            }
+          )
+          // TODO: Update note with notebook
+          showToast('Note created in notebook', 'success')
+        }
+      } catch (error) {
+        logger.error('GlobalContextMenu: Failed to create note in notebook', {
+          notebookId,
+          error,
+        })
+        // Error already handled by useNoteActions
+        showToast('Failed to create note', 'error')
       }
     }
-    
+
     const handleRenameNotebook = (notebookId: string) => {
       const notebook = getNotebook(notebookId)
       if (!notebook) return
-      
+
       setRenameModal({
         isOpen: true,
         type: 'notebook',
         id: notebookId,
-        currentName: notebook.name
+        currentName: notebook.name,
       })
     }
-    
+
     const handleDeleteNotebook = (notebookId: string) => {
       const notebook = getNotebook(notebookId)
       if (!notebook) return
-      
+
       setConfirmModal({
         isOpen: true,
         title: 'Delete Notebook',
         message: `Are you sure you want to delete the notebook "${notebook.name}"? All notes in this notebook will be moved to trash.`,
         type: 'danger',
-        onConfirm: () => {
-          const success = deleteNotebook(notebookId)
-          if (success) {
+        onConfirm: async () => {
+          try {
+            await deleteNotebook(notebookId)
             showToast(`Notebook "${notebook.name}" deleted`, 'success')
-          } else {
+          } catch (error) {
+            // Error already handled by useNotebooks
             showToast('Failed to delete notebook', 'error')
           }
-        }
+        },
       })
     }
-    
+
     const handleRenameTag = (tagName: string) => {
       setRenameModal({
         isOpen: true,
         type: 'tag',
         id: tagName,
-        currentName: tagName
+        currentName: tagName,
       })
     }
-    
+
     const handleChangeTagColor = (tagName: string) => {
       setTagColorModal({
         isOpen: true,
-        tagName: tagName
+        tagName: tagName,
       })
     }
-    
+
     const handleRemoveTag = (tagName: string) => {
       setConfirmModal({
         isOpen: true,
@@ -133,17 +170,17 @@ const GlobalContextMenu: React.FC = () => {
         onConfirm: () => {
           const count = removeTagFromAllNotes(tagName)
           showToast(`Tag "${tagName}" removed from ${count} notes`, 'success')
-        }
+        },
       })
     }
-    
+
     const handleEmptyTrash = () => {
       const trashedNotes = notes.filter(note => note.isTrashed)
       if (trashedNotes.length === 0) {
         showToast('Trash is already empty', 'info')
         return
       }
-      
+
       setConfirmModal({
         isOpen: true,
         title: 'Empty Trash',
@@ -152,10 +189,10 @@ const GlobalContextMenu: React.FC = () => {
         onConfirm: async () => {
           // Use the centralized empty trash function
           await handleEmptyTrashAction()
-        }
+        },
       })
     }
-    
+
     // Listen for all context menu events
     window.electronAPI.on('create-new-note', handleCreateNewNote)
     window.electronAPI.on('open-search', handleOpenSearch)
@@ -170,7 +207,7 @@ const GlobalContextMenu: React.FC = () => {
     window.electronAPI.on('change-tag-color', handleChangeTagColor)
     window.electronAPI.on('remove-tag', handleRemoveTag)
     window.electronAPI.on('empty-trash', handleEmptyTrash)
-    
+
     return () => {
       if (window.electronAPI) {
         window.electronAPI.removeAllListeners('create-new-note')
@@ -188,8 +225,14 @@ const GlobalContextMenu: React.FC = () => {
         window.electronAPI.removeAllListeners('empty-trash')
       }
     }
-  }, [createNewNote, setModal, setActiveSection, showToast, removeTagFromAllNotes])
-  
+  }, [
+    createNewNote,
+    setModal,
+    setActiveSection,
+    showToast,
+    removeTagFromAllNotes,
+  ])
+
   // Handle rename submission
   const handleRenameSubmit = async (newName: string) => {
     if (renameModal.type === 'notebook') {
@@ -215,14 +258,16 @@ const GlobalContextMenu: React.FC = () => {
       showToast('Tag rename functionality coming soon', 'info')
     }
   }
-  
+
   return (
     <>
       <RenameModal
         isOpen={renameModal.isOpen}
         onClose={() => setRenameModal({ ...renameModal, isOpen: false })}
         currentName={renameModal.currentName}
-        title={renameModal.type === 'notebook' ? 'Rename Notebook' : 'Rename Tag'}
+        title={
+          renameModal.type === 'notebook' ? 'Rename Notebook' : 'Rename Tag'
+        }
         onRename={handleRenameSubmit}
       />
       <ConfirmModal

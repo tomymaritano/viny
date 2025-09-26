@@ -17,6 +17,7 @@
 @import './styles/typography.css'; /* Keep for prose-theme styles */
 @import './styles/syntax-highlighting.css'; /* Syntax highlighting for code blocks */
 @import './styles/preview-features.css'; /* Preview features styles */
+@import './styles/link-preview.css'; /* Link preview tooltip styles */
 
 @tailwind base;
 @tailwind components;

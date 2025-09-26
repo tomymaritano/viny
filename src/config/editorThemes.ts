@@ -305,7 +305,7 @@ export const getThemeExtensions = (themeName = 'default') => {
  * @param {string} themeName - Theme name ('light', 'dark', 'solarized')
  * @returns {Array} CodeMirror extensions
  */
-export const createDynamicThemeExtensionsForTheme = (themeName) => {
+export const createDynamicThemeExtensionsForTheme = themeName => {
   // Since we're using CSS variables, we don't need to check theme anymore
   return createDynamicThemeExtensions()
 }

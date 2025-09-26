@@ -8,7 +8,10 @@ interface SettingsResetProps {
   onReset?: () => void
 }
 
-export const SettingsReset: React.FC<SettingsResetProps> = ({ category, onReset }) => {
+export const SettingsReset: React.FC<SettingsResetProps> = ({
+  category,
+  onReset,
+}) => {
   const [showConfirm, setShowConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState<string | null>(null)
@@ -18,10 +21,10 @@ export const SettingsReset: React.FC<SettingsResetProps> = ({ category, onReset 
     setLoading(true)
     setError(null)
     setSuccess(null)
-    
+
     try {
       const service = getSettingsService()
-      
+
       if (category) {
         service.resetCategory(category)
         setSuccess(`${category} settings reset to defaults`)
@@ -29,10 +32,10 @@ export const SettingsReset: React.FC<SettingsResetProps> = ({ category, onReset 
         service.resetAll()
         setSuccess('All settings reset to defaults')
       }
-      
+
       onReset?.()
       setShowConfirm(false)
-      
+
       // Clear success message after delay
       setTimeout(() => setSuccess(null), 3000)
     } catch (err) {
@@ -46,26 +49,26 @@ export const SettingsReset: React.FC<SettingsResetProps> = ({ category, onReset 
     setLoading(true)
     setError(null)
     setSuccess(null)
-    
+
     try {
       // Create backup before factory reset
       const service = getSettingsService()
       await service.createBackup('Before factory reset')
-      
+
       // Clear all data
       service.resetAll()
-      
+
       // Clear localStorage (except backups)
       const backupData = localStorage.getItem('viny_settings_backups')
-      localStorage.clear()
+      storageService.clear()
       if (backupData) {
         localStorage.setItem('viny_settings_backups', backupData)
       }
-      
+
       setSuccess('Factory reset completed. Backup created automatically.')
       onReset?.()
       setShowConfirm(false)
-      
+
       // Reload page after delay
       setTimeout(() => {
         window.location.reload()
@@ -85,7 +88,7 @@ export const SettingsReset: React.FC<SettingsResetProps> = ({ category, onReset 
           <p className="text-sm text-green-800">{success}</p>
         </div>
       )}
-      
+
       {error && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-md">
           <p className="text-sm text-red-800">{error}</p>
@@ -106,7 +109,8 @@ export const SettingsReset: React.FC<SettingsResetProps> = ({ category, onReset 
                 {category ? `Reset ${category} Settings` : 'Reset All Settings'}
               </span>
               <p className="text-xs text-theme-text-muted">
-                Restore {category ? `${category} settings` : 'all settings'} to default values
+                Restore {category ? `${category} settings` : 'all settings'} to
+                default values
               </p>
             </div>
           </div>
@@ -143,19 +147,20 @@ export const SettingsReset: React.FC<SettingsResetProps> = ({ category, onReset 
               <div className="flex items-center space-x-3 mb-4">
                 <Icons.AlertTriangle size={24} className="text-orange-500" />
                 <h3 className="text-lg font-medium text-theme-text-primary">
-                  {showConfirm === 'factory' ? 'Factory Reset' : 'Reset Settings'}
+                  {showConfirm === 'factory'
+                    ? 'Factory Reset'
+                    : 'Reset Settings'}
                 </h3>
               </div>
-              
+
               <p className="text-sm text-theme-text-secondary mb-6">
-                {showConfirm === 'factory' 
+                {showConfirm === 'factory'
                   ? 'This will reset everything to the initial state and reload the application. A backup will be created automatically. This action cannot be undone easily.'
-                  : category 
+                  : category
                     ? `This will reset all ${category} settings to their default values. This action cannot be undone.`
-                    : 'This will reset all settings to their default values. This action cannot be undone.'
-                }
+                    : 'This will reset all settings to their default values. This action cannot be undone.'}
               </p>
-              
+
               <div className="flex items-center justify-end space-x-3">
                 <button
                   onClick={() => setShowConfirm(false)}
@@ -165,11 +170,15 @@ export const SettingsReset: React.FC<SettingsResetProps> = ({ category, onReset 
                   Cancel
                 </button>
                 <button
-                  onClick={showConfirm === 'factory' ? handleFactoryReset : handleResetAll}
+                  onClick={
+                    showConfirm === 'factory'
+                      ? handleFactoryReset
+                      : handleResetAll
+                  }
                   disabled={loading}
                   className={`px-4 py-2 text-sm text-white rounded-md transition-colors disabled:opacity-50 ${
-                    showConfirm === 'factory' 
-                      ? 'bg-red-600 hover:bg-red-700' 
+                    showConfirm === 'factory'
+                      ? 'bg-red-600 hover:bg-red-700'
                       : 'bg-orange-600 hover:bg-orange-700'
                   }`}
                 >
@@ -178,8 +187,10 @@ export const SettingsReset: React.FC<SettingsResetProps> = ({ category, onReset 
                       <Icons.Loader2 size={14} className="animate-spin" />
                       <span>Resetting...</span>
                     </div>
+                  ) : showConfirm === 'factory' ? (
+                    'Factory Reset'
                   ) : (
-                    showConfirm === 'factory' ? 'Factory Reset' : 'Reset'
+                    'Reset'
                   )}
                 </button>
               </div>
@@ -196,10 +207,15 @@ interface CategoryResetProps {
   onReset?: () => void
 }
 
-export const CategoryReset: React.FC<CategoryResetProps> = ({ category, onReset }) => {
+export const CategoryReset: React.FC<CategoryResetProps> = ({
+  category,
+  onReset,
+}) => {
   return (
     <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-      <h4 className="text-sm font-medium text-orange-800 mb-2">Reset Settings</h4>
+      <h4 className="text-sm font-medium text-orange-800 mb-2">
+        Reset Settings
+      </h4>
       <p className="text-xs text-orange-700 mb-4">
         Restore all {category} settings to their default values.
       </p>

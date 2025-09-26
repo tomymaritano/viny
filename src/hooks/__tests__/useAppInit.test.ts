@@ -10,7 +10,7 @@ import { useAppInit } from '../useAppInit'
 // Mock functions will be defined inside the vi.mock factory
 
 vi.mock('../../stores/newSimpleStore', () => ({
-  useAppStore: vi.fn((selector) => {
+  useAppStore: vi.fn(selector => {
     const state = {
       setNotes: vi.fn(),
       setLoading: vi.fn(),
@@ -21,24 +21,24 @@ vi.mock('../../stores/newSimpleStore', () => ({
       settings: { theme: 'dark' },
       updateSettings: vi.fn(),
       isLoading: false,
-      error: null
+      error: null,
     }
-    
+
     // If selector is provided, use it (for return values)
     if (typeof selector === 'function') {
       return selector(state)
     }
-    
+
     // If no selector, return full state (for destructuring)
     return state
-  })
+  }),
 }))
 
 vi.mock('../../lib/storage', () => ({
   storageService: {
     loadNotes: vi.fn(),
-    loadSettings: vi.fn()
-  }
+    loadSettings: vi.fn(),
+  },
 }))
 
 vi.mock('../../utils/logger', () => ({
@@ -46,17 +46,17 @@ vi.mock('../../utils/logger', () => ({
     debug: vi.fn(),
     info: vi.fn(),
     warn: vi.fn(),
-    error: vi.fn()
-  }
+    error: vi.fn(),
+  },
 }))
 
 vi.mock('../../utils/defaultDataInitializer', () => ({
-  initializeDefaultData: vi.fn()
+  initializeDefaultData: vi.fn(),
 }))
 
 vi.mock('../../lib/storageUtils', () => ({
   diagnoseSaveIssues: vi.fn(),
-  checkStorageAvailability: vi.fn()
+  checkStorageAvailability: vi.fn(),
 }))
 
 // Mock matchMedia for theme detection
@@ -78,7 +78,7 @@ Object.defineProperty(window, 'matchMedia', {
 const mockSetAttribute = vi.fn()
 Object.defineProperty(document.documentElement, 'setAttribute', {
   value: mockSetAttribute,
-  writable: true
+  writable: true,
 })
 
 describe('useAppInit', () => {
@@ -94,17 +94,21 @@ describe('useAppInit', () => {
   let mockDiagnoseSaveIssues: any
   let mockCheckStorageAvailability: any
   let mockLogger: any
-  
+
   beforeEach(async () => {
     vi.clearAllMocks()
-    
+
     // Get references to the mocked functions
     const { useAppStore } = await import('../../stores/newSimpleStore')
     const { storageService } = await import('../../lib/storage')
     const { initLogger } = await import('../../utils/logger')
-    const { initializeDefaultData } = await import('../../utils/defaultDataInitializer')
-    const { diagnoseSaveIssues, checkStorageAvailability } = await import('../../lib/storageUtils')
-    
+    const { initializeDefaultData } = await import(
+      '../../utils/defaultDataInitializer'
+    )
+    const { diagnoseSaveIssues, checkStorageAvailability } = await import(
+      '../../lib/storageUtils'
+    )
+
     const mockedStore = vi.mocked(useAppStore)
     mockLoadNotes = vi.mocked(storageService.loadNotes)
     mockLoadSettings = vi.mocked(storageService.loadSettings)
@@ -112,7 +116,7 @@ describe('useAppInit', () => {
     mockInitializeDefaultData = vi.mocked(initializeDefaultData)
     mockDiagnoseSaveIssues = vi.mocked(diagnoseSaveIssues)
     mockCheckStorageAvailability = vi.mocked(checkStorageAvailability)
-    
+
     // Create fresh mocks
     mockSetNotes = vi.fn()
     mockSetLoading = vi.fn()
@@ -120,9 +124,9 @@ describe('useAppInit', () => {
     mockSetTheme = vi.fn()
     mockLoadTagColors = vi.fn()
     mockUpdateSettings = vi.fn()
-    
+
     // Reset the store mock
-    mockedStore.mockImplementation((selector) => {
+    mockedStore.mockImplementation(selector => {
       const state = {
         setNotes: mockSetNotes,
         setLoading: mockSetLoading,
@@ -133,26 +137,26 @@ describe('useAppInit', () => {
         settings: { theme: 'dark' },
         updateSettings: mockUpdateSettings,
         isLoading: false,
-        error: null
+        error: null,
       }
-      
+
       if (typeof selector === 'function') {
         return selector(state)
       }
-      
+
       return state
     })
-    
+
     // Set up default successful responses
     mockLoadNotes.mockResolvedValue([])
     mockLoadSettings.mockResolvedValue({})
     mockInitializeDefaultData.mockResolvedValue(undefined)
     mockDiagnoseSaveIssues.mockResolvedValue([])
     mockCheckStorageAvailability.mockReturnValue({ available: true })
-    
+
     // Reset environment to production (skip diagnostics by default)
     process.env.NODE_ENV = 'production'
-    
+
     // Reset localStorage mock
     if (global.localStorageMock?.getItem) {
       global.localStorageMock.getItem.mockReturnValue(null)
@@ -162,10 +166,15 @@ describe('useAppInit', () => {
   describe('App Initialization', () => {
     it('should initialize app successfully with default data', async () => {
       const mockNotes = [
-        { id: '1', title: 'Test Note', content: 'Test content', createdAt: new Date().toISOString() }
+        {
+          id: '1',
+          title: 'Test Note',
+          content: 'Test content',
+          createdAt: new Date().toISOString(),
+        },
       ]
       mockLoadNotes.mockResolvedValue(mockNotes)
-      
+
       console.log('Before renderHook')
       const { result } = renderHook(() => {
         console.log('useAppInit called')
@@ -200,43 +209,52 @@ describe('useAppInit', () => {
         expect(mockSetLoading).toHaveBeenCalledWith(false)
       })
 
-      expect(mockLogger.info).toHaveBeenCalledWith('App initialization completed successfully')
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'App initialization completed successfully'
+      )
     })
 
     it('should handle empty notes array', async () => {
       mockLoadNotes.mockResolvedValue([])
-      
+
       renderHook(() => useAppInit())
 
       await waitFor(() => {
         expect(mockSetNotes).toHaveBeenCalledWith([])
       })
 
-      expect(mockLogger.info).toHaveBeenCalledWith('App initialization completed successfully')
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'App initialization completed successfully'
+      )
     })
 
     it('should handle initialization errors gracefully', async () => {
       const error = new Error('Storage failed')
       mockLoadNotes.mockRejectedValue(error)
-      
+
       renderHook(() => useAppInit())
 
       await waitFor(() => {
-        expect(mockSetError).toHaveBeenCalledWith('Failed to load your notes. Please refresh the page.')
+        expect(mockSetError).toHaveBeenCalledWith(
+          'Failed to load your notes. Please refresh the page.'
+        )
       })
 
       await waitFor(() => {
         expect(mockSetLoading).toHaveBeenCalledWith(false)
       })
 
-      expect(mockLogger.error).toHaveBeenCalledWith('Failed to initialize app:', error)
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Failed to initialize app:',
+        error
+      )
     })
   })
 
   describe('Development Mode Diagnostics', () => {
     it('should run storage diagnostics in development mode', async () => {
       process.env.NODE_ENV = 'development'
-      
+
       renderHook(() => useAppInit())
 
       await waitFor(() => {
@@ -247,19 +265,26 @@ describe('useAppInit', () => {
         expect(mockDiagnoseSaveIssues).toHaveBeenCalled()
       })
 
-      expect(mockLogger.debug).toHaveBeenCalledWith('Running storage diagnostics...')
-      expect(mockLogger.debug).toHaveBeenCalledWith('No storage issues detected')
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'Running storage diagnostics...'
+      )
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'No storage issues detected'
+      )
     })
 
     it('should log storage issues when detected in development', async () => {
       process.env.NODE_ENV = 'development'
       const mockIssues = ['Issue 1', 'Issue 2']
       mockDiagnoseSaveIssues.mockResolvedValue(mockIssues)
-      
+
       renderHook(() => useAppInit())
 
       await waitFor(() => {
-        expect(mockLogger.warn).toHaveBeenCalledWith('Storage issues detected:', mockIssues)
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          'Storage issues detected:',
+          mockIssues
+        )
       })
 
       expect(mockLogger.warn).toHaveBeenCalledWith('Issue:', 'Issue 1')
@@ -268,7 +293,7 @@ describe('useAppInit', () => {
 
     it('should skip diagnostics in production mode', async () => {
       process.env.NODE_ENV = 'production'
-      
+
       renderHook(() => useAppInit())
 
       await waitFor(() => {
@@ -284,7 +309,7 @@ describe('useAppInit', () => {
     it('should load settings from storage service', async () => {
       const mockSettings = { theme: 'light', fontSize: 14 }
       mockLoadSettings.mockResolvedValue(mockSettings)
-      
+
       renderHook(() => useAppInit())
 
       await waitFor(() => {
@@ -295,31 +320,42 @@ describe('useAppInit', () => {
         expect(mockUpdateSettings).toHaveBeenCalledWith(mockSettings, true)
       })
 
-      expect(mockLogger.debug).toHaveBeenCalledWith('Settings loaded from storage:', Object.keys(mockSettings))
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'Settings loaded from storage:',
+        Object.keys(mockSettings)
+      )
     })
 
     it('should fallback to localStorage when storage service returns empty', async () => {
       mockLoadSettings.mockResolvedValue({})
       const directSettings = { theme: 'dark', fontSize: 16 }
-      global.localStorageMock.getItem.mockReturnValue(JSON.stringify(directSettings))
-      
+      global.localStorageMock.getItem.mockReturnValue(
+        JSON.stringify(directSettings)
+      )
+
       renderHook(() => useAppInit())
 
       await waitFor(() => {
         expect(mockUpdateSettings).toHaveBeenCalledWith(directSettings, true)
       })
 
-      expect(mockLogger.debug).toHaveBeenCalledWith('Settings loaded from direct localStorage:', Object.keys(directSettings))
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'Settings loaded from direct localStorage:',
+        Object.keys(directSettings)
+      )
     })
 
     it('should handle settings loading errors gracefully', async () => {
       const error = new Error('Settings load failed')
       mockLoadSettings.mockRejectedValue(error)
-      
+
       renderHook(() => useAppInit())
 
       await waitFor(() => {
-        expect(mockLogger.warn).toHaveBeenCalledWith('Failed to load settings from storage:', error)
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          'Failed to load settings from storage:',
+          error
+        )
       })
 
       // Should still complete initialization
@@ -333,11 +369,14 @@ describe('useAppInit', () => {
       global.localStorageMock.getItem.mockImplementation(() => {
         throw new Error('localStorage error')
       })
-      
+
       renderHook(() => useAppInit())
 
       await waitFor(() => {
-        expect(mockLogger.warn).toHaveBeenCalledWith('Failed to load settings from direct localStorage:', expect.any(Error))
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          'Failed to load settings from direct localStorage:',
+          expect.any(Error)
+        )
       })
     })
   })
@@ -369,7 +408,7 @@ describe('useAppInit', () => {
   describe('Initialization Flow', () => {
     it('should follow correct initialization sequence', async () => {
       const callOrder: string[] = []
-      
+
       mockSetLoading.mockImplementation(() => callOrder.push('setLoading'))
       mockSetError.mockImplementation(() => callOrder.push('setError'))
       mockInitializeDefaultData.mockImplementation(() => {
@@ -385,7 +424,7 @@ describe('useAppInit', () => {
         return Promise.resolve()
       })
       mockSetNotes.mockImplementation(() => callOrder.push('setNotes'))
-      
+
       renderHook(() => useAppInit())
 
       await waitFor(() => {
@@ -393,10 +432,18 @@ describe('useAppInit', () => {
       })
 
       // Verify the sequence
-      expect(callOrder.indexOf('setLoading')).toBeLessThan(callOrder.indexOf('initializeDefaultData'))
-      expect(callOrder.indexOf('initializeDefaultData')).toBeLessThan(callOrder.indexOf('loadNotes'))
-      expect(callOrder.indexOf('loadNotes')).toBeLessThan(callOrder.indexOf('loadTagColors'))
-      expect(callOrder.indexOf('loadTagColors')).toBeLessThan(callOrder.indexOf('setNotes'))
+      expect(callOrder.indexOf('setLoading')).toBeLessThan(
+        callOrder.indexOf('initializeDefaultData')
+      )
+      expect(callOrder.indexOf('initializeDefaultData')).toBeLessThan(
+        callOrder.indexOf('loadNotes')
+      )
+      expect(callOrder.indexOf('loadNotes')).toBeLessThan(
+        callOrder.indexOf('loadTagColors')
+      )
+      expect(callOrder.indexOf('loadTagColors')).toBeLessThan(
+        callOrder.indexOf('setNotes')
+      )
     })
 
     it('should prevent double initialization', async () => {
@@ -427,7 +474,7 @@ describe('useAppInit', () => {
 
       // Verify all required steps were called
       expect(mockInitializeDefaultData).toHaveBeenCalled()
-      expect(mockLoadNotes).toHaveBeenCalled() 
+      expect(mockLoadNotes).toHaveBeenCalled()
       expect(mockLoadTagColors).toHaveBeenCalled()
       expect(mockSetNotes).toHaveBeenCalled()
     })
@@ -446,12 +493,20 @@ describe('useAppInit', () => {
       renderHook(() => useAppInit())
 
       await waitFor(() => {
-        expect(mockLogger.debug).toHaveBeenCalledWith('Initializing default data if needed...')
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          'Initializing default data if needed...'
+        )
       })
 
-      expect(mockLogger.debug).toHaveBeenCalledWith('Loading notes from storage...')
-      expect(mockLogger.debug).toHaveBeenCalledWith('Loading tag colors from storage...')
-      expect(mockLogger.debug).toHaveBeenCalledWith('Loading settings from storage...')
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'Loading notes from storage...'
+      )
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'Loading tag colors from storage...'
+      )
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'Loading settings from storage...'
+      )
     })
   })
 })

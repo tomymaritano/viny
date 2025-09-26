@@ -4,45 +4,51 @@ import { useSettingsErrorHandler } from '../../../hooks/useSettingsErrorHandler'
 import { privacyService } from '../../../services/privacyService'
 import SettingsErrorBoundary from '../SettingsErrorBoundary'
 import { Icons } from '../../Icons'
+import { SliderWithLabels } from '../../ui/SliderRadix'
 
 const PrivacySettingsContent: React.FC = () => {
   const {
     settings,
     setSetting,
     schemas,
-    errors: serviceErrors
+    errors: serviceErrors,
   } = useSettings({ category: 'privacy' })
-  
+
   const {
     errors: localErrors,
     handleSettingsError,
     validateAndHandle,
-    clearError
+    clearError,
   } = useSettingsErrorHandler()
-  
+
   const [isClearing, setIsClearing] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
-  
+
   // Combine service and local errors
   const allErrors = { ...serviceErrors, ...localErrors }
 
-  const renderToggle = (key: string, label: string, description: string, warning?: string) => {
+  const renderToggle = (
+    key: string,
+    label: string,
+    description: string,
+    warning?: string
+  ) => {
     const schema = schemas.find(s => s.key === key)
     const value = settings[key] ?? schema?.defaultValue ?? false
     const hasError = allErrors[key]
-    
+
     return (
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <h4 className="text-sm font-medium text-theme-text-primary">
             {label}
             {schema?.experimental && (
-              <span className="ml-2 text-xs text-theme-accent-yellow">Experimental</span>
+              <span className="ml-2 text-xs text-theme-accent-yellow">
+                Experimental
+              </span>
             )}
           </h4>
-          <p className="text-xs text-theme-text-muted mt-1">
-            {description}
-          </p>
+          <p className="text-xs text-theme-text-muted mt-1">{description}</p>
           {warning && value && (
             <p className="text-xs text-theme-accent-yellow mt-1">
               ⚠️ {warning}
@@ -65,13 +71,13 @@ const PrivacySettingsContent: React.FC = () => {
           <input
             type="checkbox"
             checked={value as boolean}
-            onChange={async (e) => {
+            onChange={async e => {
               const newValue = e.target.checked
               const success = await validateAndHandle(
                 key,
                 newValue,
                 () => true, // Basic validation
-                (val) => setSetting(key, val)
+                val => setSetting(key, val)
               )
               if (!success) {
                 // Force re-render with original value if save failed
@@ -80,44 +86,49 @@ const PrivacySettingsContent: React.FC = () => {
             }}
             className="sr-only peer"
           />
-          <div className={`w-11 h-6 bg-theme-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent-primary ${hasError ? 'ring-2 ring-red-500 ring-opacity-50' : ''}`}></div>
+          <div
+            className={`w-11 h-6 bg-theme-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent-primary ${hasError ? 'ring-2 ring-red-500 ring-opacity-50' : ''}`}
+          ></div>
         </label>
       </div>
     )
   }
 
-  const renderNumberInput = (key: string, label: string, description?: string) => {
+  const renderNumberInput = (
+    key: string,
+    label: string,
+    description?: string
+  ) => {
     const schema = schemas.find(s => s.key === key)
     const value = settings[key] ?? schema?.defaultValue ?? 0
-    
+
     return (
       <div>
-        <label className="block text-sm font-medium text-theme-text-secondary mb-2">
-          {label}
-        </label>
-        {description && (
-          <p className="text-xs text-theme-text-muted mb-2">{description}</p>
-        )}
-        <div className="flex items-center space-x-4">
-          <span className="text-xs text-theme-text-muted">{schema?.min}</span>
-          <input
-            type="range"
-            min={schema?.min}
-            max={schema?.max}
-            step={schema?.step}
-            value={value as number}
-            onChange={(e) => setSetting(key, parseInt(e.target.value))}
-            className="flex-1 h-2 bg-theme-bg-tertiary rounded-lg appearance-none cursor-pointer"
-          />
-          <span className="text-xs text-theme-text-muted">{schema?.max}</span>
-          <span className="text-sm font-medium text-theme-text-primary w-16">
-            {value === 0 ? 'Disabled' : `${value}${key.includes('Days') ? 'd' : key.includes('Minutes') ? 'm' : 's'}`}
-          </span>
-        </div>
+        <SliderWithLabels
+          label={label}
+          description={description}
+          value={[value as number]}
+          min={schema?.min || 0}
+          max={schema?.max || 100}
+          step={schema?.step || 1}
+          showValue={true}
+          showRange={true}
+          formatValue={val =>
+            val === 0
+              ? 'Disabled'
+              : `${val}${key.includes('Days') ? 'd' : key.includes('Minutes') ? 'm' : 's'}`
+          }
+          onValueChange={values =>
+            setSetting(key, parseInt(values[0].toString()))
+          }
+          className="w-full"
+        />
         {allErrors[key] && (
           <p className="mt-1 text-xs text-red-500 flex items-center">
             <Icons.AlertTriangle size={12} className="mr-1" />
-            {typeof allErrors[key] === 'string' ? allErrors[key] : allErrors[key].message}
+            {typeof allErrors[key] === 'string'
+              ? allErrors[key]
+              : allErrors[key].message}
             <button
               onClick={() => clearError(key)}
               className="ml-2 text-theme-text-muted hover:text-theme-text-primary"
@@ -130,9 +141,13 @@ const PrivacySettingsContent: React.FC = () => {
     )
   }
 
-  const renderPasswordInput = (key: string, label: string, placeholder: string) => {
+  const renderPasswordInput = (
+    key: string,
+    label: string,
+    placeholder: string
+  ) => {
     const value = settings[key] || ''
-    
+
     return (
       <div>
         <label className="block text-sm font-medium text-theme-text-secondary mb-2">
@@ -141,7 +156,7 @@ const PrivacySettingsContent: React.FC = () => {
         <input
           type="password"
           value={value as string}
-          onChange={(e) => setSetting(key, e.target.value)}
+          onChange={e => setSetting(key, e.target.value)}
           placeholder={placeholder}
           className={`w-full px-3 py-2 bg-theme-bg-secondary border rounded-md text-sm text-theme-text-primary focus:outline-none focus:ring-2 focus:ring-theme-accent-primary ${
             allErrors[key] ? 'border-red-500' : 'border-theme-border-primary'
@@ -150,7 +165,9 @@ const PrivacySettingsContent: React.FC = () => {
         {allErrors[key] && (
           <p className="mt-1 text-xs text-red-500 flex items-center">
             <Icons.AlertTriangle size={12} className="mr-1" />
-            {typeof allErrors[key] === 'string' ? allErrors[key] : allErrors[key].message}
+            {typeof allErrors[key] === 'string'
+              ? allErrors[key]
+              : allErrors[key].message}
             <button
               onClick={() => clearError(key)}
               className="ml-2 text-theme-text-muted hover:text-theme-text-primary"
@@ -168,12 +185,18 @@ const PrivacySettingsContent: React.FC = () => {
       {/* Privacy Notice */}
       <div className="p-4 bg-theme-accent-primary/10 border border-theme-accent-primary/20 rounded-lg">
         <div className="flex items-start space-x-3">
-          <Icons.Shield size={20} className="text-theme-accent-primary mt-0.5" />
+          <Icons.Shield
+            size={20}
+            className="text-theme-accent-primary mt-0.5"
+          />
           <div>
-            <h4 className="text-sm font-medium text-theme-text-primary">Your Privacy Matters</h4>
+            <h4 className="text-sm font-medium text-theme-text-primary">
+              Your Privacy Matters
+            </h4>
             <p className="text-xs text-theme-text-muted mt-1">
-              Viny is designed with privacy in mind. All your notes are stored locally by default.
-              These settings give you control over what data is collected and how it's used.
+              Viny is designed with privacy in mind. All your notes are stored
+              locally by default. These settings give you control over what data
+              is collected and how it's used.
             </p>
           </div>
         </div>
@@ -184,20 +207,20 @@ const PrivacySettingsContent: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Analytics & Tracking
         </h3>
-        
+
         <div className="space-y-6">
           {renderToggle(
             'analyticsEnabled',
             'Usage Analytics',
             'Help improve the app by sharing anonymous usage data'
           )}
-          
+
           {renderToggle(
             'crashReporting',
             'Crash Reporting',
             'Automatically send crash reports to help fix issues'
           )}
-          
+
           {renderToggle(
             'anonymousMode',
             'Anonymous Mode',
@@ -211,29 +234,28 @@ const PrivacySettingsContent: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Data Storage
         </h3>
-        
+
         <div className="space-y-6">
           {renderToggle(
             'localDataOnly',
             'Local Data Only',
             'Keep all data on this device only'
           )}
-          
+
           {renderToggle(
             'encryptLocalStorage',
             'Encrypt Local Storage',
             'Encrypt notes stored on this device',
             'Experimental feature - ensure you remember your encryption key'
           )}
-          
-          {settings.encryptLocalStorage && (
+
+          {settings.encryptLocalStorage &&
             renderPasswordInput(
               'encryptionKey',
               'Encryption Key',
               'Enter a strong encryption key'
-            )
-          )}
-          
+            )}
+
           {renderToggle(
             'clearDataOnExit',
             'Clear Data on Exit',
@@ -247,7 +269,7 @@ const PrivacySettingsContent: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Data Retention
         </h3>
-        
+
         <div className="space-y-6">
           {renderNumberInput(
             'dataRetentionDays',
@@ -262,20 +284,20 @@ const PrivacySettingsContent: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Network Security
         </h3>
-        
+
         <div className="space-y-6">
           {renderToggle(
             'secureNoteDeletion',
             'Secure Deletion',
             'Overwrite data when deleting notes'
           )}
-          
+
           {renderToggle(
             'autoDeleteOldData',
             'Auto Delete Old Data',
             'Automatically remove data older than retention period'
           )}
-          
+
           {renderNumberInput(
             'clipboardTimeout',
             'Clear Clipboard (Seconds)',
@@ -289,28 +311,27 @@ const PrivacySettingsContent: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Security
         </h3>
-        
+
         <div className="space-y-6">
           {renderToggle(
             'requirePasswordOnStart',
             'Password on Start',
             'Require password when opening the app'
           )}
-          
+
           {renderToggle(
             'lockAfterInactivity',
             'Lock After Inactivity',
             'Require authentication after being idle'
           )}
-          
-          {settings.lockAfterInactivity && (
+
+          {settings.lockAfterInactivity &&
             renderNumberInput(
               'inactivityTimeoutMinutes',
               'Inactivity Timeout (Minutes)',
               'Minutes before requiring authentication'
-            )
-          )}
-          
+            )}
+
           {renderToggle(
             'biometricUnlock',
             'Biometric Unlock',
@@ -325,14 +346,14 @@ const PrivacySettingsContent: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Data Export Settings
         </h3>
-        
+
         <div className="space-y-6">
           {renderToggle(
             'exportIncludeMetadata',
             'Include Metadata in Exports',
             'Include creation dates and tags when exporting'
           )}
-          
+
           {renderToggle(
             'exportIncludeHistory',
             'Include History in Exports',
@@ -346,17 +367,26 @@ const PrivacySettingsContent: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           Privacy Actions
         </h3>
-        
+
         <div className="space-y-3">
           <button
             onClick={async () => {
-              if (confirm('This will permanently delete all usage data, analytics, and cached information. This action cannot be undone. Continue?')) {
+              if (
+                confirm(
+                  'This will permanently delete all usage data, analytics, and cached information. This action cannot be undone. Continue?'
+                )
+              ) {
                 setIsClearing(true)
                 try {
                   await privacyService.clearUsageData()
                   // Success handled by privacyService
                 } catch (error) {
-                  handleSettingsError('clearUsageData', error as Error, 'unknown', true)
+                  handleSettingsError(
+                    'clearUsageData',
+                    error as Error,
+                    'unknown',
+                    true
+                  )
                 } finally {
                   setIsClearing(false)
                 }
@@ -371,19 +401,29 @@ const PrivacySettingsContent: React.FC = () => {
                 {isClearing ? 'Clearing...' : 'Clear Usage Data'}
               </span>
             </div>
-            {!isClearing && <Icons.ChevronRight size={14} className="text-theme-text-muted" />}
+            {!isClearing && (
+              <Icons.ChevronRight size={14} className="text-theme-text-muted" />
+            )}
           </button>
-          
+
           <button
             onClick={async () => {
               setIsDownloading(true)
               try {
                 const includeMetadata = settings.exportIncludeMetadata ?? true
                 const includeHistory = settings.exportIncludeHistory ?? false
-                await privacyService.downloadUserData(includeMetadata, includeHistory)
+                await privacyService.downloadUserData(
+                  includeMetadata,
+                  includeHistory
+                )
                 // Success handled by privacyService
               } catch (error) {
-                handleSettingsError('downloadUserData', error as Error, 'unknown', true)
+                handleSettingsError(
+                  'downloadUserData',
+                  error as Error,
+                  'unknown',
+                  true
+                )
               } finally {
                 setIsDownloading(false)
               }
@@ -397,7 +437,9 @@ const PrivacySettingsContent: React.FC = () => {
                 {isDownloading ? 'Downloading...' : 'Download My Data'}
               </span>
             </div>
-            {!isDownloading && <Icons.ChevronRight size={14} className="text-theme-text-muted" />}
+            {!isDownloading && (
+              <Icons.ChevronRight size={14} className="text-theme-text-muted" />
+            )}
           </button>
         </div>
       </div>

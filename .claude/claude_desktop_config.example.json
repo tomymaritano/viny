@@ -1,0 +1,37 @@
+{
+  "mcpServers": {
+    "viny": {
+      "command": "node",
+      "args": [
+        "/Users/YOUR_USERNAME/Documents/github/nototo/server/src/mcp/dist/server.js"
+      ],
+      "env": {
+        "MCP_JWT_SECRET": "your-secret-key-here",
+        "DATABASE_URL": "file:/Users/YOUR_USERNAME/Documents/github/nototo/server/prisma/nototo.db",
+        "NODE_ENV": "production"
+      },
+      "metadata": {
+        "name": "Viny Notes",
+        "description": "Access and manage your Viny knowledge base",
+        "version": "1.0.0",
+        "author": "Viny Team"
+      }
+    }
+  },
+  "globalShortcuts": {
+    "viny-quick-note": {
+      "keys": ["cmd", "shift", "n"],
+      "action": "Create a quick note in Viny"
+    },
+    "viny-search": {
+      "keys": ["cmd", "shift", "f"],
+      "action": "Search Viny notes"
+    }
+  },
+  "preferences": {
+    "autoConnect": true,
+    "showMCPStatus": true,
+    "requestTimeout": 30000,
+    "maxRetries": 3
+  }
+}

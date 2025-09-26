@@ -3,13 +3,13 @@
  * Provides typed exceptions, retry logic, circuit breaker, and error recovery
  */
 
-import {
-  RepositoryError,
-  RepositoryErrorCode,
+import type {
   RetryConfig,
   CircuitBreakerConfig,
-  OperationResult
+  OperationResult,
 } from '../types/RepositoryTypes'
+import { RepositoryError, RepositoryErrorCode } from '../types/RepositoryTypes'
+import { storageLogger } from '../../../utils/logger'
 
 // =============================================================================
 // Enhanced Error Classes
@@ -71,7 +71,11 @@ export class NotFoundError extends RepositoryError {
 }
 
 export class PermissionDeniedError extends RepositoryError {
-  constructor(operation: string, resource: string, requiredPermission?: string) {
+  constructor(
+    operation: string,
+    resource: string,
+    requiredPermission?: string
+  ) {
     super(
       `Permission denied for ${operation} on ${resource}`,
       RepositoryErrorCode.PERMISSION_DENIED,
@@ -113,7 +117,7 @@ export class RetryHandler {
     baseDelayMs: 100,
     maxDelayMs: 5000,
     exponentialBackoff: true,
-    jitter: true
+    jitter: true,
   }
 
   constructor(private config: RetryConfig = RetryHandler.DEFAULT_CONFIG) {}
@@ -124,33 +128,34 @@ export class RetryHandler {
   async executeWithRetry<T>(
     operation: () => Promise<T>,
     operationName: string,
-    isRetryable: (error: Error) => boolean = (error) => error instanceof RepositoryError && error.isRetryable
+    isRetryable: (error: Error) => boolean = error =>
+      error instanceof RepositoryError && error.isRetryable
   ): Promise<T> {
     let lastError: Error
-    
+
     for (let attempt = 1; attempt <= this.config.maxAttempts; attempt++) {
       try {
         return await this.withTimeout(operation(), operationName)
       } catch (error) {
         lastError = error as Error
-        
+
         // Don't retry on last attempt or if error is not retryable
         if (attempt === this.config.maxAttempts || !isRetryable(lastError)) {
           throw this.wrapError(lastError, operationName, attempt)
         }
-        
+
         // Calculate delay with exponential backoff and jitter
         const delay = this.calculateDelay(attempt)
-        
-        console.warn(
+
+        storageLogger.warn(
           `Repository operation '${operationName}' failed (attempt ${attempt}/${this.config.maxAttempts}). Retrying in ${delay}ms...`,
           { error: lastError.message, attempt, delay }
         )
-        
+
         await this.sleep(delay)
       }
     }
-    
+
     throw this.wrapError(lastError!, operationName, this.config.maxAttempts)
   }
 
@@ -159,7 +164,7 @@ export class RetryHandler {
    */
   private calculateDelay(attempt: number): number {
     let delay: number
-    
+
     if (this.config.exponentialBackoff) {
       // Exponential backoff: baseDelay * 2^(attempt-1)
       delay = this.config.baseDelayMs * Math.pow(2, attempt - 1)
@@ -167,48 +172,55 @@ export class RetryHandler {
       // Linear backoff
       delay = this.config.baseDelayMs * attempt
     }
-    
+
     // Apply maximum delay limit
     delay = Math.min(delay, this.config.maxDelayMs)
-    
+
     // Add jitter to prevent thundering herd
     if (this.config.jitter) {
       const jitterAmount = delay * 0.1 // 10% jitter
       delay += (Math.random() - 0.5) * 2 * jitterAmount
     }
-    
+
     return Math.max(delay, 0)
   }
 
   /**
    * Add timeout to operation
    */
-  private async withTimeout<T>(promise: Promise<T>, operationName: string): Promise<T> {
+  private async withTimeout<T>(
+    promise: Promise<T>,
+    operationName: string
+  ): Promise<T> {
     const timeoutMs = 10000 // 10 second default timeout
-    
+
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => {
         reject(new TimeoutError(operationName, timeoutMs))
       }, timeoutMs)
     })
-    
+
     return Promise.race([promise, timeoutPromise])
   }
 
   /**
    * Wrap error with retry context
    */
-  private wrapError(error: Error, operationName: string, attempts: number): RepositoryError {
+  private wrapError(
+    error: Error,
+    operationName: string,
+    attempts: number
+  ): RepositoryError {
     if (error instanceof RepositoryError) {
       // Add retry context to existing RepositoryError
       error.context = {
         ...error.context,
         retryAttempts: attempts,
-        finalAttempt: true
+        finalAttempt: true,
       }
       return error
     }
-    
+
     // Wrap other errors
     return new RepositoryError(
       `Operation '${operationName}' failed after ${attempts} attempts: ${error.message}`,
@@ -238,7 +250,10 @@ export class CircuitBreaker {
   /**
    * Execute operation with circuit breaker protection
    */
-  async execute<T>(operation: () => Promise<T>, operationName: string): Promise<T> {
+  async execute<T>(
+    operation: () => Promise<T>,
+    operationName: string
+  ): Promise<T> {
     if (!this.config.enabled) {
       return operation()
     }
@@ -260,12 +275,12 @@ export class CircuitBreaker {
 
     try {
       const result = await operation()
-      
+
       // Operation succeeded - reset circuit
       if (this.state === 'half-open') {
         this.reset()
       }
-      
+
       return result
     } catch (error) {
       this.recordFailure()
@@ -276,13 +291,13 @@ export class CircuitBreaker {
   private recordFailure(): void {
     this.failures++
     this.lastFailureTime = Date.now()
-    
+
     if (this.failures >= this.config.failureThreshold) {
       this.state = 'open'
-      console.warn(
-        `Circuit breaker opened after ${this.failures} failures`,
-        { threshold: this.config.failureThreshold, resetTimeout: this.config.resetTimeoutMs }
-      )
+      storageLogger.warn(`Circuit breaker opened after ${this.failures} failures`, {
+        threshold: this.config.failureThreshold,
+        resetTimeout: this.config.resetTimeoutMs,
+      })
     }
   }
 
@@ -290,14 +305,14 @@ export class CircuitBreaker {
     this.failures = 0
     this.lastFailureTime = 0
     this.state = 'closed'
-    console.info('Circuit breaker reset - service restored')
+    storageLogger.info('Circuit breaker reset - service restored')
   }
 
   getState(): { state: string; failures: number; lastFailureTime: number } {
     return {
       state: this.state,
       failures: this.failures,
-      lastFailureTime: this.lastFailureTime
+      lastFailureTime: this.lastFailureTime,
     }
   }
 }
@@ -323,47 +338,47 @@ export class ErrorClassifier {
           return {
             category: 'transient',
             isRetryable: true,
-            suggestedAction: 'Retry with exponential backoff'
+            suggestedAction: 'Retry with exponential backoff',
           }
-        
+
         case RepositoryErrorCode.CONFLICT_ERROR:
           return {
             category: 'transient',
             isRetryable: true,
-            suggestedAction: 'Retry with latest data version'
+            suggestedAction: 'Retry with latest data version',
           }
-        
+
         case RepositoryErrorCode.PERMISSION_DENIED:
         case RepositoryErrorCode.ENCRYPTION_ERROR:
           return {
             category: 'security',
             isRetryable: false,
-            suggestedAction: 'Check authentication and permissions'
+            suggestedAction: 'Check authentication and permissions',
           }
-        
+
         case RepositoryErrorCode.VALIDATION_ERROR:
         case RepositoryErrorCode.SCHEMA_ERROR:
         case RepositoryErrorCode.NOT_FOUND:
           return {
             category: 'permanent',
             isRetryable: false,
-            suggestedAction: 'Fix data or request parameters'
+            suggestedAction: 'Fix data or request parameters',
           }
-        
+
         case RepositoryErrorCode.STORAGE_NOT_AVAILABLE:
         case RepositoryErrorCode.INITIALIZATION_ERROR:
           return {
             category: 'permanent',
             isRetryable: false,
-            suggestedAction: 'Check system configuration'
+            suggestedAction: 'Check system configuration',
           }
       }
     }
-    
+
     return {
       category: 'unknown',
       isRetryable: false,
-      suggestedAction: 'Investigate error details'
+      suggestedAction: 'Investigate error details',
     }
   }
 }
@@ -381,7 +396,7 @@ export class RepositoryErrorHandler {
     circuitBreakerConfig?: CircuitBreakerConfig
   ) {
     this.retryHandler = new RetryHandler(retryConfig)
-    
+
     if (circuitBreakerConfig?.enabled) {
       this.circuitBreaker = new CircuitBreaker(circuitBreakerConfig)
     }
@@ -395,7 +410,7 @@ export class RepositoryErrorHandler {
     operationName: string
   ): Promise<OperationResult<T>> {
     const startTime = Date.now()
-    
+
     try {
       const executor = this.circuitBreaker
         ? () => this.circuitBreaker!.execute(operation, operationName)
@@ -410,20 +425,20 @@ export class RepositoryErrorHandler {
         success: true,
         data: result,
         timestamp: Date.now(),
-        operationId: this.generateOperationId(operationName)
+        operationId: this.generateOperationId(operationName),
       }
     } catch (error) {
       const repositoryError = this.normalizeError(error as Error, operationName)
       const classification = ErrorClassifier.classifyError(repositoryError)
-      
+
       // Log error based on classification
       this.logError(repositoryError, classification, Date.now() - startTime)
-      
+
       return {
         success: false,
         error: repositoryError,
         timestamp: Date.now(),
-        operationId: this.generateOperationId(operationName)
+        operationId: this.generateOperationId(operationName),
       }
     }
   }
@@ -437,11 +452,17 @@ export class RepositoryErrorHandler {
     }
 
     // Map common error types
-    if (error.name === 'QuotaExceededError' || error.message.includes('quota')) {
+    if (
+      error.name === 'QuotaExceededError' ||
+      error.message.includes('quota')
+    ) {
       return new StorageFullError(operationName, 0, 0)
     }
 
-    if (error.name === 'SecurityError' || error.message.includes('permission')) {
+    if (
+      error.name === 'SecurityError' ||
+      error.message.includes('permission')
+    ) {
       return new PermissionDeniedError(operationName, 'storage')
     }
 
@@ -473,15 +494,15 @@ export class RepositoryErrorHandler {
       category: classification.category,
       isRetryable: classification.isRetryable,
       duration,
-      context: error.isCritical ? '[REDACTED]' : error.context
+      context: error.isCritical ? '[REDACTED]' : error.context,
     }
 
     if (classification.category === 'security' || error.isCritical) {
-      console.error('Security-related repository error:', logData)
+      storageLogger.error('Security-related repository error:', logData)
     } else if (classification.category === 'permanent') {
-      console.error('Permanent repository error:', logData)
+      storageLogger.error('Permanent repository error:', logData)
     } else {
-      console.warn('Repository error:', logData)
+      storageLogger.warn('Repository error:', logData)
     }
   }
 
@@ -502,11 +523,19 @@ export class RepositoryErrorHandler {
 // =============================================================================
 
 export class RepositoryErrorFactory {
-  static notFound(entityType: string, id: string, operation: string): NotFoundError {
+  static notFound(
+    entityType: string,
+    id: string,
+    operation: string
+  ): NotFoundError {
     return new NotFoundError(operation, id, entityType)
   }
 
-  static validationFailed(operation: string, errors: string[], data?: any): ValidationError {
+  static validationFailed(
+    operation: string,
+    errors: string[],
+    data?: any
+  ): ValidationError {
     return new ValidationError(operation, errors, data)
   }
 
@@ -514,15 +543,26 @@ export class RepositoryErrorFactory {
     return new StorageNotAvailableError(operation)
   }
 
-  static storageFull(operation: string, used: number, total: number): StorageFullError {
+  static storageFull(
+    operation: string,
+    used: number,
+    total: number
+  ): StorageFullError {
     return new StorageFullError(operation, used, total)
   }
 
-  static conflict(operation: string, entityId: string, details?: any): ConflictError {
+  static conflict(
+    operation: string,
+    entityId: string,
+    details?: any
+  ): ConflictError {
     return new ConflictError(operation, entityId, details)
   }
 
-  static permissionDenied(operation: string, resource: string): PermissionDeniedError {
+  static permissionDenied(
+    operation: string,
+    resource: string
+  ): PermissionDeniedError {
     return new PermissionDeniedError(operation, resource)
   }
 
@@ -539,7 +579,9 @@ export class RepositoryErrorFactory {
 // Type Guards
 // =============================================================================
 
-export function isStorageNotAvailableError(error: unknown): error is StorageNotAvailableError {
+export function isStorageNotAvailableError(
+  error: unknown
+): error is StorageNotAvailableError {
   return error instanceof StorageNotAvailableError
 }
 
@@ -555,7 +597,9 @@ export function isNotFoundError(error: unknown): error is NotFoundError {
   return error instanceof NotFoundError
 }
 
-export function isPermissionDeniedError(error: unknown): error is PermissionDeniedError {
+export function isPermissionDeniedError(
+  error: unknown
+): error is PermissionDeniedError {
   return error instanceof PermissionDeniedError
 }
 

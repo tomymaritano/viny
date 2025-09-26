@@ -13,7 +13,7 @@ vi.useFakeTimers()
 // Mock ToastAction type
 const mockToastAction = {
   label: 'Action',
-  onClick: vi.fn()
+  onClick: vi.fn(),
 }
 
 describe('useToast', () => {
@@ -25,13 +25,13 @@ describe('useToast', () => {
   describe('Hook Initialization', () => {
     it('should initialize with empty toasts array', () => {
       const { result } = renderHook(() => useToast())
-      
+
       expect(result.current.toasts).toEqual([])
     })
 
     it('should provide all expected methods', () => {
       const { result } = renderHook(() => useToast())
-      
+
       expect(result.current).toHaveProperty('toasts')
       expect(result.current).toHaveProperty('showToast')
       expect(result.current).toHaveProperty('dismissToast')
@@ -55,38 +55,38 @@ describe('useToast', () => {
   describe('showToast function', () => {
     it('should add toast to the array', () => {
       const { result } = renderHook(() => useToast())
-      
+
       act(() => {
         result.current.showToast({
           type: 'success',
-          message: 'Test message'
+          message: 'Test message',
         })
       })
 
       expect(result.current.toasts).toHaveLength(1)
       expect(result.current.toasts[0]).toMatchObject({
         type: 'success',
-        message: 'Test message'
+        message: 'Test message',
       })
     })
 
     it('should generate unique IDs for toasts', () => {
       const { result } = renderHook(() => useToast())
-      
+
       let id1: string
       let id2: string
-      
+
       act(() => {
         id1 = result.current.showToast({
           type: 'success',
-          message: 'First message'
+          message: 'First message',
         })
       })
-      
+
       act(() => {
         id2 = result.current.showToast({
           type: 'info',
-          message: 'Second message'
+          message: 'Second message',
         })
       })
 
@@ -99,32 +99,32 @@ describe('useToast', () => {
 
     it('should set default duration based on type', () => {
       const { result } = renderHook(() => useToast())
-      
+
       act(() => {
         result.current.showToast({
           type: 'success',
-          message: 'Success message'
+          message: 'Success message',
         })
       })
-      
+
       act(() => {
         result.current.showToast({
           type: 'error',
-          message: 'Error message'
+          message: 'Error message',
         })
       })
-      
+
       act(() => {
         result.current.showToast({
           type: 'warning',
-          message: 'Warning message'
+          message: 'Warning message',
         })
       })
-      
+
       act(() => {
         result.current.showToast({
           type: 'info',
-          message: 'Info message'
+          message: 'Info message',
         })
       })
 
@@ -136,12 +136,12 @@ describe('useToast', () => {
 
     it('should use custom duration when provided', () => {
       const { result } = renderHook(() => useToast())
-      
+
       act(() => {
         result.current.showToast({
           type: 'success',
           message: 'Custom duration',
-          duration: 10000
+          duration: 10000,
         })
       })
 
@@ -150,11 +150,11 @@ describe('useToast', () => {
 
     it('should set dismissible to true by default', () => {
       const { result } = renderHook(() => useToast())
-      
+
       act(() => {
         result.current.showToast({
           type: 'success',
-          message: 'Test message'
+          message: 'Test message',
         })
       })
 
@@ -163,12 +163,12 @@ describe('useToast', () => {
 
     it('should use custom dismissible value when provided', () => {
       const { result } = renderHook(() => useToast())
-      
+
       act(() => {
         result.current.showToast({
           type: 'success',
           message: 'Non-dismissible toast',
-          dismissible: false
+          dismissible: false,
         })
       })
 
@@ -177,26 +177,28 @@ describe('useToast', () => {
 
     it('should include details when provided', () => {
       const { result } = renderHook(() => useToast())
-      
+
       act(() => {
         result.current.showToast({
           type: 'error',
           message: 'Error occurred',
-          details: 'Detailed error information'
+          details: 'Detailed error information',
         })
       })
 
-      expect(result.current.toasts[0].details).toBe('Detailed error information')
+      expect(result.current.toasts[0].details).toBe(
+        'Detailed error information'
+      )
     })
 
     it('should include actions when provided', () => {
       const { result } = renderHook(() => useToast())
-      
+
       act(() => {
         result.current.showToast({
           type: 'info',
           message: 'Action required',
-          actions: [mockToastAction]
+          actions: [mockToastAction],
         })
       })
 
@@ -205,12 +207,12 @@ describe('useToast', () => {
 
     it('should auto-dismiss toast after duration', () => {
       const { result } = renderHook(() => useToast())
-      
+
       act(() => {
         result.current.showToast({
           type: 'success',
           message: 'Auto-dismiss test',
-          duration: 1000
+          duration: 1000,
         })
       })
 
@@ -226,12 +228,12 @@ describe('useToast', () => {
 
     it('should not auto-dismiss when duration is 0', () => {
       const { result } = renderHook(() => useToast())
-      
+
       act(() => {
         result.current.showToast({
           type: 'success',
           message: 'Persistent toast',
-          duration: 0
+          duration: 0,
         })
       })
 
@@ -248,12 +250,12 @@ describe('useToast', () => {
 
     it('should not auto-dismiss when duration is negative', () => {
       const { result } = renderHook(() => useToast())
-      
+
       act(() => {
         result.current.showToast({
           type: 'success',
           message: 'Persistent toast',
-          duration: -1
+          duration: -1,
         })
       })
 
@@ -272,13 +274,13 @@ describe('useToast', () => {
   describe('dismissToast function', () => {
     it('should remove toast by ID', () => {
       const { result } = renderHook(() => useToast())
-      
+
       let toastId: string
-      
+
       act(() => {
         toastId = result.current.showToast({
           type: 'success',
-          message: 'Test message'
+          message: 'Test message',
         })
       })
 
@@ -293,18 +295,18 @@ describe('useToast', () => {
 
     it('should only remove the specified toast', () => {
       const { result } = renderHook(() => useToast())
-      
+
       let toastId1: string
       let toastId2: string
-      
+
       act(() => {
         toastId1 = result.current.showToast({
           type: 'success',
-          message: 'First message'
+          message: 'First message',
         })
         toastId2 = result.current.showToast({
           type: 'info',
-          message: 'Second message'
+          message: 'Second message',
         })
       })
 
@@ -320,11 +322,11 @@ describe('useToast', () => {
 
     it('should handle dismissing non-existent toast gracefully', () => {
       const { result } = renderHook(() => useToast())
-      
+
       act(() => {
         result.current.showToast({
           type: 'success',
-          message: 'Test message'
+          message: 'Test message',
         })
       })
 
@@ -343,19 +345,19 @@ describe('useToast', () => {
   describe('dismissAllToasts function', () => {
     it('should remove all toasts', () => {
       const { result } = renderHook(() => useToast())
-      
+
       act(() => {
         result.current.showToast({
           type: 'success',
-          message: 'First message'
+          message: 'First message',
         })
         result.current.showToast({
           type: 'info',
-          message: 'Second message'
+          message: 'Second message',
         })
         result.current.showToast({
           type: 'warning',
-          message: 'Third message'
+          message: 'Third message',
         })
       })
 
@@ -370,7 +372,7 @@ describe('useToast', () => {
 
     it('should handle empty toasts array', () => {
       const { result } = renderHook(() => useToast())
-      
+
       expect(result.current.toasts).toHaveLength(0)
 
       act(() => {
@@ -385,7 +387,7 @@ describe('useToast', () => {
     describe('showSuccess', () => {
       it('should create success toast', () => {
         const { result } = renderHook(() => useToast())
-        
+
         act(() => {
           result.current.showSuccess('Success message')
         })
@@ -393,17 +395,17 @@ describe('useToast', () => {
         expect(result.current.toasts).toHaveLength(1)
         expect(result.current.toasts[0]).toMatchObject({
           type: 'success',
-          message: 'Success message'
+          message: 'Success message',
         })
       })
 
       it('should accept additional options', () => {
         const { result } = renderHook(() => useToast())
-        
+
         act(() => {
           result.current.showSuccess('Success message', {
             duration: 5000,
-            details: 'Success details'
+            details: 'Success details',
           })
         })
 
@@ -411,7 +413,7 @@ describe('useToast', () => {
           type: 'success',
           message: 'Success message',
           duration: 5000,
-          details: 'Success details'
+          details: 'Success details',
         })
       })
     })
@@ -419,7 +421,7 @@ describe('useToast', () => {
     describe('showError', () => {
       it('should create error toast', () => {
         const { result } = renderHook(() => useToast())
-        
+
         act(() => {
           result.current.showError('Error message')
         })
@@ -427,17 +429,17 @@ describe('useToast', () => {
         expect(result.current.toasts).toHaveLength(1)
         expect(result.current.toasts[0]).toMatchObject({
           type: 'error',
-          message: 'Error message'
+          message: 'Error message',
         })
       })
 
       it('should accept additional options', () => {
         const { result } = renderHook(() => useToast())
-        
+
         act(() => {
           result.current.showError('Error message', {
             dismissible: false,
-            actions: [mockToastAction]
+            actions: [mockToastAction],
           })
         })
 
@@ -445,7 +447,7 @@ describe('useToast', () => {
           type: 'error',
           message: 'Error message',
           dismissible: false,
-          actions: [mockToastAction]
+          actions: [mockToastAction],
         })
       })
     })
@@ -453,7 +455,7 @@ describe('useToast', () => {
     describe('showWarning', () => {
       it('should create warning toast', () => {
         const { result } = renderHook(() => useToast())
-        
+
         act(() => {
           result.current.showWarning('Warning message')
         })
@@ -461,23 +463,23 @@ describe('useToast', () => {
         expect(result.current.toasts).toHaveLength(1)
         expect(result.current.toasts[0]).toMatchObject({
           type: 'warning',
-          message: 'Warning message'
+          message: 'Warning message',
         })
       })
 
       it('should accept additional options', () => {
         const { result } = renderHook(() => useToast())
-        
+
         act(() => {
           result.current.showWarning('Warning message', {
-            duration: 8000
+            duration: 8000,
           })
         })
 
         expect(result.current.toasts[0]).toMatchObject({
           type: 'warning',
           message: 'Warning message',
-          duration: 8000
+          duration: 8000,
         })
       })
     })
@@ -485,7 +487,7 @@ describe('useToast', () => {
     describe('showInfo', () => {
       it('should create info toast', () => {
         const { result } = renderHook(() => useToast())
-        
+
         act(() => {
           result.current.showInfo('Info message')
         })
@@ -493,23 +495,23 @@ describe('useToast', () => {
         expect(result.current.toasts).toHaveLength(1)
         expect(result.current.toasts[0]).toMatchObject({
           type: 'info',
-          message: 'Info message'
+          message: 'Info message',
         })
       })
 
       it('should accept additional options', () => {
         const { result } = renderHook(() => useToast())
-        
+
         act(() => {
           result.current.showInfo('Info message', {
-            details: 'Additional info'
+            details: 'Additional info',
           })
         })
 
         expect(result.current.toasts[0]).toMatchObject({
           type: 'info',
           message: 'Info message',
-          details: 'Additional info'
+          details: 'Additional info',
         })
       })
     })
@@ -518,7 +520,7 @@ describe('useToast', () => {
   describe('Multiple toasts management', () => {
     it('should handle multiple toasts correctly', () => {
       const { result } = renderHook(() => useToast())
-      
+
       act(() => {
         result.current.showSuccess('Success 1')
         result.current.showError('Error 1')
@@ -527,7 +529,7 @@ describe('useToast', () => {
       })
 
       expect(result.current.toasts).toHaveLength(4)
-      
+
       // Check order (should be in order of creation)
       expect(result.current.toasts[0].message).toBe('Success 1')
       expect(result.current.toasts[1].message).toBe('Error 1')
@@ -537,17 +539,17 @@ describe('useToast', () => {
 
     it('should handle auto-dismiss of multiple toasts', () => {
       const { result } = renderHook(() => useToast())
-      
+
       act(() => {
         result.current.showToast({
           type: 'success',
           message: 'Quick toast',
-          duration: 1000
+          duration: 1000,
         })
         result.current.showToast({
           type: 'info',
           message: 'Slow toast',
-          duration: 3000
+          duration: 3000,
         })
       })
 
@@ -573,17 +575,17 @@ describe('useToast', () => {
 
     it('should handle mixed persistent and auto-dismiss toasts', () => {
       const { result } = renderHook(() => useToast())
-      
+
       act(() => {
         result.current.showToast({
           type: 'success',
           message: 'Persistent toast',
-          duration: 0
+          duration: 0,
         })
         result.current.showToast({
           type: 'info',
           message: 'Auto-dismiss toast',
-          duration: 1000
+          duration: 1000,
         })
       })
 
@@ -603,13 +605,13 @@ describe('useToast', () => {
   describe('Edge cases and error handling', () => {
     it('should handle very long messages', () => {
       const { result } = renderHook(() => useToast())
-      
+
       const longMessage = 'A'.repeat(1000)
-      
+
       act(() => {
         result.current.showToast({
           type: 'success',
-          message: longMessage
+          message: longMessage,
         })
       })
 
@@ -618,11 +620,11 @@ describe('useToast', () => {
 
     it('should handle empty message', () => {
       const { result } = renderHook(() => useToast())
-      
+
       act(() => {
         result.current.showToast({
           type: 'success',
-          message: ''
+          message: '',
         })
       })
 
@@ -631,12 +633,12 @@ describe('useToast', () => {
 
     it('should handle very large duration values', () => {
       const { result } = renderHook(() => useToast())
-      
+
       act(() => {
         result.current.showToast({
           type: 'success',
           message: 'Large duration',
-          duration: Number.MAX_SAFE_INTEGER
+          duration: Number.MAX_SAFE_INTEGER,
         })
       })
 
@@ -645,18 +647,18 @@ describe('useToast', () => {
 
     it('should handle rapid successive calls', () => {
       const { result } = renderHook(() => useToast())
-      
+
       act(() => {
         for (let i = 0; i < 100; i++) {
           result.current.showToast({
             type: 'success',
-            message: `Toast ${i}`
+            message: `Toast ${i}`,
           })
         }
       })
 
       expect(result.current.toasts).toHaveLength(100)
-      
+
       // All IDs should be unique
       const ids = result.current.toasts.map(toast => toast.id)
       const uniqueIds = new Set(ids)
@@ -667,7 +669,7 @@ describe('useToast', () => {
   describe('Performance considerations', () => {
     it('should provide stable method references', () => {
       const { result, rerender } = renderHook(() => useToast())
-      
+
       const initialMethods = {
         showToast: result.current.showToast,
         dismissToast: result.current.dismissToast,
@@ -675,7 +677,7 @@ describe('useToast', () => {
         showSuccess: result.current.showSuccess,
         showError: result.current.showError,
         showWarning: result.current.showWarning,
-        showInfo: result.current.showInfo
+        showInfo: result.current.showInfo,
       }
 
       // Rerender should not change method references
@@ -683,7 +685,9 @@ describe('useToast', () => {
 
       expect(result.current.showToast).toBe(initialMethods.showToast)
       expect(result.current.dismissToast).toBe(initialMethods.dismissToast)
-      expect(result.current.dismissAllToasts).toBe(initialMethods.dismissAllToasts)
+      expect(result.current.dismissAllToasts).toBe(
+        initialMethods.dismissAllToasts
+      )
       expect(result.current.showSuccess).toBe(initialMethods.showSuccess)
       expect(result.current.showError).toBe(initialMethods.showError)
       expect(result.current.showWarning).toBe(initialMethods.showWarning)
@@ -694,7 +698,7 @@ describe('useToast', () => {
   describe('Integration scenarios', () => {
     it('should work well with typical user interaction flow', () => {
       const { result } = renderHook(() => useToast())
-      
+
       // User performs action, gets success toast
       act(() => {
         result.current.showSuccess('File saved successfully')
@@ -706,7 +710,7 @@ describe('useToast', () => {
       // User makes an error, gets error toast
       act(() => {
         result.current.showError('Failed to delete file', {
-          details: 'File is currently in use'
+          details: 'File is currently in use',
         })
       })
 

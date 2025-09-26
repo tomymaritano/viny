@@ -1,27 +1,27 @@
 /**
  * Service responsible for application initialization logic
- * 
+ *
  * This service encapsulates all the business logic for app startup:
  * - Loading notes and settings from storage
- * - Running storage diagnostics in development  
+ * - Running storage diagnostics in development
  * - Initializing default data
  * - Managing the complete initialization sequence
- * 
+ *
  * Benefits of this approach:
  * - Easy to test in isolation
  * - Clear separation of concerns
  * - Reusable across different contexts
  * - No React dependencies in business logic
- * 
+ *
  * Usage:
  * ```typescript
  * const dependencies = { setNotes, setLoading, setError, loadTagColors, updateSettings }
  * const result = await appInitializationService.initialize(dependencies)
  * if (result.success) {
- *   console.log('App initialized successfully')
+ *   initLogger.info('App initialized successfully')
  * }
  * ```
- * 
+ *
  * @example
  * // In tests, you can easily mock the dependencies:
  * const mockDeps = { setNotes: vi.fn(), setLoading: vi.fn(), ... }
@@ -29,14 +29,19 @@
  * expect(mockDeps.setNotes).toHaveBeenCalledWith(expectedNotes)
  */
 
-import { createDocumentRepository, createSettingsRepository } from '../lib/repositories/RepositoryFactory'
+import {
+  createDocumentRepository,
+  createSettingsRepository,
+} from '../lib/repositories/RepositoryFactory'
 import { initLogger as logger } from '../utils/logger'
 import { initializeDefaultData } from '../utils/defaultDataInitializer'
+import { embeddingManager } from './ai'
+import { aiService } from './ai/AIService'
 
 /**
  * Dependencies required for app initialization
  * @interface InitializationDependencies
- * 
+ *
  * NOTE: With repository pattern, slices now handle their own initialization.
  * This service focuses on coordination and legacy compatibility.
  */
@@ -45,6 +50,8 @@ export interface InitializationDependencies {
   loadNotes?: () => Promise<void>
   /** Function to trigger settings loading */
   loadSettings?: () => Promise<void>
+  /** Function to trigger notebooks loading */
+  loadNotebooks?: () => Promise<void>
   /** Function to update loading state */
   setLoading: (loading: boolean) => void
   /** Function to set error messages */
@@ -79,7 +86,9 @@ export class AppInitializationService {
    * Main initialization method
    * Simplified for repository pattern - slices handle their own initialization
    */
-  async initialize(deps: InitializationDependencies): Promise<InitializationResult> {
+  async initialize(
+    deps: InitializationDependencies
+  ): Promise<InitializationResult> {
     if (this.isInitialized) {
       logger.debug('App already initialized, skipping')
       deps.setLoading(false)
@@ -100,26 +109,57 @@ export class AppInitializationService {
 
       // Repository pattern: slices handle their own loading
       // This coordination ensures proper sequencing
-      
+
       if (deps.loadSettings) {
         logger.debug('Triggering settings loading...')
         await deps.loadSettings()
       }
-      
+
+      if (deps.loadNotebooks) {
+        logger.debug('Triggering notebooks loading...')
+        initLogger.info('🗂️ Loading notebooks...')
+        await deps.loadNotebooks()
+        initLogger.info('✅ Notebooks loaded')
+      } else {
+        initLogger.warn('⚠️ loadNotebooks not provided')
+      }
+
       if (deps.loadNotes) {
         logger.debug('Triggering notes loading...')
         await deps.loadNotes()
       }
-      
+
+      // Initialize embedding manager after notes are loaded
+      try {
+        logger.debug('Initializing embedding manager...')
+        await embeddingManager.initialize()
+        logger.info('Embedding manager initialized successfully')
+      } catch (error) {
+        logger.warn('Failed to initialize embedding manager:', error)
+        // Don't fail the entire initialization if embeddings fail
+      }
+
+      // Initialize AI service after settings are loaded
+      try {
+        logger.debug('Initializing AI service...')
+        const settingsRepo = createSettingsRepository()
+        const settings = await settingsRepo.getSettings()
+        await aiService.initialize(settings)
+        logger.info('AI service initialized successfully')
+      } catch (error) {
+        logger.warn('Failed to initialize AI service:', error)
+        // Don't fail the entire initialization if AI fails
+      }
+
       // Legacy compatibility path
       if (deps.setNotes && !deps.loadNotes) {
         await this.legacyNotesLoad(deps)
       }
-      
+
       if (deps.loadTagColors && !deps.loadSettings) {
         await deps.loadTagColors()
       }
-      
+
       if (deps.updateSettings && !deps.loadSettings) {
         await this.legacySettingsLoad(deps)
       }
@@ -127,9 +167,9 @@ export class AppInitializationService {
       this.isInitialized = true
       logger.info('App initialization completed successfully')
       return { success: true }
-      
     } catch (error) {
-      const errorMessage = 'Failed to initialize application. Please refresh the page.'
+      const errorMessage =
+        'Failed to initialize application. Please refresh the page.'
       logger.error('Failed to initialize app:', error)
       deps.setError(errorMessage)
       return { success: false, error: errorMessage }
@@ -141,9 +181,11 @@ export class AppInitializationService {
   /**
    * Legacy notes loading (will be removed when all components use repository pattern)
    */
-  private async legacyNotesLoad(deps: InitializationDependencies): Promise<void> {
+  private async legacyNotesLoad(
+    deps: InitializationDependencies
+  ): Promise<void> {
     if (!deps.setNotes) return
-    
+
     logger.debug('Loading notes via legacy path...')
     try {
       const repository = createDocumentRepository()
@@ -156,18 +198,20 @@ export class AppInitializationService {
       deps.setNotes([])
     }
   }
-  
+
   /**
    * Legacy settings loading (will be removed when all components use repository pattern)
    */
-  private async legacySettingsLoad(deps: InitializationDependencies): Promise<void> {
+  private async legacySettingsLoad(
+    deps: InitializationDependencies
+  ): Promise<void> {
     if (!deps.updateSettings) return
-    
+
     logger.debug('Loading settings via legacy path...')
     try {
       const repository = createSettingsRepository()
       const settings = await repository.getSettings()
-      
+
       if (Object.keys(settings).length > 0) {
         deps.updateSettings(settings, true) // Skip persistence during initialization
         logger.debug('Settings loaded via legacy path:', Object.keys(settings))
@@ -187,14 +231,30 @@ export class AppInitializationService {
         // Test settings repository
         const settingsRepo = createSettingsRepository()
         const testSettings = await settingsRepo.getSettings()
-        logger.debug('Settings repository: OK, loaded', Object.keys(testSettings).length, 'settings')
-        
+        logger.debug(
+          'Settings repository: OK, loaded',
+          Object.keys(testSettings).length,
+          'settings'
+        )
+
         // Test document repository
         const docRepo = createDocumentRepository()
         await docRepo.initialize()
         const testNotes = await docRepo.getNotes()
-        logger.debug('Document repository: OK, found', testNotes.length, 'notes')
-        
+        logger.debug(
+          'Document repository: OK, found',
+          testNotes.length,
+          'notes'
+        )
+
+        // Test notebooks
+        const testNotebooks = await docRepo.getNotebooks()
+        logger.debug(
+          'Document repository: OK, found',
+          testNotebooks.length,
+          'notebooks'
+        )
+
         logger.debug('Repository diagnostics completed successfully')
       } catch (error) {
         logger.warn('Repository diagnostics failed:', error)

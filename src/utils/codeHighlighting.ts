@@ -1,34 +1,38 @@
 // Code highlighting utilities and copy functionality
 
 /**
- * Copy code content to clipboard
+
+import { editorLogger } from './logger' * Copy code content to clipboard
  * @param codeId - The ID of the code element to copy
  */
 export function copyCode(codeId: string): void {
   try {
     const codeElement = document.getElementById(codeId)
     if (!codeElement) {
-      console.warn(`Code element with ID ${codeId} not found`)
+      editorLogger.warn(`Code element with ID ${codeId} not found`)
       return
     }
 
     // Get the text content, preserving line breaks
     const codeText = codeElement.textContent || codeElement.innerText || ''
-    
+
     // Modern clipboard API
     if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(codeText).then(() => {
-        showCopySuccess(codeId)
-      }).catch((err) => {
-        console.error('Failed to copy code:', err)
-        fallbackCopyMethod(codeText, codeId)
-      })
+      navigator.clipboard
+        .writeText(codeText)
+        .then(() => {
+          showCopySuccess(codeId)
+        })
+        .catch(err => {
+          editorLogger.error('Failed to copy code:', err)
+          fallbackCopyMethod(codeText, codeId)
+        })
     } else {
       // Fallback for older browsers
       fallbackCopyMethod(codeText, codeId)
     }
   } catch (error) {
-    console.error('Error copying code:', error)
+    editorLogger.error('Error copying code:', error)
   }
 }
 
@@ -47,17 +51,17 @@ function fallbackCopyMethod(text: string, codeId: string): void {
     document.body.appendChild(textArea)
     textArea.focus()
     textArea.select()
-    
+
     const successful = document.execCommand('copy')
     document.body.removeChild(textArea)
-    
+
     if (successful) {
       showCopySuccess(codeId)
     } else {
       throw new Error('Fallback copy method failed')
     }
   } catch (error) {
-    console.error('Fallback copy failed:', error)
+    editorLogger.error('Fallback copy failed:', error)
     // Show manual copy instruction
     showManualCopyInstructions(codeId)
   }
@@ -74,11 +78,11 @@ function showCopySuccess(codeId: string): void {
   // Find the copy button associated with this code block
   const wrapper = codeElement.closest('.code-block-wrapper')
   const copyButton = wrapper?.querySelector('.copy-button') as HTMLButtonElement
-  
+
   if (copyButton) {
     copyButton.classList.add('copied')
     copyButton.setAttribute('title', 'Copied!')
-    
+
     // Reset after 2 seconds
     setTimeout(() => {
       copyButton.classList.remove('copied')
@@ -107,7 +111,8 @@ function showManualCopyInstructions(codeId: string): void {
   if (wrapper) {
     const instruction = document.createElement('div')
     instruction.className = 'copy-instruction'
-    instruction.textContent = 'Code selected. Press Ctrl+C (Cmd+C on Mac) to copy.'
+    instruction.textContent =
+      'Code selected. Press Ctrl+C (Cmd+C on Mac) to copy.'
     instruction.style.cssText = `
       position: absolute;
       top: 100%;
@@ -121,10 +126,10 @@ function showManualCopyInstructions(codeId: string): void {
       z-index: 1000;
       white-space: nowrap;
     `
-    
+
     wrapper.style.position = 'relative'
     wrapper.appendChild(instruction)
-    
+
     // Remove instruction after 5 seconds
     setTimeout(() => {
       if (instruction.parentNode) {
@@ -141,13 +146,17 @@ function showManualCopyInstructions(codeId: string): void {
 export function initializeCodeHighlighting(): void {
   // Make copyCode function available globally for onclick handlers
   if (typeof window !== 'undefined') {
-    (window as any).copyCode = copyCode
+    ;(window as any).copyCode = copyCode
   }
 
   // Add keyboard shortcuts for code blocks
-  document.addEventListener('keydown', (event) => {
+  document.addEventListener('keydown', event => {
     // Ctrl+Shift+C to copy focused code block
-    if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'C') {
+    if (
+      (event.ctrlKey || event.metaKey) &&
+      event.shiftKey &&
+      event.key === 'C'
+    ) {
       const activeElement = document.activeElement
       const codeBlock = activeElement?.closest('.code-block-wrapper')
       if (codeBlock) {
@@ -161,7 +170,7 @@ export function initializeCodeHighlighting(): void {
   })
 
   // Add click-to-focus functionality for code blocks
-  document.addEventListener('click', (event) => {
+  document.addEventListener('click', event => {
     const target = event.target as HTMLElement
     const codeBlock = target.closest('.code-block-wrapper')
     if (codeBlock && !target.closest('.copy-button')) {
@@ -184,30 +193,24 @@ export function detectCodeLanguage(content: string): string | null {
     javascript: [
       /\b(function|const|let|var|=>|console\.log)\b/,
       /\b(import|export|from|require)\b/,
-      /\.(js|jsx|ts|tsx)$/
+      /\.(js|jsx|ts|tsx)$/,
     ],
     python: [
       /\b(def|import|from|class|if __name__)\b/,
       /\bprint\s*\(/,
-      /\.py$/
+      /\.py$/,
     ],
     css: [
       /\{[^}]*\}/,
       /\b(display|color|background|margin|padding)\s*:/,
-      /\.(css|scss|sass)$/
+      /\.(css|scss|sass)$/,
     ],
-    html: [
-      /<\/?[a-z][\s\S]*>/i,
-      /<!DOCTYPE/i
-    ],
+    html: [/<\/?[a-z][\s\S]*>/i, /<!DOCTYPE/i],
     sql: [
       /\b(SELECT|INSERT|UPDATE|DELETE|FROM|WHERE|JOIN)\b/i,
-      /\bCREATE\s+(TABLE|DATABASE|INDEX)\b/i
+      /\bCREATE\s+(TABLE|DATABASE|INDEX)\b/i,
     ],
-    json: [
-      /^\s*\{[\s\S]*\}\s*$/,
-      /^\s*\[[\s\S]*\]\s*$/
-    ]
+    json: [/^\s*\{[\s\S]*\}\s*$/, /^\s*\[[\s\S]*\]\s*$/],
   }
 
   for (const [language, regexes] of Object.entries(patterns)) {

@@ -10,7 +10,13 @@ export const useScrollSync = viewMode => {
 
   const syncScroll = useCallback(
     (sourceElement, targetElement) => {
-      if (!sourceElement || !targetElement || isScrollSyncing || !syncScrollEnabled) return
+      if (
+        !sourceElement ||
+        !targetElement ||
+        isScrollSyncing ||
+        !syncScrollEnabled
+      )
+        return
 
       setIsScrollSyncing(true)
 

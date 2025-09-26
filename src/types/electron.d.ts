@@ -1,4 +1,4 @@
-import { Note, Notebook, Settings } from './index'
+import type { Note, Notebook, Settings } from './index'
 
 interface StorageInfo {
   dataDirectory: string
@@ -31,53 +31,110 @@ interface ExportData {
   version: string
 }
 
+interface StorageResult {
+  success: boolean
+  message?: string
+}
+
+interface ExportOptions {
+  format: 'html' | 'markdown' | 'pdf'
+  includeMetadata?: boolean
+}
+
+interface ExportResult {
+  success: boolean
+  filePath?: string
+  error?: string
+}
+
 interface ElectronAPI {
   openSettings: () => void
   isElectron: boolean
   platform: string
-  
-  // Context menu support
-  showContextMenu: (type: string) => void
-  showNoteContextMenu: (note: Note) => void
-  
-  // Event handling
-  on: (event: string, callback: Function) => void
-  removeAllListeners: (event: string) => void
+
+  // Window controls
   windowControls: {
     minimize: () => void
     maximize: () => void
     close: () => void
     unmaximize: () => void
   }
-  // Manual window dragging methods
-  startWindowDrag: (data: { startX?: number; startY?: number }) => void
-  continueWindowDrag: (data: { currentX?: number; currentY?: number; deltaX?: number; deltaY?: number }) => void
-  endWindowDrag: () => void
+
+  // Storage API - Reduced to essential operations only
   storage: {
-    saveNote: (note: Note) => Promise<Note>
+    // Notes operations - Core CRUD only
+    saveNote: (note: Note) => Promise<StorageResult>
     loadNote: (id: string) => Promise<Note | null>
     loadAllNotes: () => Promise<Note[]>
-    deleteNote: (id: string) => Promise<boolean>
-    saveNotebooks: (notebooks: Notebook[]) => Promise<Notebook[]>
+    deleteNote: (id: string) => Promise<StorageResult>
+
+    // Notebooks operations
+    saveNotebooks: (notebooks: Notebook[]) => Promise<StorageResult>
     loadNotebooks: () => Promise<Notebook[]>
-    saveSettings: (settings: Settings) => Promise<Settings>
-    loadSettings: () => Promise<Settings | null>
-    saveTagColors: (tagColors: Record<string, string>) => Promise<Record<string, string>>
+
+    // Settings operations
+    saveSettings: (settings: Partial<Settings>) => Promise<StorageResult>
+    loadSettings: () => Promise<Partial<Settings>>
+
+    // Tag colors operations
+    saveTagColors: (tagColors: Record<string, string>) => Promise<StorageResult>
     loadTagColors: () => Promise<Record<string, string>>
-    getStorageInfo: () => Promise<StorageInfo>
-    exportData: () => Promise<ExportData>
-    importData: (data: ExportData) => Promise<boolean>
-    clearStorage: () => Promise<boolean>
-    createBackup: () => Promise<string>
-    listBackups: () => Promise<BackupInfo[]>
-    restoreBackup: (filename: string) => Promise<boolean>
-    deleteBackup: (filename: string) => Promise<boolean>
+
+    // REMOVED for security:
+    // - createBackup, restoreFromBackup
+    // - migrateFromLocalStorage
+    // - checkDataIntegrity, repairCorruptedData
+    // - exportData, importData
+    // - getStorageInfo, getDataDirectory
+    // - clearStorage, listBackups, deleteBackup
   }
-  // File system operations
-  selectDirectory: () => Promise<string | null>
-  
+
+  // Export API
+  export: {
+    showSaveDialog: (
+      defaultFileName: string,
+      filters: any[]
+    ) => Promise<string | null>
+    exportNoteToFile: (
+      note: Note,
+      filePath: string,
+      options: ExportOptions
+    ) => Promise<ExportResult>
+    exportNoteToPDF: (
+      note: Note,
+      filePath: string,
+      options: ExportOptions
+    ) => Promise<ExportResult>
+    showItemInFolder: (filePath: string) => Promise<void>
+  }
+
   // Window management
   openNoteInNewWindow: (noteId: string) => Promise<void>
+
+  // Context Menu
+  showNoteContextMenu: (note: Note) => void
+  showContextMenu: (type: string, context?: any) => void
+
+  // IPC Events - Limited and validated
+  on: (channel: string, callback: Function) => void
+  removeAllListeners: (channel: string) => void
+  send: (channel: string, data: any) => void
+
+  // File operations
+  selectDirectory: () => Promise<string | null>
+  
+  // AI/ML Operations
+  loadEmbeddingModel?: (modelName: string) => Promise<boolean>
+  generateEmbedding?: (text: string) => Promise<number[]>
+  searchByEmbedding?: (embedding: number[], threshold?: number) => Promise<any[]>
+  
+  // Ollama installation
+  downloadAndInstallOllama?: (options: {
+    os: 'mac' | 'windows' | 'linux'
+    onProgress?: (percent: number) => void
+  }) => Promise<void>
+  startOllamaService?: () => Promise<void>
+  checkOllamaInstalled?: () => Promise<boolean>
 }
 
 interface Window {

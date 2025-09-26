@@ -20,15 +20,13 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
   icon,
   actions,
   titleActions,
-  onHeaderRightClick
+  onHeaderRightClick,
 }) => {
   // If no title, render as simple container
   if (!title) {
     return (
       <div className="pb-1">
-        <div className="space-y-0.5">
-          {children}
-        </div>
+        <div className="space-y-0.5">{children}</div>
       </div>
     )
   }
@@ -46,13 +44,13 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
           </div>
           <span className="text-sm">{title}</span>
           {onToggle && (
-            <Icons.ChevronDown 
-              size={12} 
+            <Icons.ChevronDown
+              size={12}
               className={`transition-all duration-200 ${isExpanded ? 'rotate-180' : ''} opacity-0 group-hover:opacity-100`}
             />
           )}
         </button>
-        
+
         {(actions || titleActions) && (
           <div className="flex items-center space-x-1">
             {titleActions}
@@ -60,12 +58,8 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
           </div>
         )}
       </div>
-      
-      {isExpanded && (
-        <div className="px-0 space-y-0.5">
-          {children}
-        </div>
-      )}
+
+      {isExpanded && <div className="px-0 space-y-0.5">{children}</div>}
     </div>
   )
 }

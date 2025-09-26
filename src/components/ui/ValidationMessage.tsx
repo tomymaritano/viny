@@ -10,7 +10,7 @@ interface ValidationMessageProps {
 const ValidationMessage: React.FC<ValidationMessageProps> = ({
   type,
   message,
-  className = ''
+  className = '',
 }) => {
   const getIcon = () => {
     switch (type) {

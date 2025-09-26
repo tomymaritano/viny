@@ -1,12 +1,12 @@
 /**
  * React hook for centralized error handling with toast notifications.
- * 
+ *
  * @description
  * This hook provides a unified interface for error handling across the application.
  * It automatically subscribes to the global error handler and displays toast notifications
  * based on error severity. Supports different error types including network, validation,
  * storage, and general application errors.
- * 
+ *
  * @returns {Object} Error handling utilities
  * @returns {Function} returns.handleError - Handle any type of error with optional context
  * @returns {Function} returns.handleNetworkError - Handle network-specific errors
@@ -14,20 +14,20 @@
  * @returns {Function} returns.handleValidationError - Handle validation errors
  * @returns {Function} returns.clearErrors - Clear all error notifications
  * @returns {Array<AppError>} returns.errorHistory - Recent error history
- * 
+ *
  * @example
  * ```tsx
  * function MyComponent() {
  *   const { handleError, handleNetworkError } = useErrorHandler();
- *   
+ *
  *   const fetchData = async () => {
  *     try {
  *       const response = await api.getData();
  *       // process response
  *     } catch (error) {
- *       handleNetworkError(error, { 
+ *       handleNetworkError(error, {
  *         endpoint: '/api/data',
- *         retry: fetchData 
+ *         retry: fetchData
  *       });
  *     }
  *   };
@@ -35,7 +35,8 @@
  * ```
  */
 import { useEffect, useCallback } from 'react'
-import { ErrorHandler, AppError, ErrorType, ErrorSeverity } from '../utils/errorHandler'
+import type { AppError } from '../utils/errorHandler'
+import { ErrorHandler, ErrorType, ErrorSeverity } from '../utils/errorHandler'
 import { useAppStore } from '../stores/newSimpleStore'
 
 export function useErrorHandler() {
@@ -47,14 +48,14 @@ export function useErrorHandler() {
     const unsubscribe = errorHandler.subscribe((error: AppError) => {
       // Show toast notification based on error severity
       const toastType = getToastType(error.severity)
-      
+
       showToast({
         type: toastType,
         message: error.message,
         details: error.details,
         duration: getToastDuration(error.severity),
         dismissible: true,
-        actions: getErrorActions(error)
+        actions: getErrorActions(error),
       })
     })
 
@@ -62,56 +63,77 @@ export function useErrorHandler() {
   }, [showToast])
 
   // Helper function to handle errors
-  const handleError = useCallback((error: Error | AppError | string, context?: Record<string, any>) => {
-    return errorHandler.handleError(error, context)
-  }, [])
+  const handleError = useCallback(
+    (error: Error | AppError | string, context?: Record<string, any>) => {
+      return errorHandler.handleError(error, context)
+    },
+    []
+  )
 
   // Specific error handlers
-  const handleNetworkError = useCallback((error: Error, context?: Record<string, any>) => {
-    return ErrorHandler.handleNetworkError(error, context)
-  }, [])
+  const handleNetworkError = useCallback(
+    (error: Error, context?: Record<string, any>) => {
+      return ErrorHandler.handleNetworkError(error, context)
+    },
+    []
+  )
 
-  const handleValidationError = useCallback((message: string, context?: Record<string, any>) => {
-    return ErrorHandler.handleValidationError(message, context)
-  }, [])
+  const handleValidationError = useCallback(
+    (message: string, context?: Record<string, any>) => {
+      return ErrorHandler.handleValidationError(message, context)
+    },
+    []
+  )
 
-  const handleStorageError = useCallback((error: Error, context?: Record<string, any>) => {
-    return ErrorHandler.handleStorageError(error, context)
-  }, [])
+  const handleStorageError = useCallback(
+    (error: Error, context?: Record<string, any>) => {
+      return ErrorHandler.handleStorageError(error, context)
+    },
+    []
+  )
 
-  const handleSyncError = useCallback((error: Error, context?: Record<string, any>) => {
-    return ErrorHandler.handleSyncError(error, context)
-  }, [])
+  const handleSyncError = useCallback(
+    (error: Error, context?: Record<string, any>) => {
+      return ErrorHandler.handleSyncError(error, context)
+    },
+    []
+  )
 
   // Async error wrapper
-  const withErrorHandling = useCallback(<T extends any[], R>(
-    fn: (...args: T) => Promise<R>,
-    errorContext?: Record<string, any>
-  ) => {
-    return async (...args: T): Promise<R | undefined> => {
-      try {
-        return await fn(...args)
-      } catch (error) {
-        handleError(error as Error, errorContext)
-        return undefined
+  const withErrorHandling = useCallback(
+    <T extends any[], R>(
+      fn: (...args: T) => Promise<R>,
+      errorContext?: Record<string, any>
+    ) => {
+      return async (...args: T): Promise<R | undefined> => {
+        try {
+          return await fn(...args)
+        } catch (error) {
+          handleError(error as Error, errorContext)
+          return undefined
+        }
       }
-    }
-  }, [handleError])
+    },
+    [handleError]
+  )
 
   // Sync error wrapper
-  const withSyncErrorHandling = useCallback(<T extends any[], R>(
-    fn: (...args: T) => R,
-    errorContext?: Record<string, any>
-  ) => {
-    return (...args: T): R | undefined => {
-      try {
-        return fn(...args)
-      } catch (error) {
-        handleError(error as Error, errorContext)
-        return undefined
+  const withSyncErrorHandling = useCallback(
+    <T extends any[], R>(
+      fn: (...args: T) => R,
+      errorContext?: Record<string, any>
+    ) => {
+      return (...args: T): R | undefined => {
+        try {
+          return fn(...args)
+        } catch (error) {
+          handleError(error as Error, errorContext)
+          return undefined
+        }
       }
-    }
-  }, [handleError])
+    },
+    [handleError]
+  )
 
   return {
     handleError,
@@ -122,13 +144,16 @@ export function useErrorHandler() {
     withErrorHandling,
     withSyncErrorHandling,
     getErrorHistory: () => errorHandler.getErrorHistory(),
-    getErrorsBy: (filter: Partial<Pick<AppError, 'type' | 'severity'>>) => errorHandler.getErrorsBy(filter),
-    clearErrorHistory: () => errorHandler.clearErrorHistory()
+    getErrorsBy: (filter: Partial<Pick<AppError, 'type' | 'severity'>>) =>
+      errorHandler.getErrorsBy(filter),
+    clearErrorHistory: () => errorHandler.clearErrorHistory(),
   }
 }
 
 // Helper functions
-function getToastType(severity: ErrorSeverity): 'success' | 'error' | 'warning' | 'info' {
+function getToastType(
+  severity: ErrorSeverity
+): 'success' | 'error' | 'warning' | 'info' {
   switch (severity) {
     case ErrorSeverity.LOW:
       return 'info'
@@ -157,14 +182,20 @@ function getToastDuration(severity: ErrorSeverity): number {
   }
 }
 
-function getErrorActions(error: AppError): Array<{ label: string; action: () => void | Promise<void> | Window | null }> {
-  const actions: Array<{ label: string; action: () => void | Promise<void> | Window | null }> = []
+function getErrorActions(error: AppError): Array<{
+  label: string
+  action: () => void | Promise<void> | Window | null
+}> {
+  const actions: Array<{
+    label: string
+    action: () => void | Promise<void> | Window | null
+  }> = []
 
   // Add retry action if available
   if (error.retry) {
     actions.push({
       label: 'Retry',
-      action: error.retry
+      action: error.retry,
     })
   }
 
@@ -172,7 +203,7 @@ function getErrorActions(error: AppError): Array<{ label: string; action: () => 
   if (error.dismiss) {
     actions.push({
       label: 'Dismiss',
-      action: error.dismiss
+      action: error.dismiss,
     })
   }
 
@@ -181,17 +212,17 @@ function getErrorActions(error: AppError): Array<{ label: string; action: () => 
     case ErrorType.NETWORK:
       actions.push({
         label: 'Check Connection',
-        action: () => window.open('https://www.google.com', '_blank')
+        action: () => window.open('https://www.google.com', '_blank'),
       })
       break
     case ErrorType.STORAGE:
       actions.push({
         label: 'Clear Cache',
         action: () => {
-          localStorage.clear()
+          storageService.clear()
           sessionStorage.clear()
           window.location.reload()
-        }
+        },
       })
       break
     case ErrorType.SYNC:
@@ -200,7 +231,7 @@ function getErrorActions(error: AppError): Array<{ label: string; action: () => 
         action: () => {
           // Trigger manual sync
           window.dispatchEvent(new CustomEvent('manual-sync'))
-        }
+        },
       })
       break
   }

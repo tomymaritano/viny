@@ -2,6 +2,7 @@ import React from 'react'
 import { Icons } from '../Icons'
 import IconButton from './IconButton'
 import { useAppStore } from '../../stores/newSimpleStore'
+import { AIToggleButton } from '../ai/AIToggleButton'
 
 interface AppHeaderProps {
   title?: string
@@ -20,9 +21,9 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   showSearchButton = true,
   onCreateNote,
   onSearch,
-  rightContent
+  rightContent,
 }) => {
-  const { setModal } = useAppStore()
+  const { setModal, isAIChatOpen, toggleAIChat } = useAppStore()
 
   const handleSearch = () => {
     if (onSearch) {
@@ -76,7 +77,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
         {/* Right section - Actions */}
         <div className="flex items-center space-x-2">
           {rightContent}
-          
+
           {showCreateButton && onCreateNote && (
             <IconButton
               icon={Icons.NotebookPen}
@@ -87,12 +88,17 @@ const AppHeader: React.FC<AppHeaderProps> = ({
             />
           )}
 
+          <AIToggleButton
+            isOpen={isAIChatOpen}
+            onClick={toggleAIChat}
+            hasNewFeatures={true}
+          />
+
           <IconButton
             icon={Icons.Settings}
             onClick={() => setModal('settings', true)}
             title="Settings"
             size={16}
-
             className="text-theme-text-muted hover:text-theme-text-primary"
           />
         </div>

@@ -3,12 +3,16 @@
  * Displays images inline in the editor
  */
 
-import { EditorView, WidgetType, Decoration, ViewPlugin, ViewUpdate } from '@codemirror/view'
+import type { EditorView, ViewUpdate } from '@codemirror/view'
+import { WidgetType, Decoration, ViewPlugin } from '@codemirror/view'
 import { RangeSetBuilder } from '@codemirror/state'
 import { editorLogger } from '../utils/logger'
 
 class ImageWidget extends WidgetType {
-  constructor(public src: string, public alt: string = '') {
+  constructor(
+    public src: string,
+    public alt = ''
+  ) {
     super()
   }
 
@@ -43,7 +47,9 @@ class ImageWidget extends WidgetType {
       } else {
         // Fallback to localStorage if memory store not available
         try {
-          const storedImages = JSON.parse(localStorage.getItem('viny-images') || '{}')
+          const storedImages = JSON.parse(
+            storageService.getItem(StorageService.KEYS.IMAGES) || '{}'
+          )
           if (storedImages[imageId]) {
             resolvedSrc = storedImages[imageId]
           }
@@ -73,7 +79,7 @@ class ImageWidget extends WidgetType {
       img.style.transform = 'scale(1.02)'
       img.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)'
     }
-    
+
     img.onmouseout = () => {
       img.style.transform = 'scale(1)'
       img.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.15)'
@@ -112,9 +118,10 @@ function createImageDecorations(view: EditorView) {
 
   // Regex to match markdown images: ![alt](src)
   const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g
-  
-  editorLogger.debug('Creating image decorations for', 'ImageWidget', doc.lines, 'lines')
-  
+
+  // Skip debug logging for performance
+  // editorLogger.debug('Creating image decorations...')
+
   for (let i = 1; i <= doc.lines; i++) {
     const line = doc.line(i)
     const lineText = line.text
@@ -126,18 +133,20 @@ function createImageDecorations(view: EditorView) {
       const from = line.from + match.index
       const to = from + fullMatch.length
 
-      editorLogger.debug('Found image markdown:', 'ImageWidget', { fullMatch, alt, src, from, to })
+      // Skip debug logging for performance
 
       // Only show widget if the src looks like a valid image
-      if (src && (src.startsWith('data:image/') || 
-                 src.startsWith('blob:') || 
-                 src.startsWith('./') || 
-                 src.startsWith('/') ||
-                 src.startsWith('viny://image:') ||
-                 src.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i))) {
-        
-        editorLogger.debug('Adding image widget for:', 'ImageWidget', src)
-        
+      if (
+        src &&
+        (src.startsWith('data:image/') ||
+          src.startsWith('blob:') ||
+          src.startsWith('./') ||
+          src.startsWith('/') ||
+          src.startsWith('viny://image:') ||
+          src.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i))
+      ) {
+        // Skip debug logging for performance
+
         // Create a decoration that shows the image after the markdown
         builder.add(
           to,
@@ -153,7 +162,7 @@ function createImageDecorations(view: EditorView) {
   }
 
   const decorations = builder.finish()
-  editorLogger.debug('Built decorations:', 'ImageWidget', decorations.size, 'decorations')
+  // Skip debug logging for performance
   return decorations
 }
 
@@ -162,13 +171,13 @@ export const imageWidgetPlugin = ViewPlugin.fromClass(
     decorations: any
 
     constructor(view: EditorView) {
-      editorLogger.debug('ImageWidget plugin initialized')
+      // Skip debug logging for performance
       this.decorations = createImageDecorations(view)
     }
 
     update(update: ViewUpdate) {
       if (update.docChanged || update.viewportChanged) {
-        editorLogger.debug('ImageWidget plugin updating...')
+        // Skip debug logging for performance
         this.decorations = createImageDecorations(update.view)
       }
     }

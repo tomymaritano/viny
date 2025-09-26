@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useAppStore } from '../stores/newSimpleStore'
+import { settingsLogger } from '../utils/logger'
 
 interface SettingsError {
   key: string
@@ -25,93 +26,100 @@ export function useSettingsErrorHandler() {
     setErrors({})
   }, [])
 
-  const handleSettingsError = useCallback((
-    key: string,
-    error: Error | string,
-    type: SettingsError['type'] = 'unknown',
-    showToast = false
-  ) => {
-    const message = error instanceof Error ? error.message : error
-    const settingsError: SettingsError = {
-      key,
-      message,
-      type,
-      timestamp: Date.now()
-    }
+  const handleSettingsError = useCallback(
+    (
+      key: string,
+      error: Error | string,
+      type: SettingsError['type'] = 'unknown',
+      showToast = false
+    ) => {
+      const message = error instanceof Error ? error.message : error
+      const settingsError: SettingsError = {
+        key,
+        message,
+        type,
+        timestamp: Date.now(),
+      }
 
-    setErrors(prev => ({
-      ...prev,
-      [key]: settingsError
-    }))
+      setErrors(prev => ({
+        ...prev,
+        [key]: settingsError,
+      }))
 
-    if (showToast) {
-      const toastMessage = getErrorToastMessage(type, key, message)
-      addToast({
-        id: `settings-error-${key}-${Date.now()}`,
-        type: 'error',
-        message: toastMessage,
-        duration: 5000
-      })
-    }
-
-    console.error(`Settings error for ${key}:`, error)
-  }, [addToast])
-
-  const handleRecoveryAction = useCallback(async (
-    recoveryFn: () => Promise<void>,
-    successMessage?: string
-  ) => {
-    setIsRecovering(true)
-    try {
-      await recoveryFn()
-      clearAllErrors()
-      
-      if (successMessage) {
+      if (showToast) {
+        const toastMessage = getErrorToastMessage(type, key, message)
         addToast({
-          id: `settings-recovery-${Date.now()}`,
-          type: 'success',
-          message: successMessage,
-          duration: 3000
+          id: `settings-error-${key}-${Date.now()}`,
+          type: 'error',
+          message: toastMessage,
+          duration: 5000,
         })
       }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Recovery failed'
-      addToast({
-        id: `settings-recovery-failed-${Date.now()}`,
-        type: 'error',
-        message: `Recovery failed: ${message}`,
-        duration: 5000
-      })
-    } finally {
-      setIsRecovering(false)
-    }
-  }, [addToast, clearAllErrors])
 
-  const validateAndHandle = useCallback(async <T>(
-    key: string,
-    value: T,
-    validationFn: (value: T) => Promise<boolean> | boolean,
-    actionFn: (value: T) => Promise<void> | void
-  ): Promise<boolean> => {
-    try {
-      // Clear previous error for this key
-      clearError(key)
+      settingsLogger.error(`Settings error for ${key}:`, error)
+    },
+    [addToast]
+  )
 
-      // Validate
-      const isValid = await validationFn(value)
-      if (!isValid) {
-        handleSettingsError(key, 'Invalid value provided', 'validation')
+  const handleRecoveryAction = useCallback(
+    async (recoveryFn: () => Promise<void>, successMessage?: string) => {
+      setIsRecovering(true)
+      try {
+        await recoveryFn()
+        clearAllErrors()
+
+        if (successMessage) {
+          addToast({
+            id: `settings-recovery-${Date.now()}`,
+            type: 'success',
+            message: successMessage,
+            duration: 3000,
+          })
+        }
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : 'Recovery failed'
+        addToast({
+          id: `settings-recovery-failed-${Date.now()}`,
+          type: 'error',
+          message: `Recovery failed: ${message}`,
+          duration: 5000,
+        })
+      } finally {
+        setIsRecovering(false)
+      }
+    },
+    [addToast, clearAllErrors]
+  )
+
+  const validateAndHandle = useCallback(
+    async <T>(
+      key: string,
+      value: T,
+      validationFn: (value: T) => Promise<boolean> | boolean,
+      actionFn: (value: T) => Promise<void> | void
+    ): Promise<boolean> => {
+      try {
+        // Clear previous error for this key
+        clearError(key)
+
+        // Validate
+        const isValid = await validationFn(value)
+        if (!isValid) {
+          handleSettingsError(key, 'Invalid value provided', 'validation')
+          return false
+        }
+
+        // Execute action
+        await actionFn(value)
+        return true
+      } catch (error) {
+        handleSettingsError(key, error as Error, 'save')
         return false
       }
-
-      // Execute action
-      await actionFn(value)
-      return true
-    } catch (error) {
-      handleSettingsError(key, error as Error, 'save')
-      return false
-    }
-  }, [clearError, handleSettingsError])
+    },
+    [clearError, handleSettingsError]
+  )
 
   return {
     errors,
@@ -121,7 +129,7 @@ export function useSettingsErrorHandler() {
     clearAllErrors,
     handleSettingsError,
     handleRecoveryAction,
-    validateAndHandle
+    validateAndHandle,
   }
 }
 

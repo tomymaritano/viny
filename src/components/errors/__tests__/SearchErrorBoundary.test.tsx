@@ -9,16 +9,20 @@ vi.mock('../../Icons', () => ({
   default: {
     Search: vi.fn(() => <div data-testid="search-icon">Search Icon</div>),
     RefreshCw: vi.fn(() => <div data-testid="refresh-icon">Refresh Icon</div>),
-    X: vi.fn(() => <div data-testid="x-icon">X Icon</div>)
-  }
+    X: vi.fn(() => <div data-testid="x-icon">X Icon</div>),
+  },
 }))
 
 vi.mock('../../../services/errorLogger', () => ({
-  logSearchError: vi.fn()
+  logSearchError: vi.fn(),
 }))
 
 // Component that throws search errors
-const ThrowSearchError = ({ errorType }: { errorType: 'syntax' | 'timeout' | 'generic' }) => {
+const ThrowSearchError = ({
+  errorType,
+}: {
+  errorType: 'syntax' | 'timeout' | 'generic'
+}) => {
   if (errorType === 'syntax') {
     throw new Error('Invalid search syntax: unclosed quote')
   } else if (errorType === 'timeout') {
@@ -41,7 +45,7 @@ describe('SearchErrorBoundary', () => {
         <div>Search content</div>
       </SearchErrorBoundary>
     )
-    
+
     expect(screen.getByText('Search content')).toBeInTheDocument()
   })
 
@@ -51,9 +55,11 @@ describe('SearchErrorBoundary', () => {
         <ThrowSearchError errorType="generic" />
       </SearchErrorBoundary>
     )
-    
+
     expect(screen.getByText('Search Error')).toBeInTheDocument()
-    expect(screen.getByText(/There was a problem with your search/)).toBeInTheDocument()
+    expect(
+      screen.getByText(/There was a problem with your search/)
+    ).toBeInTheDocument()
     expect(screen.getByTestId('search-icon')).toBeInTheDocument()
   })
 
@@ -63,29 +69,29 @@ describe('SearchErrorBoundary', () => {
         <ThrowSearchError errorType="syntax" />
       </SearchErrorBoundary>
     )
-    
+
     expect(logSearchError).toHaveBeenCalledWith(
       'unknown_query',
       expect.objectContaining({
-        message: 'Invalid search syntax: unclosed quote'
+        message: 'Invalid search syntax: unclosed quote',
       }),
       expect.objectContaining({
-        componentStack: expect.any(String)
+        componentStack: expect.any(String),
       })
     )
   })
 
   it('calls onClearSearch when Clear Search & Retry is clicked', () => {
     const onClearSearch = vi.fn()
-    
+
     render(
       <SearchErrorBoundary onClearSearch={onClearSearch}>
         <ThrowSearchError errorType="generic" />
       </SearchErrorBoundary>
     )
-    
+
     fireEvent.click(screen.getByText('Clear Search & Retry'))
-    
+
     expect(onClearSearch).toHaveBeenCalled()
   })
 
@@ -95,36 +101,40 @@ describe('SearchErrorBoundary', () => {
       const key = shouldThrow ? 'error' : 'no-error'
       return (
         <SearchErrorBoundary key={key}>
-          {shouldThrow ? <ThrowSearchError errorType="generic" /> : <div>Search works now</div>}
+          {shouldThrow ? (
+            <ThrowSearchError errorType="generic" />
+          ) : (
+            <div>Search works now</div>
+          )}
         </SearchErrorBoundary>
       )
     }
-    
+
     const { rerender } = render(<TestWrapper />)
-    
+
     expect(screen.getByText('Search Error')).toBeInTheDocument()
-    
+
     fireEvent.click(screen.getByText('Clear Search & Retry'))
-    
+
     // Update to not throw
     shouldThrow = false
     rerender(<TestWrapper />)
-    
+
     expect(screen.getByText('Search works now')).toBeInTheDocument()
   })
 
   it('shows close button when onClose is provided', () => {
     const onClose = vi.fn()
-    
+
     render(
       <SearchErrorBoundary onClose={onClose}>
         <ThrowSearchError errorType="generic" />
       </SearchErrorBoundary>
     )
-    
+
     const closeButton = screen.getByText('Close')
     expect(closeButton).toBeInTheDocument()
-    
+
     fireEvent.click(closeButton)
     expect(onClose).toHaveBeenCalled()
   })
@@ -135,7 +145,7 @@ describe('SearchErrorBoundary', () => {
         <ThrowSearchError errorType="generic" />
       </SearchErrorBoundary>
     )
-    
+
     expect(screen.queryByText('Close')).not.toBeInTheDocument()
   })
 
@@ -145,7 +155,7 @@ describe('SearchErrorBoundary', () => {
         <ThrowSearchError errorType="generic" />
       </SearchErrorBoundary>
     )
-    
+
     // Details should be visible
     expect(screen.getByText(/Search failed/)).toBeInTheDocument()
   })
@@ -156,23 +166,23 @@ describe('SearchErrorBoundary', () => {
         <ThrowSearchError errorType="generic" />
       </SearchErrorBoundary>
     )
-    
+
     expect(screen.getByText('Custom search error message')).toBeInTheDocument()
   })
 
   it('calls onError callback when error occurs', () => {
     const onError = vi.fn()
-    
+
     render(
       <SearchErrorBoundary onError={onError}>
         <ThrowSearchError errorType="generic" />
       </SearchErrorBoundary>
     )
-    
+
     expect(onError).toHaveBeenCalledWith(
       expect.objectContaining({ message: 'Search failed' }),
       expect.objectContaining({
-        componentStack: expect.any(String)
+        componentStack: expect.any(String),
       })
     )
   })
@@ -186,13 +196,13 @@ describe('SearchErrorBoundary', () => {
         return <div>Searching...</div>
       }
     }
-    
+
     render(
       <SearchErrorBoundary>
         <AsyncSearchComponent />
       </SearchErrorBoundary>
     )
-    
+
     expect(screen.getByText('Search Error')).toBeInTheDocument()
     expect(logSearchError).toHaveBeenCalledWith(
       'unknown_query',
@@ -207,16 +217,16 @@ describe('SearchErrorBoundary', () => {
         <ThrowSearchError errorType="generic" />
       </SearchErrorBoundary>
     )
-    
+
     expect(screen.getByText('Search Error')).toBeInTheDocument()
-    
+
     // Rerender without fixing the error
     rerender(
       <SearchErrorBoundary>
         <ThrowSearchError errorType="generic" />
       </SearchErrorBoundary>
     )
-    
+
     // Should still show error
     expect(screen.getByText('Search Error')).toBeInTheDocument()
   })
@@ -227,8 +237,10 @@ describe('SearchErrorBoundary', () => {
         <ThrowSearchError errorType="generic" />
       </SearchErrorBoundary>
     )
-    
-    const errorContainer = screen.getByText('Search Error').closest('div')?.parentElement
+
+    const errorContainer = screen
+      .getByText('Search Error')
+      .closest('div')?.parentElement
     expect(errorContainer).toHaveClass('bg-theme-bg-secondary')
   })
 })

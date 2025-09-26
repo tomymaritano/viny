@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
+import { logger } from '../../utils/logger'
 
 interface VantaFogProps {
   backgroundAlpha?: number
@@ -34,19 +35,37 @@ const VantaFog: React.FC<VantaFogProps> = ({
   scaleMobile = 4,
   speed = 1,
   touchControls = true,
-  zoom = 0.6
+  zoom = 0.6,
 }) => {
   const vantaRef = useRef<HTMLDivElement>(null)
   const vantaEffect = useRef<any>(null)
+  const [webGLAvailable, setWebGLAvailable] = useState(true)
 
   useEffect(() => {
     if (!vantaRef.current) return
+
+    // Check WebGL availability first
+    const checkWebGL = () => {
+      try {
+        const canvas = document.createElement('canvas')
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
+        return !!gl
+      } catch (e) {
+        return false
+      }
+    }
+
+    if (!checkWebGL()) {
+      logger.warn('WebGL not available, using fallback background')
+      setWebGLAvailable(false)
+      return
+    }
 
     // Dynamically import Vanta FOG effect
     const loadVanta = async () => {
       try {
         const VANTA = await import('vanta/dist/vanta.fog.min.js')
-        
+
         vantaEffect.current = VANTA.default({
           el: vantaRef.current,
           THREE,
@@ -64,10 +83,11 @@ const VantaFog: React.FC<VantaFogProps> = ({
           scaleMobile,
           speed,
           touchControls,
-          zoom
+          zoom,
         })
       } catch (error) {
-        console.error('Error loading Vanta FOG effect:', error)
+        logger.error('Error loading Vanta FOG effect:', error)
+        setWebGLAvailable(false)
       }
     }
 
@@ -93,11 +113,25 @@ const VantaFog: React.FC<VantaFogProps> = ({
     scaleMobile,
     speed,
     touchControls,
-    zoom
+    zoom,
   ])
 
+  // Fallback gradient when WebGL is not available
+  if (!webGLAvailable) {
+    return (
+      <div
+        className="absolute inset-0 w-full h-full"
+        style={{
+          zIndex: 0,
+          background: 'linear-gradient(135deg, #1a1c2e 0%, #2d1b69 50%, #0f0c29 100%)',
+          animation: 'gradientShift 10s ease infinite',
+        }}
+      />
+    )
+  }
+
   return (
-    <div 
+    <div
       ref={vantaRef}
       className="absolute inset-0 w-full h-full"
       style={{ zIndex: 0 }}

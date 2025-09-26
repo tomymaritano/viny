@@ -1,0 +1,258 @@
+import { contextBridge, ipcRenderer } from 'electron'
+
+// Type definitions for our Electron APIs
+interface WindowControls {
+  minimize: () => void
+  maximize: () => void
+  close: () => void
+  unmaximize: () => void
+}
+
+interface StorageResult {
+  success: boolean
+  message?: string
+}
+
+interface ExportOptions {
+  format: 'html' | 'markdown' | 'pdf'
+  includeMetadata?: boolean
+}
+
+interface ExportResult {
+  success: boolean
+  filePath?: string
+  error?: string
+}
+
+interface Note {
+  id: string
+  title: string
+  content: string
+  tags: string[]
+  notebook?: string
+  isPinned?: boolean
+  createdAt: string
+  updatedAt: string
+  isTrashed?: boolean
+}
+
+interface Notebook {
+  id: string
+  name: string
+  color: string
+  level: number
+  parentId?: string | null
+}
+
+interface Settings {
+  theme: string
+  fontSize: number
+  editorMode: string
+  [key: string]: any
+}
+
+// REDUCED API - Only essential operations
+interface StorageAPI {
+  // Notes operations - Core CRUD only
+  saveNote: (note: Note) => Promise<StorageResult>
+  loadNote: (id: string) => Promise<Note | null>
+  loadAllNotes: () => Promise<Note[]>
+  deleteNote: (id: string) => Promise<StorageResult>
+  
+  // Notebooks operations
+  saveNotebooks: (notebooks: Notebook[]) => Promise<StorageResult>
+  loadNotebooks: () => Promise<Notebook[]>
+  
+  // Settings operations
+  saveSettings: (settings: Partial<Settings>) => Promise<StorageResult>
+  loadSettings: () => Promise<Partial<Settings>>
+  
+  // Tag colors operations
+  saveTagColors: (tagColors: Record<string, string>) => Promise<StorageResult>
+  loadTagColors: () => Promise<Record<string, string>>
+  
+  // REMOVED: createBackup, restoreFromBackup, migrateFromLocalStorage,
+  // checkDataIntegrity, repairCorruptedData, exportData, importData,
+  // getStorageInfo, getDataDirectory
+  // These operations should be initiated from main process only
+}
+
+interface ExportAPI {
+  showSaveDialog: (defaultFileName: string, filters: any[]) => Promise<string | null>
+  exportNoteToFile: (note: Note, filePath: string, options: ExportOptions) => Promise<ExportResult>
+  exportNoteToPDF: (note: Note, filePath: string, options: ExportOptions) => Promise<ExportResult>
+  showItemInFolder: (filePath: string) => Promise<void>
+}
+
+interface ElectronAPI {
+  openSettings: () => void
+  isElectron: boolean
+  platform: string
+  windowControls: WindowControls
+  
+  // File System Storage APIs - Essential operations only
+  storage: StorageAPI
+  
+  // Native Export APIs
+  export: ExportAPI
+
+  // Window management
+  openNoteInNewWindow: (noteId: string) => Promise<void>
+  
+  // Context Menu
+  showNoteContextMenu: (note: Note) => void
+  showContextMenu: (type: string, context?: any) => void
+  
+  // IPC Events - Limited and validated
+  on: (channel: string, callback: Function) => void
+  removeAllListeners: (channel: string) => void
+  send: (channel: string, data: any) => void
+}
+
+// Define valid channels in one place for consistency
+const VALID_RECEIVE_CHANNELS = [
+  // Note operations
+  'export-note',
+  'toggle-pin-note',
+  'duplicate-note',
+  'delete-note',
+  'restore-note',
+  'permanent-delete-note',
+  'move-to-notebook',
+  'create-new-note',
+  
+  // UI operations
+  'open-search',
+  'open-settings-modal',
+  
+  // Notebook operations
+  'create-new-notebook',
+  'collapse-all-notebooks',
+  'expand-all-notebooks',
+  'create-note-in-notebook',
+  'rename-notebook',
+  'delete-notebook',
+  
+  // Tag operations
+  'rename-tag',
+  'change-tag-color',
+  'remove-tag',
+  
+  // Other
+  'empty-trash',
+  'note-updated'
+]
+
+const VALID_SEND_CHANNELS = [
+  'broadcast-note-update'
+]
+
+// Expose secure APIs to renderer process
+contextBridge.exposeInMainWorld('electronAPI', {
+  openSettings: (): void => ipcRenderer.send('open-settings'),
+  isElectron: true,
+  platform: process.platform,
+  windowControls: {
+    minimize: (): void => ipcRenderer.send('window-minimize'),
+    maximize: (): void => ipcRenderer.send('window-maximize'),
+    close: (): void => ipcRenderer.send('window-close'),
+    unmaximize: (): void => ipcRenderer.send('window-unmaximize'),
+  },
+  
+  // File System Storage APIs - Essential operations only
+  storage: {
+    // Notes operations
+    saveNote: (note: Note): Promise<StorageResult> => 
+      ipcRenderer.invoke('storage-save-note', note),
+    loadNote: (id: string): Promise<Note | null> => 
+      ipcRenderer.invoke('storage-load-note', id),
+    loadAllNotes: (): Promise<Note[]> => 
+      ipcRenderer.invoke('storage-load-all-notes'),
+    deleteNote: (id: string): Promise<StorageResult> => 
+      ipcRenderer.invoke('storage-delete-note', id),
+    
+    // Notebooks operations
+    saveNotebooks: (notebooks: Notebook[]): Promise<StorageResult> => 
+      ipcRenderer.invoke('storage-save-notebooks', notebooks),
+    loadNotebooks: (): Promise<Notebook[]> => 
+      ipcRenderer.invoke('storage-load-notebooks'),
+    
+    // Settings operations
+    saveSettings: (settings: Partial<Settings>): Promise<StorageResult> => 
+      ipcRenderer.invoke('storage-save-settings', settings),
+    loadSettings: (): Promise<Partial<Settings>> => 
+      ipcRenderer.invoke('storage-load-settings'),
+    
+    // Tag colors operations
+    saveTagColors: (tagColors: Record<string, string>): Promise<StorageResult> => 
+      ipcRenderer.invoke('storage-save-tag-colors', tagColors),
+    loadTagColors: (): Promise<Record<string, string>> => 
+      ipcRenderer.invoke('storage-load-tag-colors'),
+  },
+  
+  // Native Export APIs
+  export: {
+    showSaveDialog: (defaultFileName: string, filters: any[]): Promise<string | null> =>
+      ipcRenderer.invoke('export-save-dialog', defaultFileName, filters),
+    exportNoteToFile: (note: Note, filePath: string, options: ExportOptions): Promise<ExportResult> =>
+      ipcRenderer.invoke('export-note-to-file', note, filePath, options),
+    exportNoteToPDF: (note: Note, filePath: string, options: ExportOptions): Promise<ExportResult> =>
+      ipcRenderer.invoke('export-note-to-pdf', note, filePath, options),
+    showItemInFolder: (filePath: string): Promise<void> =>
+      ipcRenderer.invoke('show-item-in-folder', filePath),
+  },
+
+  // Window management
+  openNoteInNewWindow: (noteId: string): Promise<void> =>
+    ipcRenderer.invoke('open-note-in-new-window', noteId),
+  
+  // Context Menu
+  showNoteContextMenu: (note: Note): void => 
+    ipcRenderer.send('show-note-context-menu', note),
+  showContextMenu: (type: string, context?: any): void =>
+    ipcRenderer.send('show-context-menu', { type, context }),
+  
+  // IPC Events - Safe channel whitelist
+  on: (channel: string, callback: Function): void => {
+    if (VALID_RECEIVE_CHANNELS.includes(channel)) {
+      // Wrap callback to prevent direct access to event object
+      ipcRenderer.on(channel, (event, ...args) => callback(...args))
+    } else {
+      console.warn(`Attempted to listen to unauthorized channel: ${channel}`)
+    }
+  },
+  
+  removeAllListeners: (channel: string): void => {
+    if (VALID_RECEIVE_CHANNELS.includes(channel)) {
+      ipcRenderer.removeAllListeners(channel)
+    } else {
+      console.warn(`Attempted to remove listeners from unauthorized channel: ${channel}`)
+    }
+  },
+  
+  // Send method for specific allowed channels only
+  send: (channel: string, data: any): void => {
+    if (VALID_SEND_CHANNELS.includes(channel)) {
+      ipcRenderer.send(channel, data)
+    } else {
+      console.warn(`Attempted to send to unauthorized channel: ${channel}`)
+    }
+  },
+} as ElectronAPI)
+
+// For backward compatibility - minimal exposure
+contextBridge.exposeInMainWorld('electron', {
+  isElectron: true,
+})
+
+// Global type declarations for renderer process
+declare global {
+  interface Window {
+    electronAPI: ElectronAPI
+    electron: {
+      isElectron: boolean
+    }
+  }
+}
+
+export type { ElectronAPI, StorageAPI, StorageResult, Note, Notebook, Settings, ExportAPI, ExportOptions, ExportResult }

@@ -1,4 +1,4 @@
-import { StateCreator } from 'zustand'
+import type { StateCreator } from 'zustand'
 import { generateToastId } from '../../utils/idUtils'
 import { getCurrentTimestamp } from '../../utils/dateUtils'
 
@@ -47,36 +47,39 @@ export const createToastSlice: StateCreator<ToastSlice> = (set, get) => ({
   toasts: [],
 
   // Actions
-  addToast: (toast) =>
-    set((state) => ({
-      toasts: [...state.toasts, {
-        id: generateToastId(),
-        timestamp: getCurrentTimestamp(),
-        ...toast
-      }]
+  addToast: toast =>
+    set(state => ({
+      toasts: [
+        ...state.toasts,
+        {
+          id: generateToastId(),
+          timestamp: getCurrentTimestamp(),
+          ...toast,
+        },
+      ],
     })),
 
-  removeToast: (toastId) => {
-    set((state) => ({
-      toasts: state.toasts.filter(toast => toast.id !== toastId)
+  removeToast: toastId => {
+    set(state => ({
+      toasts: state.toasts.filter(toast => toast.id !== toastId),
     }))
   },
 
   clearAllToasts: () => set({ toasts: [] }),
 
-  showToast: (options) => {
+  showToast: options => {
     const id = generateToastId()
-    
+
     const newToast: Toast = {
       id,
       timestamp: getCurrentTimestamp(),
       duration: options.duration ?? getDefaultDuration(options.type),
       dismissible: options.dismissible ?? true,
-      ...options
+      ...options,
     }
 
-    set((state) => ({
-      toasts: [...state.toasts, newToast]
+    set(state => ({
+      toasts: [...state.toasts, newToast],
     }))
 
     // Auto-dismiss if duration is set
@@ -86,8 +89,8 @@ export const createToastSlice: StateCreator<ToastSlice> = (set, get) => ({
         const currentToasts = get().toasts
         if (currentToasts.some(t => t.id === id)) {
           // Call set directly to update state
-          set((state) => ({
-            toasts: state.toasts.filter(toast => toast.id !== id)
+          set(state => ({
+            toasts: state.toasts.filter(toast => toast.id !== id),
           }))
         }
       }, newToast.duration)
@@ -110,19 +113,21 @@ export const createToastSlice: StateCreator<ToastSlice> = (set, get) => ({
 
   showInfo: (message, options = {}) => {
     return get().showToast({ type: 'info', message, ...options })
-  }
+  },
 })
 
-function getDefaultDuration(type: 'success' | 'error' | 'warning' | 'info'): number {
+function getDefaultDuration(
+  type: 'success' | 'error' | 'warning' | 'info'
+): number {
   switch (type) {
     case 'success':
-      return 2000  // 2 seconds for success
+      return 2000 // 2 seconds for success
     case 'info':
-      return 3000  // 3 seconds for info
+      return 3000 // 3 seconds for info
     case 'warning':
-      return 4000  // 4 seconds for warning
+      return 4000 // 4 seconds for warning
     case 'error':
-      return 5000  // 5 seconds for errors (need more time to read)
+      return 5000 // 5 seconds for errors (need more time to read)
     default:
       return 3000
   }

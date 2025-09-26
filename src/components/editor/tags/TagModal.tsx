@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { Icons } from '../../Icons'
-import BaseModal from '../../ui/BaseModal'
+import { StandardModal } from '../../ui/StandardModal'
 import TagManager from './TagManager'
 import TagSettingsModal from './TagSettingsModal'
-import { Note } from '../../../types'
+import { useConfirmDialog } from '../../../hooks/useConfirmDialog'
+import type { Note } from '../../../types'
 import { useAppStore } from '../../../stores/newSimpleStore'
 import { getAvailableTagColors } from '../../../utils/customTagColors'
+import { noteLogger } from '../../../utils/logger'
 
 interface TagModalProps {
   isOpen: boolean
@@ -27,15 +29,26 @@ const TagModal: React.FC<TagModalProps> = ({
   filteredNotes = [],
 }) => {
   const [localTags, setLocalTags] = useState(currentTags)
-  const [tagSettingsModal, setTagSettingsModal] = useState({ show: false, tagName: '' })
+  const [tagSettingsModal, setTagSettingsModal] = useState({
+    show: false,
+    tagName: '',
+  })
   const [newTagName, setNewTagName] = useState('')
   const [selectedColor, setSelectedColor] = useState('ocean')
-  const { addNote, setTagColor, removeTagFromAllNotes, showSuccess, showError } = useAppStore()
+  // Use centralized confirm dialog hook
+  const { showConfirm } = useConfirmDialog()
+  const {
+    addNote,
+    setTagColor,
+    removeTagFromAllNotes,
+    showSuccess,
+    showError,
+  } = useAppStore()
   const availableColors = getAvailableTagColors()
 
   useEffect(() => {
     setLocalTags(currentTags)
-    
+
     // Check if we need to open tag settings for a specific tag
     if (isOpen && mode === 'global') {
       try {
@@ -43,7 +56,7 @@ const TagModal: React.FC<TagModalProps> = ({
         if (tempAction) {
           const { tag, action } = JSON.parse(tempAction)
           window.localStorage.removeItem('temp-tag-action')
-          
+
           if (action === 'color' && tag) {
             // Open the tag settings modal for color change
             setTimeout(() => {
@@ -52,7 +65,7 @@ const TagModal: React.FC<TagModalProps> = ({
           }
         }
       } catch (error) {
-        console.error('Error parsing temp tag action:', error)
+        noteLogger.error('Error parsing temp tag action:', error)
       }
     }
   }, [currentTags, isOpen, mode])
@@ -101,19 +114,27 @@ const TagModal: React.FC<TagModalProps> = ({
   }
 
   // Handler for deleting tags
-  const handleDeleteTag = (tagName: string) => {
-    const confirmMessage = `Are you sure you want to remove the tag "${tagName}" from all notes? This action cannot be undone.`
-    
-    if (window.confirm(confirmMessage)) {
-      try {
-        removeTagFromAllNotes(tagName)
-        // Success notification is handled by the store function
-      } catch (error) {
-        console.error('Failed to delete tag:', error)
-        showError(`Failed to remove tag "${tagName}". Please try again.`)
+  const handleDeleteTag = async (tagName: string) => {
+    const confirmed = await showConfirm({
+      title: 'Delete Tag',
+      message: `Are you sure you want to remove the tag "${tagName}" from all notes?`,
+      type: 'danger',
+      confirmText: 'Delete',
+      onConfirm: () => {
+        try {
+          removeTagFromAllNotes(tagName)
+          // Success notification is handled by the store function
+        } catch (error) {
+          noteLogger.error('Failed to delete tag:', error)
+          showError(
+            `Failed to remove tag "${tagName}". Please try again.`
+          )
+        }
       }
-    }
+    })
   }
+
+  // Handler has been moved inline to handleDeleteTag
 
   const handleCancel = () => {
     setLocalTags(currentTags) // Reset to original
@@ -127,16 +148,40 @@ const TagModal: React.FC<TagModalProps> = ({
   }
 
   return (
-    <BaseModal
+    <StandardModal
       isOpen={isOpen}
       onClose={handleCancel}
       title={mode === 'global' ? 'Manage Global Tags' : 'Manage Tags'}
       icon={<Icons.Tag size={20} />}
-      maxWidth="md"
+      size="md"
       closeOnEscape={true}
+      footer={
+        mode === 'global' ? (
+          <button
+            onClick={handleCancel}
+            className="px-3 py-2 text-sm bg-theme-accent-primary text-white rounded-md hover:bg-theme-accent-primary/90 transition-colors"
+          >
+            Close
+          </button>
+        ) : (
+          <div className="flex gap-2">
+            <button
+              onClick={handleCancel}
+              className="px-3 py-2 text-sm text-theme-text-secondary hover:text-theme-text-primary transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              className="px-3 py-2 text-sm bg-theme-accent-primary text-white rounded-md hover:bg-theme-accent-primary/90 transition-colors"
+            >
+              Save Tags
+            </button>
+          </div>
+        )
+      }
     >
-      {/* Content */}
-      <div className="p-4 space-y-4" onKeyDown={handleKeyDown}>
+      <div className="space-y-4" onKeyDown={handleKeyDown}>
         {mode === 'global' ? (
           /* Global Mode - Show all existing tags with management options */
           <div className="space-y-4">
@@ -145,14 +190,14 @@ const TagModal: React.FC<TagModalProps> = ({
               <label className="block text-sm font-medium text-theme-text-secondary mb-2">
                 Create new tag
               </label>
-              
+
               {/* Tag name input */}
               <div className="space-y-3">
                 <div className="relative">
                   <input
                     type="text"
                     value={newTagName}
-                    onChange={(e) => setNewTagName(e.target.value)}
+                    onChange={e => setNewTagName(e.target.value)}
                     onKeyDown={handleTagInputKeyDown}
                     placeholder="Type new tag name..."
                     className="w-full px-3 py-2 bg-theme-bg-secondary border border-theme-border-primary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-theme-accent-primary"
@@ -161,30 +206,34 @@ const TagModal: React.FC<TagModalProps> = ({
                     ⌘↵
                   </span>
                 </div>
-                
+
                 {/* Color selection */}
                 <div>
                   <label className="block text-xs font-medium text-theme-text-muted mb-2">
                     Color
                   </label>
                   <div className="flex flex-wrap gap-2">
-                    {availableColors.slice(0, 8).map(({ key, name, preview }) => (
-                      <button
-                        key={key}
-                        onClick={() => setSelectedColor(key)}
-                        className={`w-6 h-6 rounded-full border-2 transition-all hover:scale-110 ${
-                          selectedColor === key ? 'ring-2 ring-theme-accent-primary ring-offset-2 ring-offset-theme-bg-primary' : ''
-                        }`}
-                        style={{
-                          backgroundColor: preview.bg,
-                          borderColor: preview.border
-                        }}
-                        title={name}
-                      />
-                    ))}
+                    {availableColors
+                      .slice(0, 8)
+                      .map(({ key, name, preview }) => (
+                        <button
+                          key={key}
+                          onClick={() => setSelectedColor(key)}
+                          className={`w-6 h-6 rounded-full border-2 transition-all hover:scale-110 ${
+                            selectedColor === key
+                              ? 'ring-2 ring-theme-accent-primary ring-offset-2 ring-offset-theme-bg-primary'
+                              : ''
+                          }`}
+                          style={{
+                            backgroundColor: preview.bg,
+                            borderColor: preview.border,
+                          }}
+                          title={name}
+                        />
+                      ))}
                   </div>
                 </div>
-                
+
                 {/* Create button */}
                 <button
                   onClick={handleCreateNewTag}
@@ -194,45 +243,55 @@ const TagModal: React.FC<TagModalProps> = ({
                   Create Tag
                 </button>
               </div>
-              
+
               <p className="text-xs text-theme-text-muted mt-2">
                 Press ⌘+Enter or click "Create Tag" to add the new tag.
               </p>
             </div>
-            
+
             {/* Existing tags section */}
             <div>
               <label className="block text-sm font-medium text-theme-text-secondary mb-2">
                 All existing tags ({availableTags.length})
               </label>
-              
+
               {availableTags.length > 0 ? (
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {availableTags.map(tag => (
-                    <div key={tag} className="flex items-center justify-between p-3 border border-theme-border-primary rounded-md">
+                    <div
+                      key={tag}
+                      className="flex items-center justify-between p-3 border border-theme-border-primary rounded-md"
+                    >
                       <div className="flex items-center space-x-3">
                         <span className="text-sm font-medium">#{tag}</span>
                         <span className="text-xs text-theme-text-muted">
-                          {filteredNotes.filter(note => note.tags.includes(tag)).length} notes
+                          {
+                            filteredNotes.filter(note =>
+                              note.tags.includes(tag)
+                            ).length
+                          }{' '}
+                          notes
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
                         {/* Color selector */}
                         <div className="flex items-center space-x-1">
-                          {availableColors.slice(0, 6).map(({ key, preview }) => (
-                            <button
-                              key={key}
-                              onClick={() => setTagColor(tag, key)}
-                              className="w-4 h-4 rounded-full border transition-all hover:scale-110"
-                              style={{
-                                backgroundColor: preview.bg,
-                                borderColor: preview.border
-                              }}
-                              title={`Change to ${preview.name}`}
-                            />
-                          ))}
+                          {availableColors
+                            .slice(0, 6)
+                            .map(({ key, preview }) => (
+                              <button
+                                key={key}
+                                onClick={() => setTagColor(tag, key)}
+                                className="w-4 h-4 rounded-full border transition-all hover:scale-110"
+                                style={{
+                                  backgroundColor: preview.bg,
+                                  borderColor: preview.border,
+                                }}
+                                title={`Change to ${preview.name}`}
+                              />
+                            ))}
                         </div>
-                        
+
                         {/* Rename button */}
                         <button
                           onClick={() => handleOpenTagSettings(tag)}
@@ -241,7 +300,7 @@ const TagModal: React.FC<TagModalProps> = ({
                         >
                           <Icons.Edit size={14} />
                         </button>
-                        
+
                         {/* Delete button */}
                         <button
                           onClick={() => handleDeleteTag(tag)}
@@ -274,7 +333,8 @@ const TagModal: React.FC<TagModalProps> = ({
               placeholder="Type to add tags..."
             />
             <p className="text-xs text-theme-text-muted mt-2">
-              Press Enter to add a tag, or use suggestions. Use Backspace to remove the last tag.
+              Press Enter to add a tag, or use suggestions. Use Backspace to
+              remove the last tag.
             </p>
           </div>
         )}
@@ -284,10 +344,13 @@ const TagModal: React.FC<TagModalProps> = ({
           <div>
             <div className="flex items-center justify-between mb-3">
               <label className="block text-sm font-medium text-theme-text-secondary">
-                {currentTags.length > 0 ? 'Add more tags' : 'Choose from existing tags'}
+                {currentTags.length > 0
+                  ? 'Add more tags'
+                  : 'Choose from existing tags'}
               </label>
               <span className="text-xs text-theme-text-muted">
-                {availableTags.filter(tag => !localTags.includes(tag)).length} available
+                {availableTags.filter(tag => !localTags.includes(tag)).length}{' '}
+                available
               </span>
             </div>
             <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-1">
@@ -307,33 +370,6 @@ const TagModal: React.FC<TagModalProps> = ({
             </div>
           </div>
         )}
-        </div>
-
-      {/* Footer */}
-      <div className="flex items-center justify-end gap-2 p-4 border-t border-theme-border-primary">
-        {mode === 'global' ? (
-          <button
-            onClick={handleCancel}
-            className="px-3 py-2 text-sm bg-theme-accent-primary text-white rounded-md hover:bg-theme-accent-primary/90 transition-colors"
-          >
-            Close
-          </button>
-        ) : (
-          <>
-            <button
-              onClick={handleCancel}
-              className="px-3 py-2 text-sm text-theme-text-secondary hover:text-theme-text-primary transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              className="px-3 py-2 text-sm bg-theme-accent-primary text-white rounded-md hover:bg-theme-accent-primary/90 transition-colors"
-            >
-              Save Tags
-            </button>
-          </>
-        )}
       </div>
 
       {/* Tag Settings Modal */}
@@ -343,7 +379,18 @@ const TagModal: React.FC<TagModalProps> = ({
         tagName={tagSettingsModal.tagName}
         onTagNameChange={handleTagNameChange}
       />
-    </BaseModal>
+
+      {/* Confirm Delete Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog({ isOpen: false, tagName: '' })}
+        onConfirm={handleConfirmDelete}
+        title="Delete Tag"
+        description={`Are you sure you want to remove the tag "${confirmDialog.tagName}" from all notes? This action cannot be undone.`}
+        confirmText="Delete"
+        variant="destructive"
+      />
+    </StandardModal>
   )
 }
 

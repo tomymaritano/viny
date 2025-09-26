@@ -46,10 +46,7 @@ const PreviewHeader: React.FC<PreviewHeaderProps> = ({ note, formatDate }) => {
 
         {/* Notebook info in preview */}
         <div className="flex items-center space-x-2 px-3 py-1.5 bg-theme-bg-tertiary/50 rounded-full text-sm text-theme-text-secondary">
-          <Icons.FolderOpen
-            size={14}
-            className="text-theme-accent-orange"
-          />
+          <Icons.FolderOpen size={14} className="text-theme-accent-orange" />
           <span className="font-medium">
             {note?.notebook?.name || note?.notebook || 'No notebook'}
           </span>

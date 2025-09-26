@@ -46,7 +46,10 @@ export interface PluginAPI {
     search: (query: string) => any[]
   }
   ui: {
-    showToast: (message: string, type?: 'success' | 'error' | 'info' | 'warning') => void
+    showToast: (
+      message: string,
+      type?: 'success' | 'error' | 'info' | 'warning'
+    ) => void
     showModal: (content: string, options?: any) => void
     addSidebarItem: (item: any) => void
     addMenuItem: (item: any) => void
@@ -90,16 +93,16 @@ export interface PluginError {
 
 // Plugin Security Levels
 export enum SecurityLevel {
-  SAFE = 'safe',           // Basic operations only
-  TRUSTED = 'trusted',     // Full API access
-  SYSTEM = 'system'        // System-level access
+  SAFE = 'safe', // Basic operations only
+  TRUSTED = 'trusted', // Full API access
+  SYSTEM = 'system', // System-level access
 }
 
 export interface SecurityPolicy {
   level: SecurityLevel
   allowedPermissions: string[]
   resourceLimits: {
-    memoryLimit: number      // MB
+    memoryLimit: number // MB
     executionTimeout: number // ms
     networkRequests: boolean
     fileSystemAccess: boolean
@@ -115,7 +118,7 @@ export class PluginService {
   private errors: PluginError[] = []
   private securityPolicies: Map<string, SecurityPolicy> = new Map()
   private readonly pluginAPIs: Map<string, PluginAPI> = new Map()
-  
+
   // Default security policy
   private readonly defaultSecurityPolicy: SecurityPolicy = {
     level: SecurityLevel.SAFE,
@@ -124,8 +127,8 @@ export class PluginService {
       memoryLimit: 50,
       executionTimeout: 5000,
       networkRequests: false,
-      fileSystemAccess: false
-    }
+      fileSystemAccess: false,
+    },
   }
 
   constructor() {
@@ -150,9 +153,13 @@ export class PluginService {
 
   private setupErrorHandling(): void {
     // Global error handler for plugin exceptions
-    window.addEventListener('error', (event) => {
+    window.addEventListener('error', event => {
       if (event.filename?.includes('plugin')) {
-        this.handlePluginError('unknown', event.error?.message || 'Unknown error', event.error?.stack)
+        this.handlePluginError(
+          'unknown',
+          event.error?.message || 'Unknown error',
+          event.error?.stack
+        )
       }
     })
   }
@@ -160,12 +167,17 @@ export class PluginService {
   /**
    * Load a plugin from URL or file
    */
-  async loadPlugin(source: string | File, options: { 
-    trusted?: boolean 
-    permissions?: string[]
-  } = {}): Promise<boolean> {
+  async loadPlugin(
+    source: string | File,
+    options: {
+      trusted?: boolean
+      permissions?: string[]
+    } = {}
+  ): Promise<boolean> {
     try {
-      logger.info(`PluginService: Loading plugin from ${typeof source === 'string' ? source : 'file'}`)
+      logger.info(
+        `PluginService: Loading plugin from ${typeof source === 'string' ? source : 'file'}`
+      )
 
       let pluginCode: string
       let manifest: PluginManifest
@@ -196,27 +208,37 @@ export class PluginService {
         manifest,
         config: {
           enabled: true,
-          settings: {}
+          settings: {},
         },
         module: null,
         activated: false,
-        loadedAt: Date.now()
+        loadedAt: Date.now(),
       }
 
       // Execute plugin code in sandbox
-      const pluginModule = await this.executePluginCode(pluginCode, manifest.name, securityPolicy)
+      const pluginModule = await this.executePluginCode(
+        pluginCode,
+        manifest.name,
+        securityPolicy
+      )
       pluginInstance.module = pluginModule
 
       // Store plugin
       this.plugins.set(manifest.name, pluginInstance)
 
-      logger.info(`PluginService: Successfully loaded plugin '${manifest.name}' v${manifest.version}`)
+      logger.info(
+        `PluginService: Successfully loaded plugin '${manifest.name}' v${manifest.version}`
+      )
       return true
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error'
       logger.error(`PluginService: Failed to load plugin - ${errorMessage}`)
-      this.handlePluginError('unknown', errorMessage, error instanceof Error ? error.stack : undefined)
+      this.handlePluginError(
+        'unknown',
+        errorMessage,
+        error instanceof Error ? error.stack : undefined
+      )
       return false
     }
   }
@@ -232,7 +254,9 @@ export class PluginService {
       }
 
       if (plugin.activated) {
-        logger.warn(`PluginService: Plugin '${pluginName}' is already activated`)
+        logger.warn(
+          `PluginService: Plugin '${pluginName}' is already activated`
+        )
         return true
       }
 
@@ -255,13 +279,21 @@ export class PluginService {
 
       this.savePluginConfig(pluginName, plugin.config)
 
-      logger.info(`PluginService: Successfully activated plugin '${pluginName}'`)
+      logger.info(
+        `PluginService: Successfully activated plugin '${pluginName}'`
+      )
       return true
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`PluginService: Failed to activate plugin '${pluginName}' - ${errorMessage}`)
-      this.handlePluginError(pluginName, errorMessage, error instanceof Error ? error.stack : undefined)
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error'
+      logger.error(
+        `PluginService: Failed to activate plugin '${pluginName}' - ${errorMessage}`
+      )
+      this.handlePluginError(
+        pluginName,
+        errorMessage,
+        error instanceof Error ? error.stack : undefined
+      )
       return false
     }
   }
@@ -298,13 +330,21 @@ export class PluginService {
 
       this.savePluginConfig(pluginName, plugin.config)
 
-      logger.info(`PluginService: Successfully deactivated plugin '${pluginName}'`)
+      logger.info(
+        `PluginService: Successfully deactivated plugin '${pluginName}'`
+      )
       return true
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`PluginService: Failed to deactivate plugin '${pluginName}' - ${errorMessage}`)
-      this.handlePluginError(pluginName, errorMessage, error instanceof Error ? error.stack : undefined)
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error'
+      logger.error(
+        `PluginService: Failed to deactivate plugin '${pluginName}' - ${errorMessage}`
+      )
+      this.handlePluginError(
+        pluginName,
+        errorMessage,
+        error instanceof Error ? error.stack : undefined
+      )
       return false
     }
   }
@@ -332,11 +372,17 @@ export class PluginService {
 
       logger.info(`PluginService: Successfully unloaded plugin '${pluginName}'`)
       return true
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`PluginService: Failed to unload plugin '${pluginName}' - ${errorMessage}`)
-      this.handlePluginError(pluginName, errorMessage, error instanceof Error ? error.stack : undefined)
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error'
+      logger.error(
+        `PluginService: Failed to unload plugin '${pluginName}' - ${errorMessage}`
+      )
+      this.handlePluginError(
+        pluginName,
+        errorMessage,
+        error instanceof Error ? error.stack : undefined
+      )
       return false
     }
   }
@@ -414,9 +460,12 @@ export class PluginService {
 
   // Private helper methods
 
-  private async extractManifest(code: string, source: string): Promise<PluginManifest> {
+  private async extractManifest(
+    code: string,
+    source: string
+  ): Promise<PluginManifest> {
     // Extract manifest from plugin code comments or export
-    const manifestMatch = code.match(/export\s+default\s+({[\s\S]*?})/);
+    const manifestMatch = code.match(/export\s+default\s+({[\s\S]*?})/)
     if (!manifestMatch) {
       throw new Error('Plugin manifest not found')
     }
@@ -425,14 +474,18 @@ export class PluginService {
       // CSP-safe manifest parsing using dynamic module evaluation
       const manifestCode = manifestMatch[1]
       const manifest = await this.parseManifestSafely(manifestCode)
-      
+
       if (!manifest.name || !manifest.version) {
-        throw new Error('Plugin manifest missing required fields (name, version)')
+        throw new Error(
+          'Plugin manifest missing required fields (name, version)'
+        )
       }
 
       return manifest
     } catch (error) {
-      throw new Error(`Invalid plugin manifest: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Invalid plugin manifest: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -447,13 +500,21 @@ export class PluginService {
     }
 
     // Use security service for comprehensive validation
-    const validation = pluginSecurityService.validatePluginCode(manifest.name, code)
+    const validation = pluginSecurityService.validatePluginCode(
+      manifest.name,
+      code
+    )
     if (!validation.valid) {
-      throw new Error(`Security validation failed: ${validation.issues.join(', ')}`)
+      throw new Error(
+        `Security validation failed: ${validation.issues.join(', ')}`
+      )
     }
   }
 
-  private createSecurityPolicy(manifest: PluginManifest, options: any): SecurityPolicy {
+  private createSecurityPolicy(
+    manifest: PluginManifest,
+    options: any
+  ): SecurityPolicy {
     const policy = { ...this.defaultSecurityPolicy }
 
     if (options.trusted) {
@@ -470,10 +531,14 @@ export class PluginService {
     return policy
   }
 
-  private async executePluginCode(code: string, pluginName: string, policy: SecurityPolicy): Promise<any> {
+  private async executePluginCode(
+    code: string,
+    pluginName: string,
+    policy: SecurityPolicy
+  ): Promise<any> {
     // Create sandboxed execution environment
     const sandbox = this.createSandbox(pluginName, policy)
-    
+
     try {
       // CSP-safe plugin execution using dynamic module import
       return this.executeWithTimeout(
@@ -482,7 +547,9 @@ export class PluginService {
         `Plugin '${pluginName}' execution timeout`
       )
     } catch (error) {
-      throw new Error(`Plugin execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Plugin execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -493,7 +560,7 @@ export class PluginService {
 
   private createPluginAPI(pluginName: string): PluginAPI {
     const policy = this.getSecurityPolicy(pluginName)
-    
+
     // Use the real Viny Plugin API implementation
     const { createVinyPluginAPI } = require('../lib/pluginApi')
     return createVinyPluginAPI(pluginName, policy)
@@ -508,12 +575,15 @@ export class PluginService {
   }
 
   private hasPermission(policy: SecurityPolicy, permission: string): boolean {
-    return policy.allowedPermissions.includes('*') || policy.allowedPermissions.includes(permission)
+    return (
+      policy.allowedPermissions.includes('*') ||
+      policy.allowedPermissions.includes(permission)
+    )
   }
 
   private async executeWithTimeout<T>(
-    fn: () => T | Promise<T>, 
-    timeout: number, 
+    fn: () => T | Promise<T>,
+    timeout: number,
     errorMessage: string
   ): Promise<T> {
     return new Promise((resolve, reject) => {
@@ -541,16 +611,22 @@ export class PluginService {
         const manifest = ${manifestCode};
         export default manifest;
       `
-      
+
       const dataUrl = 'data:text/javascript;base64,' + btoa(moduleCode)
-      const module = await import(dataUrl)
+      const module = await import(/* @vite-ignore */ dataUrl)
       return module.default
     } catch (error) {
-      throw new Error(`Failed to parse manifest: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Failed to parse manifest: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
-  private async executePluginSafely(code: string, sandbox: any, pluginName: string): Promise<any> {
+  private async executePluginSafely(
+    code: string,
+    sandbox: any,
+    pluginName: string
+  ): Promise<any> {
     try {
       // Create a data URL with the plugin code as ES module
       const moduleCode = `
@@ -565,15 +641,16 @@ export class PluginService {
         // Return the default export
         export default typeof exports !== 'undefined' ? exports : window.pluginExport;
       `
-      
+
       const dataUrl = 'data:text/javascript;base64,' + btoa(moduleCode)
-      const module = await import(dataUrl)
+      const module = await import(/* @vite-ignore */ dataUrl)
       return module.default
     } catch (error) {
-      throw new Error(`Plugin execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Plugin execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
-
 
   private async readFileAsText(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -584,16 +661,20 @@ export class PluginService {
     })
   }
 
-  private handlePluginError(pluginName: string, error: string, stack?: string): void {
+  private handlePluginError(
+    pluginName: string,
+    error: string,
+    stack?: string
+  ): void {
     const pluginError: PluginError = {
       plugin: pluginName,
       error,
       timestamp: Date.now(),
-      stack
+      stack,
     }
-    
+
     this.errors.push(pluginError)
-    
+
     // Keep only last 100 errors
     if (this.errors.length > 100) {
       this.errors = this.errors.slice(-100)

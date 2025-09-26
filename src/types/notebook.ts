@@ -3,19 +3,21 @@ export interface Notebook {
   name: string
   color: string
   description?: string
-  parentId: string | null  // null = root category
-  children: string[]       // array of child notebook IDs
-  level: number           // 0 = root, 1 = first level, etc.
-  path: string           // full path like "work/projects/mobile"
+  parentId: string | null // null = root category
+  children: string[] // array of child notebook IDs
+  level: number // 0 = root, 1 = first level, etc.
+  path: string // full path like "work/projects/mobile"
   createdAt: string
   updatedAt: string
-  isExpanded?: boolean   // for UI state
+  isExpanded?: boolean // for UI state
+  isTrashed?: boolean // Soft delete flag
+  trashedAt?: string | null // When the notebook was trashed
 }
 
 export interface NotebookWithCounts extends Notebook {
   count: number
-  directCount: number    // notes directly in this notebook
-  totalCount: number     // notes in this notebook + all children
+  directCount: number // notes directly in this notebook
+  totalCount: number // notes in this notebook + all children
 }
 
 export interface CreateNotebookData {
@@ -36,8 +38,17 @@ export const NOTEBOOK_VALIDATION = {
   minLength: 2,
   maxLength: 50,
   allowedChars: /^[a-zA-Z0-9\s\-_]+$/,
-  reservedNames: ['all', 'pinned', 'trash', 'archived', 'completed', 'draft', 'in-progress', 'review'],
-  maxNestingLevel: 3
+  reservedNames: [
+    'all',
+    'pinned',
+    'trash',
+    'archived',
+    'completed',
+    'draft',
+    'in-progress',
+    'review',
+  ],
+  maxNestingLevel: 3,
 } as const
 
 export const NOTEBOOK_COLORS = [

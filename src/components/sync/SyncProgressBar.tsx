@@ -13,7 +13,7 @@ const SyncProgressBar: React.FC<SyncProgressBarProps> = ({
   className = '',
   showPercentage = false,
   showText = false,
-  height = 'md'
+  height = 'md',
 }) => {
   const { status, progress, isSyncing } = useSyncStatus()
 
@@ -54,8 +54,10 @@ const SyncProgressBar: React.FC<SyncProgressBarProps> = ({
           )}
         </div>
       )}
-      
-      <div className={`w-full bg-gray-200 dark:bg-gray-700 rounded-full ${getHeightClass()}`}>
+
+      <div
+        className={`w-full bg-gray-200 dark:bg-gray-700 rounded-full ${getHeightClass()}`}
+      >
         <div
           className={`${getProgressColor()} ${getHeightClass()} rounded-full transition-all duration-300 ease-out`}
           style={{ width: `${progress}%` }}

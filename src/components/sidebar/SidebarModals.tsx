@@ -1,20 +1,25 @@
 import React from 'react'
 import TagSettingsModal from '../editor/tags/TagSettingsModal'
 import CreateNotebookModal from '../ui/CreateNotebookModal'
-import { NotebookWithCounts } from '../../types/notebook'
+import type { NotebookWithCounts } from '../../types/notebook'
 
 interface SidebarModalsProps {
   // Tag settings modal
   tagSettingsModal: { show: boolean; tagName: string }
   onTagSettingsClose: () => void
   onTagNameChange: (oldName: string, newName: string) => void
-  
+
   // Create notebook modal
   createNotebookModal: boolean
   onCreateNotebookClose: () => void
-  onCreateNotebook: (name: string, color: string, parentId?: string | null) => void
+  onCreateNotebook: (
+    name: string,
+    color: string,
+    parentId?: string | null
+  ) => void
   existingNotebookNames: string[]
   availableParents: NotebookWithCounts[]
+  defaultParentId?: string | null
 }
 
 /**
@@ -28,7 +33,8 @@ const SidebarModals: React.FC<SidebarModalsProps> = ({
   onCreateNotebookClose,
   onCreateNotebook,
   existingNotebookNames,
-  availableParents
+  availableParents,
+  defaultParentId,
 }) => {
   return (
     <>
@@ -48,6 +54,7 @@ const SidebarModals: React.FC<SidebarModalsProps> = ({
         existingNames={existingNotebookNames}
         availableParents={availableParents}
         maxLevel={3}
+        defaultParentId={defaultParentId}
       />
     </>
   )

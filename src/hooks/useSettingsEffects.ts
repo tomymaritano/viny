@@ -2,7 +2,13 @@ import { useEffect } from 'react'
 import { useAppStore } from '../stores/newSimpleStore'
 import { useSettings } from './useSettings'
 import { i18nService, type SupportedLanguage } from '../services/i18nService'
-import { applyThemeToDOM, applyCustomCSS, applyTypographySettings, type ThemeValue } from '../utils/themeUtils'
+import { settingsLogger } from '../utils/logger'
+import {
+  applyThemeToDOM,
+  applyCustomCSS,
+  applyTypographySettings,
+  type ThemeValue,
+} from '../utils/themeUtils'
 
 /**
  * Hook que aplica los efectos de los settings en tiempo real
@@ -18,17 +24,22 @@ export const useSettingsEffects = () => {
     const applyTheme = () => {
       try {
         const theme = settings.theme
-        console.log('🎨 useSettingsEffects applying theme:', theme, 'from settings:', settings.theme)
-        
+        settingsLogger.info(
+          '🎨 useSettingsEffects applying theme:',
+          theme,
+          'from settings:',
+          settings.theme
+        )
+
         // Only apply theme to DOM, don't call setTheme to avoid overwriting user's choice
         applyThemeToDOM(theme as ThemeValue)
-        
-        console.log('✅ Theme applied successfully:', theme)
+
+        settingsLogger.info('✅ Theme applied successfully:', theme)
       } catch (error) {
-        console.error('❌ Failed to apply theme:', error)
+        settingsLogger.error('❌ Failed to apply theme:', error)
       }
     }
-    
+
     // Only apply if settings have been initialized from storage
     if (isInitialized && settings && Object.keys(settings).length > 0) {
       applyTheme()
@@ -43,7 +54,7 @@ export const useSettingsEffects = () => {
           i18nService.applyLanguage(settings.language as SupportedLanguage)
         }
       } catch (error) {
-        console.error('Failed to apply language:', error)
+        settingsLogger.error('Failed to apply language:', error)
       }
     }
     applyLanguage()
@@ -53,9 +64,12 @@ export const useSettingsEffects = () => {
   useEffect(() => {
     const applyCustomCSSEffect = () => {
       try {
-        applyCustomCSS(settings.customCSS || '', settings.customCSSEnabled || false)
+        applyCustomCSS(
+          settings.customCSS || '',
+          settings.customCSSEnabled || false
+        )
       } catch (error) {
-        console.error('Failed to apply custom CSS:', error)
+        settingsLogger.error('Failed to apply custom CSS:', error)
       }
     }
     applyCustomCSSEffect()
@@ -73,12 +87,20 @@ export const useSettingsEffects = () => {
           previewLineHeight: settings.lineHeight, // Can be made separate if needed
           fontFamily: settings.fontFamily,
           syntaxTheme: settings.syntaxTheme,
-          previewTheme: settings.previewTheme
+          previewTheme: settings.previewTheme,
         })
       } catch (error) {
-        console.error('Failed to apply typography settings:', error)
+        settingsLogger.error('Failed to apply typography settings:', error)
       }
     }
     applyTypography()
-  }, [settings.fontSize, settings.editorFontSize, settings.previewFontSize, settings.lineHeight, settings.fontFamily, settings.syntaxTheme, settings.previewTheme])
+  }, [
+    settings.fontSize,
+    settings.editorFontSize,
+    settings.previewFontSize,
+    settings.lineHeight,
+    settings.fontFamily,
+    settings.syntaxTheme,
+    settings.previewTheme,
+  ])
 }

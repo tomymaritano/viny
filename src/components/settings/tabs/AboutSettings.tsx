@@ -14,14 +14,19 @@ const AboutSettings: React.FC = () => {
         <h3 className="text-lg font-medium text-theme-text-primary mb-4">
           About Viny
         </h3>
-        
+
         <div className="space-y-4">
           <div className="flex items-center space-x-4">
             <div className="w-16 h-16 bg-theme-accent-primary/10 rounded-lg flex items-center justify-center">
-              <Icons.NotebookText size={32} className="text-theme-accent-primary" />
+              <Icons.NotebookText
+                size={32}
+                className="text-theme-accent-primary"
+              />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-theme-text-primary">Viny</h1>
+              <h1 className="text-2xl font-bold text-theme-text-primary">
+                Viny
+              </h1>
               <p className="text-sm text-theme-text-secondary">
                 A beautiful note-taking app for developers
               </p>
@@ -30,13 +35,17 @@ const AboutSettings: React.FC = () => {
 
           <div className="bg-theme-bg-secondary rounded-lg p-4 space-y-3">
             <div className="flex justify-between">
-              <span className="text-sm text-theme-text-secondary">Version:</span>
+              <span className="text-sm text-theme-text-secondary">
+                Version:
+              </span>
               <span className="text-sm font-medium text-theme-text-primary">
                 {appInfo.version}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-theme-text-secondary">Platform:</span>
+              <span className="text-sm text-theme-text-secondary">
+                Platform:
+              </span>
               <span className="text-sm font-medium text-theme-text-primary">
                 {appInfo.electron}
               </span>

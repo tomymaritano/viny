@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Force Dexie Reimport</title>
+    <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+</head>
+<body>
+    <h1>Force Dexie Reimport</h1>
+    <button onclick="forceReimport()">Clear Dexie and Reimport</button>
+    <pre id="output"></pre>
+    
+    <script>
+        async function forceReimport() {
+            const output = document.getElementById('output');
+            output.textContent = 'Starting reimport process...\n';
+            
+            try {
+                // Delete the database
+                output.textContent += 'Deleting VinyDatabase...\n';
+                await Dexie.delete('VinyDatabase');
+                output.textContent += 'Database deleted successfully!\n';
+                
+                // Clear the Dexie flag temporarily
+                localStorage.removeItem('viny_use_dexie');
+                
+                output.textContent += '\nPlease refresh the page to reimport your notes.\n';
+                output.textContent += 'Your notes will be automatically imported from file storage.\n';
+                
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+                
+            } catch (error) {
+                output.textContent += `Error: ${error.message}\n`;
+            }
+        }
+    </script>
+</body>
+</html>

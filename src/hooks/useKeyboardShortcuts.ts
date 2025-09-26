@@ -2,65 +2,132 @@
  * Custom hook for keyboard shortcuts
  */
 import { useEffect } from 'react'
-import { Note } from '../types'
 
 interface UseKeyboardShortcutsProps {
-  currentNote: Note | null
-  onCreateNew: () => void
-  onSave: (note: Note) => void
-  onSearch: () => void
-  onExport: () => void
-  onSettings: () => void
+  // Note actions
+  onNewNote?: () => void
+  onSaveNote?: () => void
+  onDeleteNote?: () => void
+  onTogglePin?: () => void
+  onDuplicateNote?: () => void
+  onViewHistory?: () => void
+  
+  // Navigation
+  onSearch?: () => void
+  onEscape?: () => void
+  
+  // Legacy props (for backward compatibility)
+  onCreateNew?: () => void
+  onExport?: () => void
+  onSettings?: () => void
 }
 
-export const useKeyboardShortcuts = ({
-  currentNote,
-  onCreateNew,
-  onSave,
-  onSearch,
-  onExport,
-  onSettings
-}: UseKeyboardShortcutsProps) => {
+export const useKeyboardShortcuts = (props: UseKeyboardShortcutsProps) => {
+  const {
+    // Note actions
+    onNewNote,
+    onSaveNote,
+    onDeleteNote,
+    onTogglePin,
+    onDuplicateNote,
+    onViewHistory,
+    
+    // Navigation
+    onSearch,
+    onEscape,
+    
+    // Legacy
+    onCreateNew,
+    onExport,
+    onSettings,
+  } = props
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Check if user is typing in an input field
       const target = e.target as HTMLElement
-      const isTyping = target && ['input', 'textarea'].includes(
-        target.tagName.toLowerCase()
-      )
+      const isTyping =
+        target && ['input', 'textarea'].includes(target.tagName.toLowerCase())
       
+      // Don't handle shortcuts when in CodeMirror editor
+      if (target?.closest('.cm-editor')) {
+        return
+      }
+
       // Cmd/Ctrl + K - Search
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
-        onSearch()
+        onSearch?.()
       }
-      
+
       // Cmd/Ctrl + N - New note
       if ((e.metaKey || e.ctrlKey) && e.key === 'n' && !isTyping) {
         e.preventDefault()
-        onCreateNew()
+        ;(onNewNote || onCreateNew)?.()
       }
-      
-      // Cmd/Ctrl + S - Save (when in editor)
-      if ((e.metaKey || e.ctrlKey) && e.key === 's' && currentNote) {
+
+      // Cmd/Ctrl + S - Save
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault()
-        onSave(currentNote)
+        onSaveNote?.()
       }
-      
-      // Cmd/Ctrl + E - Export current note
-      if ((e.metaKey || e.ctrlKey) && e.key === 'e' && currentNote) {
+
+      // Cmd/Ctrl + D - Duplicate note
+      if ((e.metaKey || e.ctrlKey) && e.key === 'd' && !isTyping) {
         e.preventDefault()
-        onExport()
+        onDuplicateNote?.()
       }
-      
+
+      // Cmd/Ctrl + P - Toggle pin
+      if ((e.metaKey || e.ctrlKey) && e.key === 'p' && !isTyping) {
+        e.preventDefault()
+        onTogglePin?.()
+      }
+
+      // Cmd/Ctrl + H - View history
+      if ((e.metaKey || e.ctrlKey) && e.key === 'h' && !isTyping) {
+        e.preventDefault()
+        onViewHistory?.()
+      }
+
+      // Delete/Backspace - Delete note (with confirmation)
+      if ((e.key === 'Delete' || (e.key === 'Backspace' && (e.metaKey || e.ctrlKey))) && !isTyping) {
+        e.preventDefault()
+        onDeleteNote?.()
+      }
+
+      // Escape - Close modals/dialogs
+      if (e.key === 'Escape') {
+        onEscape?.()
+      }
+
+      // Legacy shortcuts
+      // Cmd/Ctrl + E - Export
+      if ((e.metaKey || e.ctrlKey) && e.key === 'e') {
+        e.preventDefault()
+        onExport?.()
+      }
+
       // Cmd/Ctrl + , - Settings
       if ((e.metaKey || e.ctrlKey) && e.key === ',') {
         e.preventDefault()
-        onSettings()
+        onSettings?.()
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [currentNote, onCreateNew, onSave, onSearch, onExport, onSettings])
+  }, [
+    onNewNote,
+    onSaveNote,
+    onDeleteNote,
+    onTogglePin,
+    onDuplicateNote,
+    onViewHistory,
+    onSearch,
+    onEscape,
+    onCreateNew,
+    onExport,
+    onSettings,
+  ])
 }

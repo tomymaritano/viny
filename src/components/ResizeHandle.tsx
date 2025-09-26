@@ -5,7 +5,10 @@ interface ResizeHandleProps {
   position?: 'right' | 'left'
 }
 
-const ResizeHandle: React.FC<ResizeHandleProps> = ({ onMouseDown, position = 'right' }) => {
+const ResizeHandle: React.FC<ResizeHandleProps> = ({
+  onMouseDown,
+  position = 'right',
+}) => {
   const [isHovering, setIsHovering] = useState<boolean>(false)
   const [isDragging, setIsDragging] = useState<boolean>(false)
 
@@ -52,9 +55,10 @@ const ResizeHandle: React.FC<ResizeHandleProps> = ({ onMouseDown, position = 'ri
         className={`
           absolute ${position === 'right' ? 'right-0' : 'left-0'} top-0 h-full
           transition-all duration-200
-          ${isHovering || isDragging 
-            ? 'w-0.5 bg-theme-accent-primary' 
-            : 'w-px bg-theme-border-primary/50'
+          ${
+            isHovering || isDragging
+              ? 'w-0.5 bg-theme-accent-primary'
+              : 'w-px bg-theme-border-primary/50'
           }
         `}
       />

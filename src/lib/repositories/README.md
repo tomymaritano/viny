@@ -152,7 +152,7 @@ The repository system handles all identified localStorage patterns:
 
 ### UI State (Medium Priority)
 
-- `inkrun-sidebar-width`, `inkrun-noteslist-width` → Layout persistence
+- `viny-sidebar-width`, `viny-noteslist-width` → Layout persistence
 - `viny-split-ratio` → Editor split ratios
 - Component state management
 

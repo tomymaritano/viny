@@ -1,15 +1,17 @@
 // Modals component - handles all modal dialogs in the app
 import React, { Suspense } from 'react'
-import { Note } from '../../types'
+import type { Note } from '../../types'
 import { useAppStore } from '../../stores/newSimpleStore'
 
 // Modal Components
-import { SearchModal } from '../SearchModal'
+import { SearchModalWrapper as SearchModal } from '../SearchModalWrapper'
 import { TagModal } from '../editor/tags/TagModal'
 import { SettingsModal } from '../settings/SettingsModal'
+import { AIOnboardingModal } from '../ai/AIOnboardingModal'
+import RevisionHistoryModal from '../revision/RevisionHistoryModal'
 
 // Lazy modal components
-import { ExportDialog } from '../features/LazyComponents'
+import { ExportDialog } from '../LazyComponents'
 
 interface AppModalsProps {
   modals: {
@@ -18,6 +20,8 @@ interface AppModalsProps {
     settings: boolean
     tagModal: boolean
     notebookManager: boolean
+    aiOnboarding: boolean
+    revisionHistory: boolean
   }
   currentNote: Note | null
   filteredNotes: Note[]
@@ -38,11 +42,12 @@ const AppModals: React.FC<AppModalsProps> = ({
   handleOpenNote,
   handleSaveNote,
   setModal,
-  createNewNote
+  createNewNote,
 }) => {
   // Get store functions for creating notes with tags
-  const { addNote, setCurrentNote, setSelectedNoteId, setIsEditorOpen } = useAppStore()
-  
+  const { addNote, setCurrentNote, setSelectedNoteId, setIsEditorOpen } =
+    useAppStore()
+
   // Helper function to create a new note with specific tags
   const createNewNoteWithTags = (tags: string[]) => {
     const newNote: Note = {
@@ -55,9 +60,9 @@ const AppModals: React.FC<AppModalsProps> = ({
       isPinned: false,
       isTrashed: false,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     }
-    
+
     addNote(newNote)
     setCurrentNote(newNote)
     setSelectedNoteId(newNote.id)
@@ -102,7 +107,7 @@ const AppModals: React.FC<AppModalsProps> = ({
           currentTags={currentNote?.tags || []}
           mode={currentNote ? 'note' : 'global'}
           filteredNotes={filteredNotes}
-          onTagsChange={(newTags) => {
+          onTagsChange={newTags => {
             if (currentNote) {
               // Edit existing note
               handleSaveNote({ ...currentNote, tags: newTags })
@@ -123,6 +128,29 @@ const AppModals: React.FC<AppModalsProps> = ({
           onNotebookChange={handleNotebookChange}
         />
       )} */}
+
+      {/* AI Onboarding Modal */}
+      {modals.aiOnboarding && (
+        <AIOnboardingModal
+          isOpen={modals.aiOnboarding}
+          onClose={() => setModal('aiOnboarding', false)}
+          onComplete={() => {
+            setModal('aiOnboarding', false)
+            // Refresh AI availability in search modal
+            window.location.reload()
+          }}
+        />
+      )}
+
+      {/* Revision History Modal */}
+      {modals.revisionHistory && (
+        <RevisionHistoryModal
+          isOpen={modals.revisionHistory}
+          onClose={() => setModal('revisionHistory', false)}
+          note={currentNote}
+          onRestoreRevision={handleSaveNote}
+        />
+      )}
     </>
   )
 }

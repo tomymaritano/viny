@@ -7,13 +7,13 @@ describe('useFormValidation', () => {
   const initialValues = {
     name: '',
     email: '',
-    age: 0
+    age: 0,
   }
 
   const validationRules = {
     name: (value: string) => ValidationRules.required(value, 'name'),
     email: (value: string) => ValidationRules.email(value, 'email'),
-    age: (value: number) => ValidationRules.range(value, 1, 120, 'age')
+    age: (value: number) => ValidationRules.range(value, 1, 120, 'age'),
   }
 
   describe('Initial state', () => {
@@ -23,7 +23,7 @@ describe('useFormValidation', () => {
           initialValues,
           validationRules,
           validateOnChange: false,
-          validateOnBlur: false
+          validateOnBlur: false,
         })
       )
 
@@ -43,7 +43,7 @@ describe('useFormValidation', () => {
         useFormValidation({
           initialValues,
           validationRules,
-          validateOnChange: false
+          validateOnChange: false,
         })
       )
 
@@ -60,7 +60,7 @@ describe('useFormValidation', () => {
         useFormValidation({
           initialValues,
           validationRules,
-          validateOnChange: true
+          validateOnChange: true,
         })
       )
 
@@ -77,7 +77,7 @@ describe('useFormValidation', () => {
         useFormValidation({
           initialValues,
           validationRules,
-          validateOnChange: false
+          validateOnChange: false,
         })
       )
 
@@ -93,7 +93,7 @@ describe('useFormValidation', () => {
         useFormValidation({
           initialValues,
           validationRules,
-          validateOnChange: true
+          validateOnChange: true,
         })
       )
 
@@ -119,7 +119,7 @@ describe('useFormValidation', () => {
         useFormValidation({
           initialValues,
           validationRules,
-          validateOnBlur: false
+          validateOnBlur: false,
         })
       )
 
@@ -135,7 +135,7 @@ describe('useFormValidation', () => {
         useFormValidation({
           initialValues,
           validationRules,
-          validateOnBlur: true
+          validateOnBlur: true,
         })
       )
 
@@ -152,7 +152,7 @@ describe('useFormValidation', () => {
         useFormValidation({
           initialValues,
           validationRules,
-          validateOnBlur: false
+          validateOnBlur: false,
         })
       )
 
@@ -172,9 +172,9 @@ describe('useFormValidation', () => {
           initialValues: {
             name: '',
             email: 'invalid-email',
-            age: 150
+            age: 150,
           },
-          validationRules
+          validationRules,
         })
       )
 
@@ -186,7 +186,9 @@ describe('useFormValidation', () => {
 
       expect(validationResult.isValid).toBe(false)
       expect(validationResult.errors).toContain('name is required')
-      expect(validationResult.errors).toContain('email must be a valid email address')
+      expect(validationResult.errors).toContain(
+        'email must be a valid email address'
+      )
       expect(validationResult.errors).toContain('age must be between 1 and 120')
     })
 
@@ -196,9 +198,9 @@ describe('useFormValidation', () => {
           initialValues: {
             name: 'John Doe',
             email: 'john@example.com',
-            age: 25
+            age: 25,
           },
-          validationRules
+          validationRules,
         })
       )
 
@@ -219,10 +221,10 @@ describe('useFormValidation', () => {
         useFormValidation({
           initialValues: { name: 'John' },
           validationRules: {
-            name: (value: string) => ValidationRules.required(value, 'name')
+            name: (value: string) => ValidationRules.required(value, 'name'),
           },
           validateOnChange: true,
-          validateOnBlur: true
+          validateOnBlur: true,
         })
       )
 
@@ -238,9 +240,9 @@ describe('useFormValidation', () => {
         useFormValidation({
           initialValues: { name: '' },
           validationRules: {
-            name: (value: string) => ValidationRules.required(value, 'name')
+            name: (value: string) => ValidationRules.required(value, 'name'),
           },
-          validateOnBlur: true
+          validateOnBlur: true,
         })
       )
 
@@ -260,8 +262,8 @@ describe('useFormValidation', () => {
         useFormValidation({
           initialValues: { name: '' },
           validationRules: {
-            name: (value: string) => ValidationRules.required(value, 'name')
-          }
+            name: (value: string) => ValidationRules.required(value, 'name'),
+          },
         })
       )
 
@@ -277,7 +279,7 @@ describe('useFormValidation', () => {
       const { result } = renderHook(() =>
         useFormValidation({
           initialValues,
-          validationRules
+          validationRules,
         })
       )
 
@@ -312,8 +314,8 @@ describe('useFormValidation', () => {
         field: 'name',
         value,
         isValid: true,
-        warning: value.length > 20 ? 'Name is quite long' : undefined
-      })
+        warning: value.length > 20 ? 'Name is quite long' : undefined,
+      }),
     }
 
     it('should handle warnings correctly', () => {
@@ -321,12 +323,15 @@ describe('useFormValidation', () => {
         useFormValidation({
           initialValues: { name: '' },
           validationRules: validationRulesWithWarnings,
-          validateOnChange: true
+          validateOnChange: true,
         })
       )
 
       act(() => {
-        result.current.handleFieldChange('name', 'This is a very long name that exceeds twenty characters')
+        result.current.handleFieldChange(
+          'name',
+          'This is a very long name that exceeds twenty characters'
+        )
       })
 
       expect(result.current.warnings.name).toBe('Name is quite long')
@@ -336,9 +341,11 @@ describe('useFormValidation', () => {
     it('should show warnings in field props for touched fields', () => {
       const { result } = renderHook(() =>
         useFormValidation({
-          initialValues: { name: 'This is a very long name that exceeds twenty characters' },
+          initialValues: {
+            name: 'This is a very long name that exceeds twenty characters',
+          },
           validationRules: validationRulesWithWarnings,
-          validateOnBlur: true
+          validateOnBlur: true,
         })
       )
 
@@ -357,12 +364,16 @@ describe('useFormValidation', () => {
       const { result } = renderHook(() =>
         useFormValidation({
           initialValues,
-          validationRules
+          validationRules,
         })
       )
 
       act(() => {
-        result.current.setValues({ name: 'Manual', email: 'manual@test.com', age: 30 })
+        result.current.setValues({
+          name: 'Manual',
+          email: 'manual@test.com',
+          age: 30,
+        })
       })
 
       expect(result.current.values.name).toBe('Manual')
@@ -388,7 +399,7 @@ describe('useFormValidation', () => {
       const { result } = renderHook(() =>
         useFormValidation({
           initialValues,
-          validationRules
+          validationRules,
         })
       )
 
@@ -413,7 +424,7 @@ describe('useFormValidation', () => {
       const { result } = renderHook(() =>
         useFormValidation({
           initialValues,
-          validationRules
+          validationRules,
         })
       )
 
