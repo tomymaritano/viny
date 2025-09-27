@@ -81,7 +81,6 @@ export const useActiveNotesQuery = () => {
 ```tsx
 // main.tsx o App.tsx
 import { ServiceProvider } from './contexts/ServiceContext'
-
 ;<QueryProvider>
   <ServiceProvider>
     {' '}

@@ -52,11 +52,9 @@ export { useSidebarPrefetch } from './useSidebarPrefetch'
 // Tags queries and mutations
 export {
   useTagsQuery,
-  useNotesByTagQuery,
   useAddTagMutation,
   useRemoveTagMutation,
   useRenameTagMutation,
-  useDeleteTagMutation,
 } from './useTagsQuery'
 
 // Re-export query keys for manual cache manipulation if needed

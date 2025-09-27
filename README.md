@@ -237,11 +237,44 @@ Switch between modes using the toggle in the bottom-left corner.
 
 ## 📚 Documentation
 
-- [Architecture Overview](docs/ARCHITECTURE.md)
-- [Development Guide](docs/DEVELOPMENT.md)
-- [Deployment Guide](docs/DEPLOYMENT.md)
-- [Plugin Development](docs/PLUGIN-API.md)
-- [API Reference](server/README.md)
+### Quick Links
+
+- [CLAUDE.md](CLAUDE.md) - Project context for AI assistance
+- [Documentation Index](docs/index.md) - Complete documentation guide
+- [Changelog](docs/CHANGELOG.md) - Version history
+
+### Getting Started
+
+- [Quick Start](docs/getting-started/quick-start.md)
+- [Installation](docs/getting-started/installation.md)
+- [Setup Guide](docs/SETUP_GUIDE.md)
+
+### Development
+
+- [Architecture Overview](docs/development/architecture.md)
+- [Development Setup](docs/development/development-setup.md)
+- [Clean Architecture Guide](docs/CLEAN_ARCHITECTURE_GUIDE.md)
+- [TanStack Query Migration](docs/TANSTACK_QUERY_MIGRATION.md)
+
+### User Guide
+
+- [Interface Overview](docs/user-guide/interface-overview.md)
+- [Notes Management](docs/user-guide/notes-management.md)
+- [Plugins](docs/user-guide/plugins.md)
+- [MCP Integration](docs/user-guide/mcp-integration.md)
+- [Troubleshooting](docs/user-guide/troubleshooting.md)
+
+### Deployment
+
+- [Production Deployment](docs/deployment/production-deployment.md)
+- [Auto Updates](docs/deployment/auto-updates.md)
+- [PWA Setup](docs/deployment/pwa-setup.md)
+
+### Reference
+
+- [API Reference](docs/reference/api-reference.md)
+- [Configuration Options](docs/reference/configuration-options.md)
+- [Keyboard Shortcuts](docs/reference/keyboard-shortcuts.md)
 
 ## 🔌 Plugin System
 

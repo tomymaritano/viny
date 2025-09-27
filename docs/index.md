@@ -1,39 +1,94 @@
-# Viny Documentation
+# Viny Documentation Index
 
-> A modern, professional markdown note editor built for productivity and focus.
+> Complete documentation guide for Viny - A modern, professional markdown note editor built for productivity and focus.
 
-## Quick Navigation
+## 🚀 Quick Links
 
-### 🚀 Getting Started
+- **[CLAUDE.md](../CLAUDE.md)** - ⭐ Project context for AI assistance (essential for developers)
+- **[Changelog](CHANGELOG.md)** - Version history and release notes
+- **[Project Overview](PROJECT_OVERVIEW.md)** - High-level project structure
 
-- [Installation](getting-started/installation.md) - Install Viny locally or with Docker
-- [Quick Start](getting-started/quick-start.md) - Get up and running in 5 minutes
+## 📚 Documentation by Category
 
-### 📚 User Guide
+### 🎯 Getting Started
 
-- [Interface Overview](user-guide/interface-overview.md) - Learn the Viny interface
-- [Notes Management](user-guide/notes-management.md) - Create, organize, and manage your notes
-- [Plugins](user-guide/plugins.md) - Extend Viny with plugins
+- [Quick Start Guide](getting-started/quick-start.md) - Get up and running in 5 minutes
+- [Installation](getting-started/installation.md) - Detailed installation instructions
+- [Setup Guide](SETUP_GUIDE.md) - Complete setup and configuration
+
+### 💻 Development
+
+#### Architecture & Design
+
+- [Architecture Overview](development/architecture.md) - System architecture and design decisions
+- [React Architecture](development/architecture-react.md) - Frontend component architecture
+- [Clean Architecture Guide](CLEAN_ARCHITECTURE_GUIDE.md) - 4-layer architecture implementation
+- [TanStack Query Migration](TANSTACK_QUERY_MIGRATION.md) - Modern data fetching patterns
+
+#### Development Guides
+
+- [Development Setup](development/development-setup.md) - Setting up your development environment
+- [Testing Guide](TESTING.md) - Testing strategies and implementation
+
+#### Analysis & Optimization
+
+- [Storage Audit Results](analysis/storage-audit-results.md) - Storage layer analysis
+- [PouchDB vs Dexie Evaluation](analysis/pouchdb-vs-dexie-evaluation.md) - Database comparison
+
+### 📖 User Guide
+
+- [Interface Overview](user-guide/interface-overview.md) - Understanding the UI
+- [Notes Management](user-guide/notes-management.md) - Creating and organizing notes
+- [Plugins](user-guide/plugins.md) - Using and developing plugins
+- [MCP Integration](user-guide/mcp-integration.md) - Model Context Protocol integration
 - [Troubleshooting](user-guide/troubleshooting.md) - Common issues and solutions
 
-### 🛠 Development
+### 🔌 Plugin Development
 
-- [Architecture](development/architecture.md) - System architecture and design
-- [React Architecture](development/architecture-react.md) - Modern React patterns used
-- [Development Setup](development/development-setup.md) - Set up your development environment
-- [Testing](TESTING.md) - Testing strategy and guidelines
+- [Plugin Development Advanced](PLUGIN-DEVELOPMENT-ADVANCED.md) - Advanced plugin development guide
+- [Plugin API Reference](reference/api-reference.md) - Complete API documentation
 
-### 🚀 Deployment
+### 🚢 Deployment
 
-- [Production Deployment](deployment/production-deployment.md) - Deploy to production
+- [Production Deployment](deployment/production-deployment.md) - Deploying to production
+- [Auto Updates](deployment/auto-updates.md) - Setting up automatic updates
 - [PWA Setup](deployment/pwa-setup.md) - Progressive Web App configuration
-- [Auto Updates](deployment/auto-updates.md) - Automatic update system
 
 ### 📖 Reference
 
 - [API Reference](reference/api-reference.md) - Complete API documentation
-- [Keyboard Shortcuts](reference/keyboard-shortcuts.md) - All keyboard shortcuts
-- [Configuration Options](reference/configuration-options.md) - Customize Viny settings
+- [Configuration Options](reference/configuration-options.md) - All available settings
+- [Keyboard Shortcuts](reference/keyboard-shortcuts.md) - Keyboard shortcut reference
+
+### 🤖 AI & Advanced Features
+
+- [AI Features Guide](AI_FEATURES_GUIDE.md) - AI integration and features
+- [MCP Integration](MCP_INTEGRATION.md) - Model Context Protocol details
+- [RAG UI Mockup](RAG_UI_MOCKUP.md) - Retrieval-Augmented Generation interface
+- [Knowledge Graph Integration](features/KNOWLEDGE_GRAPH_INTEGRATION.md) - Graph-based knowledge features
+- [Knowledge Graph Chat Design](features/KNOWLEDGE_GRAPH_CHAT_DESIGN.md) - Chat interface design
+
+### 🔒 Security & Performance
+
+- [Security Improvements](SECURITY_IMPROVEMENTS.md) - Security enhancements
+- [IPC Validation](IPC_VALIDATION.md) - Inter-process communication validation
+- [Preload API Migration](PRELOAD_API_MIGRATION.md) - Electron preload security
+
+### 📋 Migration Guides
+
+- [Dexie Migration Guide](DEXIE_MIGRATION_GUIDE.md) - Migrating to Dexie.js
+
+### 📝 Historical Documentation
+
+For project evolution and historical context, archived documentation is organized in subdirectories:
+
+- **`architecture/`** - Architecture evolution and decisions
+- **`ai-integration/`** - AI feature integration history
+- **`testing/`** - Testing implementation history
+- **`releases/`** - Release history and notes
+- **`status-reports/`** - Project status updates
+- **`migration/`** - Migration documentation
+- **`development/`** - Development process documentation
 
 ## What is Viny?
 
