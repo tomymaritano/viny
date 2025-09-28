@@ -5,11 +5,36 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { visualizer } from 'rollup-plugin-visualizer'
 
 export default defineConfig({
+  server: {
+    port: 5173,
+    strictPort: true,
+    host: 'localhost',
+    // Optimizaciones para mejor performance
+    fs: {
+      strict: false
+    },
+    hmr: {
+      overlay: false // Deshabilita overlay de errores para mejor performance
+    }
+  },
   define: {
     global: 'globalThis',
   },
   optimizeDeps: {
-    exclude: ['electron-store']
+    exclude: ['electron-store'],
+    // Pre-bundlea estas dependencias pesadas para evitar re-optimización
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-select',
+      'zustand',
+      'framer-motion',
+      'lucide-react',
+      '@tanstack/react-query',
+      'dexie'
+    ]
   },
   plugins: [
     react(),
@@ -54,12 +79,15 @@ export default defineConfig({
       })
     ] : [])
     */
-    visualizer({
-      open: true,
-      gzipSize: true,
-      brotliSize: true,
-      filename: 'dist/stats.html'
-    })
+    // Solo visualizer en build, no en dev para mejor performance
+    ...(process.env.NODE_ENV === 'production' ? [
+      visualizer({
+        open: false,
+        gzipSize: true,
+        brotliSize: true,
+        filename: 'dist/stats.html'
+      })
+    ] : [])
   ],
   base: './',
   build: {

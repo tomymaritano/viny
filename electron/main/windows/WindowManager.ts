@@ -86,7 +86,9 @@ export class WindowManager {
       // Open DevTools in development
       this.mainWindow.webContents.openDevTools()
     } else {
-      this.mainWindow.loadFile(path.join(__dirname, '../../../dist/index.html'))
+      // In production, the dist folder is at the root of the app
+      const indexPath = path.join(app.getAppPath(), 'dist', 'index.html')
+      this.mainWindow.loadFile(indexPath)
     }
 
     // Show when ready
@@ -134,8 +136,8 @@ export class WindowManager {
     // Load settings page
     const settingsUrl = process.env.NODE_ENV !== 'production'
       ? 'http://localhost:5173/#/settings'
-      : `file://${path.join(__dirname, '../../../dist/index.html')}#/settings`
-    
+      : `file://${path.join(app.getAppPath(), 'dist', 'index.html')}#/settings`
+
     this.settingsWindow.loadURL(settingsUrl)
 
     this.settingsWindow.once('ready-to-show', () => {
@@ -182,8 +184,8 @@ export class WindowManager {
     // Load note in standalone mode
     const noteUrl = process.env.NODE_ENV !== 'production'
       ? `http://localhost:5173/note/${note.id}`
-      : `file://${path.join(__dirname, '../../../dist/index.html')}?noteId=${note.id}`
-    
+      : `file://${path.join(app.getAppPath(), 'dist', 'index.html')}?noteId=${note.id}`
+
     noteWindow.loadURL(noteUrl)
 
     // Clean up on close

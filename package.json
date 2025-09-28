@@ -1,6 +1,6 @@
 {
   "name": "viny",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "main": "electron/dist/main/index.js",
   "scripts": {
     "dev": "vite",
@@ -105,92 +105,6 @@
   "author": "Viny",
   "license": "ISC",
   "description": "A powerful note-taking app with Markdown support",
-  "build": {
-    "appId": "com.viny.app",
-    "productName": "Viny",
-    "directories": {
-      "output": "dist-electron"
-    },
-    "publish": {
-      "provider": "github",
-      "owner": "tomymaritano",
-      "repo": "markdown",
-      "private": true
-    },
-    "files": [
-      "dist/**/*",
-      "electron/dist/**/*",
-      "!electron/src/**/*",
-      "!electron/*.ts"
-    ],
-    "asarUnpack": [
-      "node_modules/electron-updater/**/*"
-    ],
-    "extraMetadata": {
-      "main": "electron/dist/main.js"
-    },
-    "compression": "normal",
-    "mac": {
-      "category": "public.app-category.productivity",
-      "icon": "public/icon-512.png",
-      "hardenedRuntime": true,
-      "gatekeeperAssess": false,
-      "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist",
-      "notarize": false,
-      "extendInfo": {
-        "NSRequiresAquaSystemAppearance": false,
-        "LSApplicationCategoryType": "public.app-category.productivity",
-        "CFBundleDisplayName": "Viny",
-        "CFBundleName": "Viny",
-        "CFBundleShortVersionString": "1.5.0",
-        "CFBundleVersion": "1.5.0",
-        "LSMinimumSystemVersion": "10.12.0"
-      },
-      "target": [
-        {
-          "target": "dmg",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
-        },
-        {
-          "target": "zip",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
-        }
-      ]
-    },
-    "dmg": {
-      "title": "Viny ${version}",
-      "contents": [
-        {
-          "x": 130,
-          "y": 220
-        },
-        {
-          "x": 410,
-          "y": 220,
-          "type": "link",
-          "path": "/Applications"
-        }
-      ],
-      "backgroundColor": "#002b36",
-      "window": {
-        "width": 540,
-        "height": 400
-      }
-    },
-    "linux": {
-      "target": "AppImage"
-    },
-    "win": {
-      "target": "nsis"
-    }
-  },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
     "@playwright/test": "^1.48.0",
@@ -322,5 +236,9 @@
     "unified": "^11.0.5",
     "vanta": "^0.5.24",
     "zustand": "^5.0.6"
+  },
+  "optionalDependencies": {
+    "win-mouse": "^1.3.0",
+    "osx-mouse": "^1.3.0"
   }
 }
